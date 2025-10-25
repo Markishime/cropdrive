@@ -92,11 +92,11 @@ export default function HomePage() {
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              '/videos/14578994_3840_2160_30fps.mp4',
-              '/videos/13929079_3840_2160_30fps.mp4',
-              '/videos/12814183_1920_1080_30fps.mp4',
-              '/videos/13947559_3840_2160_30fps.mp4',
-              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
+              'https://cdn.coverr.co/videos/coverr-aerial-view-of-palm-oil-plantation-8223/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-palm-oil-fruit-bunches-8221/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-green-palm-trees-5647/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-tropical-plantation-rows-8222/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-agricultural-field-aerial-7801/1080p.mp4'
             ].map((video, index) => (
               <motion.div
                 key={index}
@@ -120,6 +120,7 @@ export default function HomePage() {
                   loop
                   className="w-full h-full object-cover"
                   preload="metadata"
+                  crossOrigin="anonymous"
                   onError={(e) => {
                     console.error('Video failed to load:', video, e);
                   }}
