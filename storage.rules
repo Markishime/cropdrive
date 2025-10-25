@@ -1,0 +1,31 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // User uploads - only authenticated users can upload to their own folder
+    match /uploads/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.size < 10 * 1024 * 1024  // 10MB limit
+        && request.resource.contentType.matches('image/.*|application/pdf')
+        && request.resource.name.matches('.*\\.(jpg|jpeg|png|pdf)$');
+    }
+
+    // Public files - anyone can read
+    match /public/{allPaths=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Admin files - no client access
+    match /admin/{allPaths=**} {
+      allow read, write: if false;
+    }
+
+    // Reports - users can read their own reports
+    match /reports/{userId}/{allPaths=**} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow write: if false; // Only server-side functions can write
+    }
+  }
+}

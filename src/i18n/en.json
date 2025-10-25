@@ -1,0 +1,311 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "submit": "Submit",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "retry": "Retry",
+    "skip": "Skip",
+    "finish": "Finish",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume"
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "tutorials": "Tutorials",
+    "reviews": "Reviews",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Smart Farm Analysis with AI",
+    "subtitle": "Transform your palm oil farming with AI-powered soil and leaf analysis",
+    "description": "Upload your lab reports and get instant AI insights, recommendations, and trend analysis to optimize your farm's productivity.",
+    "cta": {
+      "primary": "Start Free Trial",
+      "secondary": "View Pricing"
+    }
+  },
+  "features": {
+    "title": "AGS AI Assistant - 11 Core Features",
+    "subtitle": "Smart Farming Intelligence for Palm Oil Plantations",
+    "tagline": "Your personal farming expert that analyzes soil and leaf test reports using artificial intelligence",
+    "simpleProcess": "Simple Process: Upload Report → AI Analyzes → Get Recommendations",
+    "whoIsItFor": "Who Is It For?",
+    "coreFeatures": {
+      "feature1": {
+        "title": "Smart Document Reading (OCR & AI)",
+        "description": "Automatically reads PDF reports from any laboratory, extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~30 seconds."
+      },
+      "feature2": {
+        "title": "Intelligent Nutrient Analysis",
+        "description": "Compares results against MPOB standards. Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient."
+      },
+      "feature3": {
+        "title": "AI-Powered Recommendations",
+        "description": "Powered by Google Gemini AI, providing three investment options: HIGH (Fast, premium), MEDIUM (Balanced), LOW (Budget). Includes exact product names, application rates, cost estimates in RM."
+      },
+      "feature4": {
+        "title": "Regenerative Agriculture Integration",
+        "description": "Sustainable practices to reduce long-term fertilizer dependence: EFB Mulching, Leguminous Cover Crops, Composting, Biochar Application."
+      },
+      "feature5": {
+        "title": "Economic Impact Forecasting",
+        "description": "5-year financial projections for each investment option with year-by-year breakdown: Investment costs, Yield improvements, Additional revenue, Net profit, ROI percentage."
+      },
+      "feature6": {
+        "title": "Professional PDF Reports",
+        "description": "Export complete analysis to PDF format with professional formatting suitable for meetings. Includes complete nutrient analysis tables, color-coded severity indicators, all AI recommendations."
+      },
+      "feature7": {
+        "title": "Historical Data Tracking",
+        "description": "Saves every analysis automatically. Compare results across different time periods. Track improvements from treatments. Identify seasonal patterns."
+      },
+      "feature8": {
+        "title": "Multi-Farm Management",
+        "description": "Manage multiple plantations from one dashboard. Track different blocks or estates separately. Compare performance across locations."
+      },
+      "feature9": {
+        "title": "User Authentication & Data Security",
+        "description": "Secure login with email and password. Bank-level encryption (Google Firebase). Role-based access control. Automatic cloud backup."
+      },
+      "feature10": {
+        "title": "Mobile-Friendly Design",
+        "description": "Works perfectly on smartphones and tablets. Upload photos of reports directly from phone camera. Responsive design adapts to screen size."
+      },
+      "feature11": {
+        "title": "Admin Panel (For Managers)",
+        "description": "Configure AI analysis settings. Manage user accounts and permissions. Monitor system usage. View organization-wide reports."
+      }
+    },
+    "benefits": {
+      "timeSavings": "Time Savings",
+      "costSavings": "Cost Savings",
+      "revenueIncrease": "Revenue Increase & ROI",
+      "accuracy": "Accuracy",
+      "accessibility": "Accessibility"
+    },
+    "soil": {
+      "title": "Soil Analysis",
+      "description": "Upload soil test PDFs and get AI-powered analysis of pH, nitrogen, phosphorus, and potassium levels with MPOB standard comparisons."
+    },
+    "leaf": {
+      "title": "Leaf Analysis",
+      "description": "Analyze leaf nutrient content and receive fertilizer recommendations based on optimal palm oil standards."
+    },
+    "reports": {
+      "title": "Smart Reports",
+      "description": "Generate comprehensive PDF reports with graphs, trends, and actionable recommendations."
+    },
+    "trends": {
+      "title": "Historical Trends",
+      "description": "Track your farm's progress over time with visual analytics and year-to-year comparisons."
+    }
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Transparent pricing with no hidden fees",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "currencyNote": "Payments processed securely in euros (€). Ringgit prices shown for reference only.",
+    "features": {
+      "aiReports": "AI Agronomic Report",
+      "support": "Clarification Support (WhatsApp/Email)",
+      "responseTime": "Response Time (hours)",
+      "renewalDiscount": "Renewal Discount",
+      "referralBonus": "Referral Bonus (next annual plan)",
+      "comparativeAnalysis": "Comparative Analysis (year-to-year progress)",
+      "partnerDiscounts": "Partner Discounts (test kits, fertilizers, etc.)",
+      "earlyAccess": "Early Access to New Features",
+      "unlimited": "Unlimited",
+      "standard": "Standard"
+    },
+    "cta": {
+      "getStarted": "Get Started",
+      "mostPopular": "Most Popular",
+      "upgrade": "Upgrade Now"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your CropDrive account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "rememberMe": "Remember me",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join thousands of farmers using AI for better yields",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "farmName": "Farm Name",
+      "farmLocation": "Farm Location",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "language": "Preferred Language",
+      "agreeToTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "signUp": "Sign Up",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a password reset link",
+      "email": "Email",
+      "sendResetLink": "Send Reset Link",
+      "backToLogin": "Back to Login"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "overview": "Overview",
+    "recentActivity": "Recent Activity",
+    "uploadAnalysis": "Upload & Analysis",
+    "history": "Analysis History",
+    "subscription": "Subscription",
+    "multiFarm": "Multi-Farm Management",
+    "farms": "Farms",
+    "allFarms": "All Farms",
+    "addFarm": "Add Farm",
+    "farmDetails": "Farm Details",
+    "farmName": "Farm Name",
+    "location": "Location",
+    "size": "Size (hectares)",
+    "status": {
+      "critical": "Critical Issues",
+      "low": "Low Issues",
+      "balanced": "All Balanced",
+      "noData": "No Data"
+    },
+    "stats": {
+      "totalUploads": "Total Uploads",
+      "thisMonth": "This Month",
+      "remaining": "Remaining",
+      "plan": "Current Plan",
+      "totalFarms": "Total Farms",
+      "criticalIssues": "Critical Issues",
+      "averageHealth": "Average Health"
+    },
+    "upload": {
+      "title": "Upload Lab Report",
+      "description": "Upload your soil or leaf analysis PDF",
+      "selectFile": "Select File",
+      "takePhoto": "Take Photo",
+      "dragDrop": "Drag and drop your file here",
+      "or": "or",
+      "browse": "browse to upload",
+      "supportedFormats": "Supported formats: PDF, JPG, PNG, Excel, CSV",
+      "maxSize": "Max file size: 10MB",
+      "analyzing": "Analyzing with AI...",
+      "analysisComplete": "Analysis Complete!",
+      "viewResults": "View Results",
+      "processingTime": "Processing time: ~30 seconds"
+    },
+    "analysis": {
+      "results": "Analysis Results",
+      "recommendations": "Recommendations",
+      "viewReport": "View Full Report",
+      "downloadPDF": "Download PDF",
+      "share": "Share Results",
+      "colorCoded": "Color-Coded Status",
+      "green": "Balanced - Within 5% of ideal",
+      "yellow": "Low - 5-15% gap",
+      "red": "Critical - >15% gap",
+      "investmentOptions": "Investment Options",
+      "high": "High Investment - Fast results (6-12 months)",
+      "medium": "Medium Investment - Balanced approach (12-18 months)",
+      "low": "Low Investment - Budget-friendly (18-36 months)",
+      "fiveYearForecast": "5-Year Financial Forecast",
+      "roi": "Return on Investment"
+    }
+  },
+  "subscription": {
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade Plan",
+    "downgrade": "Downgrade Plan",
+    "cancel": "Cancel Subscription",
+    "reactivate": "Reactivate",
+    "manage": "Manage Subscription",
+    "billingHistory": "Billing History",
+    "nextBilling": "Next billing date",
+    "amount": "Amount",
+    "status": "Status",
+    "active": "Active",
+    "canceled": "Canceled",
+    "pastDue": "Past Due"
+  },
+  "tutorials": {
+    "title": "Tutorials & Guides",
+    "subtitle": "Learn how to get the most out of CropDrive",
+    "gettingStarted": "Getting Started",
+    "uploadingReports": "Uploading Lab Reports",
+    "understandingResults": "Understanding AI Results",
+    "mobileTips": "Mobile Upload Tips",
+    "faq": "Frequently Asked Questions"
+  },
+  "reviews": {
+    "title": "What Farmers Say",
+    "subtitle": "Success stories from Malaysian palm oil farmers"
+  },
+  "footer": {
+    "company": "Company",
+    "product": "Product",
+    "support": "Support",
+    "legal": "Legal",
+    "about": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "blog": "Blog",
+    "features": "Features",
+    "pricing": "Pricing",
+    "tutorials": "Tutorials",
+    "api": "API",
+    "help": "Help Center",
+    "contact": "Contact Us",
+    "whatsapp": "WhatsApp Support",
+    "status": "System Status",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "copyright": "© 2024 CropDrive OP Advisor™. All rights reserved."
+  }
+}

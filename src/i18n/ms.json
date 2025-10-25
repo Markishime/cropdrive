@@ -1,0 +1,311 @@
+{
+  "common": {
+    "loading": "Memuatkan...",
+    "error": "Ralat",
+    "success": "Berjaya",
+    "warning": "Amaran",
+    "info": "Maklumat",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "delete": "Padam",
+    "edit": "Edit",
+    "view": "Lihat",
+    "download": "Muat Turun",
+    "upload": "Muat Naik",
+    "submit": "Hantar",
+    "continue": "Teruskan",
+    "back": "Kembali",
+    "next": "Seterusnya",
+    "previous": "Sebelumnya",
+    "close": "Tutup",
+    "yes": "Ya",
+    "no": "Tidak",
+    "ok": "OK",
+    "retry": "Cuba Lagi",
+    "skip": "Langkau",
+    "finish": "Selesai",
+    "start": "Mula",
+    "stop": "Berhenti",
+    "pause": "Jeda",
+    "resume": "Sambung"
+  },
+  "nav": {
+    "home": "Laman Utama",
+    "features": "Ciri-ciri",
+    "pricing": "Harga",
+    "tutorials": "Tutorial",
+    "reviews": "Ulasan",
+    "login": "Log Masuk",
+    "register": "Daftar",
+    "dashboard": "Papan Pemuka",
+    "profile": "Profil",
+    "settings": "Tetapan",
+    "logout": "Log Keluar",
+    "language": "Bahasa"
+  },
+  "hero": {
+    "title": "Analisis Ladang Pintar dengan AI",
+    "subtitle": "Transformasi pertanian kelapa sawit anda dengan analisis tanah dan daun berkuasa AI",
+    "description": "Muat naik laporan makmal anda dan dapatkan pandangan AI segera, cadangan, dan analisis trend untuk mengoptimumkan produktiviti ladang anda.",
+    "cta": {
+      "primary": "Mula Percubaan Percuma",
+      "secondary": "Lihat Harga"
+    }
+  },
+  "features": {
+    "title": "AGS AI Assistant - 11 Ciri Utama",
+    "subtitle": "Kecerdasan Pertanian Pintar untuk Ladang Kelapa Sawit",
+    "tagline": "Pakar pertanian peribadi anda yang menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan",
+    "simpleProcess": "Proses Mudah: Muat Naik Laporan → AI Menganalisis → Terima Cadangan",
+    "whoIsItFor": "Untuk Siapa?",
+    "coreFeatures": {
+      "feature1": {
+        "title": "Pembacaan Dokumen Pintar (OCR & AI)",
+        "description": "Membaca PDF laporan makmal secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~30 saat."
+      },
+      "feature2": {
+        "title": "Analisis Nutrien Pintar",
+        "description": "Bandingkan keputusan dengan standard MPOB. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien."
+      },
+      "feature3": {
+        "title": "Cadangan Berkuasa AI",
+        "description": "Dikuasakan oleh Google Gemini AI, menyediakan tiga pilihan pelaburan: TINGGI (Pantas, premium), SEDERHANA (Seimbang), RENDAH (Bajet). Termasuk nama produk tepat, kadar aplikasi, kos anggaran dalam RM."
+      },
+      "feature4": {
+        "title": "Integrasi Pertanian Regeneratif",
+        "description": "Amalan mampan untuk kurangkan pergantungan baja jangka panjang: Sungkupan EFB, Tanaman Penutup Legum, Pengkomposan, Aplikasi Biochar."
+      },
+      "feature5": {
+        "title": "Ramalan Impak Ekonomi",
+        "description": "Unjuran kewangan 5 tahun untuk setiap pilihan pelaburan dengan pecahan tahun demi tahun: Kos pelaburan, Peningkatan hasil, Pendapatan tambahan, Keuntungan bersih, Peratusan ROI."
+      },
+      "feature6": {
+        "title": "Laporan PDF Profesional",
+        "description": "Eksport analisis lengkap ke format PDF dengan pemformatan profesional sesuai untuk mesyuarat. Termasuk jadual analisis nutrien lengkap, penunjuk keterukan berkod warna, semua cadangan AI."
+      },
+      "feature7": {
+        "title": "Penjejakan Data Sejarah",
+        "description": "Simpan setiap analisis secara automatik. Bandingkan keputusan merentasi tempoh masa berbeza. Jejaki peningkatan dari rawatan. Kenal pasti corak bermusim."
+      },
+      "feature8": {
+        "title": "Pengurusan Berbilang Ladang",
+        "description": "Urus berbilang ladang dari satu papan pemuka. Jejaki blok atau estet berbeza secara berasingan. Bandingkan prestasi merentas lokasi."
+      },
+      "feature9": {
+        "title": "Pengesahan Pengguna & Keselamatan Data",
+        "description": "Log masuk selamat dengan e-mel dan kata laluan. Penyulitan tahap bank (Google Firebase). Kawalan akses berasaskan peranan. Sandaran awan automatik."
+      },
+      "feature10": {
+        "title": "Reka Bentuk Mesra Mudah Alih",
+        "description": "Berfungsi sempurna pada telefon pintar dan tablet. Muat naik foto laporan terus dari kamera telefon. Reka bentuk responsif menyesuaikan dengan saiz skrin."
+      },
+      "feature11": {
+        "title": "Panel Admin (Untuk Pengurus)",
+        "description": "Konfigurasikan tetapan analisis AI. Urus akaun pengguna dan kebenaran. Pantau penggunaan sistem. Lihat laporan seluruh organisasi."
+      }
+    },
+    "benefits": {
+      "timeSavings": "Penjimatan Masa",
+      "costSavings": "Penjimatan Kos",
+      "revenueIncrease": "Peningkatan Pendapatan & ROI",
+      "accuracy": "Ketepatan",
+      "accessibility": "Kebolehcapaian"
+    },
+    "soil": {
+      "title": "Analisis Tanah",
+      "description": "Muat naik PDF ujian tanah dan dapatkan analisis berkuasa AI tentang tahap pH, nitrogen, fosforus, dan kalium dengan perbandingan standard MPOB."
+    },
+    "leaf": {
+      "title": "Analisis Daun",
+      "description": "Analisis kandungan nutrien daun dan terima cadangan baja berdasarkan standard kelapa sawit optimum."
+    },
+    "reports": {
+      "title": "Laporan Pintar",
+      "description": "Jana laporan PDF komprehensif dengan graf, trend, dan cadangan boleh dilaksana."
+    },
+    "trends": {
+      "title": "Trend Sejarah",
+      "description": "Jejaki kemajuan ladang anda dari masa ke semasa dengan analitik visual dan perbandingan tahun ke tahun."
+    }
+  },
+  "pricing": {
+    "title": "Pilih Pelan Anda",
+    "subtitle": "Harga telus tanpa yuran tersembunyi",
+    "monthly": "Bulanan",
+    "yearly": "Tahunan",
+    "save": "Jimat",
+    "perMonth": "/bulan",
+    "perYear": "/tahun",
+    "currencyNote": "Pembayaran diproses dengan selamat dalam euro (€). Harga Ringgit ditunjukkan untuk rujukan sahaja.",
+    "features": {
+      "aiReports": "Laporan Agronomi AI",
+      "support": "Sokongan Penjelasan (WhatsApp/Email)",
+      "responseTime": "Masa Respons (jam)",
+      "renewalDiscount": "Diskaun Pembaharuan",
+      "referralBonus": "Bonus Rujukan (pelan tahunan seterusnya)",
+      "comparativeAnalysis": "Analisis Perbandingan (kemajuan tahun ke tahun)",
+      "partnerDiscounts": "Diskaun Rakan Kongsi (kit ujian, baja, dll)",
+      "earlyAccess": "Akses Awal kepada Ciri Baharu",
+      "unlimited": "Tanpa Had",
+      "standard": "Standard"
+    },
+    "cta": {
+      "getStarted": "Mulakan",
+      "mostPopular": "Paling Popular",
+      "upgrade": "Naik Taraf Sekarang"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Selamat Kembali",
+      "subtitle": "Log masuk ke akaun CropDrive anda",
+      "email": "Email",
+      "password": "Kata Laluan",
+      "forgotPassword": "Lupa Kata Laluan?",
+      "rememberMe": "Ingat saya",
+      "signIn": "Log Masuk",
+      "noAccount": "Tiada akaun?",
+      "signUp": "Daftar di sini"
+    },
+    "register": {
+      "title": "Cipta Akaun",
+      "subtitle": "Sertai ribuan petani yang menggunakan AI untuk hasil yang lebih baik",
+      "name": "Nama Penuh",
+      "email": "Email",
+      "phone": "Nombor Telefon",
+      "farmName": "Nama Ladang",
+      "farmLocation": "Lokasi Ladang",
+      "password": "Kata Laluan",
+      "confirmPassword": "Sahkan Kata Laluan",
+      "language": "Bahasa Pilihan",
+      "agreeToTerms": "Saya bersetuju dengan",
+      "termsOfService": "Syarat Perkhidmatan",
+      "and": "dan",
+      "privacyPolicy": "Dasar Privasi",
+      "signUp": "Daftar",
+      "haveAccount": "Sudah ada akaun?",
+      "signIn": "Log masuk di sini"
+    },
+    "forgotPassword": {
+      "title": "Tetapkan Semula Kata Laluan",
+      "subtitle": "Masukkan email anda untuk menerima pautan tetapan semula kata laluan",
+      "email": "Email",
+      "sendResetLink": "Hantar Pautan Tetapan Semula",
+      "backToLogin": "Kembali ke Log Masuk"
+    }
+  },
+  "dashboard": {
+    "title": "Papan Pemuka",
+    "welcome": "Selamat kembali",
+    "overview": "Gambaran Keseluruhan",
+    "recentActivity": "Aktiviti Terkini",
+    "uploadAnalysis": "Muat Naik & Analisis",
+    "history": "Sejarah Analisis",
+    "subscription": "Langganan",
+    "multiFarm": "Pengurusan Berbilang Ladang",
+    "farms": "Ladang",
+    "allFarms": "Semua Ladang",
+    "addFarm": "Tambah Ladang",
+    "farmDetails": "Butiran Ladang",
+    "farmName": "Nama Ladang",
+    "location": "Lokasi",
+    "size": "Saiz (hektar)",
+    "status": {
+      "critical": "Isu Kritikal",
+      "low": "Isu Rendah",
+      "balanced": "Semua Seimbang",
+      "noData": "Tiada Data"
+    },
+    "stats": {
+      "totalUploads": "Jumlah Muat Naik",
+      "thisMonth": "Bulan Ini",
+      "remaining": "Baki",
+      "plan": "Pelan Semasa",
+      "totalFarms": "Jumlah Ladang",
+      "criticalIssues": "Isu Kritikal",
+      "averageHealth": "Kesihatan Purata"
+    },
+    "upload": {
+      "title": "Muat Naik Laporan Makmal",
+      "description": "Muat naik PDF analisis tanah atau daun anda",
+      "selectFile": "Pilih Fail",
+      "takePhoto": "Ambil Gambar",
+      "dragDrop": "Seret dan lepas fail anda di sini",
+      "or": "atau",
+      "browse": "layar untuk muat naik",
+      "supportedFormats": "Format disokong: PDF, JPG, PNG, Excel, CSV",
+      "maxSize": "Saiz fail maksimum: 10MB",
+      "analyzing": "Menganalisis dengan AI...",
+      "analysisComplete": "Analisis Selesai!",
+      "viewResults": "Lihat Keputusan",
+      "processingTime": "Masa pemprosesan: ~30 saat"
+    },
+    "analysis": {
+      "results": "Keputusan Analisis",
+      "recommendations": "Cadangan",
+      "viewReport": "Lihat Laporan Penuh",
+      "downloadPDF": "Muat Turun PDF",
+      "share": "Kongsi Keputusan",
+      "colorCoded": "Status Berkod Warna",
+      "green": "Seimbang - Dalam 5% ideal",
+      "yellow": "Rendah - Jurang 5-15%",
+      "red": "Kritikal - Jurang >15%",
+      "investmentOptions": "Pilihan Pelaburan",
+      "high": "Pelaburan Tinggi - Hasil pantas (6-12 bulan)",
+      "medium": "Pelaburan Sederhana - Pendekatan seimbang (12-18 bulan)",
+      "low": "Pelaburan Rendah - Mesra bajet (18-36 bulan)",
+      "fiveYearForecast": "Ramalan Kewangan 5 Tahun",
+      "roi": "Pulangan Pelaburan"
+    }
+  },
+  "subscription": {
+    "currentPlan": "Pelan Semasa",
+    "upgrade": "Naik Taraf Pelan",
+    "downgrade": "Turun Taraf Pelan",
+    "cancel": "Batal Langganan",
+    "reactivate": "Aktifkan Semula",
+    "manage": "Urus Langganan",
+    "billingHistory": "Sejarah Bil",
+    "nextBilling": "Tarikh bil seterusnya",
+    "amount": "Jumlah",
+    "status": "Status",
+    "active": "Aktif",
+    "canceled": "Dibatalkan",
+    "pastDue": "Tertunggak"
+  },
+  "tutorials": {
+    "title": "Tutorial & Panduan",
+    "subtitle": "Ketahui cara mendapatkan yang terbaik dari CropDrive",
+    "gettingStarted": "Memulakan",
+    "uploadingReports": "Memuat Naik Laporan Makmal",
+    "understandingResults": "Memahami Keputusan AI",
+    "mobileTips": "Petua Muat Naik Mudah Alih",
+    "faq": "Soalan Lazim"
+  },
+  "reviews": {
+    "title": "Apa yang Petani Katakan",
+    "subtitle": "Kisah kejayaan dari petani kelapa sawit Malaysia"
+  },
+  "footer": {
+    "company": "Syarikat",
+    "product": "Produk",
+    "support": "Sokongan",
+    "legal": "Undang-undang",
+    "about": "Tentang Kami",
+    "careers": "Kerjaya",
+    "press": "Media",
+    "blog": "Blog",
+    "features": "Ciri-ciri",
+    "pricing": "Harga",
+    "tutorials": "Tutorial",
+    "api": "API",
+    "help": "Pusat Bantuan",
+    "contact": "Hubungi Kami",
+    "whatsapp": "Sokongan WhatsApp",
+    "status": "Status Sistem",
+    "privacy": "Dasar Privasi",
+    "terms": "Syarat Perkhidmatan",
+    "cookies": "Dasar Kuki",
+    "copyright": "© 2024 CropDrive OP Advisor™. Hak cipta terpelihara."
+  }
+}
