@@ -42,11 +42,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
           farmLocation: userData.farmLocation,
           language: userData.language || 'ms',
           registrationDate: userData.registrationDate?.toDate() || new Date(),
-          plan: userData.plan || 'start',
+          plan: userData.plan || 'none',
           status: userData.status || 'active',
           stripeCustomerId: userData.stripeCustomerId,
           uploadsUsed: userData.uploadsUsed || 0,
-          uploadsLimit: userData.uploadsLimit || 10,
+          uploadsLimit: userData.uploadsLimit || 0,
           lastLogin: new Date(),
           preferences: userData.preferences || {
             notifications: true,
@@ -56,17 +56,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
           },
         };
       } else {
-        // Create new user document if it doesn't exist
+        // Create new user document if it doesn't exist - NO PLAN BY DEFAULT
         const newUser: User = {
           uid: firebaseUser.uid,
           email: firebaseUser.email || '',
           displayName: firebaseUser.displayName || '',
           language: 'ms',
           registrationDate: new Date(),
-          plan: 'start',
+          plan: 'none',
           status: 'active',
           uploadsUsed: 0,
-          uploadsLimit: 10,
+          uploadsLimit: 0,
           lastLogin: new Date(),
           preferences: {
             notifications: true,
@@ -133,7 +133,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Send email verification
       await sendEmailVerification(result.user);
 
-      // Create user document in Firestore
+      // Create user document in Firestore - NO PLAN BY DEFAULT
       const newUser: Omit<User, 'uid'> = {
         email: userData.email,
         displayName: userData.displayName,
@@ -142,10 +142,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         farmLocation: userData.farmLocation,
         language: userData.language,
         registrationDate: new Date(),
-        plan: 'start',
+        plan: 'none',
         status: 'active',
         uploadsUsed: 0,
-        uploadsLimit: 10,
+        uploadsLimit: 0,
         lastLogin: new Date(),
         preferences: {
           notifications: true,

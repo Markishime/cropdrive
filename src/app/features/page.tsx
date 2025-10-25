@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useAuth } from '@/lib/auth';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 
@@ -11,6 +12,9 @@ export default function FeaturesPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const { language, t } = useTranslation(currentLanguage);
+  const { user } = useAuth();
+  
+  const currentPlan = user?.plan || 'start';
 
   useEffect(() => {
     setMounted(true);
@@ -182,6 +186,31 @@ export default function FeaturesPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Logged-in User Banner */}
+      {user && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-4 sm:px-6 lg:px-8"
+        >
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="text-center sm:text-left">
+              <p className="text-sm font-medium">
+                {language === 'ms' ? `✓ Pelan Semasa Anda: ${currentPlan.toUpperCase()} • Semua ciri di bawah tersedia untuk anda!` : `✓ Your Current Plan: ${currentPlan.toUpperCase()} • All features below are available to you!`}
+              </p>
+            </div>
+            {currentPlan === 'start' && (
+              <Link href="/pricing">
+                <Button className="bg-yellow-400 text-green-900 hover:bg-yellow-300 font-bold px-6 py-2 text-sm">
+                  {language === 'ms' ? 'Naik Taraf Sekarang' : 'Upgrade Now'}
+                </Button>
+              </Link>
+            )}
+          </div>
+        </motion.div>
+      )}
+      
       {/* Hero Section with Green Gradient */}
       <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">

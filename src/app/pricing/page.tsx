@@ -20,6 +20,9 @@ export default function PricingPage() {
   const [exchangeRateLoading, setExchangeRateLoading] = useState(true);
   const { language, t } = useTranslation(currentLanguage);
   const { user } = useAuth();
+  
+  // Get user's current plan (none means no plan purchased yet)
+  const currentUserPlan = user?.plan || 'none';
 
   useEffect(() => {
     setMounted(true);
@@ -72,6 +75,53 @@ export default function PricingPage() {
   if (!mounted) {
     return null;
   }
+  
+  // Helper function to determine button text and styling
+  const getPlanButtonInfo = (tierId: string) => {
+    if (!user) {
+      return {
+        text: language === 'ms' ? 'Log Masuk' : 'Login to Start',
+        className: 'bg-green-700 text-white hover:bg-green-800',
+        disabled: false,
+      };
+    }
+    
+    if (currentUserPlan === tierId) {
+      return {
+        text: language === 'ms' ? '✓ Pelan Semasa' : '✓ Current Plan',
+        className: 'bg-gray-300 text-gray-600 cursor-not-allowed',
+        disabled: true,
+      };
+    }
+    
+    // If user has no plan, show "Get Started" or "Choose Plan"
+    if (currentUserPlan === 'none') {
+      return {
+        text: language === 'ms' ? '🛒 Beli Pelan' : '🛒 Buy Plan',
+        className: 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 font-bold shadow-lg',
+        disabled: false,
+      };
+    }
+    
+    // Tier comparison - using actual plan IDs
+    const tierOrder = ['none', 'start', 'smart', 'precision'];
+    const currentIndex = tierOrder.indexOf(currentUserPlan);
+    const targetIndex = tierOrder.indexOf(tierId);
+    
+    if (targetIndex > currentIndex) {
+      return {
+        text: language === 'ms' ? '⬆️ Naik Taraf' : '⬆️ Upgrade',
+        className: 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg',
+        disabled: false,
+      };
+    } else {
+      return {
+        text: language === 'ms' ? '⬇️ Turun Taraf' : '⬇️ Downgrade',
+        className: 'bg-gray-600 text-white hover:bg-gray-700',
+        disabled: false,
+      };
+    }
+  };
 
   const handlePlanSelect = async (planId: string) => {
     if (!user) {
@@ -136,29 +186,56 @@ export default function PricingPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <motion.span
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
-            >
-              {language === 'ms' ? '🌾 Untuk Pekebun Kecil' : '🌾 For Small Farmers'}
-            </motion.span>
+            {/* Different header for logged-in vs non-logged-in users */}
+            {user && currentUserPlan !== 'none' ? (
+              <>
+                <motion.span
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+                >
+                  {language === 'ms' ? '✓ Anda Pengguna Aktif' : '✓ Active Subscriber'}
+                </motion.span>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
-              {language === 'ms' ? 'PILIH' : 'CHOOSE'} <span className="text-yellow-400">{language === 'ms' ? 'PELAN' : 'PLAN'}</span>
-            </h1>
+                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
+                  {language === 'ms' ? 'URUS' : 'MANAGE'} <span className="text-yellow-400">{language === 'ms' ? 'PELAN' : 'PLAN'}</span>
+                </h1>
 
-            <p className="text-lg text-white/80 mb-6 font-semibold">
-              {language === 'ms' ? '< 100 Hektar • Harga Tetap • Mula dalam 5 Minit' : '< 100 Hectares • Fixed Prices • Start in 5 Minutes'}
-            </p>
+                <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                  {language === 'ms'
+                    ? 'Lihat pelan anda atau naik taraf untuk lebih banyak ciri.'
+                    : 'Review your plan or upgrade for more features.'
+                  }
+                </p>
+              </>
+            ) : (
+              <>
+                <motion.span
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+                >
+                  {language === 'ms' ? '🌾 Untuk Pekebun Kecil' : '🌾 For Small Farmers'}
+                </motion.span>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Harga telus tanpa yuran tersembunyi. Beli sekarang dan dapatkan akses segera!'
-                : 'Transparent pricing with no hidden fees. Buy now and get instant access!'
-              }
-            </p>
+                <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
+                  {language === 'ms' ? 'PILIH' : 'CHOOSE'} <span className="text-yellow-400">{language === 'ms' ? 'PELAN' : 'PLAN'}</span>
+                </h1>
+
+                <p className="text-lg text-white/80 mb-6 font-semibold">
+                  {language === 'ms' ? '< 100 Hektar • Harga Tetap • Mula dalam 5 Minit' : '< 100 Hectares • Fixed Prices • Start in 5 Minutes'}
+                </p>
+
+                <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+                  {language === 'ms'
+                    ? 'Harga telus tanpa yuran tersembunyi. Beli sekarang dan dapatkan akses segera!'
+                    : 'Transparent pricing with no hidden fees. Buy now and get instant access!'
+                  }
+                </p>
+              </>
+            )}
 
             {/* Organizations Banner */}
             <motion.div
@@ -235,16 +312,24 @@ export default function PricingPage() {
               transition={{ duration: 0.8, delay: index * 0.2 }}
               className={`relative ${tier.popular ? 'scale-105' : ''}`}
             >
-              {tier.popular && (
+              {tier.popular && (!user || currentUserPlan === 'none') && (
                 <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-yellow-400 text-green-900 px-6 py-3 rounded-full text-sm font-black uppercase tracking-wider shadow-xl">
                     {language === 'ms' ? 'Paling Popular' : 'Most Popular'}
                   </span>
                 </div>
               )}
+              
+              {user && currentUserPlan !== 'none' && tier.id === currentUserPlan && (
+                <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
+                  <span className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-full text-sm font-black uppercase tracking-wider shadow-xl">
+                    {language === 'ms' ? '✓ Pelan Anda' : '✓ Your Current Plan'}
+                  </span>
+                </div>
+              )}
 
               <div className={`h-full bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 border-4 ${
-                tier.popular ? 'border-yellow-400 transform scale-105' : 'border-gray-200'
+                (user && currentUserPlan !== 'none' && tier.id === currentUserPlan) ? 'border-green-600 transform scale-105 pt-4' : tier.popular ? 'border-yellow-400 transform scale-105 pt-4' : 'border-gray-200'
               }`}>
                 <div className={`p-8 ${tier.popular ? 'bg-gradient-to-br from-green-50 to-white' : ''}`}>
                   <div className="text-center mb-8">
@@ -332,22 +417,23 @@ export default function PricingPage() {
                     ))}
                   </div>
 
-                  <button
-                    onClick={() => handlePlanSelect(tier.id)}
-                    disabled={loading === tier.id}
-                    className={`w-full py-4 rounded-lg font-bold uppercase text-sm tracking-wider transition-all duration-200 ${
-                      tier.popular
-                        ? 'bg-yellow-400 text-green-900 hover:bg-yellow-300 shadow-lg hover:shadow-xl'
-                        : 'bg-green-700 text-white hover:bg-green-800'
-                    } ${loading === tier.id ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {loading === tier.id
-                      ? (language === 'ms' ? 'Memproses...' : 'Processing...')
-                      : user
-                        ? (language === 'ms' ? 'Pilih Pelan' : 'Choose Plan')
-                        : (language === 'ms' ? 'Log Masuk' : 'Login to Start')
-                    }
-                  </button>
+                  {(() => {
+                    const buttonInfo = getPlanButtonInfo(tier.id);
+                    return (
+                      <button
+                        onClick={() => handlePlanSelect(tier.id)}
+                        disabled={loading === tier.id || buttonInfo.disabled}
+                        className={`w-full py-4 rounded-lg font-bold uppercase text-sm tracking-wider transition-all duration-200 ${
+                          buttonInfo.className
+                        } ${loading === tier.id ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        {loading === tier.id
+                          ? (language === 'ms' ? 'Memproses...' : 'Processing...')
+                          : buttonInfo.text
+                        }
+                      </button>
+                    );
+                  })()}
                 </div>
               </div>
             </motion.div>
@@ -645,40 +731,88 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="relative py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
+      {/* CTA Section - Only show for non-logged-in users or users without a plan */}
+      {(!user || currentUserPlan === 'none') && (
+        <section className="relative py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '40px 40px'
+            }}></div>
+          </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase">
-              {language === 'ms' ? 'Sedia' : 'Ready'} <span className="text-yellow-400">{language === 'ms' ? 'Memulakan?' : 'to Start?'}</span>
-            </h2>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Sertai ribuan petani Malaysia yang sudah menggunakan AI untuk hasil yang lebih baik.'
-                : 'Join thousands of Malaysian farmers already using AI for better yields.'
-              }
-            </p>
-            <Link href="/register">
-              <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
-                {language === 'ms' ? 'Daftar Sekarang' : 'Get Started Now'}
-              </button>
-            </Link>
-          </motion.div>
-        </div>
-      </section>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase">
+                {language === 'ms' ? 'Sedia' : 'Ready'} <span className="text-yellow-400">{language === 'ms' ? 'Memulakan?' : 'to Start?'}</span>
+              </h2>
+              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+                {language === 'ms'
+                  ? 'Sertai ribuan petani Malaysia yang sudah menggunakan AI untuk hasil yang lebih baik.'
+                  : 'Join thousands of Malaysian farmers already using AI for better yields.'
+                }
+              </p>
+              {!user ? (
+                <Link href="/register">
+                  <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                    {language === 'ms' ? 'Daftar Sekarang' : 'Get Started Now'}
+                  </button>
+                </Link>
+              ) : (
+                <button
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  className="px-10 py-5 bg-yellow-400 text-green-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105"
+                >
+                  {language === 'ms' ? 'Pilih Pelan Di Atas' : 'Choose Plan Above'}
+                </button>
+              )}
+            </motion.div>
+          </div>
+        </section>
+      )}
+      
+      {/* For logged-in users with a plan, show different CTA */}
+      {user && currentUserPlan !== 'none' && (
+        <section className="relative py-24 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 overflow-hidden">
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '40px 40px'
+            }}></div>
+          </div>
+
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="text-center"
+            >
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase">
+                {language === 'ms' ? 'Sedia' : 'Ready'} <span className="text-yellow-400">{language === 'ms' ? 'Menganalisis?' : 'to Analyze?'}</span>
+              </h2>
+              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+                {language === 'ms'
+                  ? 'Anda sudah mempunyai pelan aktif. Mula muat naik laporan makmal anda sekarang!'
+                  : 'You already have an active plan. Start uploading your lab reports now!'
+                }
+              </p>
+              <Link href="/assistant">
+                <button className="px-10 py-5 bg-yellow-400 text-blue-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                  {language === 'ms' ? '🤖 Mulakan Analisis' : '🤖 Start Analysis'}
+                </button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -5,11 +5,15 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useAuth } from '@/lib/auth';
 
 export default function ContactUsPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const { language } = useTranslation(currentLanguage);
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -25,16 +29,50 @@ export default function ContactUsPage() {
     setCurrentLanguage(lang);
   }, []);
 
+  useEffect(() => {
+    // Pre-fill form with user data if logged in
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.displayName || prev.name,
+        email: user.email || prev.email
+      }));
+    }
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
     
-    // Simulate sending (replace with actual API call)
-    setTimeout(() => {
-      toast.success(language === 'ms' ? 'Mesej berjaya dihantar!' : 'Message sent successfully!');
-      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    try {
+      // Save contact message to Firestore
+      const contactRef = collection(db, 'contacts');
+      await addDoc(contactRef, {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subject: formData.subject,
+        message: formData.message,
+        userId: user?.uid || null,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+        language: language
+      });
+
+      toast.success(language === 'ms' ? '✓ Mesej berjaya dihantar! Kami akan menghubungi anda tidak lama lagi.' : '✓ Message sent successfully! We will contact you soon.');
+      setFormData({ 
+        name: user?.displayName || '', 
+        email: user?.email || '', 
+        phone: '', 
+        subject: '', 
+        message: '' 
+      });
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast.error(language === 'ms' ? '✗ Ralat menghantar mesej. Sila cuba lagi.' : '✗ Error sending message. Please try again.');
+    } finally {
       setSending(false);
-    }, 1500);
+    }
   };
 
   if (!mounted) {

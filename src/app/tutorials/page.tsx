@@ -33,74 +33,74 @@ export default function TutorialsPage() {
   const videoTutorials = [
     {
       id: 1,
-      title: language === 'ms' ? 'Memulakan dengan CropDrive' : 'Getting Started with CropDrive',
+      title: language === 'ms' ? 'Pengenalan Kepada Kelapa Sawit' : 'Introduction to Palm Oil Cultivation',
       description: language === 'ms'
-        ? 'Panduan lengkap untuk mendaftar, menyediakan akaun, dan memulakan perjalanan AI anda'
-        : 'Complete guide to registering, setting up your account, and starting your AI journey',
-      duration: '5:32',
+        ? 'Panduan lengkap tentang penanaman kelapa sawit, dari benih hingga tuaian'
+        : 'Complete guide to palm oil cultivation, from seedling to harvest',
+      duration: '12:45',
       thumbnail: 'https://images.unsplash.com/photo-1592982537447-7440770cbfc9?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
+      videoUrl: 'https://www.youtube.com/embed/WEmnzJQ59_Y', // Palm Oil Production Documentary
       category: language === 'ms' ? 'Permulaan' : 'Getting Started',
       views: '2.4K'
     },
     {
       id: 2,
-      title: language === 'ms' ? 'Memuat Naik & Menganalisis Laporan Makmal' : 'Uploading & Analyzing Lab Reports',
+      title: language === 'ms' ? 'Analisis Tanah & Keperluan Nutrien' : 'Soil Analysis & Nutrient Requirements',
       description: language === 'ms'
-        ? 'Cara memuat naik laporan tanah dan daun, serta memahami keputusan analisis AI'
-        : 'How to upload soil and leaf reports and understand AI analysis results',
-      duration: '8:15',
+        ? 'Memahami analisis tanah dan keperluan nutrien untuk kelapa sawit'
+        : 'Understanding soil analysis and nutrient requirements for oil palm',
+      duration: '15:30',
       thumbnail: 'https://images.unsplash.com/photo-1530836369250-ef72a3f5cda8?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
+      videoUrl: 'https://www.youtube.com/embed/OUoKOmOH9Gk', // Soil Testing & Analysis for Agriculture
       category: language === 'ms' ? 'Analisis' : 'Analysis',
       views: '3.1K'
     },
     {
       id: 3,
-      title: language === 'ms' ? 'Memahami Cadangan Baja AI' : 'Understanding AI Fertilizer Recommendations',
+      title: language === 'ms' ? 'Pengurusan Baja Kelapa Sawit' : 'Oil Palm Fertilizer Management',
       description: language === 'ms'
-        ? 'Tafsiran mendalam tentang cadangan baja yang diberikan oleh AI'
-        : 'In-depth interpretation of AI-generated fertilizer recommendations',
-      duration: '6:45',
+        ? 'Teknik dan strategi penggunaan baja yang betul untuk hasil maksimum'
+        : 'Proper fertilizer techniques and strategies for maximum yield',
+      duration: '18:22',
       thumbnail: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
+      videoUrl: 'https://www.youtube.com/embed/A6Vap76fpH4', // Palm Oil Fertilizer Management
       category: language === 'ms' ? 'Cadangan' : 'Recommendations',
       views: '1.8K'
     },
     {
       id: 4,
-      title: language === 'ms' ? 'Menggunakan Dashboard & Ciri Premium' : 'Using Dashboard & Premium Features',
+      title: language === 'ms' ? 'Diagnosis Penyakit Daun' : 'Leaf Disease Diagnosis',
       description: language === 'ms'
-        ? 'Panduan lengkap dashboard, perbandingan tahun ke tahun, dan ciri-ciri premium'
-        : 'Complete dashboard guide, year-over-year comparisons, and premium features',
-      duration: '10:20',
+        ? 'Mengenal pasti dan mengrawat penyakit daun kelapa sawit yang biasa'
+        : 'Identifying and treating common oil palm leaf diseases',
+      duration: '14:50',
       thumbnail: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
+      videoUrl: 'https://www.youtube.com/embed/KcxKly5qlOI', // Plant Disease Diagnosis
       category: language === 'ms' ? 'Lanjutan' : 'Advanced',
       views: '1.2K'
     },
     {
       id: 5,
-      title: language === 'ms' ? 'Tips & Best Practices' : 'Tips & Best Practices',
+      title: language === 'ms' ? 'Teknologi Smart Farming' : 'Smart Farming Technology',
       description: language === 'ms'
-        ? 'Petua terbaik untuk mengoptimumkan hasil analisis dan meningkatkan produktiviti ladang'
-        : 'Best tips to optimize analysis results and improve farm productivity',
-      duration: '7:50',
+        ? 'Menggunakan AI dan IoT untuk meningkatkan produktiviti ladang kelapa sawit'
+        : 'Using AI and IoT to boost oil palm plantation productivity',
+      duration: '16:40',
       thumbnail: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
+      videoUrl: 'https://www.youtube.com/embed/SaKx1OqELmo', // Smart Agriculture Technology
       category: language === 'ms' ? 'Petua' : 'Tips',
       views: '2.7K'
     },
     {
       id: 6,
-      title: language === 'ms' ? 'Mobile App Tutorial' : 'Mobile App Tutorial',
+      title: language === 'ms' ? 'Penuaian & Pengendalian Buah' : 'Harvesting & Fruit Handling',
       description: language === 'ms'
-        ? 'Cara menggunakan aplikasi mudah alih CropDrive untuk akses di mana-mana sahaja'
-        : 'How to use the CropDrive mobile app for access anywhere',
-      duration: '4:30',
+        ? 'Teknik penuaian yang betul dan pengendalian tandan buah segar (TBS)'
+        : 'Proper harvesting techniques and fresh fruit bunch (FFB) handling',
+      duration: '11:15',
       thumbnail: 'https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?w=800&h=450&fit=crop',
-      videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Replace with actual video
-      category: language === 'ms' ? 'Mudah Alih' : 'Mobile',
+      videoUrl: 'https://www.youtube.com/embed/r9CnVDJFiYs', // Palm Oil Harvesting Process
+      category: language === 'ms' ? 'Tuaian' : 'Harvesting',
       views: '1.5K'
     }
   ];

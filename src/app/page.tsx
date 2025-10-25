@@ -57,24 +57,23 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
       <section className="relative h-screen overflow-hidden">
-        {/* Background Image Carousel with Overlay */}
+        {/* Background Video Carousel with Overlay */}
         <div className="absolute inset-0">
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=2070',
-              'https://images.unsplash.com/photo-1586281380349-632531db7ed4?q=80&w=2070',
-              'https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=2070',
-              'https://images.unsplash.com/photo-1464226184884-fa280b87c399?q=80&w=2070',
-              'https://images.unsplash.com/photo-1560493676-04071c5f467b?q=80&w=2070'
-            ].map((image, index) => (
+              'https://cdn.coverr.co/videos/coverr-aerial-view-of-palm-oil-plantation-8223/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-palm-oil-fruit-bunches-8221/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-green-palm-trees-5647/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-tropical-plantation-rows-8222/1080p.mp4',
+              'https://cdn.coverr.co/videos/coverr-agricultural-field-aerial-7801/1080p.mp4'
+            ].map((video, index) => (
               <motion.div
                 key={index}
                 className="absolute inset-0"
                 initial={{ opacity: index === 0 ? 1 : 0 }}
                 animate={{
                   opacity: [0, 1, 1, 0],
-                  scale: [1.1, 1, 1, 1.1],
                 }}
                 transition={{
                   duration: 15,
@@ -84,16 +83,20 @@ export default function HomePage() {
                   ease: "easeInOut"
                 }}
               >
-                <img 
-                  src={image}
-                  alt={`Palm Oil Plantation ${index + 1}`}
-              className="w-full h-full object-cover"
-            />
+                <video
+                  src={video}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
               </motion.div>
             ))}
           </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-green-900/85 via-green-800/75 to-green-900/85"></div>
-          <div className="absolute inset-0 bg-black/30"></div>
+          {/* Lighter overlay to make videos more visible */}
+          <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 via-green-800/40 to-green-900/50"></div>
+          <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
         {/* Side Navigation */}
@@ -246,104 +249,45 @@ export default function HomePage() {
               />
             </motion.h1>
 
-            {/* Two Client Types - Clear Division */}
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, delay: 0.8 }}
-              className="max-w-5xl mx-auto mt-6 sm:mt-8 px-4 sm:px-0"
+              transition={{ duration: 1, delay: 0.9 }}
+              className="text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto mb-8 sm:mb-10 leading-relaxed px-4"
+              style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-                {/* Small Farmers - Buy Now */}
-                <motion.div
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  className="bg-gradient-to-br from-yellow-400/95 to-yellow-500/95 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border-2 sm:border-4 border-yellow-300/50"
-                >
-                  <div className="text-center">
-                    {/* Palm Oil Fruit Bunch Icon */}
-                    <div className="mb-3 sm:mb-4 mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-green-900/20 rounded-full flex items-center justify-center">
-                      <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-900" viewBox="0 0 64 64" fill="currentColor">
-                        <circle cx="32" cy="28" r="10" opacity="0.9"/>
-                        <circle cx="26" cy="34" r="8" opacity="0.8"/>
-                        <circle cx="38" cy="34" r="8" opacity="0.8"/>
-                        <circle cx="32" cy="40" r="7" opacity="0.7"/>
-                        <circle cx="22" cy="28" r="7" opacity="0.7"/>
-                        <circle cx="42" cy="28" r="7" opacity="0.7"/>
-                        <rect x="30" y="42" width="4" height="12" rx="2" opacity="0.9"/>
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-green-900 mb-2 sm:mb-3 uppercase tracking-tight">
-                      {language === 'ms' ? 'Pekebun Kecil' : 'Small Farmers'}
-                    </h3>
-                    <p className="text-green-900/80 font-semibold mb-2 text-xs sm:text-sm">
-                      {language === 'ms' ? '< 100 Hektar' : '< 100 Hectares'}
-                    </p>
-                    <p className="text-green-900/70 mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed px-2">
-                      {language === 'ms' 
-                        ? 'Akses segera kepada analisis AI. Beli pelan & mula hari ini!'
-                        : 'Instant access to AI analysis. Buy a plan & start today!'
-                      }
-                    </p>
-                    <Link href="/pricing">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300 touch-manipulation"
-                      >
-                        {language === 'ms' ? '🛒 Beli Sekarang' : '🛒 Buy Now'}
-                      </motion.button>
-                    </Link>
-                    <p className="mt-3 sm:mt-4 text-xs text-green-900/60 font-medium">
-                      {language === 'ms' ? 'Harga tetap • Mulakan dalam 5 minit' : 'Fixed prices • Start in 5 minutes'}
-                    </p>
-                  </div>
-                </motion.div>
+              {language === 'ms' 
+                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI bertauliah MPOB dalam masa 30 saat. Sertai ribuan pekebun pintar di seluruh Malaysia.'
+                : 'Boost your palm oil yield with MPOB-certified AI analysis in 30 seconds. Join thousands of smart farmers across Malaysia.'
+              }
+            </motion.p>
 
-                {/* Organizations - Custom Solutions */}
-                <motion.div
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  className="bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border-2 sm:border-4 border-white/50"
+            {/* CTA Buttons */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 1.1 }}
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 w-full max-w-2xl mx-auto"
+            >
+              <Link href="/pricing" className="w-full sm:w-auto">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation"
                 >
-                  <div className="text-center">
-                    {/* Plantation/Factory Icon */}
-                    <div className="mb-3 sm:mb-4 mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-green-600/10 rounded-full flex items-center justify-center">
-                      <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-700" viewBox="0 0 64 64" fill="currentColor">
-                        <rect x="10" y="35" width="12" height="20" opacity="0.8"/>
-                        <rect x="26" y="30" width="12" height="25" opacity="0.9"/>
-                        <rect x="42" y="25" width="12" height="30" opacity="0.8"/>
-                        <rect x="8" y="55" width="48" height="4" opacity="0.7"/>
-                        <path d="M10 35 L16 15 L22 35" opacity="0.6"/>
-                        <path d="M26 30 L32 10 L38 30" opacity="0.7"/>
-                        <path d="M42 25 L48 8 L54 25" opacity="0.6"/>
-                      </svg>
-                    </div>
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 mb-2 sm:mb-3 uppercase tracking-tight">
-                      {language === 'ms' ? 'Organisasi' : 'Organizations'}
-                    </h3>
-                    <p className="text-gray-700 font-semibold mb-2 text-xs sm:text-sm">
-                      {language === 'ms' ? '> 100 Hektar' : '> 100 Hectares'}
-                    </p>
-                    <p className="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed px-2">
-                      {language === 'ms' 
-                        ? 'Penyelesaian tersuai & harga khas. Hubungi kami untuk demo.'
-                        : 'Custom solutions & special pricing. Contact us for a demo.'
-                      }
-                    </p>
-                    <Link href="/contact">
-                      <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 touch-manipulation"
-                      >
-                        {language === 'ms' ? '📅 Tempah Temu Janji' : '📅 Book Appointment'}
-                      </motion.button>
-                    </Link>
-                    <p className="mt-3 sm:mt-4 text-xs text-gray-500 font-medium">
-                      {language === 'ms' ? 'Harga tersuai • Sokongan dedikasi' : 'Custom pricing • Dedicated support'}
-                    </p>
-                  </div>
-                </motion.div>
-              </div>
+                  {language === 'ms' ? '🚀 Mulakan Sekarang' : '🚀 Get Started Now'}
+                </motion.button>
+              </Link>
+              <Link href="/how-it-works" className="w-full sm:w-auto">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto px-8 sm:px-10 py-4 sm:py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation"
+                >
+                  {language === 'ms' ? '▶️ Tonton Demo' : '▶️ Watch Demo'}
+                </motion.button>
+              </Link>
             </motion.div>
           </div>
         </div>

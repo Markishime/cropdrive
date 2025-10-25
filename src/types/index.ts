@@ -5,9 +5,10 @@ export interface User {
   phoneNumber?: string;
   farmName?: string;
   farmLocation?: string;
+  farmSize?: string;
   language: 'en' | 'ms';
   registrationDate: Date;
-  plan: string; // Plan ID: 'start' | 'smart' | 'precision'
+  plan: string; // Plan ID: 'none' | 'start' | 'smart' | 'precision'
   status: 'active' | 'inactive' | 'suspended';
   stripeCustomerId?: string;
   uploadsUsed: number;

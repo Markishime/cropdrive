@@ -7,18 +7,23 @@ import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import Card, { CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
-import { User, Mail, Phone, MapPin, Calendar, Edit, Save } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Calendar, Edit, Save, XCircle, Leaf } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import { updateProfile as firebaseUpdateProfile } from 'firebase/auth';
 
 export default function ProfilePage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     displayName: '',
     phoneNumber: '',
     farmName: '',
     farmLocation: '',
+    farmSize: '',
   });
   
   const { user, loading: authLoading } = useAuth();
@@ -37,6 +42,7 @@ export default function ProfilePage() {
         phoneNumber: user.phoneNumber || '',
         farmName: user.farmName || '',
         farmLocation: user.farmLocation || '',
+        farmSize: user.farmSize || '',
       });
     }
   }, [user]);
@@ -49,9 +55,57 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
-  const handleSave = () => {
-    // Save profile updates
-    toast.success(language === 'ms' ? 'Profil dikemas kini!' : 'Profile updated!');
+  const handleSave = async () => {
+    if (!user?.uid) return;
+    
+    setSaving(true);
+    try {
+      // Update user profile in Firestore
+      const userRef = doc(db, 'users', user.uid);
+      await updateDoc(userRef, {
+        phoneNumber: formData.phoneNumber,
+        farmName: formData.farmName,
+        farmLocation: formData.farmLocation,
+        farmSize: formData.farmSize,
+        updatedAt: serverTimestamp()
+      });
+
+      // Update display name in Firebase Auth if changed
+      if (formData.displayName !== user.displayName) {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          await firebaseUpdateProfile(currentUser, {
+            displayName: formData.displayName
+          });
+          
+          // Also update in Firestore
+          await updateDoc(userRef, {
+            displayName: formData.displayName
+          });
+        }
+      }
+
+      toast.success(language === 'ms' ? '✓ Profil dikemas kini! Sila muat semula halaman.' : '✓ Profile updated! Please reload the page.');
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast.error(language === 'ms' ? '✗ Ralat mengemas kini profil' : '✗ Error updating profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    // Reset form data to original user data
+    if (user) {
+      setFormData({
+        displayName: user.displayName || '',
+        phoneNumber: user.phoneNumber || '',
+        farmName: user.farmName || '',
+        farmLocation: user.farmLocation || '',
+        farmSize: user.farmSize || '',
+      });
+    }
     setIsEditing(false);
   };
 
@@ -92,22 +146,40 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
-            <Button
-              onClick={() => isEditing ? handleSave() : setIsEditing(true)}
-              className="flex items-center space-x-2"
-            >
-              {isEditing ? (
-                <>
-                  <Save className="w-4 h-4" />
-                  <span>{language === 'ms' ? 'Simpan' : 'Save'}</span>
-                </>
-              ) : (
-                <>
-                  <Edit className="w-4 h-4" />
-                  <span>{language === 'ms' ? 'Edit' : 'Edit'}</span>
-                </>
+            <div className="flex items-center space-x-2">
+              {isEditing && (
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  className="flex items-center space-x-2"
+                >
+                  <XCircle className="w-4 h-4" />
+                  <span>{language === 'ms' ? 'Batal' : 'Cancel'}</span>
+                </Button>
               )}
-            </Button>
+              <Button
+                onClick={() => isEditing ? handleSave() : setIsEditing(true)}
+                disabled={saving}
+                className="flex items-center space-x-2"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>{language === 'ms' ? 'Menyimpan...' : 'Saving...'}</span>
+                  </>
+                ) : isEditing ? (
+                  <>
+                    <Save className="w-4 h-4" />
+                    <span>{language === 'ms' ? 'Simpan' : 'Save'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Edit className="w-4 h-4" />
+                    <span>{language === 'ms' ? 'Edit' : 'Edit'}</span>
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
         </motion.div>
 
@@ -271,6 +343,26 @@ export default function ProfilePage() {
                       />
                     ) : (
                       <p className="text-gray-900 py-2">{user.farmLocation || '-'}</p>
+                    )}
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Leaf className="w-4 h-4" />
+                        <span>{language === 'ms' ? 'Saiz Ladang (Hektar)' : 'Farm Size (Hectares)'}</span>
+                      </div>
+                    </label>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={formData.farmSize}
+                        onChange={(e) => setFormData({...formData, farmSize: e.target.value})}
+                        placeholder={language === 'ms' ? 'Contoh: 50 hektar' : 'Example: 50 hectares'}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                      />
+                    ) : (
+                      <p className="text-gray-900 py-2">{user.farmSize || '-'}</p>
                     )}
                   </div>
                 </div>

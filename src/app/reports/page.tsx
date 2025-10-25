@@ -8,12 +8,31 @@ import { useTranslation, getCurrentLanguage } from '@/i18n';
 import Card, { CardContent } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import { FileText, Download, Eye, Filter, Calendar, Search, Trash2 } from 'lucide-react';
+import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import toast from 'react-hot-toast';
+
+interface Report {
+  id: string;
+  title: string;
+  type: 'soil' | 'leaf';
+  date: string;
+  status: 'completed' | 'processing';
+  recommendations: number;
+  summary: string;
+  userId: string;
+  createdAt: Timestamp;
+  fileUrl?: string;
+}
 
 export default function ReportsPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'soil' | 'leaf'>('all');
+  const [reports, setReports] = useState<Report[]>([]);
+  const [loadingReports, setLoadingReports] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -32,49 +51,120 @@ export default function ReportsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Mock report data - Replace with actual data from database
-  const mockReports = [
-    {
-      id: 1,
-      title: language === 'ms' ? 'Analisis Tanah - Januari 2025' : 'Soil Analysis - January 2025',
-      type: 'soil',
-      date: '2025-01-15',
-      status: 'completed',
-      recommendations: 12,
-      summary: language === 'ms' 
-        ? 'pH tanah rendah, perlu menambah kapur'
-        : 'Low soil pH, lime addition recommended'
-    },
-    {
-      id: 2,
-      title: language === 'ms' ? 'Analisis Daun - Januari 2025' : 'Leaf Analysis - January 2025',
-      type: 'leaf',
-      date: '2025-01-10',
-      status: 'completed',
-      recommendations: 8,
-      summary: language === 'ms'
-        ? 'Kekurangan nitrogen, tambah baja NPK'
-        : 'Nitrogen deficiency, add NPK fertilizer'
-    },
-    {
-      id: 3,
-      title: language === 'ms' ? 'Analisis Tanah - Disember 2024' : 'Soil Analysis - December 2024',
-      type: 'soil',
-      date: '2024-12-20',
-      status: 'completed',
-      recommendations: 10,
-      summary: language === 'ms'
-        ? 'Kandungan organik baik, teruskan amalan semasa'
-        : 'Good organic content, continue current practices'
-    },
-  ];
+  // Fetch reports from Firestore
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (!user?.uid) return;
 
-  const filteredReports = mockReports.filter(report => {
+      setLoadingReports(true);
+      try {
+        const reportsRef = collection(db, 'reports');
+        const q = query(
+          reportsRef,
+          where('userId', '==', user.uid),
+          orderBy('createdAt', 'desc')
+        );
+        
+        const querySnapshot = await getDocs(q);
+        const fetchedReports: Report[] = [];
+        
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          fetchedReports.push({
+            id: doc.id,
+            title: data.title || '',
+            type: data.type || 'soil',
+            date: data.date || new Date().toISOString().split('T')[0],
+            status: data.status || 'completed',
+            recommendations: data.recommendations || 0,
+            summary: data.summary || '',
+            userId: data.userId,
+            createdAt: data.createdAt,
+            fileUrl: data.fileUrl
+          });
+        });
+        
+        setReports(fetchedReports);
+      } catch (error) {
+        console.error('Error fetching reports:', error);
+        toast.error(language === 'ms' ? 'Ralat memuatkan laporan' : 'Error loading reports');
+        // Use mock data as fallback
+        setReports([
+          {
+            id: '1',
+            title: language === 'ms' ? 'Analisis Tanah - Januari 2025' : 'Soil Analysis - January 2025',
+            type: 'soil',
+            date: '2025-01-15',
+            status: 'completed',
+            recommendations: 12,
+            summary: language === 'ms' 
+              ? 'pH tanah rendah, perlu menambah kapur'
+              : 'Low soil pH, lime addition recommended',
+            userId: user?.uid || '',
+            createdAt: Timestamp.now()
+          },
+          {
+            id: '2',
+            title: language === 'ms' ? 'Analisis Daun - Januari 2025' : 'Leaf Analysis - January 2025',
+            type: 'leaf',
+            date: '2025-01-10',
+            status: 'completed',
+            recommendations: 8,
+            summary: language === 'ms'
+              ? 'Kekurangan nitrogen, tambah baja NPK'
+              : 'Nitrogen deficiency, add NPK fertilizer',
+            userId: user?.uid || '',
+            createdAt: Timestamp.now()
+          }
+        ]);
+      } finally {
+        setLoadingReports(false);
+      }
+    };
+
+    if (user && mounted) {
+      fetchReports();
+    }
+  }, [user, mounted, language]);
+
+  const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.summary.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || report.type === filterType;
     return matchesSearch && matchesType;
   });
+
+  const handleDeleteReport = async (reportId: string) => {
+    if (!confirm(language === 'ms' ? 'Adakah anda pasti mahu memadam laporan ini?' : 'Are you sure you want to delete this report?')) {
+      return;
+    }
+
+    setDeletingId(reportId);
+    try {
+      await deleteDoc(doc(db, 'reports', reportId));
+      setReports(reports.filter(r => r.id !== reportId));
+      toast.success(language === 'ms' ? '✓ Laporan dipadam' : '✓ Report deleted');
+    } catch (error) {
+      console.error('Error deleting report:', error);
+      toast.error(language === 'ms' ? '✗ Ralat memadam laporan' : '✗ Error deleting report');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const handleViewReport = (report: Report) => {
+    // For now, just show a message. You can implement a modal or redirect to a detail page
+    toast.success(language === 'ms' ? `Membuka laporan: ${report.title}` : `Opening report: ${report.title}`);
+    // TODO: Implement report viewing logic
+  };
+
+  const handleDownloadReport = (report: Report) => {
+    if (report.fileUrl) {
+      window.open(report.fileUrl, '_blank');
+    } else {
+      toast.error(language === 'ms' ? 'Tiada fail untuk dimuat turun' : 'No file available for download');
+    }
+  };
 
   if (authLoading || !user) {
     return (
@@ -180,7 +270,7 @@ export default function ReportsPage() {
                   <p className="text-sm text-gray-600">
                     {language === 'ms' ? 'Jumlah Laporan' : 'Total Reports'}
                   </p>
-                  <p className="text-3xl font-bold text-gray-900">{mockReports.length}</p>
+                  <p className="text-3xl font-bold text-gray-900">{reports.length}</p>
                 </div>
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                   <FileText className="w-6 h-6 text-green-600" />
@@ -213,7 +303,7 @@ export default function ReportsPage() {
                     {language === 'ms' ? 'Analisis Tanah' : 'Soil Analysis'}
                   </p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {mockReports.filter(r => r.type === 'soil').length}
+                    {reports.filter(r => r.type === 'soil').length}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -231,7 +321,7 @@ export default function ReportsPage() {
                     {language === 'ms' ? 'Analisis Daun' : 'Leaf Analysis'}
                   </p>
                   <p className="text-3xl font-bold text-gray-900">
-                    {mockReports.filter(r => r.type === 'leaf').length}
+                    {reports.filter(r => r.type === 'leaf').length}
                   </p>
                 </div>
                 <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -329,16 +419,36 @@ export default function ReportsPage() {
                       </div>
 
                       <div className="flex items-center space-x-2 flex-shrink-0">
-                        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center space-x-1"
+                          onClick={() => handleViewReport(report)}
+                        >
                           <Eye className="w-4 h-4" />
                           <span className="hidden sm:inline">{language === 'ms' ? 'Lihat' : 'View'}</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="flex items-center space-x-1"
+                          onClick={() => handleDownloadReport(report)}
+                        >
                           <Download className="w-4 h-4" />
                           <span className="hidden sm:inline">{language === 'ms' ? 'Muat Turun' : 'Download'}</span>
                         </Button>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:bg-red-50">
-                          <Trash2 className="w-4 h-4" />
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => handleDeleteReport(report.id)}
+                          disabled={deletingId === report.id}
+                        >
+                          {deletingId === report.id ? (
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
                         </Button>
                       </div>
                     </div>

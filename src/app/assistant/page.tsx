@@ -4,12 +4,22 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { MessageSquare, ExternalLink, RefreshCw } from 'lucide-react';
+import { 
+  MessageSquare, 
+  ExternalLink, 
+  RefreshCw,
+  Maximize2,
+  Info,
+  Zap,
+  CheckCircle2,
+  Upload
+} from 'lucide-react';
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
-  const [loading, setLoading] = useState(true);
+  const [iframeKey, setIframeKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -22,25 +32,33 @@ export default function AssistantPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
+    } else if (user && (user.plan === 'none' || !user.plan)) {
+      router.push('/pricing');
     }
   }, [user, authLoading, router]);
 
   const language = currentLang;
+  const AGS_AI_URL = 'https://ags-ai-assistant.streamlit.app/?embedded=true';
 
   const handleRefresh = () => {
-    setLoading(true);
-    // Trigger iframe reload
-    const iframe = document.getElementById('ags-assistant-iframe') as HTMLIFrameElement;
+    setIsLoading(true);
+    setIframeKey(prev => prev + 1);
+  };
+
+  const handleFullscreen = () => {
+    const iframe = document.getElementById('ags-iframe');
     if (iframe) {
-      iframe.src = iframe.src;
+      if (iframe.requestFullscreen) {
+        iframe.requestFullscreen();
+      }
     }
   };
 
-  if (authLoading || !user) {
+  if (authLoading || !user || user.plan === 'none' || !user.plan) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">
             {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
           </p>
@@ -50,136 +68,217 @@ export default function AssistantPage() {
   }
 
   return (
-    <div className="h-full flex flex-col bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Enhanced Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="bg-gradient-to-r from-green-900 via-green-800 to-green-900 shadow-lg border-b-4 border-yellow-400"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
-                <MessageSquare className="w-6 h-6 text-white" />
-              </div>
+              <motion.div 
+                className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl flex items-center justify-center shadow-xl"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              >
+                <MessageSquare className="w-7 h-7 text-green-900" />
+              </motion.div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
                   {language === 'ms' ? 'Pembantu AI AGS' : 'AGS AI Assistant'}
+                  <Zap className="w-5 h-5 text-yellow-400" />
                 </h1>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-white/80 font-medium">
                   {language === 'ms' 
-                    ? 'Analisis laporan makmal anda dengan AI yang canggih' 
-                    : 'Analyze your lab reports with advanced AI'
+                    ? 'Analisis Laporan Makmal dengan AI' 
+                    : 'Lab Report Analysis with AI'
                   }
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <button
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={handleRefresh}
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
                 title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
               >
                 <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm font-medium">
+                <span className="hidden sm:inline text-sm">
                   {language === 'ms' ? 'Muat Semula' : 'Refresh'}
                 </span>
-              </button>
+              </motion.button>
 
-              <a
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleFullscreen}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
+                title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
+              >
+                <Maximize2 className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">
+                  {language === 'ms' ? 'Penuh' : 'Full'}
+                </span>
+              </motion.button>
+
+              <motion.a
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 href="https://ags-ai-assistant.streamlit.app/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200"
+                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-green-900 rounded-xl transition-all duration-200 font-bold shadow-lg"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm font-medium">
-                  {language === 'ms' ? 'Buka Tab Baharu' : 'Open in New Tab'}
+                <span className="hidden sm:inline text-sm">
+                  {language === 'ms' ? 'Buka' : 'Open'}
                 </span>
-              </a>
+              </motion.a>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Assistant Info Banner */}
-      <div className="bg-blue-50 border-b border-blue-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-start space-x-3">
-            <div className="flex-shrink-0">
-              <svg className="w-5 h-5 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm text-blue-800">
+      {/* Quick Guide Banner */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.2 }}
+        className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <Info className="w-5 h-5 text-blue-200 flex-shrink-0" />
+              <p className="text-sm font-semibold">
                 {language === 'ms' 
-                  ? '💡 Muat naik laporan makmal tanah atau daun anda dalam format PDF untuk mendapatkan analisis dan cadangan AI yang terperinci.'
-                  : '💡 Upload your soil or leaf lab reports in PDF format to get detailed AI analysis and recommendations.'
+                  ? '💡 Panduan Pantas: Muat naik PDF laporan makmal → Tunggu 30 saat → Dapatkan analisis terperinci!'
+                  : '💡 Quick Guide: Upload lab report PDF → Wait 30 seconds → Get detailed analysis!'
                 }
               </p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Embedded AI Assistant */}
-      <div className="flex-1 relative">
-        {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-gray-600 font-medium">
-                {language === 'ms' ? 'Memuatkan Pembantu AI...' : 'Loading AI Assistant...'}
-              </p>
+            <div className="flex items-center gap-2 text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
+              <CheckCircle2 className="w-4 h-4" />
+              <span>{language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified'}</span>
             </div>
           </div>
+        </div>
+      </motion.div>
+
+      {/* AI Assistant Embedded */}
+      <div className="flex-1 relative overflow-hidden">
+        {isLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 z-10"
+          >
+            <div className="text-center space-y-4">
+              <motion.div
+                animate={{ 
+                  rotate: 360,
+                  scale: [1, 1.1, 1]
+                }}
+                transition={{ 
+                  rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+                  scale: { duration: 1, repeat: Infinity, ease: "easeInOut" }
+                }}
+                className="w-20 h-20 border-4 border-green-600 border-t-transparent rounded-full mx-auto"
+              />
+              <div>
+                <p className="text-xl font-bold text-gray-800 mb-2">
+                  {language === 'ms' ? 'Memuatkan Pembantu AI...' : 'Loading AI Assistant...'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  {language === 'ms' ? 'Sila tunggu sebentar' : 'Please wait a moment'}
+                </p>
+              </div>
+              <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
+                <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
+                <span>{language === 'ms' ? 'Menyambung ke pelayan AI' : 'Connecting to AI server'}</span>
+              </div>
+            </div>
+          </motion.div>
         )}
         
         <iframe
-          id="ags-assistant-iframe"
-          src="https://ags-ai-assistant.streamlit.app/"
+          key={iframeKey}
+          id="ags-iframe"
+          src={AGS_AI_URL}
           className="w-full h-full border-0"
           title="AGS AI Assistant"
-          onLoad={() => setLoading(false)}
-          allow="camera; microphone; clipboard-read; clipboard-write"
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+          onLoad={() => setIsLoading(false)}
+          allow="camera; microphone; clipboard-read; clipboard-write; accelerometer; gyroscope"
+          referrerPolicy="no-referrer-when-downgrade"
+          style={{ 
+            width: '100%', 
+            height: '100%',
+            border: 'none',
+            overflow: 'hidden'
+          }}
         />
       </div>
 
-      {/* Footer Tips */}
-      <div className="bg-white border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600 font-bold">1.</span>
-              <p className="text-gray-600">
-                {language === 'ms' 
-                  ? 'Muat naik fail PDF laporan makmal anda'
-                  : 'Upload your lab report PDF file'
-                }
-              </p>
+      {/* Bottom Tips Bar */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="bg-white border-t-2 border-gray-200 shadow-lg"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                1
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">
+                  {language === 'ms' ? 'Muat Naik' : 'Upload'}
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {language === 'ms' ? 'Fail PDF laporan makmal' : 'Lab report PDF file'}
+                </p>
+              </div>
             </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600 font-bold">2.</span>
-              <p className="text-gray-600">
-                {language === 'ms' 
-                  ? 'Tunggu AI menganalisis laporan (30 saat)'
-                  : 'Wait for AI to analyze report (30 seconds)'
-                }
-              </p>
+            
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                2
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">
+                  {language === 'ms' ? 'Analisis' : 'Analyze'}
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {language === 'ms' ? 'AI proses ~30 saat' : 'AI processes ~30 seconds'}
+                </p>
+              </div>
             </div>
-            <div className="flex items-start space-x-2">
-              <span className="text-green-600 font-bold">3.</span>
-              <p className="text-gray-600">
-                {language === 'ms' 
-                  ? 'Dapatkan cadangan baja dan tindakan'
-                  : 'Get fertilizer recommendations and actions'
-                }
-              </p>
+            
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
+                3
+              </div>
+              <div>
+                <p className="font-bold text-gray-900">
+                  {language === 'ms' ? 'Cadangan' : 'Recommendations'}
+                </p>
+                <p className="text-gray-600 text-xs">
+                  {language === 'ms' ? 'Dapatkan cadangan baja' : 'Get fertilizer advice'}
+                </p>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
-

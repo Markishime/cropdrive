@@ -49,24 +49,24 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     <Link href={href} onClick={onClick}>
       <motion.div
         whileHover={{ x: isCollapsed ? 0 : 4 }}
-        className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer ${
-          isActive
-            ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-lg'
-            : 'text-gray-700 hover:bg-gray-100'
-        }`}
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl transition-all duration-200 group cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg font-bold'
+                  : 'text-white/80 hover:bg-white/10 hover:text-white'
+              }`}
         title={isCollapsed ? (language === 'ms' ? labelMs : label) : undefined}
       >
-        <div className={`${isActive ? 'text-white' : 'text-gray-600 group-hover:text-green-600'}`}>
-          {icon}
-        </div>
-        {!isCollapsed && (
-          <>
-            <span className={`font-semibold text-sm ${isActive ? 'text-white' : 'text-gray-700'}`}>
-              {language === 'ms' ? labelMs : label}
-            </span>
-            {isActive && (
-              <ChevronRight className="ml-auto w-4 h-4 text-white" />
-            )}
+              <div className={`${isActive ? 'text-green-900' : 'text-white/80 group-hover:text-white'}`}>
+                {icon}
+              </div>
+              {!isCollapsed && (
+                <>
+                  <span className={`font-semibold text-sm ${isActive ? 'text-green-900' : 'text-white/90'}`}>
+                    {language === 'ms' ? labelMs : label}
+                  </span>
+                  {isActive && (
+                    <ChevronRight className="ml-auto w-4 h-4 text-green-900" />
+                  )}
           </>
         )}
       </motion.div>
@@ -116,55 +116,72 @@ export const Sidebar: React.FC = () => {
     }
   };
 
+  // Dynamic sidebar items based on user's plan
+  const hasPlan = user && user.plan && user.plan !== 'none';
+  
   const sidebarItems = [
     {
       href: '/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
       label: 'Dashboard',
-      labelMs: 'Papan Pemuka'
+      labelMs: 'Papan Pemuka',
+      showAlways: true
     },
     {
       href: '/assistant',
       icon: <MessageSquare className="w-5 h-5" />,
       label: 'AI Assistant',
-      labelMs: 'Pembantu AI'
+      labelMs: 'Pembantu AI',
+      showAlways: false,
+      requiresPlan: true
     },
     {
       href: '/reports',
       icon: <FileText className="w-5 h-5" />,
       label: 'Reports History',
-      labelMs: 'Sejarah Laporan'
+      labelMs: 'Sejarah Laporan',
+      showAlways: false,
+      requiresPlan: true
     },
     {
-      href: '/profile',
-      icon: <User className="w-5 h-5" />,
-      label: 'Profile',
-      labelMs: 'Profil'
+      href: '/payment-method',
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+      </svg>,
+      label: 'Payment Method',
+      labelMs: 'Kaedah Bayaran',
+      showAlways: false,
+      requiresPlan: true
     },
     {
       href: '/tutorials',
       icon: <BookOpen className="w-5 h-5" />,
       label: 'Tutorials',
-      labelMs: 'Tutorial'
+      labelMs: 'Tutorial',
+      showAlways: true
     },
     {
       href: '/pricing',
-      icon: <FileText className="w-5 h-5" />,
+      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+      </svg>,
       label: 'Plans & Pricing',
-      labelMs: 'Pelan & Harga'
+      labelMs: 'Pelan & Harga',
+      showAlways: true
     },
     {
       href: '/contact',
       icon: <HelpCircle className="w-5 h-5" />,
       label: 'Support',
-      labelMs: 'Sokongan'
+      labelMs: 'Sokongan',
+      showAlways: true
     }
-  ];
+  ].filter(item => item.showAlways || (item.requiresPlan && hasPlan));
 
   const SidebarContent = () => (
     <div className="h-full flex flex-col">
-      {/* Logo & Collapse Button */}
-      <div className="p-6 border-b border-gray-200">
+            {/* Logo & Collapse Button */}
+            <div className="p-6 border-b border-green-700/50">
         <div className="flex items-center justify-between">
           {!isCollapsed && (
             <Link href="/dashboard" className="flex items-center space-x-3 group">
@@ -185,54 +202,54 @@ export const Sidebar: React.FC = () => {
                   <circle cx="23" cy="24" r="1.2" fill="currentColor" opacity="0.7"/>
                 </svg>
               </div>
-              <div className="flex flex-col">
-                <div className="flex items-start leading-tight">
-                  <span className="font-black text-lg text-gray-900 font-heading">
-                    CropDrive
-                  </span>
-                  <sup className="text-xs font-black ml-0.5 text-yellow-500">™</sup>
+                <div className="flex flex-col">
+                  <div className="flex items-start leading-tight">
+                    <span className="font-black text-lg text-white font-heading">
+                      CropDrive
+                    </span>
+                    <sup className="text-xs font-black ml-0.5 text-yellow-400">™</sup>
+                  </div>
+                  <span className="text-xs text-white/70 font-medium">OP Advisor</span>
                 </div>
-                <span className="text-xs text-gray-500 font-medium">OP Advisor</span>
-              </div>
             </Link>
           )}
           <button
             onClick={toggleCollapsed}
-            className={`p-2 rounded-lg hover:bg-gray-100 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
+            className={`p-2 rounded-lg hover:bg-white/10 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
             title={isCollapsed ? (language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'ms' ? 'Runtuhkan' : 'Collapse')}
           >
             {isCollapsed ? (
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-5 h-5 text-white/80" />
             ) : (
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-5 h-5 text-white/80" />
             )}
           </button>
         </div>
       </div>
 
-      {/* User Profile */}
-      {user && !isCollapsed && (
-        <div className="p-6 border-b border-gray-200">
+            {/* User Profile */}
+            {user && !isCollapsed && (
+              <div className="p-6 border-b border-green-700/50">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center text-white font-bold text-lg">
-              {user.displayName?.charAt(0).toUpperCase() || 'U'}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-gray-900 truncate">{user.displayName}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-            </div>
+                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-green-900 font-bold text-lg shadow-lg">
+                  {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-semibold text-white truncate">{user.displayName}</p>
+                  <p className="text-xs text-white/70 truncate">{user.email}</p>
+                </div>
           </div>
         </div>
       )}
       
-      {/* User Avatar (Collapsed) */}
-      {user && isCollapsed && (
-        <div className="p-4 border-b border-gray-200 flex justify-center">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center text-white font-bold text-sm">
-            {user.displayName?.charAt(0).toUpperCase() || 'U'}
-          </div>
-        </div>
-      )}
+            {/* User Avatar (Collapsed) */}
+            {user && isCollapsed && (
+              <div className="p-4 border-b border-green-700/50 flex justify-center">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center text-green-900 font-bold text-sm shadow-lg">
+                  {user.displayName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+              </div>
+            )}
 
       {/* Navigation Items */}
       <nav className={`flex-1 ${isCollapsed ? 'p-2' : 'p-4'} space-y-2 overflow-y-auto`}>
@@ -248,15 +265,15 @@ export const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-      {/* Bottom Actions */}
-      <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-t border-gray-200 space-y-2`}>
+            {/* Bottom Actions */}
+            <div className={`${isCollapsed ? 'p-2' : 'p-4'} border-t border-green-700/50 space-y-2`}>
         {/* Language Switcher */}
         <button
           onClick={toggleLanguage}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-all duration-200 w-full`}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200 w-full`}
           title={isCollapsed ? (language === 'ms' ? 'English' : 'Bahasa Malaysia') : undefined}
         >
-          <Globe className="w-5 h-5 text-gray-600" />
+          <Globe className="w-5 h-5" />
           {!isCollapsed && (
             <span className="font-semibold text-sm">
               {language === 'ms' ? 'English' : 'Bahasa Malaysia'}
@@ -264,14 +281,30 @@ export const Sidebar: React.FC = () => {
           )}
         </button>
 
+        {/* Profile */}
+        <Link href="/profile">
+          <button
+            onClick={() => setIsOpen(false)}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200 w-full`}
+            title={isCollapsed ? (language === 'ms' ? 'Profil' : 'Profile') : undefined}
+          >
+            <User className="w-5 h-5" />
+            {!isCollapsed && (
+              <span className="font-semibold text-sm">
+                {language === 'ms' ? 'Profil' : 'Profile'}
+              </span>
+            )}
+          </button>
+        </Link>
+
         {/* Settings */}
         <Link href="/settings">
           <button
             onClick={() => setIsOpen(false)}
-            className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-gray-700 hover:bg-gray-100 transition-all duration-200 w-full`}
+            className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-white/80 hover:bg-white/10 hover:text-white transition-all duration-200 w-full`}
             title={isCollapsed ? (language === 'ms' ? 'Tetapan' : 'Settings') : undefined}
           >
-            <Settings className="w-5 h-5 text-gray-600" />
+            <Settings className="w-5 h-5" />
             {!isCollapsed && (
               <span className="font-semibold text-sm">
                 {language === 'ms' ? 'Tetapan' : 'Settings'}
@@ -283,7 +316,7 @@ export const Sidebar: React.FC = () => {
         {/* Logout */}
         <button
           onClick={handleSignOut}
-          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-red-600 hover:bg-red-50 transition-all duration-200 w-full`}
+          className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} px-4 py-3 rounded-xl text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all duration-200 w-full`}
           title={isCollapsed ? (language === 'ms' ? 'Log Keluar' : 'Logout') : undefined}
         >
           <LogOut className="w-5 h-5" />
@@ -311,12 +344,12 @@ export const Sidebar: React.FC = () => {
         )}
       </button>
 
-      {/* Desktop Sidebar */}
+      {/* Desktop Sidebar - Solid Green Background */}
       <aside className="hidden lg:flex lg:flex-shrink-0">
         <motion.div
           animate={{ width: isCollapsed ? 80 : 288 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="bg-white border-r border-gray-200 shadow-sm"
+          className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 border-r border-green-700 shadow-2xl"
         >
           <SidebarContent />
         </motion.div>
