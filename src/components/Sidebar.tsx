@@ -127,6 +127,7 @@ export const Sidebar: React.FC = () => {
       labelMs: 'Papan Pemuka',
       showAlways: true
     },
+    // AI Assistant - only for users with plans
     {
       href: '/assistant',
       icon: <MessageSquare className="w-5 h-5" />,
@@ -135,6 +136,7 @@ export const Sidebar: React.FC = () => {
       showAlways: false,
       requiresPlan: true
     },
+    // Reports - only for users with plans
     {
       href: '/reports',
       icon: <FileText className="w-5 h-5" />,
@@ -143,6 +145,7 @@ export const Sidebar: React.FC = () => {
       showAlways: false,
       requiresPlan: true
     },
+    // Payment Method - only for users with plans
     {
       href: '/payment-method',
       icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -15,28 +15,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
 
-  // Pages that should never show sidebar (even when logged in) - only show page content
+  // Pages that should never show any layout (login/register/forgot-password)
   const noLayoutPages = ['/login', '/register', '/forgot-password'];
   const shouldHideLayout = noLayoutPages.includes(pathname);
-
-  // Public pages that should always show Navbar/Footer (never sidebar)
-  const publicPages = [
-    '/',
-    '/about',
-    '/features',
-    '/how-it-works',
-    '/pricing',
-    '/contact',
-    '/reviews',
-    '/tutorials',
-    '/accessibility',
-    '/privacy',
-    '/terms',
-    '/consumer-info',
-    '/get-started/farmers',
-    '/get-started/organizations'
-  ];
-  const isPublicPage = publicPages.includes(pathname);
 
   // Show loading state
   if (loading) {
@@ -55,20 +36,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <>{children}</>;
   }
 
-  // For public pages - always show Navbar/Footer, never sidebar
-  if (isPublicPage) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <Navbar />
-        <main className="flex-1">
-          {children}
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Show Sidebar for logged-in users on authenticated pages (dashboard, assistant, reports, etc.)
+  // If user is logged in - ALWAYS show Sidebar (never navbar)
   if (user) {
     return (
       <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -82,7 +50,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     );
   }
 
-  // Fallback: Show Navbar for any other logged-out user scenario
+  // If user is NOT logged in - show Navbar + Footer
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
