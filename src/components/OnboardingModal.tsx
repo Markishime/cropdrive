@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/i18n';
 import Button from './ui/Button';
 import Card from './ui/Card';
@@ -74,6 +75,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
   currentUser,
   language: propLanguage,
 }) => {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [completed, setCompleted] = useState(false);
   const { language: contextLanguage } = useTranslation();
@@ -105,13 +107,12 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     // Mark onboarding as completed in localStorage
     localStorage.setItem('cropdrive-onboarding-completed', 'true');
 
-    // Close modal after a delay and trigger completion callback
+    // Redirect to landing page after a delay
     setTimeout(() => {
       if (onComplete) {
         onComplete();
-      } else if (onClose) {
-        onClose();
       }
+      router.push('/');
     }, 2000);
   };
 
@@ -119,9 +120,8 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     localStorage.setItem('cropdrive-onboarding-completed', 'true');
     if (onComplete) {
       onComplete();
-    } else if (onClose) {
-      onClose();
     }
+    router.push('/');
   };
 
   if (!isOpen) return null;
@@ -308,10 +308,10 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </p>
 
                 <button
-                  onClick={onClose}
+                  onClick={() => router.push('/')}
                   className="bg-yellow-400 text-green-900 px-8 py-4 uppercase tracking-wider text-lg font-bold hover:bg-yellow-300 transition-all duration-200"
                 >
-                  {language === 'ms' ? 'Pergi ke Dashboard' : 'Go to Dashboard'}
+                  {language === 'ms' ? 'Pergi ke Laman Utama' : 'Go to Home'}
                 </button>
               </div>
             )}
