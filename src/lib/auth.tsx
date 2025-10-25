@@ -217,11 +217,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Listen to auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('Auth state changed:', firebaseUser ? `User logged in: ${firebaseUser.email}` : 'No user');
+      
       if (firebaseUser) {
         const convertedUser = await convertFirebaseUser(firebaseUser);
         setUser(convertedUser);
+        console.log('User data loaded:', convertedUser?.email);
       } else {
         setUser(null);
+        console.log('User set to null');
       }
       setLoading(false);
     });
