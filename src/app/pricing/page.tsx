@@ -142,19 +142,54 @@ export default function PricingPage() {
               transition={{ duration: 0.6 }}
               className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
             >
-              {language === 'ms' ? 'Harga Telus' : 'Transparent Pricing'}
+              {language === 'ms' ? '🌾 Untuk Pekebun Kecil' : '🌾 For Small Farmers'}
             </motion.span>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-4 leading-tight">
               {language === 'ms' ? 'PILIH' : 'CHOOSE'} <span className="text-yellow-400">{language === 'ms' ? 'PELAN' : 'PLAN'}</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg text-white/80 mb-6 font-semibold">
+              {language === 'ms' ? '< 100 Hektar • Harga Tetap • Mula dalam 5 Minit' : '< 100 Hectares • Fixed Prices • Start in 5 Minutes'}
+            </p>
+
+            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
-                ? 'Harga telus tanpa yuran tersembunyi. Pilih pelan yang sesuai dengan keperluan ladang anda.'
-                : 'Transparent pricing with no hidden fees. Choose the plan that fits your farm needs.'
+                ? 'Harga telus tanpa yuran tersembunyi. Beli sekarang dan dapatkan akses segera!'
+                : 'Transparent pricing with no hidden fees. Buy now and get instant access!'
               }
             </p>
+
+            {/* Organizations Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="max-w-2xl mx-auto bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border-2 border-white/20 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8"
+            >
+              <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
+                <div className="text-center md:text-left flex-1">
+                  <h3 className="text-white font-bold text-base sm:text-lg mb-1">
+                    {language === 'ms' ? '🏢 Organisasi (> 100 Hektar)?' : '🏢 Organizations (> 100 Hectares)?'}
+                  </h3>
+                  <p className="text-white/70 text-xs sm:text-sm">
+                    {language === 'ms' 
+                      ? 'Dapatkan harga tersuai dan sokongan dedikasi'
+                      : 'Get custom pricing and dedicated support'
+                    }
+                  </p>
+                </div>
+                <Link href="/contact">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full md:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-green-900 rounded-full font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation whitespace-nowrap"
+                  >
+                    {language === 'ms' ? 'Hubungi Kami' : 'Contact Us'}
+                  </motion.button>
+                </Link>
+              </div>
+            </motion.div>
 
             {/* Billing Toggle */}
             <div className="inline-flex items-center justify-center space-x-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">

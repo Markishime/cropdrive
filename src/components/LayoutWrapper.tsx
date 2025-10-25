@@ -36,7 +36,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <>{children}</>;
   }
 
-  // Show Sidebar for logged-in users
+  // Show Sidebar for logged-in users (no footer)
   if (user) {
     return (
       <div className="flex h-screen overflow-hidden bg-gray-50">
@@ -45,7 +45,6 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
           <main className="flex-1 overflow-y-auto">
             {children}
           </main>
-          <Footer />
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
@@ -58,15 +59,60 @@ export default function ContactUsPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
+            <motion.span
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+            >
+              {language === 'ms' ? '🏢 Untuk Organisasi & Penyelesaian Tersuai' : '🏢 For Organizations & Custom Solutions'}
+            </motion.span>
+
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight font-heading">
+              {language === 'ms' ? 'Tempah' : 'Book'} <span className="text-yellow-400">{language === 'ms' ? 'Demo' : 'A Demo'}</span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+
+            <p className="text-lg text-white/80 mb-6 font-semibold">
+              {language === 'ms' ? '> 100 Hektar • Harga Tersuai • Sokongan Dedikasi' : '> 100 Hectares • Custom Pricing • Dedicated Support'}
+            </p>
+
+            <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed mb-8">
               {language === 'ms'
-                ? 'Kami sedia membantu anda dengan sebarang pertanyaan atau keperluan sokongan'
-                : 'We\'re here to help you with any questions or support needs'
+                ? 'Dapatkan penyelesaian tersuai untuk organisasi anda. Pasukan kami sedia membantu!'
+                : 'Get custom solutions tailored for your organization. Our team is ready to help!'
               }
             </p>
+
+            {/* Small Farmers Banner */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.3 }}
+              className="max-w-2xl mx-auto bg-gradient-to-r from-yellow-400/20 to-yellow-500/10 backdrop-blur-sm border-2 border-yellow-400/30 rounded-xl sm:rounded-2xl p-4 sm:p-6"
+            >
+              <div className="flex flex-col md:flex-row items-center justify-between space-y-3 md:space-y-0 md:space-x-4">
+                <div className="text-center md:text-left flex-1">
+                  <h3 className="text-white font-bold text-base sm:text-lg mb-1">
+                    {language === 'ms' ? '🌾 Pekebun Kecil (< 100 Hektar)?' : '🌾 Small Farmers (< 100 Hectares)?'}
+                  </h3>
+                  <p className="text-white/70 text-xs sm:text-sm">
+                    {language === 'ms' 
+                      ? 'Beli terus dengan harga tetap'
+                      : 'Buy directly with fixed prices'
+                    }
+                  </p>
+                </div>
+                <Link href="/pricing">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full md:w-auto px-5 sm:px-6 py-2.5 sm:py-3 bg-yellow-400 text-green-900 rounded-full font-bold text-sm sm:text-base shadow-xl hover:shadow-2xl transition-all duration-300 touch-manipulation whitespace-nowrap"
+                  >
+                    {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+                  </motion.button>
+                </Link>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

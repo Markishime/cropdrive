@@ -246,30 +246,104 @@ export default function HomePage() {
               />
             </motion.h1>
 
-            {/* CTA Buttons */}
+            {/* Two Client Types - Clear Division */}
             <motion.div
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+              transition={{ duration: 1.2, delay: 0.8 }}
+              className="max-w-5xl mx-auto mt-6 sm:mt-8 px-4 sm:px-0"
             >
-              <Link href="/features">
-                <button className="group relative inline-flex items-center justify-center px-10 py-5 text-green-900 text-lg font-black tracking-wider uppercase bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 rounded-full shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105">
-                  <span className="relative z-10">
-                    {language === 'ms' ? 'Terokai Sekarang' : 'Explore Now'}
-                  </span>
-                  <svg className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-              </Link>
-              <Link href="/how-it-works">
-                <button className="group relative inline-flex items-center justify-center px-10 py-5 text-white text-lg font-bold tracking-wider uppercase border-2 border-white/80 hover:border-yellow-400 hover:bg-yellow-400/10 transition-all duration-300 rounded-full backdrop-blur-sm">
-                  <span className="relative z-10">
-                    {language === 'ms' ? 'Lihat Bagaimana' : 'See How It Works'}
-                  </span>
-                </button>
-              </Link>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+                {/* Small Farmers - Buy Now */}
+                <motion.div
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  className="bg-gradient-to-br from-yellow-400/95 to-yellow-500/95 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border-2 sm:border-4 border-yellow-300/50"
+                >
+                  <div className="text-center">
+                    {/* Palm Oil Fruit Bunch Icon */}
+                    <div className="mb-3 sm:mb-4 mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-green-900/20 rounded-full flex items-center justify-center">
+                      <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-900" viewBox="0 0 64 64" fill="currentColor">
+                        <circle cx="32" cy="28" r="10" opacity="0.9"/>
+                        <circle cx="26" cy="34" r="8" opacity="0.8"/>
+                        <circle cx="38" cy="34" r="8" opacity="0.8"/>
+                        <circle cx="32" cy="40" r="7" opacity="0.7"/>
+                        <circle cx="22" cy="28" r="7" opacity="0.7"/>
+                        <circle cx="42" cy="28" r="7" opacity="0.7"/>
+                        <rect x="30" y="42" width="4" height="12" rx="2" opacity="0.9"/>
+                      </svg>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-green-900 mb-2 sm:mb-3 uppercase tracking-tight">
+                      {language === 'ms' ? 'Pekebun Kecil' : 'Small Farmers'}
+                    </h3>
+                    <p className="text-green-900/80 font-semibold mb-2 text-xs sm:text-sm">
+                      {language === 'ms' ? '< 100 Hektar' : '< 100 Hectares'}
+                    </p>
+                    <p className="text-green-900/70 mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed px-2">
+                      {language === 'ms' 
+                        ? 'Akses segera kepada analisis AI. Beli pelan & mula hari ini!'
+                        : 'Instant access to AI analysis. Buy a plan & start today!'
+                      }
+                    </p>
+                    <Link href="/pricing">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300 touch-manipulation"
+                      >
+                        {language === 'ms' ? '🛒 Beli Sekarang' : '🛒 Buy Now'}
+                      </motion.button>
+                    </Link>
+                    <p className="mt-3 sm:mt-4 text-xs text-green-900/60 font-medium">
+                      {language === 'ms' ? 'Harga tetap • Mulakan dalam 5 minit' : 'Fixed prices • Start in 5 minutes'}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* Organizations - Custom Solutions */}
+                <motion.div
+                  whileHover={{ scale: 1.03, y: -5 }}
+                  className="bg-gradient-to-br from-white/95 to-gray-50/95 backdrop-blur-lg rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-2xl border-2 sm:border-4 border-white/50"
+                >
+                  <div className="text-center">
+                    {/* Plantation/Factory Icon */}
+                    <div className="mb-3 sm:mb-4 mx-auto w-16 h-16 sm:w-20 sm:h-20 bg-green-600/10 rounded-full flex items-center justify-center">
+                      <svg className="w-10 h-10 sm:w-12 sm:h-12 text-green-700" viewBox="0 0 64 64" fill="currentColor">
+                        <rect x="10" y="35" width="12" height="20" opacity="0.8"/>
+                        <rect x="26" y="30" width="12" height="25" opacity="0.9"/>
+                        <rect x="42" y="25" width="12" height="30" opacity="0.8"/>
+                        <rect x="8" y="55" width="48" height="4" opacity="0.7"/>
+                        <path d="M10 35 L16 15 L22 35" opacity="0.6"/>
+                        <path d="M26 30 L32 10 L38 30" opacity="0.7"/>
+                        <path d="M42 25 L48 8 L54 25" opacity="0.6"/>
+                      </svg>
+                    </div>
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-black text-gray-900 mb-2 sm:mb-3 uppercase tracking-tight">
+                      {language === 'ms' ? 'Organisasi' : 'Organizations'}
+                    </h3>
+                    <p className="text-gray-700 font-semibold mb-2 text-xs sm:text-sm">
+                      {language === 'ms' ? '> 100 Hektar' : '> 100 Hectares'}
+                    </p>
+                    <p className="text-gray-600 mb-4 sm:mb-6 text-xs sm:text-sm leading-relaxed px-2">
+                      {language === 'ms' 
+                        ? 'Penyelesaian tersuai & harga khas. Hubungi kami untuk demo.'
+                        : 'Custom solutions & special pricing. Contact us for a demo.'
+                      }
+                    </p>
+                    <Link href="/contact">
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 touch-manipulation"
+                      >
+                        {language === 'ms' ? '📅 Tempah Temu Janji' : '📅 Book Appointment'}
+                      </motion.button>
+                    </Link>
+                    <p className="mt-3 sm:mt-4 text-xs text-gray-500 font-medium">
+                      {language === 'ms' ? 'Harga tersuai • Sokongan dedikasi' : 'Custom pricing • Dedicated support'}
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </div>
@@ -362,6 +436,205 @@ export default function HomePage() {
           <p className="text-white/60 text-xs text-center">
             © 2025 CROPDRIVE OP ADVISOR™. {language === 'ms' ? 'TANDA DAGANGAN DAN JENAMA ADALAH HAK MILIK PEMILIKNYA' : 'TRADEMARKS AND BRANDS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS'}
           </p>
+        </div>
+      </section>
+
+      {/* Who We Serve Section - Two Client Types */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-10 sm:mb-12 lg:mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-3 sm:mb-4 font-heading tracking-tight">
+              {language === 'ms' ? 'Siapa Yang Kami Khidmat?' : 'Who Do We Serve?'}
+            </h2>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4">
+              {language === 'ms' 
+                ? 'Penyelesaian disesuaikan untuk setiap jenis pelanggan'
+                : 'Tailored solutions for every type of customer'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12">
+            {/* Small Farmers Card */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              {/* Palm Fruit Icon */}
+              <div className="mb-4 sm:mb-6 w-20 h-20 sm:w-24 sm:h-24 bg-yellow-400 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-12 h-12 sm:w-14 sm:h-14 text-green-900" viewBox="0 0 64 64" fill="currentColor">
+                  <circle cx="32" cy="28" r="10" opacity="0.9"/>
+                  <circle cx="26" cy="34" r="8" opacity="0.8"/>
+                  <circle cx="38" cy="34" r="8" opacity="0.8"/>
+                  <circle cx="32" cy="40" r="7" opacity="0.7"/>
+                  <circle cx="22" cy="28" r="7" opacity="0.7"/>
+                  <circle cx="42" cy="28" r="7" opacity="0.7"/>
+                  <rect x="30" y="42" width="4" height="12" rx="2" opacity="0.9"/>
+                </svg>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-black text-green-900 mb-3 sm:mb-4 text-center">
+                {language === 'ms' ? 'Pekebun Kecil' : 'Small Farmers'}
+              </h3>
+
+              <p className="text-base sm:text-lg text-green-900/80 font-semibold mb-4 sm:mb-6 text-center">
+                {language === 'ms' ? '< 100 Hektar' : '< 100 Hectares'}
+              </p>
+
+              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '✅ Harga tetap & telus - Tiada kejutan'
+                      : '✅ Fixed & transparent prices - No surprises'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '⚡ Akses segera - Mula dalam 5 minit'
+                      : '⚡ Instant access - Start in 5 minutes'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '📱 Platform mudah guna - Tiada latihan diperlukan'
+                      : '📱 Easy-to-use platform - No training needed'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '🤖 Analisis AI dalam 30 saat'
+                      : '🤖 AI analysis in 30 seconds'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              <Link href="/pricing">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300 touch-manipulation"
+                >
+                  {language === 'ms' ? '🛒 Beli Sekarang' : '🛒 Buy Now'}
+                </motion.button>
+              </Link>
+            </motion.div>
+
+            {/* Organizations Card */}
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
+            >
+              {/* Plantation Icon */}
+              <div className="mb-4 sm:mb-6 w-20 h-20 sm:w-24 sm:h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto">
+                <svg className="w-12 h-12 sm:w-14 sm:h-14 text-white" viewBox="0 0 64 64" fill="currentColor">
+                  <rect x="10" y="35" width="12" height="20" opacity="0.8"/>
+                  <rect x="26" y="30" width="12" height="25" opacity="0.9"/>
+                  <rect x="42" y="25" width="12" height="30" opacity="0.8"/>
+                  <rect x="8" y="55" width="48" height="4" opacity="0.7"/>
+                  <path d="M10 35 L16 15 L22 35" opacity="0.6"/>
+                  <path d="M26 30 L32 10 L38 30" opacity="0.7"/>
+                  <path d="M42 25 L48 8 L54 25" opacity="0.6"/>
+                </svg>
+              </div>
+
+              <h3 className="text-2xl sm:text-3xl font-black text-green-900 mb-3 sm:mb-4 text-center">
+                {language === 'ms' ? 'Organisasi' : 'Organizations'}
+              </h3>
+
+              <p className="text-base sm:text-lg text-green-900/80 font-semibold mb-4 sm:mb-6 text-center">
+                {language === 'ms' ? '> 100 Hektar' : '> 100 Hectares'}
+              </p>
+
+              <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '💼 Penyelesaian tersuai untuk organisasi besar'
+                      : '💼 Custom solutions for large organizations'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '💰 Harga khas berdasarkan volum'
+                      : '💰 Special volume-based pricing'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '👨‍💼 Pengurus akaun dedikasi'
+                      : '👨‍💼 Dedicated account manager'
+                    }
+                  </p>
+                </div>
+                <div className="flex items-start space-x-2 sm:space-x-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <p className="text-sm sm:text-base text-gray-800">
+                    {language === 'ms' 
+                      ? '📊 Integrasi API & laporan tersuai'
+                      : '📊 API integration & custom reports'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              <Link href="/contact">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 touch-manipulation"
+                >
+                  {language === 'ms' ? '📅 Tempah Demo' : '📅 Book A Demo'}
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
         </div>
       </section>
 
