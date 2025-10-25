@@ -58,7 +58,7 @@ export default function HomePage() {
       {/* Hero Section - Full Screen with Image Carousel Background */}
       <section className="relative h-screen overflow-hidden">
         {/* Background Video with Overlay */}
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-green-900">
           {/* Single Video */}
           <div className="absolute inset-0">
             <video
@@ -68,8 +68,10 @@ export default function HomePage() {
               loop
               className="w-full h-full object-cover"
               preload="auto"
+              poster="https://images.unsplash.com/photo-1595587637401-f8f5e7944a78?w=1920&h=1080&fit=crop"
             >
               <source src="/videos/12814183_1920_1080_30fps.mp4" type="video/mp4" />
+              Your browser does not support the video tag.
             </video>
           </div>
           {/* Lighter overlay to make videos more visible */}
