@@ -1,15 +1,19 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n';
+import { useAuth } from '@/lib/auth';
 import Card, { CardContent } from '@/components/ui/Card';
-import { Play, BookOpen, Video, Image, CheckCircle2, Download, ExternalLink } from 'lucide-react';
+import { Play, BookOpen, Video, Image, CheckCircle2, Download, ExternalLink, Lock, Crown, Zap } from 'lucide-react';
 
 export default function TutorialsPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [activeVideo, setActiveVideo] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
@@ -29,6 +33,7 @@ export default function TutorialsPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
+  const hasPlan = user && user.plan && user.plan !== 'none';
 
   const videoTutorials = [
     {
@@ -221,6 +226,82 @@ export default function TutorialsPage() {
             }
           </p>
         </motion.div>
+
+        {/* Premium Upgrade Banner - Only shown to logged-in users without plans */}
+        {user && !hasPlan && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-12"
+          >
+            <Card className="bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 border-2 border-yellow-300 shadow-xl overflow-hidden">
+              <CardContent className="p-8 relative">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32"></div>
+                <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-orange-300/20 to-transparent rounded-full blur-3xl -ml-32 -mb-32"></div>
+                
+                <div className="relative z-10">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex-1 text-center md:text-left">
+                      <div className="flex items-center justify-center md:justify-start space-x-2 mb-3">
+                        <Crown className="w-6 h-6 text-yellow-600" />
+                        <span className="text-yellow-700 font-bold text-sm uppercase tracking-wide">
+                          {language === 'ms' ? 'Tingkatkan Akaun Anda' : 'Upgrade Your Account'}
+                        </span>
+                      </div>
+                      <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                        {language === 'ms' 
+                          ? '🚀 Buka Kuasa Penuh AI untuk Ladang Anda' 
+                          : '🚀 Unlock Full AI Power for Your Farm'
+                        }
+                      </h3>
+                      <p className="text-gray-700 text-lg mb-4">
+                        {language === 'ms'
+                          ? 'Dapatkan analisis tanah AI, cadangan baja pintar, dan banyak lagi!'
+                          : 'Get AI soil analysis, smart fertilizer recommendations, and much more!'
+                        }
+                      </p>
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
+                        <div className="flex items-center space-x-2 text-green-700">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {language === 'ms' ? 'Analisis 1-2 minit' : '1-2 min analysis'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-green-700">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {language === 'ms' ? 'Laporan terperinci' : 'Detailed reports'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2 text-green-700">
+                          <CheckCircle2 className="w-5 h-5" />
+                          <span className="font-semibold">
+                            {language === 'ms' ? 'Sokongan 24/7' : '24/7 support'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center space-y-3">
+                      <Link href="/pricing">
+                        <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
+                          <Zap className="w-5 h-5" />
+                          <span>{language === 'ms' ? 'Pilih Pelan Sekarang' : 'Choose Plan Now'}</span>
+                        </button>
+                      </Link>
+                      <p className="text-sm text-gray-600">
+                        {language === 'ms' 
+                          ? 'Mulai dari RM 99/bulan sahaja' 
+                          : 'Starting from RM 99/month only'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* Video Tutorials Section */}
         <motion.div
