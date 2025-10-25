@@ -307,5 +307,72 @@
     "terms": "Terms of Service",
     "cookies": "Cookie Policy",
     "copyright": "© 2024 CropDrive OP Advisor™. All rights reserved."
+  },
+  "landing": {
+    "challenge": {
+      "title": "The Challenge",
+      "subtitle": "Soil and leaf test results are difficult to interpret without expert support. This often leads to:",
+      "item1": "Wasted fertilizer",
+      "item2": "Higher costs",
+      "item3": "Missed yield potential",
+      "item4": "Long-term soil degradation"
+    },
+    "howWeHelp": {
+      "title": "How We Help",
+      "subtitle": "CropDrive™ AI Agronomist:",
+      "item1": "Interprets test data",
+      "item2": "Provides field-specific recommendations",
+      "item3": "Designs soil health improvement strategies",
+      "item4": "Links every step to clear economic and return-on-investment values"
+    },
+    "whatWeOffer": {
+      "title": "What We Offer",
+      "description": "We interpret lab results, provide clear fertilization strategies, and deliver long-term investment plans with soil health restoration tailored to each farm."
+    },
+    "tailoredSolutions": {
+      "title": "Tailored Solutions for Key Audiences",
+      "farmers": {
+        "title": "Farmers & Estates",
+        "desc": "Turn raw test results into clear advisory reports, adding value through practical improvement strategies."
+      },
+      "labs": {
+        "title": "Soil & Leaf Testing Labs",
+        "desc": "Strengthen farmer cooperatives by adding agronomy services that make advanced tools accessible to smallholders with limited resources."
+      },
+      "ngos": {
+        "title": "NGOs & Development Programs",
+        "desc": "Save man-time with fertilization plans delivered in minutes instead of days, ensuring consistency across estates."
+      },
+      "plantations": {
+        "title": "Plantations & Agri-businesses",
+        "desc": "Boost your fertilizer sales by linking products to tailored field recommendations that deliver clear value to farmers."
+      },
+      "suppliers": {
+        "title": "Fertilizer Suppliers",
+        "desc": "Enhance product adoption through integrated, data-driven recommendations."
+      },
+      "research": {
+        "title": "Public, Research & Certification Bodies",
+        "desc": "Use farm-level data to track adoption, verify impact, and support extension, training, policy, and long-term sustainability."
+      }
+    },
+    "turnLabResults": {
+      "title": "Turn Lab Test Results Into Real Yield Gains",
+      "subtitle": "Faster, clearer, and reliable decisions backed by science and AI",
+      "forOrganizations": {
+        "title": "For Organizations",
+        "item1": "Streamline operations with instant, expert-level insights",
+        "item2": "Scale support for large networks or programs",
+        "item3": "Measure and report on sustainability metrics"
+      },
+      "forFarmers": {
+        "title": "For Farmers",
+        "item1": "Simple, actionable plans from complex data",
+        "item2": "Cost savings and yield boosts tailored to your fields",
+        "item3": "Long-term soil health for future seasons"
+      },
+      "backedBy": "Results Backed by Wide Experience",
+      "expertise": "Our AI draws from proven agronomic expertise to deliver trusted outcomes in tropical agriculture."
+    }
   }
 }

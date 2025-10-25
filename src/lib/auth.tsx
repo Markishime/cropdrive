@@ -161,6 +161,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         lastLogin: serverTimestamp(),
       });
 
+      // Sign out the user so they need to log in
+      await firebaseSignOut(auth);
+      
       toast.success(language === 'ms' ? 'Akaun berjaya didaftarkan! Sila semak emel anda untuk pengesahan.' : 'Account successfully registered! Please check your email for verification.');
     } catch (error: any) {
       console.error('Sign up error:', error);

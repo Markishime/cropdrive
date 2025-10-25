@@ -307,5 +307,72 @@
     "terms": "Syarat Perkhidmatan",
     "cookies": "Dasar Kuki",
     "copyright": "© 2024 CropDrive OP Advisor™. Hak cipta terpelihara."
+  },
+  "landing": {
+    "challenge": {
+      "title": "Cabaran",
+      "subtitle": "Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada:",
+      "item1": "Pembaziran baja",
+      "item2": "Kos yang lebih tinggi",
+      "item3": "Potensi hasil yang terlepas",
+      "item4": "Degradasi tanah jangka panjang"
+    },
+    "howWeHelp": {
+      "title": "Bagaimana Kami Membantu",
+      "subtitle": "Agronomis AI CropDrive™:",
+      "item1": "Mentafsir data ujian",
+      "item2": "Menyediakan cadangan khusus ladang",
+      "item3": "Mereka bentuk strategi peningkatan kesihatan tanah",
+      "item4": "Mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas"
+    },
+    "whatWeOffer": {
+      "title": "Apa Yang Kami Tawarkan",
+      "description": "Kami mentafsir keputusan makmal, menyediakan strategi pemupukan yang jelas, dan menyampaikan pelan pelaburan jangka panjang dengan pemulihan kesihatan tanah yang disesuaikan untuk setiap ladang."
+    },
+    "tailoredSolutions": {
+      "title": "Penyelesaian Tersuai untuk Khalayak Utama",
+      "farmers": {
+        "title": "Petani & Estet",
+        "desc": "Ubah keputusan ujian mentah menjadi laporan nasihat yang jelas, menambah nilai melalui strategi peningkatan praktikal."
+      },
+      "labs": {
+        "title": "Makmal Ujian Tanah & Daun",
+        "desc": "Perkukuh koperasi petani dengan menambah perkhidmatan agronomi yang menjadikan alat canggih boleh diakses oleh pekebun kecil dengan sumber terhad."
+      },
+      "ngos": {
+        "title": "NGO & Program Pembangunan",
+        "desc": "Jimat masa kerja dengan pelan pemupukan yang disampaikan dalam minit bukannya hari, memastikan konsistensi merentas estet."
+      },
+      "plantations": {
+        "title": "Ladang & Perniagaan Pertanian",
+        "desc": "Tingkatkan jualan baja anda dengan mengaitkan produk kepada cadangan ladang tersuai yang memberikan nilai jelas kepada petani."
+      },
+      "suppliers": {
+        "title": "Pembekal Baja",
+        "desc": "Tingkatkan penerimaan produk melalui cadangan bersepadu berasaskan data."
+      },
+      "research": {
+        "title": "Badan Awam, Penyelidikan & Pensijilan",
+        "desc": "Gunakan data peringkat ladang untuk menjejaki penerimaan, mengesahkan impak, dan menyokong pengembangan, latihan, dasar, dan kemampanan jangka panjang."
+      }
+    },
+    "turnLabResults": {
+      "title": "Tukar Keputusan Ujian Makmal Kepada Peningkatan Hasil Sebenar",
+      "subtitle": "Keputusan yang lebih pantas, jelas, dan boleh dipercayai disokong oleh sains dan AI",
+      "forOrganizations": {
+        "title": "Untuk Organisasi",
+        "item1": "Memperkemas operasi dengan pandangan pakar segera",
+        "item2": "Meluaskan sokongan untuk rangkaian atau program besar",
+        "item3": "Mengukur dan melaporkan metrik kemampanan"
+      },
+      "forFarmers": {
+        "title": "Untuk Petani",
+        "item1": "Pelan mudah dan boleh dilaksanakan dari data kompleks",
+        "item2": "Penjimatan kos dan peningkatan hasil disesuaikan dengan ladang anda",
+        "item3": "Kesihatan tanah jangka panjang untuk musim akan datang"
+      },
+      "backedBy": "Keputusan Disokong oleh Pengalaman Luas",
+      "expertise": "AI kami menggunakan kepakaran agronomi yang terbukti untuk memberikan hasil yang dipercayai dalam pertanian tropika."
+    }
   }
 }

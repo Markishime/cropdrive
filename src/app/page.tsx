@@ -579,17 +579,20 @@ export default function HomePage() {
             className="max-w-4xl mx-auto"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 text-center">
-              The <span className="text-red-600">Challenge</span>
+              {language === 'ms' ? 'Cabaran' : 'The'} <span className="text-red-600">{language === 'ms' ? '' : 'Challenge'}</span>
             </h2>
             <p className="text-xl text-gray-700 mb-8 text-center">
-              Soil and leaf test results are difficult to interpret without expert support. This often leads to:
+              {language === 'ms'
+                ? 'Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada:'
+                : 'Soil and leaf test results are difficult to interpret without expert support. This often leads to:'
+              }
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
-                { icon: '💸', text: 'Wasted fertilizer' },
-                { icon: '📈', text: 'Higher costs' },
-                { icon: '🌾', text: 'Missed yield potential' },
-                { icon: '🏜️', text: 'Long-term soil degradation' },
+                { icon: '💸', text: language === 'ms' ? 'Pembaziran baja' : 'Wasted fertilizer' },
+                { icon: '📈', text: language === 'ms' ? 'Kos yang lebih tinggi' : 'Higher costs' },
+                { icon: '🌾', text: language === 'ms' ? 'Potensi hasil yang terlepas' : 'Missed yield potential' },
+                { icon: '🏜️', text: language === 'ms' ? 'Degradasi tanah jangka panjang' : 'Long-term soil degradation' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -619,17 +622,17 @@ export default function HomePage() {
             className="max-w-4xl mx-auto"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 text-center">
-              How We <span className="text-green-700">Help</span>
+              {language === 'ms' ? 'Bagaimana Kami' : 'How We'} <span className="text-green-700">{language === 'ms' ? 'Membantu' : 'Help'}</span>
             </h2>
             <p className="text-2xl font-semibold text-green-700 mb-8 text-center">
-              CropDrive™ AI Agronomist:
+              {language === 'ms' ? 'Agronomis AI CropDrive™:' : 'CropDrive™ AI Agronomist:'}
             </p>
             <div className="space-y-6">
               {[
-                { icon: '🔍', text: 'Interprets test data' },
-                { icon: '🎯', text: 'Provides field-specific recommendations' },
-                { icon: '🌱', text: 'Designs soil health improvement strategies' },
-                { icon: '💰', text: 'Links every step to clear economic and return-on-investment values' },
+                { icon: '🔍', text: language === 'ms' ? 'Mentafsir data ujian' : 'Interprets test data' },
+                { icon: '🎯', text: language === 'ms' ? 'Menyediakan cadangan khusus ladang' : 'Provides field-specific recommendations' },
+                { icon: '🌱', text: language === 'ms' ? 'Mereka bentuk strategi peningkatan kesihatan tanah' : 'Designs soil health improvement strategies' },
+                { icon: '💰', text: language === 'ms' ? 'Mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas' : 'Links every step to clear economic and return-on-investment values' },
               ].map((item, index) => (
                 <motion.div
                   key={index}
@@ -1195,10 +1198,13 @@ export default function HomePage() {
             className="max-w-4xl mx-auto text-center"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8">
-              What We <span className="text-yellow-600">Offer</span>
+              {language === 'ms' ? 'Apa Yang Kami' : 'What We'} <span className="text-yellow-600">{language === 'ms' ? 'Tawarkan' : 'Offer'}</span>
             </h2>
             <p className="text-xl text-gray-700 leading-relaxed">
-              We interpret lab results, provide clear fertilization strategies, and deliver long-term investment plans with soil health restoration tailored to each farm.
+              {language === 'ms'
+                ? 'Kami mentafsir keputusan makmal, menyediakan strategi pemupukan yang jelas, dan menyampaikan pelan pelaburan jangka panjang dengan pemulihan kesihatan tanah yang disesuaikan untuk setiap ladang.'
+                : 'We interpret lab results, provide clear fertilization strategies, and deliver long-term investment plans with soil health restoration tailored to each farm.'
+              }
             </p>
           </motion.div>
         </div>
@@ -1215,40 +1221,52 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Tailored Solutions for <span className="text-green-700">Key Audiences</span>
+              {language === 'ms' ? 'Penyelesaian Tersuai untuk' : 'Tailored Solutions for'} <span className="text-green-700">{language === 'ms' ? 'Khalayak Utama' : 'Key Audiences'}</span>
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                title: 'Farmers & Estates',
-                desc: 'Turn raw test results into clear advisory reports, adding value through practical improvement strategies.',
+                title: language === 'ms' ? 'Petani & Estet' : 'Farmers & Estates',
+                desc: language === 'ms' 
+                  ? 'Ubah keputusan ujian mentah menjadi laporan nasihat yang jelas, menambah nilai melalui strategi peningkatan praktikal.'
+                  : 'Turn raw test results into clear advisory reports, adding value through practical improvement strategies.',
                 number: '01'
               },
               {
-                title: 'Soil & Leaf Testing Labs',
-                desc: 'Strengthen farmer cooperatives by adding agronomy services that make advanced tools accessible to smallholders with limited resources.',
+                title: language === 'ms' ? 'Makmal Ujian Tanah & Daun' : 'Soil & Leaf Testing Labs',
+                desc: language === 'ms'
+                  ? 'Perkukuh koperasi petani dengan menambah perkhidmatan agronomi yang menjadikan alat canggih boleh diakses oleh pekebun kecil dengan sumber terhad.'
+                  : 'Strengthen farmer cooperatives by adding agronomy services that make advanced tools accessible to smallholders with limited resources.',
                 number: '02'
               },
               {
-                title: 'NGOs & Development Programs',
-                desc: 'Save man-time with fertilization plans delivered in minutes instead of days, ensuring consistency across estates.',
+                title: language === 'ms' ? 'NGO & Program Pembangunan' : 'NGOs & Development Programs',
+                desc: language === 'ms'
+                  ? 'Jimat masa kerja dengan pelan pemupukan yang disampaikan dalam minit bukannya hari, memastikan konsistensi merentas estet.'
+                  : 'Save man-time with fertilization plans delivered in minutes instead of days, ensuring consistency across estates.',
                 number: '03'
               },
               {
-                title: 'Plantations & Agri-businesses',
-                desc: 'Boost your fertilizer sales by linking products to tailored field recommendations that deliver clear value to farmers.',
+                title: language === 'ms' ? 'Ladang & Perniagaan Pertanian' : 'Plantations & Agri-businesses',
+                desc: language === 'ms'
+                  ? 'Tingkatkan jualan baja anda dengan mengaitkan produk kepada cadangan ladang tersuai yang memberikan nilai jelas kepada petani.'
+                  : 'Boost your fertilizer sales by linking products to tailored field recommendations that deliver clear value to farmers.',
                 number: '04'
               },
               {
-                title: 'Fertilizer Suppliers',
-                desc: 'Enhance product adoption through integrated, data-driven recommendations.',
+                title: language === 'ms' ? 'Pembekal Baja' : 'Fertilizer Suppliers',
+                desc: language === 'ms'
+                  ? 'Tingkatkan penerimaan produk melalui cadangan bersepadu berasaskan data.'
+                  : 'Enhance product adoption through integrated, data-driven recommendations.',
                 number: '05'
               },
               {
-                title: 'Public, Research & Certification Bodies',
-                desc: 'Use farm-level data to track adoption, verify impact, and support extension, training, policy, and long-term sustainability.',
+                title: language === 'ms' ? 'Badan Awam, Penyelidikan & Pensijilan' : 'Public, Research & Certification Bodies',
+                desc: language === 'ms'
+                  ? 'Gunakan data peringkat ladang untuk menjejaki penerimaan, mengesahkan impak, dan menyokong pengembangan, latihan, dasar, dan kemampanan jangka panjang.'
+                  : 'Use farm-level data to track adoption, verify impact, and support extension, training, policy, and long-term sustainability.',
                 number: '06'
               },
             ].map((solution, index) => (
@@ -1288,10 +1306,16 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-6xl font-bold mb-6">
-              Turn Lab Test Results Into <span className="text-yellow-400">Real Yield Gains</span>
+              {language === 'ms'
+                ? <><span>Tukar Keputusan Ujian Makmal Kepada</span> <span className="text-yellow-400">Peningkatan Hasil Sebenar</span></>
+                : <>Turn Lab Test Results Into <span className="text-yellow-400">Real Yield Gains</span></>
+              }
             </h2>
             <p className="text-2xl mb-12">
-              Faster, clearer, and reliable decisions backed by science and AI
+              {language === 'ms'
+                ? 'Keputusan yang lebih pantas, jelas, dan boleh dipercayai disokong oleh sains dan AI'
+                : 'Faster, clearer, and reliable decisions backed by science and AI'
+              }
             </p>
           </motion.div>
 
@@ -1304,12 +1328,14 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border-2 border-yellow-400"
             >
-              <h3 className="text-3xl font-bold text-yellow-400 mb-6">For Organizations</h3>
+              <h3 className="text-3xl font-bold text-yellow-400 mb-6">
+                {language === 'ms' ? 'Untuk Organisasi' : 'For Organizations'}
+              </h3>
               <ul className="space-y-4">
                 {[
-                  'Streamline operations with instant, expert-level insights',
-                  'Scale support for large networks or programs',
-                  'Measure and report on sustainability metrics',
+                  language === 'ms' ? 'Memperkemas operasi dengan pandangan pakar segera' : 'Streamline operations with instant, expert-level insights',
+                  language === 'ms' ? 'Meluaskan sokongan untuk rangkaian atau program besar' : 'Scale support for large networks or programs',
+                  language === 'ms' ? 'Mengukur dan melaporkan metrik kemampanan' : 'Measure and report on sustainability metrics',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <svg className="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -1329,12 +1355,14 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="bg-white/10 backdrop-blur-sm p-8 rounded-2xl border-2 border-yellow-400"
             >
-              <h3 className="text-3xl font-bold text-yellow-400 mb-6">For Farmers</h3>
+              <h3 className="text-3xl font-bold text-yellow-400 mb-6">
+                {language === 'ms' ? 'Untuk Petani' : 'For Farmers'}
+              </h3>
               <ul className="space-y-4">
                 {[
-                  'Simple, actionable plans from complex data',
-                  'Cost savings and yield boosts tailored to your fields',
-                  'Long-term soil health for future seasons',
+                  language === 'ms' ? 'Pelan mudah dan boleh dilaksanakan dari data kompleks' : 'Simple, actionable plans from complex data',
+                  language === 'ms' ? 'Penjimatan kos dan peningkatan hasil disesuaikan dengan ladang anda' : 'Cost savings and yield boosts tailored to your fields',
+                  language === 'ms' ? 'Kesihatan tanah jangka panjang untuk musim akan datang' : 'Long-term soil health for future seasons',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <svg className="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -1355,10 +1383,13 @@ export default function HomePage() {
             className="text-center mt-16"
           >
             <p className="text-xl italic mb-8">
-              Results Backed by Wide Experience
+              {language === 'ms' ? 'Keputusan Disokong oleh Pengalaman Luas' : 'Results Backed by Wide Experience'}
             </p>
             <p className="text-lg max-w-3xl mx-auto">
-              Our AI draws from proven agronomic expertise to deliver trusted outcomes in tropical agriculture.
+              {language === 'ms'
+                ? 'AI kami menggunakan kepakaran agronomi yang terbukti untuk memberikan hasil yang dipercayai dalam pertanian tropika.'
+                : 'Our AI draws from proven agronomic expertise to deliver trusted outcomes in tropical agriculture.'
+              }
             </p>
           </motion.div>
         </div>

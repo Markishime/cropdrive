@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from '@/i18n';
@@ -13,10 +14,19 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'analysis' | 'history' | 'subscription'>('overview');
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
 
   const { user, loading: authLoading } = useAuth();
-  const { language, t } = useTranslation();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+    setCurrentLang(lang);
+  }, []);
+
+  const { language, t } = useTranslation(mounted ? currentLang : 'en');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -25,6 +35,17 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }, [user, authLoading, router]);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+      setCurrentLang(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   if (authLoading || loading) {
     return (
@@ -38,7 +59,8 @@ export default function DashboardPage() {
     return null;
   }
 
-  const userPlan = getPlanById(user.plan);
+  const userPlan = user.plan !== 'start' ? getPlanById(user.plan) : null;
+  const hasPurchasedPlan = user.plan !== 'start';
   const uploadsRemaining = Math.max(0, user.uploadsLimit - user.uploadsUsed);
 
   return (
@@ -74,27 +96,55 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="mt-6 md:mt-0">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/20">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg
-                          className="w-8 h-8 text-green-900"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-sm text-white/70 font-medium uppercase tracking-wider">
-                          {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
-                        </p>
-                        <p className="text-2xl font-bold text-white">
-                          {userPlan?.name || 'N/A'}
-                        </p>
+                  {hasPurchasedPlan ? (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-white/20">
+                      <div className="flex items-center space-x-4">
+                        <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                          <svg
+                            className="w-8 h-8 text-green-900"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <p className="text-sm text-white/70 font-medium uppercase tracking-wider">
+                            {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                          </p>
+                          <p className="text-2xl font-bold text-white">
+                            {userPlan?.name || 'N/A'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border-2 border-yellow-400/50">
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                          <svg
+                            className="w-8 h-8 text-green-900"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-white/70 font-medium uppercase tracking-wider mb-2">
+                          {language === 'ms' ? 'Tiada Pelan Aktif' : 'No Active Plan'}
+                        </p>
+                        <p className="text-xs text-white/60 mb-4">
+                          {language === 'ms' ? 'Pilih pelan untuk membuka ciri-ciri premium' : 'Choose a plan to unlock premium features'}
+                        </p>
+                        <Link href="/pricing">
+                          <button className="px-6 py-2 bg-yellow-400 text-green-900 rounded-lg font-bold text-sm hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                            {language === 'ms' ? 'Pilih Pelan' : 'Choose Plan'}
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
@@ -472,68 +522,103 @@ export default function DashboardPage() {
                     {language === 'ms' ? 'Pengurusan Langganan' : 'Subscription Management'}
                   </h2>
 
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                  {hasPurchasedPlan ? (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>
+                            {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {language === 'ms' ? 'Pelan' : 'Plan'}
+                              </span>
+                              <span className="font-semibold">
+                                {userPlan?.name || 'N/A'}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {language === 'ms' ? 'Status' : 'Status'}
+                              </span>
+                              <span className="font-semibold text-green-600">
+                                {language === 'ms' ? 'Aktif' : 'Active'}
+                              </span>
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-600">
+                                {language === 'ms' ? 'Had Muat Naik' : 'Upload Limit'}
+                              </span>
+                              <span className="font-semibold">
+                                {user.uploadsLimit === -1 ? 'Unlimited' : user.uploadsLimit}
+                              </span>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>
+                            {language === 'ms' ? 'Tindakan' : 'Actions'}
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-4">
+                            <Link href="/pricing">
+                              <Button className="w-full" variant="outline">
+                                {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
+                              </Button>
+                            </Link>
+
+                            <Button className="w-full" variant="outline">
+                              {language === 'ms' ? 'Sejarah Bil' : 'Billing History'}
+                            </Button>
+
+                            <Button className="w-full" variant="outline">
+                              {language === 'ms' ? 'Batal Langganan' : 'Cancel Subscription'}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
                     <Card>
-                      <CardHeader>
-                        <CardTitle>
-                          {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {language === 'ms' ? 'Pelan' : 'Plan'}
-                            </span>
-                            <span className="font-semibold">
-                              {userPlan?.name || 'N/A'}
-                            </span>
+                      <CardContent className="p-12">
+                        <div className="text-center">
+                          <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
+                            <svg
+                              className="w-12 h-12 text-green-900"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
                           </div>
-
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {language === 'ms' ? 'Status' : 'Status'}
-                            </span>
-                            <span className="font-semibold text-green-600">
-                              {language === 'ms' ? 'Aktif' : 'Active'}
-                            </span>
-                          </div>
-
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-600">
-                              {language === 'ms' ? 'Had Muat Naik' : 'Upload Limit'}
-                            </span>
-                            <span className="font-semibold">
-                              {user.uploadsLimit === -1 ? 'Unlimited' : user.uploadsLimit}
-                            </span>
-                          </div>
+                          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                            {language === 'ms' ? 'Tiada Pelan Aktif' : 'No Active Plan'}
+                          </h3>
+                          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+                            {language === 'ms'
+                              ? 'Anda belum lagi memilih pelan. Pilih pelan yang sesuai dengan keperluan ladang anda dan mulakan analisis AI hari ini!'
+                              : "You haven't chosen a plan yet. Select the plan that fits your farm needs and start AI analysis today!"
+                            }
+                          </p>
+                          <Link href="/pricing">
+                            <Button className="px-8 py-3">
+                              {language === 'ms' ? 'Lihat Pelan & Harga' : 'View Plans & Pricing'}
+                            </Button>
+                          </Link>
                         </div>
                       </CardContent>
                     </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle>
-                          {language === 'ms' ? 'Tindakan' : 'Actions'}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="space-y-4">
-                          <Button className="w-full" variant="outline">
-                            {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
-                          </Button>
-
-                          <Button className="w-full" variant="outline">
-                            {language === 'ms' ? 'Sejarah Bil' : 'Billing History'}
-                          </Button>
-
-                          <Button className="w-full" variant="outline">
-                            {language === 'ms' ? 'Batal Langganan' : 'Cancel Subscription'}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+                  )}
                 </motion.div>
               )}
             </div>

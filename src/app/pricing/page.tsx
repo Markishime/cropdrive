@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { getPricingTierById, PRICING_TIERS, formatPrice } from '@/lib/subscriptions';
+import { convertMYRtoEUR } from '@/lib/exchangeRate';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 import toast from 'react-hot-toast';
@@ -15,6 +16,8 @@ export default function PricingPage() {
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const [isYearly, setIsYearly] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
+  const [eurPrices, setEurPrices] = useState<Record<string, { monthly: number; yearly: number }>>({});
+  const [exchangeRateLoading, setExchangeRateLoading] = useState(true);
   const { language, t } = useTranslation(currentLanguage);
   const { user } = useAuth();
 
@@ -23,6 +26,48 @@ export default function PricingPage() {
     const lang = getCurrentLanguage();
     setCurrentLanguage(lang);
   }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLanguage(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  // Fetch EUR prices on mount
+  useEffect(() => {
+    const fetchEURPrices = async () => {
+      try {
+        setExchangeRateLoading(true);
+        const prices: Record<string, { monthly: number; yearly: number }> = {};
+        
+        for (const tier of PRICING_TIERS) {
+          const monthlyEUR = await convertMYRtoEUR(tier.monthlyPrice);
+          const yearlyEUR = await convertMYRtoEUR(tier.yearlyPrice);
+          
+          prices[tier.id] = {
+            monthly: monthlyEUR,
+            yearly: yearlyEUR,
+          };
+        }
+        
+        setEurPrices(prices);
+      } catch (error) {
+        console.error('Error fetching EUR prices:', error);
+        toast.error('Failed to load EUR prices. Showing MYR only.');
+      } finally {
+        setExchangeRateLoading(false);
+      }
+    };
+
+    if (mounted) {
+      fetchEURPrices();
+    }
+  }, [mounted]);
 
   if (!mounted) {
     return null;
@@ -112,7 +157,7 @@ export default function PricingPage() {
             </p>
 
             {/* Billing Toggle */}
-            <div className="flex items-center justify-center space-x-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4 inline-flex">
+            <div className="inline-flex items-center justify-center space-x-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
               <span className={`text-lg font-bold ${!isYearly ? 'text-yellow-400' : 'text-white/70'}`}>
                 {language === 'ms' ? 'BULANAN' : 'MONTHLY'}
               </span>
@@ -176,7 +221,8 @@ export default function PricingPage() {
                     </p>
 
                     <div className="mb-6 bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6 text-white">
-                      <div className="flex items-baseline justify-center">
+                      {/* MYR Price (Fixed) */}
+                      <div className="flex items-baseline justify-center mb-4">
                         <span className="text-6xl font-black text-yellow-400">
                           {isYearly ? tier.yearlyPrice : tier.monthlyPrice}
                         </span>
@@ -184,7 +230,36 @@ export default function PricingPage() {
                           RM
                         </span>
                       </div>
-                      <p className="text-lg text-white/80 mt-2 font-medium">
+                      
+                      {/* EUR Price (Real-time) */}
+                      <div className="border-t border-white/20 pt-3 mt-3">
+                        {exchangeRateLoading ? (
+                          <div className="flex items-center justify-center">
+                            <svg className="animate-spin h-5 w-5 text-yellow-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-sm text-white/80">
+                              {language === 'ms' ? 'Mengemas kini harga EUR...' : 'Updating EUR price...'}
+                            </span>
+                          </div>
+                        ) : eurPrices[tier.id] ? (
+                          <div className="text-center">
+                            <p className="text-2xl font-bold text-white/90">
+                              €{(isYearly ? eurPrices[tier.id].yearly : eurPrices[tier.id].monthly).toFixed(2)}
+                            </p>
+                            <p className="text-xs text-white/60 mt-1">
+                              {language === 'ms' ? 'Harga sebenar dalam EUR' : 'Actual price in EUR'}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-white/70 text-center">
+                            {language === 'ms' ? 'Harga EUR tidak tersedia' : 'EUR price unavailable'}
+                          </p>
+                        )}
+                      </div>
+
+                      <p className="text-lg text-white/80 mt-3 font-medium">
                         {isYearly ? (language === 'ms' ? '/tahun' : '/year') : (language === 'ms' ? '/bulan' : '/month')}
                       </p>
                       {isYearly && (
@@ -194,10 +269,11 @@ export default function PricingPage() {
                       )}
                     </div>
 
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+                      <span className="font-semibold text-yellow-700">💡 </span>
                       {language === 'ms'
-                        ? 'Pembayaran diproses dalam euro (€). Harga RM untuk rujukan.'
-                        : 'Payments processed in euros (€). RM prices for reference.'
+                        ? 'Harga RM adalah tetap. Pembayaran dalam EUR (€) mengikut kadar pertukaran semasa.'
+                        : 'RM prices are fixed. Payment in EUR (€) follows current exchange rate.'
                       }
                     </p>
                   </div>
@@ -233,7 +309,7 @@ export default function PricingPage() {
                     {loading === tier.id
                       ? (language === 'ms' ? 'Memproses...' : 'Processing...')
                       : user
-                        ? (language === 'ms' ? 'Mulakan Sekarang' : 'Get Started')
+                        ? (language === 'ms' ? 'Pilih Pelan' : 'Choose Plan')
                         : (language === 'ms' ? 'Log Masuk' : 'Login to Start')
                     }
                   </button>
@@ -269,12 +345,26 @@ export default function PricingPage() {
                 <h3 className="text-xl font-black text-gray-900 mb-3 uppercase tracking-wide">
                   {language === 'ms' ? 'Nota Pembayaran' : 'Payment Note'}
                 </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {language === 'ms'
-                    ? 'Semua pembayaran diproses dengan selamat dalam euro (€) melalui Stripe. Harga dalam Ringgit Malaysia (RM) ditunjukkan untuk rujukan sahaja berdasarkan kadar pertukaran semasa. Anda akan dibilkan dalam euro.'
-                    : 'All payments are processed securely in euros (€) through Stripe. Malaysian Ringgit (RM) prices are shown for reference only based on current exchange rates. You will be charged in euros.'
-                  }
-                </p>
+                <div className="space-y-3">
+                  <p className="text-gray-700 leading-relaxed">
+                    {language === 'ms'
+                      ? '💰 Harga dalam Ringgit Malaysia (RM) adalah TETAP dan tidak akan berubah.'
+                      : '💰 Malaysian Ringgit (RM) prices are FIXED and will not change.'
+                    }
+                  </p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {language === 'ms'
+                      ? '💱 Harga Euro (€) dikemas kini secara real-time berdasarkan kadar pertukaran semasa.'
+                      : '💱 Euro (€) prices are updated in real-time based on current exchange rates.'
+                    }
+                  </p>
+                  <p className="text-gray-700 leading-relaxed font-semibold">
+                    {language === 'ms'
+                      ? '✅ Semua pembayaran diproses dengan selamat dalam euro (€) melalui Stripe. Jumlah sebenar yang anda bayar akan berdasarkan kadar pertukaran EUR semasa.'
+                      : '✅ All payments are processed securely in euros (€) through Stripe. The actual amount you pay will be based on the current EUR exchange rate.'
+                    }
+                  </p>
+                </div>
               </div>
             </div>
           </div>
