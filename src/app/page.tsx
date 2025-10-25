@@ -18,6 +18,7 @@ export default function HomePage() {
   const [activeSection, setActiveSection] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -32,6 +33,25 @@ export default function HomePage() {
       setShowOnboarding(true);
     }
   }, [user]);
+
+  // Control video playback when index changes
+  useEffect(() => {
+    // Pause all videos first
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+
+    // Play the current video
+    const currentVideo = videoRefs.current[currentVideoIndex];
+    if (currentVideo) {
+      currentVideo.play().catch((error) => {
+        console.log('Video play error:', error);
+      });
+    }
+  }, [currentVideoIndex]);
 
   // Auto-advance video carousel every 30 seconds
   useEffect(() => {
@@ -91,12 +111,15 @@ export default function HomePage() {
                 }}
               >
                 <video
+                  ref={(el) => {
+                    videoRefs.current[index] = el;
+                  }}
                   src={video}
-                  autoPlay={currentVideoIndex === index}
                   muted
                   playsInline
                   loop
                   className="w-full h-full object-cover"
+                  preload="auto"
                 />
               </motion.div>
             ))}
