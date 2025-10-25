@@ -137,8 +137,8 @@ export default function TutorialsPage() {
       step: 4,
       title: language === 'ms' ? 'Dapatkan Analisis AI' : 'Get AI Analysis',
       description: language === 'ms'
-        ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 30 saat'
-        : 'Our AI will analyze your report and provide recommendations within 30 seconds',
+        ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 1-2 minit'
+        : 'Our AI will analyze your report and provide recommendations within 1-2 minutes',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
       icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
     }
@@ -169,14 +169,14 @@ export default function TutorialsPage() {
     {
       question: language === 'ms' ? 'Apakah format fail yang disokong?' : 'What file formats are supported?',
       answer: language === 'ms'
-        ? 'Kami menyokong fail PDF, JPG, PNG, dan JPEG. Saiz maksimum ialah 10MB setiap fail.'
-        : 'We support PDF, JPG, PNG, and JPEG files. Maximum size is 10MB per file.'
+        ? 'Kami menyokong Gambar (JPG, PNG), PDF, dan Excel (.xlsx, .xls). Termasuk laporan SPLAB dan farm_test_data. Saiz maksimum ialah 10MB setiap fail.'
+        : 'We support Images (JPG, PNG), PDF, and Excel (.xlsx, .xls) files. Including SPLAB and farm_test_data reports. Maximum size is 10MB per file.'
     },
     {
       question: language === 'ms' ? 'Berapa lama masa pemprosesan AI?' : 'How long does AI processing take?',
       answer: language === 'ms'
-        ? 'Kebanyakan analisis selesai dalam 20-30 saat. Untuk fail yang lebih kompleks atau besar, ia mungkin mengambil masa sehingga 1 minit.'
-        : 'Most analyses complete in 20-30 seconds. For more complex or larger files, it may take up to 1 minute.'
+        ? 'Kebanyakan analisis selesai dalam 1-2 minit. Untuk fail yang lebih kompleks atau besar, ia mungkin mengambil masa sehingga 3 minit.'
+        : 'Most analyses complete in 1-2 minutes. For more complex or larger files, it may take up to 3 minutes.'
     },
     {
       question: language === 'ms' ? 'Adakah data saya selamat dan sulit?' : 'Is my data secure and confidential?',

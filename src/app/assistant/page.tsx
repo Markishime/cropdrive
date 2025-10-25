@@ -158,8 +158,8 @@ export default function AssistantPage() {
               <Info className="w-5 h-5 text-blue-200 flex-shrink-0" />
               <p className="text-sm font-semibold">
                 {language === 'ms' 
-                  ? '💡 Panduan Pantas: Muat naik PDF laporan makmal → Tunggu 30 saat → Dapatkan analisis terperinci!'
-                  : '💡 Quick Guide: Upload lab report PDF → Wait 30 seconds → Get detailed analysis!'
+                  ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) → Tunggu 1-2 minit → Dapatkan analisis terperinci!'
+                  : '💡 Quick Guide: Upload lab report (Image/PDF/Excel - SPLAB, farm_test_data) → Wait 1-2 minutes → Get detailed analysis!'
                 }
               </p>
             </div>
@@ -244,7 +244,7 @@ export default function AssistantPage() {
                   {language === 'ms' ? 'Muat Naik' : 'Upload'}
                 </p>
                 <p className="text-gray-600 text-xs">
-                  {language === 'ms' ? 'Fail PDF laporan makmal' : 'Lab report PDF file'}
+                  {language === 'ms' ? 'Gambar/PDF/Excel (SPLAB, farm_test_data)' : 'Image/PDF/Excel (SPLAB, farm_test_data)'}
                 </p>
               </div>
             </div>
@@ -258,7 +258,7 @@ export default function AssistantPage() {
                   {language === 'ms' ? 'Analisis' : 'Analyze'}
                 </p>
                 <p className="text-gray-600 text-xs">
-                  {language === 'ms' ? 'AI proses ~30 saat' : 'AI processes ~30 seconds'}
+                  {language === 'ms' ? 'AI proses ~1-2 minit' : 'AI processes ~1-2 minutes'}
                 </p>
               </div>
             </div>

@@ -33,8 +33,8 @@ export default function FeaturesPage() {
       icon: '📄',
       title: language === 'ms' ? 'Pembacaan Dokumen Pintar (OCR & AI)' : 'Smart Document Reading (OCR & AI)',
       description: language === 'ms'
-        ? 'Membaca PDF laporan makmal secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~30 saat.'
-        : 'Automatically reads PDF reports from any laboratory, extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~30 seconds.',
+        ? 'Membaca laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~1-2 minit.'
+        : 'Automatically reads lab reports (Image/PDF/Excel - SPLAB, farm_test_data), extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~1-2 minutes.',
       benefits: [
         language === 'ms' ? 'Jimat berjam-jam kemasukan data manual' : 'Saves hours of manual data entry',
         language === 'ms' ? 'Hapuskan kesilapan taipan' : 'Eliminates typing errors',
@@ -353,6 +353,10 @@ export default function FeaturesPage() {
               <ul className="space-y-2 text-gray-700">
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
+                  <span>{language === 'ms' ? 'Gambar (JPG, PNG)' : 'Images (JPG, PNG)'}</span>
+                </li>
+                <li className="flex items-center">
+                  <span className="text-green-600 mr-2">•</span>
                   <span>PDF {language === 'ms' ? 'laporan (mana-mana makmal)' : 'reports (any laboratory)'}</span>
                 </li>
                 <li className="flex items-center">
@@ -361,15 +365,11 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>CSV files</span>
+                  <span className="font-semibold text-green-700">SPLAB {language === 'ms' ? 'laporan' : 'reports'}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Dokumen diimbas (OCR)' : 'Scanned documents (OCR)'}</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Foto dari kamera telefon' : 'Photos from phone camera'}</span>
+                  <span className="font-semibold text-green-700">farm_test_data {language === 'ms' ? 'laporan' : 'reports'}</span>
                 </li>
               </ul>
             </motion.div>

@@ -17,6 +17,7 @@ export default function HomePage() {
   const { language, t } = useTranslation(currentLanguage);
   const [activeSection, setActiveSection] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -62,34 +63,32 @@ export default function HomePage() {
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              'https://cdn.coverr.co/videos/coverr-aerial-view-of-palm-oil-plantation-8223/1080p.mp4',
-              'https://cdn.coverr.co/videos/coverr-palm-oil-fruit-bunches-8221/1080p.mp4',
-              'https://cdn.coverr.co/videos/coverr-green-palm-trees-5647/1080p.mp4',
-              'https://cdn.coverr.co/videos/coverr-tropical-plantation-rows-8222/1080p.mp4',
-              'https://cdn.coverr.co/videos/coverr-agricultural-field-aerial-7801/1080p.mp4'
+              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4',
+              '/videos/Farmer_s_Oil_Palm_Cultivation_Video.mp4',
+              '/videos/4822968-hd_1920_1080_30fps.mp4'
             ].map((video, index) => (
               <motion.div
                 key={index}
                 className="absolute inset-0"
-                initial={{ opacity: index === 0 ? 1 : 0 }}
+                initial={{ opacity: 0 }}
                 animate={{
-                  opacity: [0, 1, 1, 0],
+                  opacity: currentVideoIndex === index ? 1 : 0,
                 }}
                 transition={{
-                  duration: 15,
-                  delay: index * 5,
-                  repeat: Infinity,
-                  repeatDelay: 12,
+                  duration: 1,
                   ease: "easeInOut"
                 }}
               >
                 <video
                   src={video}
-                  autoPlay
-                  loop
+                  autoPlay={currentVideoIndex === index}
                   muted
                   playsInline
                   className="w-full h-full object-cover"
+                  onEnded={() => {
+                    // Move to next video when current video ends
+                    setCurrentVideoIndex((prev) => (prev + 1) % 3);
+                  }}
                 />
               </motion.div>
             ))}
@@ -181,7 +180,7 @@ export default function HomePage() {
                   600,
                   'MPOB Certified AI Analysis',
                   500,
-                  'MPOB Certified AI Analysis in 30 Seconds',
+                  'MPOB Certified AI Analysis in 1-2 Minutes',
                   3000,
                   'Maximize Yield',
                   800,
@@ -218,7 +217,7 @@ export default function HomePage() {
                   800,
                   'Analisis AI Bertauliah MPOB',
                   600,
-                  'Analisis AI Bertauliah MPOB dalam 30 Saat',
+                  'Analisis AI Bertauliah MPOB dalam 1-2 Minit',
                   3000,
                   'Maksimum Hasil',
                   800,
@@ -258,8 +257,8 @@ export default function HomePage() {
               style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
             >
               {language === 'ms' 
-                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI bertauliah MPOB dalam masa 30 saat. Sertai ribuan pekebun pintar di seluruh Malaysia.'
-                : 'Boost your palm oil yield with MPOB-certified AI analysis in 30 seconds. Join thousands of smart farmers across Malaysia.'
+                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI bertauliah MPOB dalam masa 1-2 minit. Sertai ribuan pekebun pintar di seluruh Malaysia.'
+                : 'Boost your palm oil yield with MPOB-certified AI analysis in 1-2 minutes. Join thousands of smart farmers across Malaysia.'
               }
             </motion.p>
 
@@ -268,7 +267,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.1 }}
-              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 w-full max-w-2xl mx-auto"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 w-full max-w-2xl mx-auto mb-28 sm:mb-8"
             >
               <Link href="/pricing" className="w-full sm:w-auto">
                 <motion.button
@@ -312,7 +311,7 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 1.2 }}
-          className="absolute bottom-16 left-0 right-0 z-20 flex justify-center"
+          className="absolute bottom-12 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
         >
           <div className="flex flex-col items-center justify-center space-y-3">
             <p className="text-white text-xs uppercase tracking-[0.2em] font-bold text-center">
@@ -474,8 +473,8 @@ export default function HomePage() {
                   </svg>
                   <p className="text-sm sm:text-base text-gray-800">
                     {language === 'ms' 
-                      ? '🤖 Analisis AI dalam 30 saat'
-                      : '🤖 AI analysis in 30 seconds'
+                      ? '🤖 Analisis AI dalam 1-2 minit'
+                      : '🤖 AI analysis in 1-2 minutes'
                     }
                   </p>
                 </div>
@@ -615,7 +614,7 @@ export default function HomePage() {
             {[
               {
                 image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
-                title: language === 'ms' ? 'Analisis 30 Saat' : '30-Second Analysis',
+                title: language === 'ms' ? 'Analisis 1-2 Minit' : '1-2 Minute Analysis',
                 desc: language === 'ms' ? 'AI menganalisis laporan makmal anda dalam masa nyata' : 'AI analyzes your lab reports in real-time'
               },
               {
@@ -901,7 +900,7 @@ export default function HomePage() {
                 <ul className="space-y-3 text-gray-700">
                   <li className="flex items-start">
                     <span className="text-green-600 mr-2">✓</span>
-                    <span className="font-semibold">{language === 'ms' ? '30 saat analisis vs berjam-jam kerja manual' : '30 seconds analysis vs hours of manual work'}</span>
+                    <span className="font-semibold">{language === 'ms' ? '1-2 minit analisis vs berjam-jam kerja manual' : '1-2 minutes analysis vs hours of manual work'}</span>
                   </li>
                   <li className="flex items-start">
                     <span className="text-green-600 mr-2">✓</span>
@@ -1039,6 +1038,167 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Marketing Strategy Section */}
+      <section className="py-24 bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 uppercase">
+              {language === 'ms' ? 'Strategi' : 'Our'} <span className="text-green-700">{language === 'ms' ? 'Pemasaran Kami' : 'Marketing Strategy'}</span>
+            </h2>
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+              {language === 'ms'
+                ? 'Kami membina kesedaran dan kepercayaan melalui strategi pemasaran yang komprehensif'
+                : 'We build awareness and trust through comprehensive marketing strategies'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+            {[
+              {
+                icon: '🎯',
+                title: language === 'ms' ? 'Pemasaran Digital' : 'Digital Marketing',
+                items: [
+                  language === 'ms' ? 'Media sosial (Facebook, Instagram)' : 'Social media (Facebook, Instagram)',
+                  language === 'ms' ? 'Iklan Google bertarget' : 'Targeted Google Ads',
+                  language === 'ms' ? 'Kandungan SEO' : 'SEO content',
+                  language === 'ms' ? 'Video tutorial YouTube' : 'YouTube tutorial videos'
+                ]
+              },
+              {
+                icon: '🤝',
+                title: language === 'ms' ? 'Perkongsian' : 'Partnerships',
+                items: [
+                  language === 'ms' ? 'Kerjasama MPOB' : 'MPOB collaboration',
+                  language === 'ms' ? 'Persatuan petani' : 'Farmer associations',
+                  language === 'ms' ? 'Kedai bekalan pertanian' : 'Agricultural supply stores',
+                  language === 'ms' ? 'Institusi kewangan' : 'Financial institutions'
+                ]
+              },
+              {
+                icon: '📚',
+                title: language === 'ms' ? 'Pendidikan & Demo' : 'Education & Demo',
+                items: [
+                  language === 'ms' ? 'Webinar percuma' : 'Free webinars',
+                  language === 'ms' ? 'Lawatan ladang' : 'Farm visits',
+                  language === 'ms' ? 'Demo langsung' : 'Live demonstrations',
+                  language === 'ms' ? 'Pusat latihan' : 'Training centers'
+                ]
+              },
+              {
+                icon: '💬',
+                title: language === 'ms' ? 'Pemasaran Mulut ke Mulut' : 'Word-of-Mouth',
+                items: [
+                  language === 'ms' ? 'Program rujukan' : 'Referral program',
+                  language === 'ms' ? 'Testimoni pelanggan' : 'Customer testimonials',
+                  language === 'ms' ? 'Kajian kes' : 'Case studies',
+                  language === 'ms' ? 'Komuniti dalam talian' : 'Online community'
+                ]
+              }
+            ].map((strategy, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500 hover:shadow-2xl transition-shadow duration-300"
+              >
+                <div className="text-5xl mb-4 text-center">{strategy.icon}</div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
+                  {strategy.title}
+                </h3>
+                <ul className="space-y-2">
+                  {strategy.items.map((item, idx) => (
+                    <li key={idx} className="flex items-start text-sm text-gray-700">
+                      <span className="text-green-600 mr-2 flex-shrink-0">✓</span>
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Marketing Channels */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            viewport={{ once: true }}
+            className="bg-gradient-to-r from-green-600 to-green-700 p-10 rounded-2xl shadow-2xl text-white"
+          >
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-black mb-4">
+                {language === 'ms' ? 'Saluran Pemasaran Utama' : 'Key Marketing Channels'}
+              </h3>
+              <p className="text-green-100">
+                {language === 'ms'
+                  ? 'Kami menjangkau petani di mana mereka berada'
+                  : 'We reach farmers where they are'
+                }
+              </p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {[
+                { icon: '📱', label: language === 'ms' ? 'WhatsApp' : 'WhatsApp' },
+                { icon: '👍', label: language === 'ms' ? 'Facebook' : 'Facebook' },
+                { icon: '📺', label: language === 'ms' ? 'YouTube' : 'YouTube' },
+                { icon: '📧', label: language === 'ms' ? 'E-mel' : 'Email' },
+                { icon: '📻', label: language === 'ms' ? 'Radio' : 'Radio' },
+                { icon: '🏪', label: language === 'ms' ? 'Kedai Agro' : 'Agro Shops' }
+              ].map((channel, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-white/10 backdrop-blur-sm p-4 rounded-xl text-center hover:bg-white/20 transition-all duration-300"
+                >
+                  <div className="text-4xl mb-2">{channel.icon}</div>
+                  <p className="text-sm font-semibold">{channel.label}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Success Metrics */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
+          >
+            {[
+              { number: '10,000+', label: language === 'ms' ? 'Petani Aktif' : 'Active Farmers' },
+              { number: '95%', label: language === 'ms' ? 'Kadar Kepuasan' : 'Satisfaction Rate' },
+              { number: '50,000+', label: language === 'ms' ? 'Analisis Selesai' : 'Analyses Completed' },
+              { number: '15+', label: language === 'ms' ? 'Negeri Diliputi' : 'States Covered' }
+            ].map((metric, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.5 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-6 rounded-xl shadow-lg text-center hover:shadow-2xl transition-shadow duration-300"
+              >
+                <p className="text-4xl font-black text-green-700 mb-2">{metric.number}</p>
+                <p className="text-gray-700 font-semibold text-sm">{metric.label}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
       {/* AI Technology Behind CropDrive Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
@@ -1148,10 +1308,10 @@ export default function HomePage() {
               {
                 step: '01',
                 title: language === 'ms' ? 'Muat Naik Laporan Anda' : 'Upload Your Report',
-                desc: language === 'ms' ? 'Ambil gambar atau muat naik laporan analisis tanah/daun anda. AI kami boleh membaca pelbagai format laporan makmal' : 'Take a photo or upload your soil/leaf analysis report. Our AI can read multiple lab report formats',
+                desc: language === 'ms' ? 'Ambil gambar atau muat naik laporan analisis tanah/daun anda (SPLAB, farm_test_data). AI kami boleh membaca pelbagai format laporan makmal' : 'Take a photo or upload your soil/leaf analysis report (SPLAB, farm_test_data). Our AI can read multiple lab report formats',
                 image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800',
                 features: [
-                  language === 'ms' ? 'Sokongan pelbagai format' : 'Multiple format support',
+                  language === 'ms' ? 'Gambar, PDF, Excel (SPLAB, farm_test_data)' : 'Images, PDF, Excel (SPLAB, farm_test_data)',
                   language === 'ms' ? 'Upload mudah' : 'Easy upload',
                   language === 'ms' ? 'Selamat & terenkripsi' : 'Secure & encrypted'
                 ]
@@ -1159,10 +1319,10 @@ export default function HomePage() {
               {
                 step: '02',
                 title: language === 'ms' ? 'AI Menganalisis Data' : 'AI Analyzes Data',
-                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 30 saat, membandingkan dengan standard MPOB dan membuat analisis mendalam' : 'Our AI technology processes your data in 30 seconds, comparing with MPOB standards and performing deep analysis',
+                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 1-2 minit, membandingkan dengan standard MPOB dan membuat analisis mendalam' : 'Our AI technology processes your data in 1-2 minutes, comparing with MPOB standards and performing deep analysis',
                 image: 'https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800',
                 features: [
-                  language === 'ms' ? 'Analisis 30 saat' : '30-second analysis',
+                  language === 'ms' ? 'Analisis 1-2 minit' : '1-2 minute analysis',
                   language === 'ms' ? 'Standard MPOB' : 'MPOB standards',
                   language === 'ms' ? 'Perbandingan mendalam' : 'Deep comparison'
                 ]
@@ -1768,8 +1928,8 @@ export default function HomePage() {
               {
                 q: language === 'ms' ? 'Berapa lama masa yang diperlukan untuk mendapat laporan?' : 'How long does it take to get a report?',
                 a: language === 'ms'
-                  ? 'Laporan akan siap dalam masa 30 saat hingga 5 minit selepas anda muat naik keputusan ujian makmal anda.'
-                  : 'Reports are ready within 30 seconds to 5 minutes after you upload your laboratory test results.'
+                  ? 'Laporan akan siap dalam masa 1-2 minit selepas anda muat naik keputusan ujian makmal anda.'
+                  : 'Reports are ready within 1-2 minutes after you upload your laboratory test results.'
               },
               {
                 q: language === 'ms' ? 'Adakah CropDrive sesuai untuk ladang kecil?' : 'Is CropDrive suitable for small farms?',

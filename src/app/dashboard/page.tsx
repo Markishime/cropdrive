@@ -281,8 +281,8 @@ export default function DashboardPage() {
                         </h3>
                         <p className="text-white/90 text-sm">
                           {language === 'ms'
-                            ? 'Muat naik laporan makmal dan dapatkan analisis AI dalam 30 saat. Bertauliah MPOB.'
-                            : 'Upload lab reports and get AI analysis in 30 seconds. MPOB certified.'
+                            ? 'Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) dan dapatkan analisis AI dalam 1-2 minit. Bertauliah MPOB.'
+                            : 'Upload lab reports (Image/PDF/Excel - SPLAB, farm_test_data) and get AI analysis in 1-2 minutes. MPOB certified.'
                           }
                         </p>
                       </div>

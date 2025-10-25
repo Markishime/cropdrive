@@ -580,7 +580,7 @@ export default function PricingPage() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span>{language === 'ms' ? 'Masa analisis: 30 saat' : 'Analysis time: 30 seconds'}</span>
+                  <span>{language === 'ms' ? 'Masa analisis: 1-2 minit' : 'Analysis time: 1-2 minutes'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
