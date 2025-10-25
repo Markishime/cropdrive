@@ -92,11 +92,11 @@ export default function HomePage() {
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/14578994_3840_2160_30fps.mp4',
-              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/13929079_3840_2160_30fps.mp4',
-              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/12814183_1920_1080_30fps.mp4',
-              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/13947559_3840_2160_30fps.mp4',
-              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
+              '/videos/14578994_3840_2160_30fps.mp4',
+              '/videos/13929079_3840_2160_30fps.mp4',
+              '/videos/12814183_1920_1080_30fps.mp4',
+              '/videos/13947559_3840_2160_30fps.mp4',
+              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
             ].map((video, index) => (
               <motion.div
                 key={index}
@@ -119,8 +119,7 @@ export default function HomePage() {
                   playsInline
                   loop
                   className="w-full h-full object-cover"
-                  preload="auto"
-                  crossOrigin="anonymous"
+                  preload="metadata"
                   onError={(e) => {
                     console.error('Video failed to load:', video, e);
                   }}
