@@ -78,7 +78,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         displayName: formData.name,
-        phone: formData.phone,
+        phoneNumber: formData.phone,
         farmName: formData.farmName,
         farmLocation: formData.farmLocation,
         language: formData.language as 'ms' | 'en',
