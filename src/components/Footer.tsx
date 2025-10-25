@@ -55,6 +55,8 @@ const footerSections: FooterSection[] = [
       { href: '/privacy', label: 'Privacy Policy', labelMs: 'Dasar Privasi' },
       { href: '/terms', label: 'Terms of Service', labelMs: 'Syarat Perkhidmatan' },
       { href: '/cookies', label: 'Cookie Policy', labelMs: 'Dasar Kuki' },
+      { href: '/consumer-info', label: 'Consumer Information', labelMs: 'Maklumat Pengguna' },
+      { href: '/accessibility', label: 'Accessibility Notice', labelMs: 'Notis Kebolehcapaian' },
     ],
   },
 ];

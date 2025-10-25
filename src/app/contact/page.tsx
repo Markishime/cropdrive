@@ -58,7 +58,7 @@ export default function ContactUsPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-['Outfit',_sans-serif]">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
               {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
@@ -82,7 +82,7 @@ export default function ContactUsPage() {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-3xl font-black text-gray-900 mb-8 font-['Outfit',_sans-serif]">
+              <h2 className="text-3xl font-black text-gray-900 mb-8 font-heading">
                 {language === 'ms' ? 'Hantar Mesej' : 'Send a Message'}
               </h2>
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -177,7 +177,7 @@ export default function ContactUsPage() {
               className="space-y-8"
             >
               <div>
-                <h2 className="text-3xl font-black text-gray-900 mb-8 font-['Outfit',_sans-serif]">
+                <h2 className="text-3xl font-black text-gray-900 mb-8 font-heading">
                   {language === 'ms' ? 'Maklumat Hubungan' : 'Contact Information'}
                 </h2>
               </div>

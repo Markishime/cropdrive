@@ -38,7 +38,7 @@ export default function AboutUsPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-['Outfit',_sans-serif]">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
               {language === 'ms' ? 'Tentang' : 'About'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
@@ -51,29 +51,79 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-      {/* Mission Section */}
+      {/* About CropDrive Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-16"
+          >
+            <div className="max-w-4xl mx-auto">
+              <p className="text-2xl text-gray-700 leading-relaxed mb-8">
+                {language === 'ms'
+                  ? 'CropDrive™ adalah platform agronomi digital yang dibangunkan oleh AGS – Agriculture Global Solutions, sebuah konsultansi pertanian yang berpangkalan di Jerman dan beroperasi di seluruh dunia.'
+                  : 'CropDrive™ is a digital agronomy platform developed by AGS – Agriculture Global Solutions, an agricultural consultancy based in Germany and operating globally.'
+                }
+              </p>
+              <p className="text-xl text-gray-600 leading-relaxed mb-8">
+                {language === 'ms'
+                  ? 'Kami membangunkan alat praktikal yang didorong oleh AI yang membantu petani dan organisasi membuat keputusan agronomi dan pelaburan berdasarkan data. Fokus semasa kami adalah pada penyelesaian pertanian digital berasaskan AI untuk kelapa sawit di Malaysia, dengan perancangan pengembangan ke Indonesia dan negara tropika lain.'
+                  : 'We develop practical AI-driven tools that help farmers and organizations make data-based agronomic and investment decisions. Our current focus is on AI-based digital agriculture solutions for oil palm in Malaysia, with planned expansion to Indonesia and other tropical countries.'
+                }
+              </p>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-16">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+              className="relative"
+            >
+              <img 
+                src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"
+                alt="Palm Oil Plantation"
+                className="rounded-2xl shadow-2xl"
+              />
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
+                {language === 'ms' ? 'Produk Pertama Kami' : 'Our First Product'}
+              </h2>
+              <p className="text-xl text-gray-700 leading-relaxed mb-6">
+                {language === 'ms'
+                  ? 'Produk pertama kami, CropDrive AI Agronomist, menukar keputusan ujian tanah dan daun kepada cadangan tepat khusus lapangan yang mengurangkan pembaziran, meningkatkan hasil, dan membimbing pengurusan tanah jangka panjang.'
+                  : 'Our first product, the CropDrive AI Agronomist, turns soil and leaf test results into precise, field-specific recommendations that reduce waste, improve yields, and guide long-term soil management.'
+                }
+              </p>
+            </motion.div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-16">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-['Outfit',_sans-serif]">
-                {language === 'ms' ? 'Misi Kami' : 'Our Mission'}
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
+                {language === 'ms' ? 'Pasukan Kami' : 'Our Team'}
               </h2>
               <p className="text-xl text-gray-700 leading-relaxed mb-6">
                 {language === 'ms'
-                  ? 'CropDrive OP Advisor™ ditubuhkan dengan visi untuk membawa revolusi pertanian pintar ke Malaysia. Kami percaya setiap petani kelapa sawit berhak mendapat akses kepada teknologi AI terkini untuk membuat keputusan yang lebih baik.'
-                  : 'CropDrive OP Advisor™ was founded with a vision to bring smart farming revolution to Malaysia. We believe every palm oil farmer deserves access to cutting-edge AI technology to make better decisions.'
-                }
-              </p>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                {language === 'ms'
-                  ? 'Dengan menggabungkan kepakaran agronomi tempatan dengan AI Google Gemini, kami menjadikan analisis tanah dan daun yang kompleks mudah difahami dan boleh dilaksanakan dalam masa 30 saat.'
-                  : 'By combining local agronomic expertise with Google Gemini AI, we make complex soil and leaf analysis easy to understand and actionable in just 30 seconds.'
+                  ? 'Pasukan kami menggabungkan pengalaman lapangan yang mendalam dalam agronomi tropika, kesuburan tanah, dan pertanian presisi dengan sains data maju. Kami bekerjasama dengan perniagaan pertanian, institusi penyelidikan, NGO, dan agensi pembangunan untuk menjadikan agronomi digital yang boleh dipercayai dapat diakses oleh ladang semua saiz.'
+                  : 'Our team combines deep field experience in tropical agronomy, soil fertility, and precision agriculture with advanced data science. We collaborate with agricultural businesses, research institutions, NGOs, and development agencies to make reliable digital agronomy accessible to farms of all sizes.'
                 }
               </p>
             </motion.div>
@@ -86,12 +136,32 @@ export default function AboutUsPage() {
               className="relative"
             >
               <img 
-                src="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=800"
-                alt="Palm Oil Plantation"
+                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=800"
+                alt="Agricultural Team"
                 className="rounded-2xl shadow-2xl"
               />
             </motion.div>
           </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="max-w-4xl mx-auto"
+          >
+            <div className="bg-gradient-to-br from-green-50 to-white p-10 rounded-3xl shadow-xl">
+              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 font-heading text-center">
+                {language === 'ms' ? 'Masa Depan Kami' : 'Our Future'}
+              </h2>
+              <p className="text-xl text-gray-700 leading-relaxed mb-6">
+                {language === 'ms'
+                  ? 'Semasa kami terus berkembang, portfolio tanaman CropDrive akan berkembang ke koko dan kopi, membawa pendekatan berasaskan sains yang sama ke tanaman tropika utama lain. Misi kami adalah untuk menghubungkan data sebenar dengan hasil sebenar, memastikan setiap cadangan membawa kepada peningkatan yang boleh diukur dalam produktiviti dan kemampanan.'
+                  : "As we continue to grow, CropDrive's crop portfolio will expand into cocoa and coffee, bringing the same science-based approach to other key tropical crops. Our mission is to connect real data with real results, ensuring every recommendation leads to measurable improvement in productivity and sustainability."
+                }
+              </p>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -105,7 +175,7 @@ export default function AboutUsPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-['Outfit',_sans-serif]">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
               {language === 'ms' ? 'Nilai' : 'Our'} <span className="text-green-700">{language === 'ms' ? 'Kami' : 'Values'}</span>
             </h2>
           </motion.div>
@@ -143,7 +213,7 @@ export default function AboutUsPage() {
                 className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-center"
               >
                 <div className="text-6xl mb-6">{value.icon}</div>
-                <h3 className="text-2xl font-black text-gray-900 mb-4 font-['Outfit',_sans-serif]">
+                <h3 className="text-2xl font-black text-gray-900 mb-4 font-heading">
                   {value.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
@@ -165,7 +235,7 @@ export default function AboutUsPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 font-['Outfit',_sans-serif]">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 font-heading">
               {language === 'ms' ? 'Pencapaian Kami' : 'Our Achievements'}
             </h2>
           </motion.div>
@@ -202,7 +272,7 @@ export default function AboutUsPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-['Outfit',_sans-serif]">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
               {language === 'ms' ? 'Sertai Kami Hari Ini' : 'Join Us Today'}
             </h2>
             <p className="text-xl text-gray-600 mb-8">

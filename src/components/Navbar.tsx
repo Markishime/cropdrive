@@ -62,6 +62,8 @@ export const Navbar: React.FC = () => {
   const getStartedLinks = [
     { href: '/get-started/farmers', label: 'For Farmers', labelMs: 'Untuk Petani' },
     { href: '/get-started/organizations', label: 'For Organizations', labelMs: 'Untuk Organisasi' },
+    { href: '/features', label: 'Features', labelMs: 'Ciri-ciri' },
+    { href: '/pricing', label: 'Pricing', labelMs: 'Harga' },
   ];
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo - CropDrive OP Advisor™ */}
-          <Link href="/" className="flex items-center space-x-3 group">
+          <Link href="/" className="flex items-center space-x-3 group mr-8 lg:mr-12">
             {/* Oil Palm Tree Icon */}
             <div className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ${
               scrolled ? 'text-green-600' : 'text-yellow-400'
@@ -117,27 +119,27 @@ export const Navbar: React.FC = () => {
               </svg>
             </div>
             
-            <div className="flex flex-col leading-tight">
-              <span className={`font-black text-xl tracking-tight transition-all duration-500 ${
+            <div className="flex items-start leading-tight whitespace-nowrap">
+              <span className={`font-black text-lg md:text-xl tracking-tight transition-all duration-500 ${
                 scrolled ? 'text-gray-900' : 'text-white'
-              } font-['Outfit',_sans-serif]`}>
+              } font-heading`}>
                 CropDrive OP Advisor
               </span>
-              <span className={`text-[10px] font-bold tracking-widest transition-all duration-500 ${
-                scrolled ? 'text-gray-500' : 'text-yellow-400'
+              <sup className={`text-xs font-black ml-0.5 transition-all duration-500 ${
+                scrolled ? 'text-yellow-500' : 'text-yellow-400'
               }`}>
                 ™
-              </span>
+              </sup>
             </div>
           </Link>
 
           {/* Desktop Navigation - Modern & Transparent */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-4 lg:space-x-6">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`font-semibold text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 relative group ${
+                className={`font-semibold text-xs lg:text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 relative group whitespace-nowrap ${
                   scrolled 
                     ? 'text-gray-700' 
                     : 'text-white'
@@ -156,7 +158,7 @@ export const Navbar: React.FC = () => {
                 onMouseLeave={() => setShowDropdown(false)}
               >
                 <button
-                  className={`font-semibold text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 flex items-center space-x-1 relative group ${
+                  className={`font-semibold text-xs lg:text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 flex items-center space-x-1 relative group whitespace-nowrap ${
                     scrolled ? 'text-gray-700' : 'text-white'
                   }`}
                 >
@@ -211,6 +213,22 @@ export const Navbar: React.FC = () => {
               </div>
             )}
 
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-300 whitespace-nowrap ${
+                scrolled
+                  ? 'text-gray-700 hover:bg-gray-100'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+              </svg>
+              <span className="font-bold">{language === 'ms' ? 'EN' : 'MS'}</span>
+            </button>
+
             {/* Auth & Actions */}
             {user ? (
               <button
@@ -232,15 +250,26 @@ export const Navbar: React.FC = () => {
                 {language === 'ms' ? 'Log Keluar' : 'Logout'}
               </button>
             ) : (
-              <Link href="/register">
-                <button className={`px-6 py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-sm ${
-                  scrolled
-                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                    : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
-                }`}>
-                  {language === 'ms' ? 'Jadual Lawatan' : 'Schedule a Visit'}
-                </button>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link href="/login">
+                  <button className={`px-5 py-2 rounded-lg font-semibold text-sm transition-all duration-300 whitespace-nowrap ${
+                    scrolled
+                      ? 'text-gray-700 hover:bg-gray-100'
+                      : 'text-white hover:bg-white/10'
+                  }`}>
+                    {language === 'ms' ? 'Log Masuk' : 'Login'}
+                  </button>
+                </Link>
+                <Link href="/register">
+                  <button className={`px-6 py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-sm whitespace-nowrap ${
+                    scrolled
+                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                  }`}>
+                    {language === 'ms' ? 'Daftar' : 'Register'}
+                  </button>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -298,6 +327,25 @@ export const Navbar: React.FC = () => {
                   {language === 'ms' ? link.labelMs : link.label}
                 </Link>
               ))}
+
+              {/* Get Started Links in Mobile (Only Before Login) */}
+              {!user && (
+                <div className="pt-2 border-t border-gray-200">
+                  <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 px-2">
+                    {language === 'ms' ? 'Mula' : 'Get Started'}
+                  </div>
+                  {getStartedLinks.map((link) => (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className="block text-gray-600 hover:text-green-600 font-medium transition-colors duration-200 py-2 px-2"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      {language === 'ms' ? link.labelMs : link.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                 <button

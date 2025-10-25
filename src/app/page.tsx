@@ -143,7 +143,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.3, type: "spring", stiffness: 100 }}
-              className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-8 leading-tight min-h-[320px] md:min-h-[280px] font-['Inter',_sans-serif] drop-shadow-2xl tracking-tight"
+              className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-8 leading-tight min-h-[320px] md:min-h-[280px] font-heading drop-shadow-2xl tracking-tight"
               style={{ textShadow: '0 8px 32px rgba(0,0,0,0.6)', letterSpacing: '-0.03em' }}
             >
               <TypeAnimation
@@ -382,7 +382,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 font-['Inter',_sans-serif] tracking-tight">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4 font-heading tracking-tight">
               {language === 'ms' ? 'Mengapa Memilih CropDrive?' : 'Why Choose CropDrive?'}
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
@@ -454,7 +454,7 @@ export default function HomePage() {
                   </motion.div>
                 </div>
                 <div className="p-6 bg-gradient-to-b from-white to-green-50/30">
-                  <h3 className="text-xl font-black text-gray-900 mb-2 font-['Inter',_sans-serif] tracking-tight">
+                  <h3 className="text-xl font-black text-gray-900 mb-2 font-heading tracking-tight">
                     {item.title}
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed font-medium">
@@ -836,7 +836,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl md:text-6xl font-black text-white mb-6 font-['Inter',_sans-serif] tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-black text-white mb-6 font-heading tracking-tight">
               {language === 'ms' ? 'Kuasa AI di Sebalik Kejayaan Anda' : 'The AI Power Behind Your Success'}
             </h2>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
@@ -894,7 +894,7 @@ export default function HomePage() {
                 >
                   <span className="text-white font-black text-3xl">{tech.number}</span>
                 </motion.div>
-                <h3 className="text-2xl font-black text-white mb-4 font-['Inter',_sans-serif] tracking-tight relative z-10">{tech.title}</h3>
+                <h3 className="text-2xl font-black text-white mb-4 font-heading tracking-tight relative z-10">{tech.title}</h3>
                 <p className="text-gray-300 leading-relaxed font-medium relative z-10">{tech.desc}</p>
                 </motion.div>
               ))}
@@ -912,7 +912,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-20"
           >
-            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-['Inter',_sans-serif] tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading tracking-tight">
               {language === 'ms' ? 'Bagaimana Ia Berfungsi' : 'How It Works'}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -998,7 +998,7 @@ export default function HomePage() {
 
                 {/* Content Side */}
                 <div className="flex-1">
-                  <h3 className="text-4xl font-black text-gray-900 mb-6 font-['Inter',_sans-serif] tracking-tight">
+                  <h3 className="text-4xl font-black text-gray-900 mb-6 font-heading tracking-tight">
                     {step.title}
                   </h3>
                   <p className="text-lg text-gray-600 mb-8 leading-relaxed">
@@ -1028,17 +1028,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Success Stories & Testimonials Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 via-yellow-50 to-green-50">
+      {/* Success Stories & Testimonials Section - Sliding Carousel */}
+      <section className="py-24 bg-gradient-to-br from-green-50 via-yellow-50 to-green-50 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+            whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-                  viewport={{ once: true }}
+            viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-['Inter',_sans-serif] tracking-tight">
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading tracking-tight">
               {language === 'ms' ? 'Kisah Kejayaan' : 'Success Stories'}
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -1047,81 +1047,139 @@ export default function HomePage() {
                 : 'Hear from farmers who have increased their yields with CropDrive'
               }
             </p>
-                </motion.div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'Ahmad bin Hassan',
-                location: 'Johor',
-                farm: '50 hektar',
-                result: language === 'ms' ? '+35% hasil dalam 2 tahun' : '+35% yield in 2 years',
-                quote: language === 'ms' 
-                  ? 'CropDrive telah mengubah cara saya menguruskan ladang. Sekarang saya tahu apa yang tanah saya perlukan.'
-                  : 'CropDrive has transformed how I manage my farm. Now I know exactly what my soil needs.',
-                image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400'
-              },
-              {
-                name: 'Siti Aminah',
-                location: 'Pahang',
-                farm: '120 hektar',
-                result: language === 'ms' ? 'Jimat RM80k setahun' : 'Saved RM80k per year',
-                quote: language === 'ms' 
-                  ? 'Cadangan baja yang tepat menjimatkan banyak wang. ROI saya meningkat dengan ketara.'
-                  : 'Precise fertilizer recommendations save so much money. My ROI has improved significantly.',
-                image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400'
-              },
-              {
-                name: 'Rajesh Kumar',
-                location: 'Perak',
-                farm: '200 hektar',
-                result: language === 'ms' ? '150% ROI dalam 3 tahun' : '150% ROI in 3 years',
-                quote: language === 'ms' 
-                  ? 'Multi-farm management memudahkan pengurusan kesemua ladang saya dari satu tempat.'
-                  : 'Multi-farm management makes it easy to manage all my farms from one place.',
-                image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400'
-              }
-            ].map((testimonial, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.2 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="relative h-48">
-                  <img 
-                    src={testimonial.image}
-                    alt={testimonial.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 to-transparent"></div>
-                </div>
-                <div className="p-8">
-                  <div className="flex items-center mb-4">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">{testimonial.name}</h3>
-                      <p className="text-gray-500 text-sm">{testimonial.location} • {testimonial.farm}</p>
+          {/* Carousel Container */}
+          <div className="relative">
+            <motion.div 
+              className="flex gap-8"
+              animate={{
+                x: [0, -2400, 0]
+              }}
+              transition={{
+                duration: 60,
+                repeat: Infinity,
+                ease: "linear"
+              }}
+            >
+              {[
+                {
+                  name: 'Ahmad bin Hassan',
+                  location: 'Johor',
+                  farm: '50 hectares',
+                  result: language === 'ms' ? '+35% hasil dalam 2 tahun' : '+35% yield in 2 years',
+                  quote: language === 'ms' 
+                    ? 'CropDrive telah mengubah cara saya menguruskan ladang. Sekarang saya tahu apa yang tanah saya perlukan.'
+                    : 'CropDrive has transformed how I manage my farm. Now I know exactly what my soil needs.',
+                  image: 'https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Siti Aminah',
+                  location: 'Pahang',
+                  farm: '120 hectares',
+                  result: language === 'ms' ? 'Jimat RM80k setahun' : 'Saved RM80k per year',
+                  quote: language === 'ms' 
+                    ? 'Cadangan baja yang tepat menjimatkan banyak wang. ROI saya meningkat dengan ketara.'
+                    : 'Precise fertilizer recommendations save so much money. My ROI has improved significantly.',
+                  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Rajesh Kumar',
+                  location: 'Perak',
+                  farm: '200 hectares',
+                  result: language === 'ms' ? '150% ROI dalam 3 tahun' : '150% ROI in 3 years',
+                  quote: language === 'ms' 
+                    ? 'Multi-farm management memudahkan pengurusan kesemua ladang saya dari satu tempat.'
+                    : 'Multi-farm management makes it easy to manage all my farms from one place.',
+                  image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Lee Chin Huat',
+                  location: 'Selangor',
+                  farm: '85 hectares',
+                  result: language === 'ms' ? '+28% produktiviti' : '+28% productivity',
+                  quote: language === 'ms'
+                    ? 'AI analysis membantu saya mengenal pasti kekurangan nutrien dengan cepat. Hasil saya meningkat dengan ketara.'
+                    : 'AI analysis helped me identify nutrient deficiencies quickly. My yields have improved significantly.',
+                  image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Fatimah Zahra',
+                  location: 'Kedah',
+                  farm: '60 hectares',
+                  result: language === 'ms' ? 'Kualiti tanah meningkat 40%' : '40% soil health improvement',
+                  quote: language === 'ms'
+                    ? 'Program pemulihan tanah yang dicadangkan CropDrive sangat berkesan. Tanah saya sekarang lebih subur.'
+                    : 'The soil restoration program recommended by CropDrive was very effective. My soil is now much healthier.',
+                  image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Wong Ah Kow',
+                  location: 'Sabah',
+                  farm: '300 hectares',
+                  result: language === 'ms' ? 'ROI +180% dalam 4 tahun' : '180% ROI in 4 years',
+                  quote: language === 'ms'
+                    ? 'Sistem multi-ladang memudahkan pengurusan operasi besar. Keputusan berdasarkan data adalah kunci kejayaan.'
+                    : 'Multi-farm system makes managing large operations easy. Data-driven decisions are the key to success.',
+                  image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop'
+                },
+                // Duplicate for seamless loop
+                {
+                  name: 'Ahmad bin Hassan',
+                  location: 'Johor',
+                  farm: '50 hectares',
+                  result: language === 'ms' ? '+35% hasil dalam 2 tahun' : '+35% yield in 2 years',
+                  quote: language === 'ms' 
+                    ? 'CropDrive telah mengubah cara saya menguruskan ladang. Sekarang saya tahu apa yang tanah saya perlukan.'
+                    : 'CropDrive has transformed how I manage my farm. Now I know exactly what my soil needs.',
+                  image: 'https://images.unsplash.com/photo-1566753323558-f4e0952af115?w=400&h=400&fit=crop'
+                },
+                {
+                  name: 'Siti Aminah',
+                  location: 'Pahang',
+                  farm: '120 hectares',
+                  result: language === 'ms' ? 'Jimat RM80k setahun' : 'Saved RM80k per year',
+                  quote: language === 'ms' 
+                    ? 'Cadangan baja yang tepat menjimatkan banyak wang. ROI saya meningkat dengan ketara.'
+                    : 'Precise fertilizer recommendations save so much money. My ROI has improved significantly.',
+                  image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop'
+                }
+              ].map((testimonial, index) => (
+                <motion.div
+                  key={index}
+                  whileHover={{ scale: 1.05, y: -10 }}
+                  className="min-w-[350px] md:min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300"
+                >
+                  <div className="relative h-64 w-full overflow-hidden">
+                    <img 
+                      src={testimonial.image}
+                      alt={testimonial.name}
+                      className="w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-green-900/90 via-green-900/40 to-transparent"></div>
+                    <div className="absolute bottom-4 left-4 text-white">
+                      <h3 className="text-2xl font-black">{testimonial.name}</h3>
+                      <p className="text-green-100 text-sm font-semibold">{testimonial.location} • {testimonial.farm}</p>
                     </div>
                   </div>
-                  <div className="mb-4 p-4 bg-green-50 rounded-xl">
-                    <p className="text-green-700 font-bold text-lg">{testimonial.result}</p>
+                  <div className="p-6">
+                    <div className="mb-4 p-4 bg-gradient-to-r from-green-50 to-yellow-50 rounded-xl border-2 border-green-200">
+                      <p className="text-green-700 font-black text-lg text-center">{testimonial.result}</p>
+                    </div>
+                    <p className="text-gray-600 italic leading-relaxed mb-4 text-sm">
+                      "{testimonial.quote}"
+                    </p>
+                    <div className="flex justify-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
                   </div>
-                  <p className="text-gray-600 italic leading-relaxed">
-                    "{testimonial.quote}"
-                  </p>
-                  <div className="flex mt-4">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-            </div>
-          </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </motion.div>
           </div>
         </div>
       </section>
@@ -1211,7 +1269,7 @@ export default function HomePage() {
                 >
                   <span className="text-white font-black text-xl">{solution.number}</span>
                 </motion.div>
-                <h3 className="text-xl font-black text-gray-900 mb-3 font-['Inter',_sans-serif] tracking-tight">{solution.title}</h3>
+                <h3 className="text-xl font-black text-gray-900 mb-3 font-heading tracking-tight">{solution.title}</h3>
                 <p className="text-gray-700 leading-relaxed font-medium">{solution.desc}</p>
               </motion.div>
             ))}
@@ -1302,6 +1360,217 @@ export default function HomePage() {
             <p className="text-lg max-w-3xl mx-auto">
               Our AI draws from proven agronomic expertise to deliver trusted outcomes in tropical agriculture.
             </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Statistics Section */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading">
+              {language === 'ms' ? 'Hasil Dalam Angka' : 'Results in Numbers'}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {language === 'ms' 
+                ? 'Data sebenar daripada petani yang menggunakan CropDrive'
+                : 'Real data from farmers using CropDrive'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                number: '3,500+',
+                label: language === 'ms' ? 'Petani Aktif' : 'Active Farmers',
+                icon: '👨‍🌾'
+              },
+              {
+                number: '45,000+',
+                label: language === 'ms' ? 'Hektar Diuruskan' : 'Hectares Managed',
+                icon: '🌾'
+              },
+              {
+                number: '38%',
+                label: language === 'ms' ? 'Purata Peningkatan Hasil' : 'Average Yield Increase',
+                icon: '📈'
+              },
+              {
+                number: 'RM12M+',
+                label: language === 'ms' ? 'Penjimatan Kos' : 'Cost Savings',
+                icon: '💰'
+              }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ scale: 1.05 }}
+                className="bg-gradient-to-br from-green-50 to-yellow-50 p-8 rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all"
+              >
+                <div className="text-5xl mb-4">{stat.icon}</div>
+                <div className="text-5xl font-black text-green-700 mb-2">{stat.number}</div>
+                <div className="text-lg font-semibold text-gray-700">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-black mb-6 font-heading">
+              {language === 'ms' ? 'Teknologi Yang' : 'Powered by'} <span className="text-yellow-400">{language === 'ms' ? 'Dikuasai AI' : 'Advanced AI'}</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+              {language === 'ms'
+                ? 'Platform kami menggunakan teknologi AI terkini untuk memberikan cadangan pertanian yang tepat'
+                : 'Our platform uses cutting-edge AI technology to deliver precise agricultural recommendations'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: language === 'ms' ? 'Google Gemini AI' : 'Google Gemini AI',
+                desc: language === 'ms'
+                  ? 'Model AI generasi terkini untuk analisis data yang kompleks dan cadangan yang tepat'
+                  : 'Latest generation AI model for complex data analysis and precise recommendations',
+                icon: '🤖'
+              },
+              {
+                title: language === 'ms' ? 'Teknologi OCR' : 'OCR Technology',
+                desc: language === 'ms'
+                  ? 'Membaca dokumen makmal secara automatik tanpa perlu taip manual'
+                  : 'Automatically reads laboratory documents without manual typing',
+                icon: '📄'
+              },
+              {
+                title: language === 'ms' ? 'Model Agronomi' : 'Agronomic Models',
+                desc: language === 'ms'
+                  ? 'Berdasarkan penyelidikan antarabangsa dan disahkan dalam keadaan tropika'
+                  : 'Based on international research and validated in tropical conditions',
+                icon: '🔬'
+              }
+            ].map((tech, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.2 }}
+                viewport={{ once: true }}
+                className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border-2 border-gray-700 hover:border-yellow-400 transition-all"
+              >
+                <div className="text-6xl mb-4">{tech.icon}</div>
+                <h3 className="text-2xl font-bold mb-4 text-yellow-400">{tech.title}</h3>
+                <p className="text-gray-300 leading-relaxed">{tech.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading">
+              {language === 'ms' ? 'Soalan Lazim' : 'Frequently Asked Questions'}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {language === 'ms'
+                ? 'Jawapan kepada soalan yang paling kerap ditanya'
+                : 'Answers to the most commonly asked questions'
+              }
+            </p>
+          </motion.div>
+
+          <div className="space-y-6">
+            {[
+              {
+                q: language === 'ms' ? 'Bagaimana CropDrive berfungsi?' : 'How does CropDrive work?',
+                a: language === 'ms'
+                  ? 'CropDrive menggunakan AI untuk menganalisis keputusan ujian tanah dan daun anda, kemudian memberikan cadangan baja yang tepat berdasarkan keperluan ladang anda.'
+                  : 'CropDrive uses AI to analyze your soil and leaf test results, then provides precise fertilizer recommendations based on your farm\'s needs.'
+              },
+              {
+                q: language === 'ms' ? 'Berapa lama masa yang diperlukan untuk mendapat laporan?' : 'How long does it take to get a report?',
+                a: language === 'ms'
+                  ? 'Laporan akan siap dalam masa 30 saat hingga 5 minit selepas anda muat naik keputusan ujian makmal anda.'
+                  : 'Reports are ready within 30 seconds to 5 minutes after you upload your laboratory test results.'
+              },
+              {
+                q: language === 'ms' ? 'Adakah CropDrive sesuai untuk ladang kecil?' : 'Is CropDrive suitable for small farms?',
+                a: language === 'ms'
+                  ? 'Ya! CropDrive direka untuk semua saiz ladang, dari petani kecil hingga ladang besar. Kami mempunyai pelan harga yang sesuai untuk setiap keperluan.'
+                  : 'Yes! CropDrive is designed for all farm sizes, from smallholders to large plantations. We have pricing plans suitable for every need.'
+              },
+              {
+                q: language === 'ms' ? 'Apakah format fail yang diterima?' : 'What file formats are accepted?',
+                a: language === 'ms'
+                  ? 'Kami menerima PDF, JPG, PNG, dan format spreadsheet (Excel/CSV). Sistem OCR kami boleh membaca kebanyakan format laporan makmal standard.'
+                  : 'We accept PDF, JPG, PNG, and spreadsheet formats (Excel/CSV). Our OCR system can read most standard laboratory report formats.'
+              },
+              {
+                q: language === 'ms' ? 'Adakah saya perlu pengetahuan teknikal?' : 'Do I need technical knowledge?',
+                a: language === 'ms'
+                  ? 'Tidak! CropDrive direka untuk mudah digunakan oleh sesiapa sahaja. Anda hanya perlu muat naik keputusan ujian, dan sistem akan mengendalikan selebihnya.'
+                  : 'No! CropDrive is designed to be user-friendly for everyone. You just need to upload your test results, and the system handles the rest.'
+              }
+            ].map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-8 rounded-2xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all"
+              >
+                <h3 className="text-xl font-bold text-gray-900 mb-4">{faq.q}</h3>
+                <p className="text-gray-700 leading-relaxed">{faq.a}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            viewport={{ once: true }}
+            className="text-center mt-12"
+          >
+            <p className="text-lg text-gray-600 mb-4">
+              {language === 'ms' ? 'Masih ada soalan?' : 'Still have questions?'}
+            </p>
+            <Link href="/contact">
+              <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl">
+                {language === 'ms' ? 'Hubungi Kami' : 'Contact Us'}
+              </button>
+            </Link>
           </motion.div>
         </div>
       </section>

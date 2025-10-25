@@ -221,13 +221,13 @@ export default function FeaturesPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
-                <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200">
-                  {language === 'ms' ? 'Mula Percubaan' : 'Start Trial'}
+                <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                  {language === 'ms' ? 'Daftar Sekarang' : 'Sign Up Now'}
                 </button>
               </Link>
-              <Link href="/pricing">
-                <button className="px-8 py-4 border-2 border-white/30 text-white rounded font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200">
-                  {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+              <Link href="/get-started/farmers">
+                <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200 hover:bg-white/10">
+                  {language === 'ms' ? 'Ketahui Lebih Lanjut' : 'Learn More'}
                 </button>
               </Link>
             </div>
@@ -549,13 +549,13 @@ export default function FeaturesPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link href="/register">
-                <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
-                  {language === 'ms' ? 'Mula Percubaan Percuma' : 'Start Free Trial'}
+                <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
+                  {language === 'ms' ? 'Sertai Sekarang' : 'Join Now'}
                 </button>
               </Link>
               <Link href="/pricing">
-                <button className="px-10 py-5 border-2 border-white text-white rounded-lg font-medium uppercase text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 hover:bg-white/10 transition-all duration-200">
-                  {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+                <button className="px-10 py-5 border-2 border-white text-white rounded-xl font-medium uppercase text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 hover:bg-white/10 transition-all duration-200">
+                  {language === 'ms' ? 'Lihat Pelan Harga' : 'View Plans'}
                 </button>
               </Link>
             </div>

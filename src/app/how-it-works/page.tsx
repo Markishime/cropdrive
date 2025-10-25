@@ -23,46 +23,46 @@ export default function HowItWorksPage() {
   const steps = [
     {
       number: '1',
-      title: language === 'ms' ? 'Muat Naik Laporan' : 'Upload Report',
+      title: language === 'ms' ? 'Muat Naik Keputusan Ujian Anda' : 'Upload Your Test Results',
       desc: language === 'ms' 
-        ? 'Muat naik PDF atau gambar laporan makmal tanah/daun anda. AI kami menyokong semua format lab.'
-        : 'Upload your soil/leaf lab report PDF or image. Our AI supports all lab formats.',
+        ? 'Mulakan dengan memuat naik hasil analisis tanah dan daun anda terus ke platform. Format yang diterima termasuk kebanyakan laporan makmal standard. Petani boleh memuat naik fail melalui akaun CropDrive mereka, manakala organisasi dan makmal boleh mengintegrasikan muat naik pukal.'
+        : 'Start by uploading your soil and leaf analysis results directly to the platform. Accepted formats include most standard laboratory reports. Farmers can upload files through their CropDrive account, while organizations and laboratories can integrate bulk uploads.',
       icon: '📤',
       image: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=800'
     },
     {
       number: '2',
-      title: language === 'ms' ? 'AI Menganalisis (30 saat)' : 'AI Analyzes (30 seconds)',
+      title: language === 'ms' ? 'Analisis AI' : 'AI Analysis',
       desc: language === 'ms'
-        ? 'Google Gemini AI membaca data, membandingkan dengan standard MPOB, dan mengenal pasti isu nutrien.'
-        : 'Google Gemini AI reads data, compares to MPOB standards, and identifies nutrient issues.',
+        ? 'AI Agronomis CropDrive mentafsir data ujian menggunakan model agronomi yang dibangunkan dari penyelidikan antarabangsa dan disahkan dalam keadaan lapangan tropika. Sistem mengenal pasti jurang nutrien, isu kesihatan tanah, dan ketidakseimbangan, kemudian mereka bentuk strategi persenyawaan dan penambahbaikan yang disesuaikan.'
+        : "CropDrive's AI Agronomist interprets the test data using agronomic models developed from international research and validated in tropical field conditions. The system identifies nutrient gaps, soil health issues, and imbalances, then designs tailored fertilization and improvement strategies.",
       icon: '🤖',
       image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800'
     },
     {
       number: '3',
-      title: language === 'ms' ? 'Terima 3 Pilihan Bajet' : 'Receive 3 Budget Options',
+      title: language === 'ms' ? 'Terima Laporan Anda' : 'Receive Your Report',
       desc: language === 'ms'
-        ? 'Dapatkan cadangan Tinggi, Sederhana, dan Rendah dengan kos, ROI 5 tahun, dan amalan regeneratif.'
-        : 'Get High, Medium, and Low recommendations with costs, 5-year ROI, and regenerative practices.',
-      icon: '💰',
+        ? 'Dalam beberapa minit, pengguna menerima laporan nasihat khusus lapangan yang merangkumi: Cadangan baja dengan kadar dan masa, Strategi penambahbaikan kesihatan tanah, Anggaran keseimbangan nutrien dan ROI, Kesan yang dijangka terhadap produktiviti.'
+        : 'Within minutes, users receive a field-specific advisory report that includes: Fertilizer recommendations with rates and timing, Soil health improvement strategy, Nutrient balance and ROI estimates, Expected impact on productivity.',
+      icon: '📋',
       image: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800'
     },
     {
       number: '4',
-      title: language === 'ms' ? 'Eksport Laporan PDF' : 'Export PDF Report',
+      title: language === 'ms' ? 'Laksanakan Cadangan' : 'Apply Recommendations',
       desc: language === 'ms'
-        ? 'Muat turun laporan profesional lengkap untuk mesyuarat, pembekal, dan dokumentasi.'
-        : 'Download complete professional report for meetings, suppliers, and documentation.',
-      icon: '📄',
+        ? 'Petani dan estet menggunakan laporan untuk menyesuaikan penggunaan input dan meningkatkan prestasi hasil. Untuk organisasi, CropDrive menyediakan analitik agregat dan integrasi pilihan ke dalam sistem pemantauan untuk pengurusan projek atau rantaian bekalan.'
+        : 'Farmers and estates use the report to adjust input use and improve yield performance. For organizations, CropDrive provides aggregated analytics and optional integration into monitoring systems for project or supply chain management.',
+      icon: '🌱',
       image: 'https://images.unsplash.com/photo-1568667256549-094345857637?w=800'
     },
     {
       number: '5',
-      title: language === 'ms' ? 'Laksana & Pantau' : 'Implement & Monitor',
+      title: language === 'ms' ? 'Jejaki Kemajuan dan Keputusan' : 'Track Progress and Results',
       desc: language === 'ms'
-        ? 'Laksanakan cadangan, muat naik ujian berkala, bandingkan keputusan, dan jejaki peningkatan.'
-        : 'Implement recommendations, upload periodic tests, compare results, and track improvements.',
+        ? 'Dengan penggunaan yang konsisten, CropDrive membolehkan pengguna membandingkan data bermusim, memantau pemulihan tanah, dan menilai faedah ekonomi pengurusan nutrien yang lebih baik.'
+        : 'With consistent use, CropDrive allows users to compare seasonal data, monitor soil restoration, and evaluate the economic benefits of improved nutrient management.',
       icon: '📈',
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800'
     }
@@ -86,13 +86,13 @@ export default function HowItWorksPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-['Outfit',_sans-serif]">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
               {language === 'ms' ? 'Cara Ia' : 'How It'} <span className="text-yellow-400">{language === 'ms' ? 'Berfungsi' : 'Works'}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
-                ? 'Dari muat naik laporan hingga hasil yang boleh diambil tindakan dalam 5 langkah mudah'
-                : 'From report upload to actionable results in 5 simple steps'
+                ? 'CropDrive™ menukar keputusan ujian makmal pertanian kepada keputusan agronomi yang jelas. Prosesnya mudah, cepat, dan disokong oleh sains.'
+                : 'CropDrive™ turns agricultural laboratory test results into clear agronomic decisions. The process is simple, fast, and backed by science.'
               }
             </p>
           </motion.div>
@@ -127,10 +127,10 @@ export default function HowItWorksPage() {
 
                 {/* Content */}
                 <div className="w-full md:w-1/2">
-                  <div className="inline-block bg-yellow-400 text-green-900 text-6xl font-black rounded-full w-24 h-24 flex items-center justify-center mb-6 shadow-xl">
+                  <div className="bg-yellow-400 text-green-900 text-6xl font-black rounded-full w-24 h-24 flex items-center justify-center mb-6 shadow-xl">
                     {step.number}
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-['Outfit',_sans-serif]">
+                  <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
                     {step.title}
                   </h2>
                   <p className="text-xl text-gray-700 leading-relaxed mb-8">
@@ -159,7 +159,7 @@ export default function HowItWorksPage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 font-['Outfit',_sans-serif]">
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 font-heading">
               {language === 'ms' ? 'Sedia untuk Transformasi?' : 'Ready to Transform?'}
             </h2>
             <p className="text-xl text-white/90 mb-8">

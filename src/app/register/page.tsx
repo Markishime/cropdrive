@@ -6,10 +6,10 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from '@/i18n';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import Card from '@/components/ui/Card';
 import toast from 'react-hot-toast';
+
+// Hide navbar for this page
+export const dynamic = 'force-dynamic';
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -78,16 +78,15 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         displayName: formData.name,
-        phoneNumber: formData.phone || undefined,
-        farmName: formData.farmName || undefined,
-        farmLocation: formData.farmLocation || undefined,
-        language: formData.language as 'en' | 'ms',
-      }, formData.language as 'en' | 'ms');
+        phone: formData.phone,
+        farmName: formData.farmName,
+        farmLocation: formData.farmLocation,
+        language: formData.language as 'ms' | 'en',
+      }, language);
 
-      // Success message is handled in the auth context
+      toast.success(language === 'ms' ? 'Akaun berjaya dibuat!' : 'Account created successfully!');
       router.push('/dashboard');
     } catch (error) {
-      // Error is handled in the auth context
       console.error('Registration error:', error);
     } finally {
       setLoading(false);
@@ -103,126 +102,216 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-green-50 via-blue-50 to-emerald-50">
-      <div className="max-w-md w-full space-y-8">
+    <>
+      <style jsx global>{`
+        nav { display: none !important; }
+        footer { display: none !important; }
+      `}</style>
+      
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 relative overflow-hidden">
+        {/* Animated Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+
+        {/* Floating Elements */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-        >
-          <div className="text-center">
-            <Link href="/" className="flex items-center justify-center space-x-2 mb-8">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-xl flex items-center justify-center">
-                <svg
-                  className="w-7 h-7 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
+          className="absolute top-20 right-20 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl"
+          animate={{
+            y: [0, -30, 0],
+            x: [0, 20, 0],
+          }}
+          transition={{
+            duration: 7,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div
+          className="absolute bottom-32 left-20 w-40 h-40 bg-green-400/20 rounded-full blur-3xl"
+          animate={{
+            y: [0, 30, 0],
+            x: [0, -20, 0],
+          }}
+          transition={{
+            duration: 9,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+
+        <div className="max-w-2xl w-full space-y-6 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+          >
+            <div className="text-center">
+              <Link href="/" className="inline-flex items-center justify-center space-x-3 mb-8 group">
+                <motion.div 
+                  className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-yellow-400/50 transition-all"
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="font-bold text-2xl text-gray-900">
-                CropDrive OP Advisor<sup className="text-sm">™</sup>
-              </span>
-            </Link>
+                  <svg className="w-8 h-8 text-green-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4 C9 6, 7 9, 6 12" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4 C15 6, 17 9, 18 12" />
+                    <rect x="11" y="12" width="2" height="9" rx="0.5" fill="currentColor"/>
+                  </svg>
+                </motion.div>
+                <span className="font-black text-3xl text-white font-heading">
+                  CropDrive<span className="text-yellow-400">™</span>
+                </span>
+              </Link>
 
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {language === 'ms' ? 'Cipta Akaun' : 'Create Account'}
-            </h2>
-            <p className="text-gray-600">
-              {language === 'ms'
-                ? 'Sertai ribuan petani yang menggunakan AI untuk hasil yang lebih baik'
-                : 'Join thousands of farmers using AI for better yields'
-              }
-            </p>
-          </div>
-        </motion.div>
+              <motion.h2 
+                className="text-4xl font-black text-white mb-3 font-heading"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+              >
+                {language === 'ms' ? 'Cipta Akaun Baru' : 'Create New Account'}
+              </motion.h2>
+              <motion.p 
+                className="text-green-100 text-lg"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                {language === 'ms'
+                  ? 'Sertai ribuan petani yang menggunakan AI untuk hasil yang lebih baik'
+                  : 'Join thousands of farmers using AI for better yields'
+                }
+              </motion.p>
+            </div>
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          <Card className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6">
-                <Input
-                  label={language === 'ms' ? 'Nama Penuh' : 'Full Name'}
-                  placeholder={language === 'ms' ? 'Nama penuh anda' : 'Your full name'}
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-
-                <Input
-                  type="email"
-                  label={language === 'ms' ? 'Email' : 'Email'}
-                  placeholder={language === 'ms' ? 'nama@email.com' : 'name@email.com'}
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-
-                <Input
-                  type="tel"
-                  label={language === 'ms' ? 'Nombor Telefon' : 'Phone Number'}
-                  placeholder={language === 'ms' ? '+60123456789' : '+60123456789'}
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  disabled={loading}
-                />
-
-                <Input
-                  label={language === 'ms' ? 'Nama Ladang' : 'Farm Name'}
-                  placeholder={language === 'ms' ? 'Nama ladang anda' : 'Your farm name'}
-                  value={formData.farmName}
-                  onChange={(e) => handleInputChange('farmName', e.target.value)}
-                  disabled={loading}
-                />
-
-                <Input
-                  label={language === 'ms' ? 'Lokasi Ladang' : 'Farm Location'}
-                  placeholder={language === 'ms' ? 'Lokasi ladang anda' : 'Your farm location'}
-                  value={formData.farmLocation}
-                  onChange={(e) => handleInputChange('farmLocation', e.target.value)}
-                  disabled={loading}
-                />
-
-                <Input
-                  type="password"
-                  label={language === 'ms' ? 'Kata Laluan' : 'Password'}
-                  placeholder={language === 'ms' ? 'Kata laluan anda' : 'Your password'}
-                  value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
-                  required
-                  disabled={loading}
-                />
-
-                <Input
-                  type="password"
-                  label={language === 'ms' ? 'Sahkan Kata Laluan' : 'Confirm Password'}
-                  placeholder={language === 'ms' ? 'Sahkan kata laluan anda' : 'Confirm your password'}
-                  value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  required
-                  disabled={loading}
-                />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20"
+          >
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Nama Penuh' : 'Full Name'} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={language === 'ms' ? 'Nama penuh anda' : 'Your full name'}
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    {language === 'ms' ? 'Bahasa Pilihan' : 'Preferred Language'}
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Email' : 'Email'} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder={language === 'ms' ? 'nama@email.com' : 'name@email.com'}
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Nombor Telefon' : 'Phone Number'}
+                  </label>
+                  <input
+                    type="tel"
+                    placeholder={language === 'ms' ? '+60123456789' : '+60123456789'}
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Nama Ladang' : 'Farm Name'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={language === 'ms' ? 'Nama ladang anda' : 'Your farm name'}
+                    value={formData.farmName}
+                    onChange={(e) => handleInputChange('farmName', e.target.value)}
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Lokasi Ladang' : 'Farm Location'}
+                  </label>
+                  <input
+                    type="text"
+                    placeholder={language === 'ms' ? 'Lokasi ladang anda' : 'Your farm location'}
+                    value={formData.farmLocation}
+                    onChange={(e) => handleInputChange('farmLocation', e.target.value)}
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Bahasa Pilihan' : 'Preferred Language'} <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.language}
                     onChange={(e) => handleInputChange('language', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200 bg-white"
                     disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <option value="ms">Bahasa Malaysia</option>
                     <option value="en">English</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Kata Laluan' : 'Password'} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder={language === 'ms' ? 'Kata laluan anda' : 'Your password'}
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Sahkan Kata Laluan' : 'Confirm Password'} <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder={language === 'ms' ? 'Sahkan kata laluan' : 'Confirm password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                    required
+                    disabled={loading}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
                 </div>
               </div>
 
@@ -232,44 +321,70 @@ export default function RegisterPage() {
                   id="agreeToTerms"
                   checked={agreeToTerms}
                   onChange={(e) => setAgreeToTerms(e.target.checked)}
-                  className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 focus:ring-2 mt-1"
+                  className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mt-1 cursor-pointer"
                 />
                 <label htmlFor="agreeToTerms" className="ml-2 text-sm text-gray-700">
                   {language === 'ms' ? 'Saya bersetuju dengan' : 'I agree to the'}{' '}
-                  <Link href="/terms" className="text-primary-600 hover:text-primary-700 font-medium">
+                  <Link href="/terms" className="text-green-700 hover:text-green-800 font-bold">
                     {language === 'ms' ? 'Syarat Perkhidmatan' : 'Terms of Service'}
-                  </Link>{' '}
-                  {language === 'ms' ? 'dan' : 'and'}{' '}
-                  <Link href="/privacy" className="text-primary-600 hover:text-primary-700 font-medium">
+                  </Link>
+                  {' '}{language === 'ms' ? 'dan' : 'and'}{' '}
+                  <Link href="/privacy" className="text-green-700 hover:text-green-800 font-bold">
                     {language === 'ms' ? 'Dasar Privasi' : 'Privacy Policy'}
                   </Link>
                 </label>
               </div>
 
-              <Button
+              <motion.button
                 type="submit"
-                loading={loading}
-                disabled={loading}
-                className="w-full"
+                disabled={loading || !agreeToTerms}
+                className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-black py-4 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
               >
-                {language === 'ms' ? 'Daftar' : 'Sign Up'}
-              </Button>
+                {loading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                    </svg>
+                    {language === 'ms' ? 'Mencipta Akaun...' : 'Creating Account...'}
+                  </span>
+                ) : (
+                  language === 'ms' ? 'Cipta Akaun' : 'Create Account'
+                )}
+              </motion.button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                {language === 'ms' ? 'Sudah ada akaun?' : 'Already have an account?'}{' '}
+                {language === 'ms' ? 'Sudah mempunyai akaun?' : 'Already have an account?'}{' '}
                 <Link
                   href="/login"
-                  className="text-primary-600 hover:text-primary-700 font-medium"
+                  className="text-green-700 hover:text-green-800 font-bold transition-colors"
                 >
                   {language === 'ms' ? 'Log masuk di sini' : 'Sign in here'}
                 </Link>
               </p>
             </div>
-          </Card>
-        </motion.div>
+          </motion.div>
+
+          {/* Back to Home */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-center"
+          >
+            <Link href="/" className="inline-flex items-center text-white/80 hover:text-white font-semibold transition-colors">
+              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+            </Link>
+          </motion.div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
