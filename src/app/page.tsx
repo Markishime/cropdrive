@@ -92,11 +92,11 @@ export default function HomePage() {
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              '/videos/14578994_3840_2160_30fps.mp4',
-              '/videos/13929079_3840_2160_30fps.mp4',
-              '/videos/12814183_1920_1080_30fps.mp4',
-              '/videos/13947559_3840_2160_30fps.mp4',
-              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
+              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/14578994_3840_2160_30fps.mp4',
+              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/13929079_3840_2160_30fps.mp4',
+              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/12814183_1920_1080_30fps.mp4',
+              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/13947559_3840_2160_30fps.mp4',
+              'https://raw.githubusercontent.com/Markishime/cropdrive/main/public/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
             ].map((video, index) => (
               <motion.div
                 key={index}
@@ -120,6 +120,10 @@ export default function HomePage() {
                   loop
                   className="w-full h-full object-cover"
                   preload="auto"
+                  crossOrigin="anonymous"
+                  onError={(e) => {
+                    console.error('Video failed to load:', video, e);
+                  }}
                 />
               </motion.div>
             ))}
@@ -299,7 +303,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.1 }}
-              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 w-full max-w-2xl mx-auto mb-28 sm:mb-8"
+              className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center items-center px-4 w-full max-w-2xl mx-auto mb-32 sm:mb-8"
             >
               <Link href="/pricing" className="w-full sm:w-auto">
                 <motion.button
@@ -359,7 +363,7 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 1.2 }}
-          className="absolute bottom-12 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
+          className="absolute bottom-6 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
         >
           <div className="flex flex-col items-center justify-center space-y-3">
             <p className="text-white text-xs uppercase tracking-[0.2em] font-bold text-center">
