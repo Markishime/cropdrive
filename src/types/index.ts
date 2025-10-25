@@ -117,7 +117,7 @@ export interface PricingTier {
 }
 
 export interface LanguageStrings {
-  [key: string]: string | { [key: string]: string | { [key: string]: string } };
+  [key: string]: any;
 }
 
 export interface AuthContextType {
