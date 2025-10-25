@@ -127,14 +127,14 @@ export default function DashboardPage() {
                   </motion.p>
                 </div>
 
-                {/* Current Plan Card */}
-                <motion.div
-                  initial={{ opacity: 0, x: 50 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5 }}
-                  className="flex-shrink-0"
-                >
-                  {hasPurchasedPlan && userPlan ? (
+                {/* Current Plan Card - Only show if user has purchased a plan */}
+                {hasPurchasedPlan && userPlan && (
+                  <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.8, delay: 0.5 }}
+                    className="flex-shrink-0"
+                  >
                     <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20 shadow-2xl">
                       <div className="flex items-center space-x-4">
                         <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
@@ -153,14 +153,8 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="bg-yellow-500/20 backdrop-blur-md rounded-2xl p-6 border-2 border-yellow-400/50 shadow-2xl">
-                      <p className="text-white font-bold text-center">
-                        {language === 'ms' ? '⚠️ Tiada Pelan' : '⚠️ No Plan'}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           </div>

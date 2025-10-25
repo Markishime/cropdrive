@@ -23,12 +23,12 @@ export default function LoginPage() {
   const { language, t } = useTranslation();
   const router = useRouter();
 
-  // Redirect if already logged in
+  // Redirect if already logged in (no loading screen)
   useEffect(() => {
-    if (!authLoading && user) {
+    if (user) {
       router.push('/dashboard');
     }
-  }, [user, authLoading, router]);
+  }, [user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,6 +40,8 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
+      toast.loading(language === 'ms' ? 'Sedang log masuk...' : 'Signing in...', { id: 'login' });
+      
       await signIn(email, password, language);
 
       // Check if remember me is checked
@@ -49,9 +51,10 @@ export default function LoginPage() {
         localStorage.removeItem('cropdrive-remember-email');
       }
 
+      toast.success(language === 'ms' ? 'Berjaya log masuk!' : 'Successfully logged in!', { id: 'login' });
       router.push('/dashboard');
     } catch (error) {
-      // Error is handled in the auth context
+      toast.error(language === 'ms' ? 'Log masuk gagal' : 'Login failed', { id: 'login' });
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -66,14 +69,6 @@ export default function LoginPage() {
       setRememberMe(true);
     }
   }, []);
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="spinner"></div>
-      </div>
-    );
-  }
 
   return (
     <>

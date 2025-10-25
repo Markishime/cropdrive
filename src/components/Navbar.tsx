@@ -34,26 +34,14 @@ export const Navbar: React.FC = () => {
   // State for dropdown menu
   const [showDropdown, setShowDropdown] = useState(false);
 
-  // Nav links - DIFFERENT before and after login
+  // Nav links - Marketing-focused navigation (sidebar handles authenticated pages)
   const getNavLinks = (): NavLink[] => {
-    if (user) {
-      // AFTER LOGIN: Dashboard-focused navigation
-      return [
-        { href: '/dashboard', label: 'Dashboard', labelMs: 'Papan Pemuka' },
-        { href: '/assistant', label: 'AI Assistant', labelMs: 'Pembantu AI' },
-        { href: '/features', label: 'Features', labelMs: 'Ciri-ciri' },
-        { href: '/pricing', label: 'Pricing', labelMs: 'Harga' },
-        { href: '/tutorials', label: 'Tutorials', labelMs: 'Tutorial' },
-      ];
-    } else {
-      // BEFORE LOGIN: Marketing-focused navigation
-      return [
-        { href: '/', label: 'Home', labelMs: 'Laman Utama' },
-        { href: '/how-it-works', label: 'How It Works', labelMs: 'Cara Ia Berfungsi' },
-        { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
-        { href: '/contact', label: 'Contact Us', labelMs: 'Hubungi Kami' },
-      ];
-    }
+    return [
+      { href: '/', label: 'Home', labelMs: 'Laman Utama' },
+      { href: '/how-it-works', label: 'How It Works', labelMs: 'Cara Ia Berfungsi' },
+      { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
+      { href: '/contact', label: 'Contact Us', labelMs: 'Hubungi Kami' },
+    ];
   };
 
   const navLinks = getNavLinks();

@@ -17,6 +17,8 @@ export default function HomePage() {
   const { language, t } = useTranslation(currentLanguage);
   const [activeSection, setActiveSection] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -31,6 +33,34 @@ export default function HomePage() {
       setShowOnboarding(true);
     }
   }, [user]);
+
+  // Control video playback when index changes
+  useEffect(() => {
+    // Pause all videos first
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+      }
+    });
+
+    // Play the current video
+    const currentVideo = videoRefs.current[currentVideoIndex];
+    if (currentVideo) {
+      currentVideo.play().catch((error) => {
+        console.log('Video play error:', error);
+      });
+    }
+  }, [currentVideoIndex]);
+
+  // Auto-advance video carousel every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentVideoIndex((prev) => (prev + 1) % 5);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Listen for language changes
   useEffect(() => {
@@ -57,26 +87,64 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
       <section className="relative h-screen overflow-hidden">
-        {/* Background Video with Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-green-900">
-          {/* Single Video */}
+        {/* Background Video Carousel with Overlay */}
+        <div className="absolute inset-0">
+          {/* Carousel Container */}
           <div className="absolute inset-0">
-            <video
-              autoPlay
-              muted
-              playsInline
-              loop
-              className="w-full h-full object-cover"
-              preload="auto"
-              poster="https://images.unsplash.com/photo-1595587637401-f8f5e7944a78?w=1920&h=1080&fit=crop"
-            >
-              <source src="/videos/12814183_1920_1080_30fps.mp4" type="video/mp4" />
-              Your browser does not support the video tag.
-            </video>
+            {[
+              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/14578994_3840_2160_30fps.mp4',
+              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/13929079_3840_2160_30fps.mp4',
+              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/12814183_1920_1080_30fps.mp4',
+              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/4822968-hd_1920_1080_30fps.mp4',
+              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
+            ].map((video, index) => (
+              <motion.div
+                key={index}
+                className="absolute inset-0"
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: currentVideoIndex === index ? 1 : 0,
+                }}
+                transition={{
+                  duration: 1,
+                  ease: "easeInOut"
+                }}
+              >
+                <video
+                  ref={(el) => {
+                    videoRefs.current[index] = el;
+                  }}
+                  src={video}
+                  muted
+                  playsInline
+                  loop
+                  className="w-full h-full object-cover"
+                  preload="auto"
+                />
+              </motion.div>
+            ))}
           </div>
           {/* Lighter overlay to make videos more visible */}
           <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 via-green-800/40 to-green-900/50"></div>
           <div className="absolute inset-0 bg-black/20"></div>
+        </div>
+
+        {/* Side Navigation - Video Carousel Dots */}
+        <div className="absolute left-8 top-1/2 transform -translate-y-1/2 z-20 hidden lg:block">
+          <div className="flex flex-col items-center space-y-8">
+            <div className="flex flex-col items-center space-y-3">
+              {[0, 1, 2, 3, 4].map((index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentVideoIndex(index)}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50 hover:bg-white/80'
+                  }`}
+                  title={`Video ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Social Links */}
@@ -270,12 +338,28 @@ export default function HomePage() {
           </svg>
         </div>
 
+        {/* Video Carousel Dots - Mobile */}
+        <div className="absolute top-4 left-0 right-0 z-20 flex justify-center lg:hidden">
+          <div className="flex items-center space-x-2 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentVideoIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50'
+                }`}
+                title={`Video ${index + 1}`}
+              />
+            ))}
+          </div>
+        </div>
+
         {/* Animated Mouse Scroll Indicator - Centered */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 1.2 }}
-          className="absolute bottom-4 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
+          className="absolute bottom-8 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
         >
           <div className="flex flex-col items-center justify-center space-y-3">
             <p className="text-white text-xs uppercase tracking-[0.2em] font-bold text-center">
