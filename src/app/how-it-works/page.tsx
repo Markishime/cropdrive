@@ -99,6 +99,138 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
+      {/* Demo Video Section */}
+      <section className="py-24 bg-gradient-to-br from-gray-900 via-green-900 to-gray-900">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-heading">
+              {language === 'ms' ? 'Lihat Demo' : 'Watch'} <span className="text-yellow-400">{language === 'ms' ? 'Langsung' : 'Demo'}</span>
+            </h2>
+            <p className="text-xl text-white/90 max-w-3xl mx-auto">
+              {language === 'ms'
+                ? 'Tonton bagaimana AGS AI Assistant menganalisis laporan makmal anda dalam masa 1-2 minit'
+                : 'Watch how AGS AI Assistant analyzes your lab reports in 1-2 minutes'
+              }
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="max-w-5xl mx-auto"
+          >
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black">
+              {/* Demo Video Player */}
+              <div className="aspect-video relative">
+                <video
+                  className="w-full h-full object-cover"
+                  controls
+                  poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
+                >
+                  <source src="/videos/demo-video.mp4" type="video/mp4" />
+                  {language === 'ms' 
+                    ? 'Pelayar anda tidak menyokong tag video.'
+                    : 'Your browser does not support the video tag.'
+                  }
+                </video>
+                {/* Placeholder overlay - remove once you have the actual video */}
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-900/90 to-gray-900/90 pointer-events-none">
+                  <div className="text-center px-6">
+                    <div className="text-6xl mb-4">🎬</div>
+                    <p className="text-2xl font-bold text-white mb-2">
+                      {language === 'ms' ? 'Video Demo Akan Datang' : 'Demo Video Coming Soon'}
+                    </p>               
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Demo Features */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.3 }}
+                viewport={{ once: true }}
+                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
+              >
+                <div className="text-4xl mb-3">📤</div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {language === 'ms' ? 'Muat Naik Mudah' : 'Easy Upload'}
+                </h3>
+                <p className="text-white/80">
+                  {language === 'ms'
+                    ? 'Muat naik Gambar, PDF, atau Excel (SPLAB, farm_test_data)'
+                    : 'Upload Images, PDF, or Excel (SPLAB, farm_test_data)'
+                  }
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                viewport={{ once: true }}
+                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
+              >
+                <div className="text-4xl mb-3">⚡</div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {language === 'ms' ? 'Analisis Pantas' : 'Fast Analysis'}
+                </h3>
+                <p className="text-white/80">
+                  {language === 'ms'
+                    ? 'Dapatkan hasil analisis dalam masa 1-2 minit'
+                    : 'Get analysis results in 1-2 minutes'
+                  }
+                </p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.5 }}
+                viewport={{ once: true }}
+                className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
+              >
+                <div className="text-4xl mb-3">✅</div>
+                <h3 className="text-xl font-bold text-white mb-2">
+                  {language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified'}
+                </h3>
+                <p className="text-white/80">
+                  {language === 'ms'
+                    ? 'Cadangan mengikut standard MPOB Malaysia'
+                    : 'Recommendations follow MPOB Malaysia standards'
+                  }
+                </p>
+              </motion.div>
+            </div>
+
+            {/* CTA Button */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              viewport={{ once: true }}
+              className="text-center mt-12"
+            >
+              <Link href="/assistant">
+                <button className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 uppercase tracking-wide">
+                  {language === 'ms' ? '🚀 Cuba Sekarang' : '🚀 Try Now'}
+                </button>
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Steps Section */}
       <section className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

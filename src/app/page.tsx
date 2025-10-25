@@ -33,6 +33,15 @@ export default function HomePage() {
     }
   }, [user]);
 
+  // Auto-advance video carousel every 30 seconds
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentVideoIndex((prev) => (prev + 1) % 5);
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(timer);
+  }, []);
+
   // Listen for language changes
   useEffect(() => {
     const handleStorageChange = () => {
@@ -63,9 +72,11 @@ export default function HomePage() {
           {/* Carousel Container */}
           <div className="absolute inset-0">
             {[
-              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4',
-              '/videos/Farmer_s_Oil_Palm_Cultivation_Video.mp4',
-              '/videos/4822968-hd_1920_1080_30fps.mp4'
+              '/videos/14578994_3840_2160_30fps.mp4',
+              '/videos/13929079_3840_2160_30fps.mp4',
+              '/videos/12814183_1920_1080_30fps.mp4',
+              '/videos/13947559_3840_2160_30fps.mp4',
+              '/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4'
             ].map((video, index) => (
               <motion.div
                 key={index}
@@ -84,11 +95,8 @@ export default function HomePage() {
                   autoPlay={currentVideoIndex === index}
                   muted
                   playsInline
+                  loop
                   className="w-full h-full object-cover"
-                  onEnded={() => {
-                    // Move to next video when current video ends
-                    setCurrentVideoIndex((prev) => (prev + 1) % 3);
-                  }}
                 />
               </motion.div>
             ))}
@@ -98,17 +106,18 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
-        {/* Side Navigation */}
+        {/* Side Navigation - Video Carousel Dots */}
         <div className="absolute left-8 top-1/2 transform -translate-y-1/2 z-20 hidden lg:block">
           <div className="flex flex-col items-center space-y-8">
-            <div className="flex flex-col items-center space-y-2">
-              {[1, 2, 3, 4, 5].map((num) => (
+            <div className="flex flex-col items-center space-y-3">
+              {[0, 1, 2, 3, 4].map((index) => (
                 <button
-                  key={num}
-                  onClick={() => setActiveSection(num)}
+                  key={index}
+                  onClick={() => setCurrentVideoIndex(index)}
                   className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    activeSection === num ? 'bg-yellow-400 scale-125' : 'bg-white/50 hover:bg-white/80'
+                    currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50 hover:bg-white/80'
                   }`}
+                  title={`Video ${index + 1}`}
                 />
               ))}
             </div>
@@ -304,6 +313,22 @@ export default function HomePage() {
             <circle cx="100" cy="400" r="20" stroke="currentColor" strokeWidth="2" className="text-yellow-400" />
             <circle cx="100" cy="500" r="20" stroke="currentColor" strokeWidth="2" className="text-yellow-400" />
           </svg>
+        </div>
+
+        {/* Video Carousel Dots - Mobile */}
+        <div className="absolute top-4 left-0 right-0 z-20 flex justify-center lg:hidden">
+          <div className="flex items-center space-x-2 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full">
+            {[0, 1, 2, 3, 4].map((index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentVideoIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50'
+                }`}
+                title={`Video ${index + 1}`}
+              />
+            ))}
+          </div>
         </div>
 
         {/* Animated Mouse Scroll Indicator - Centered */}
