@@ -56,7 +56,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative h-screen overflow-hidden pt-16 sm:pt-0">
         {/* Background Video with Overlay */}
         <div className="absolute inset-0">
           <video
@@ -84,7 +84,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative h-full flex items-center justify-center">
+        <div className="relative h-full flex items-center justify-center z-10 pt-16 sm:pt-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             {/* Dynamic Label */}
             <motion.div
@@ -103,7 +103,7 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 1.2, delay: 0.3, type: "spring", stiffness: 100 }}
-              className="text-4xl md:text-5xl lg:text-7xl font-black text-white mb-8 leading-tight min-h-[320px] md:min-h-[280px] font-heading drop-shadow-2xl tracking-tight"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white mb-8 leading-tight min-h-[240px] sm:min-h-[280px] md:min-h-[280px] font-heading drop-shadow-2xl tracking-tight"
               style={{ textShadow: '0 8px 32px rgba(0,0,0,0.6)', letterSpacing: '-0.03em' }}
             >
               <TypeAnimation
