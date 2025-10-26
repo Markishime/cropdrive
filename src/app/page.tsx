@@ -270,7 +270,7 @@ export default function HomePage() {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 1.2 }}
-          className="absolute bottom-4 sm:bottom-16 left-0 right-0 z-20 flex justify-center"
+          className="absolute bottom-2 sm:bottom-8 left-0 right-0 z-20 flex justify-center"
         >
           <div className="flex flex-col items-center justify-center space-y-3">
             <p className="text-white text-xs uppercase tracking-[0.2em] font-bold text-center">

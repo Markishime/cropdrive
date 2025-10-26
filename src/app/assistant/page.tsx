@@ -6,13 +6,11 @@ import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { 
   MessageSquare, 
-  ExternalLink, 
   RefreshCw,
   Maximize2,
   Info,
   Zap,
-  CheckCircle2,
-  Upload
+  CheckCircle2
 } from 'lucide-react';
 
 export default function AssistantPage() {
@@ -131,19 +129,6 @@ export default function AssistantPage() {
                 </span>
               </motion.button>
 
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href="https://ags-ai-assistant.streamlit.app/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-green-900 rounded-xl transition-all duration-200 font-bold shadow-lg"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm">
-                  {language === 'ms' ? 'Buka' : 'Open'}
-                </span>
-              </motion.a>
             </div>
           </div>
         </div>
@@ -230,59 +215,6 @@ export default function AssistantPage() {
         />
       </div>
 
-      {/* Bottom Tips Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.3 }}
-        className="bg-white border-t-2 border-gray-200 shadow-lg"
-      >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-                1
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">
-                  {language === 'ms' ? 'Muat Naik' : 'Upload'}
-                </p>
-                <p className="text-gray-600 text-xs">
-                  {language === 'ms' ? 'Gambar/PDF/Excel (SPLAB, farm_test_data)' : 'Image/PDF/Excel (SPLAB, farm_test_data)'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-                2
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">
-                  {language === 'ms' ? 'Analisis' : 'Analyze'}
-                </p>
-                <p className="text-gray-600 text-xs">
-                  {language === 'ms' ? 'AI proses ~1-2 minit' : 'AI processes ~1-2 minutes'}
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center text-white font-bold shadow-md">
-                3
-              </div>
-              <div>
-                <p className="font-bold text-gray-900">
-                  {language === 'ms' ? 'Cadangan' : 'Recommendations'}
-                </p>
-                <p className="text-gray-600 text-xs">
-                  {language === 'ms' ? 'Dapatkan cadangan baja' : 'Get fertilizer advice'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
     </div>
   );
 }
