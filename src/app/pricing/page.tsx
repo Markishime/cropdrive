@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { useAuth } from '@/lib/auth';
+import { auth } from '@/lib/firebase';
 import { getPricingTierById, PRICING_TIERS, formatPrice } from '@/lib/subscriptions';
 import { convertMYRtoEUR } from '@/lib/exchangeRate';
 import Button from '@/components/ui/Button';
@@ -19,10 +20,18 @@ export default function PricingPage() {
   const [eurPrices, setEurPrices] = useState<Record<string, { monthly: number; yearly: number }>>({});
   const [exchangeRateLoading, setExchangeRateLoading] = useState(true);
   const { language, t } = useTranslation(currentLanguage);
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   
   // Get user's current plan (none means no plan purchased yet)
   const currentUserPlan = user?.plan || 'none';
+
+  // Refresh user data when component mounts (in case returning from purchase)
+  useEffect(() => {
+    if (mounted && refreshUser && user) {
+      console.log('🔄 Checking for plan updates on pricing page...');
+      refreshUser();
+    }
+  }, [mounted, user?.uid]); // Only refresh when mounted or user changes
 
   useEffect(() => {
     setMounted(true);
@@ -133,8 +142,16 @@ export default function PricingPage() {
     try {
       setLoading(planId);
 
-      // Get Firebase ID token
-      const token = await (user as any).getIdToken();
+      // Get Firebase ID token from the current Firebase Auth user
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
+        toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+        window.location.href = '/login';
+        return;
+      }
+
+      const token = await firebaseUser.getIdToken();
+      console.log('Got Firebase ID token');
 
       // Create checkout session
       const response = await fetch('/api/stripe/create-checkout', {
@@ -150,19 +167,37 @@ export default function PricingPage() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create checkout session');
+        const errorData = await response.json();
+        console.error('Checkout error response:', errorData);
+        throw new Error(errorData.details || errorData.error || 'Failed to create checkout session');
       }
 
       const { url } = await response.json();
 
       if (url) {
-        window.location.href = url;
+        console.log('Redirecting to Stripe checkout:', url);
+        // Show loading toast
+        toast.loading(
+          language === 'ms'
+            ? '🔄 Mengalihkan ke Stripe...'
+            : '🔄 Redirecting to Stripe...',
+          { duration: 2000 }
+        );
+        // Redirect to Stripe checkout in the same window
+        setTimeout(() => {
+          window.location.href = url;
+        }, 500);
       } else {
         throw new Error('No checkout URL received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating checkout session:', error);
-      toast.error(language === 'ms' ? 'Ralat membuat sesi pembayaran' : 'Error creating checkout session');
+      const errorMessage = error.message || 'Unknown error';
+      toast.error(
+        language === 'ms' 
+          ? `Ralat: ${errorMessage}` 
+          : `Error: ${errorMessage}`
+      );
     } finally {
       setLoading(null);
     }
@@ -322,8 +357,8 @@ export default function PricingPage() {
               
               {user && currentUserPlan !== 'none' && tier.id === currentUserPlan && (
                 <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
-                  <span className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-3 rounded-full text-sm font-black uppercase tracking-wider shadow-xl">
-                    {language === 'ms' ? '✓ Pelan Anda' : '✓ Your Current Plan'}
+                  <span className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-wide shadow-xl whitespace-nowrap">
+                    {language === 'ms' ? '✓ PELAN ANDA' : '✓ YOUR CURRENT PLAN'}
                   </span>
                 </div>
               )}

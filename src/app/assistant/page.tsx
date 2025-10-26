@@ -32,9 +32,12 @@ export default function AssistantPage() {
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
-    } else if (user && (user.plan === 'none' || !user.plan)) {
-      router.push('/pricing');
     }
+    // For testing: Allow access without payment
+    // Remove this condition once you want to enforce payment
+    // else if (user && (user.plan === 'none' || !user.plan)) {
+    //   router.push('/pricing');
+    // }
   }, [user, authLoading, router]);
 
   const language = currentLang;
@@ -54,7 +57,8 @@ export default function AssistantPage() {
     }
   };
 
-  if (authLoading || !user || user.plan === 'none' || !user.plan) {
+  // For testing: Only check if user is authenticated, not if they have a plan
+  if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
         <div className="flex flex-col items-center space-y-4">

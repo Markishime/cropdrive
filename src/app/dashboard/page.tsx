@@ -15,7 +15,7 @@ export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
 
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -23,6 +23,44 @@ export default function DashboardPage() {
     const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
     setCurrentLang(lang);
   }, []);
+
+  // Silently refresh user data when returning from purchase
+  useEffect(() => {
+    if (typeof window !== 'undefined' && mounted && refreshUser) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('refresh') === 'true') {
+        console.log('🔄 Silently refreshing user data after purchase...');
+        
+        // Silently poll for updates without showing notification
+        let pollCount = 0;
+        const maxPolls = 15; // 15 attempts over 45 seconds
+        const pollInterval = 3000; // 3 seconds
+        
+        const silentPoll = async () => {
+          try {
+            await refreshUser();
+            pollCount++;
+            console.log(`✅ Silent refresh attempt ${pollCount}/${maxPolls}`);
+            
+            if (pollCount < maxPolls) {
+              setTimeout(silentPoll, pollInterval);
+            } else {
+              console.log('✅ Silent polling complete');
+            }
+          } catch (error) {
+            console.error('Error during silent refresh:', error);
+            if (pollCount < maxPolls) {
+              setTimeout(silentPoll, pollInterval);
+            }
+          }
+        };
+        
+        // Start immediately and clean URL
+        silentPoll();
+        window.history.replaceState({}, '', '/dashboard');
+      }
+    }
+  }, [mounted, refreshUser]);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
 
@@ -45,18 +83,7 @@ export default function DashboardPage() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  if (authLoading || loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">{language === 'ms' ? 'Memuatkan...' : 'Loading...'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
+  if (authLoading || loading || !user) {
     return null;
   }
 
@@ -251,6 +278,172 @@ export default function DashboardPage() {
           </section>
         )}
 
+        {/* Current Plan Details - Show plan features */}
+        {hasPurchasedPlan && userPlan && (
+          <section className="py-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl border-2 border-green-200 overflow-hidden"
+              >
+                {/* Plan Header */}
+                <div className="bg-gradient-to-r from-green-600 via-green-700 to-green-800 p-8 text-white">
+                  <div className="flex items-start justify-between flex-wrap gap-4">
+                    <div className="flex-1">
+                      <div className="inline-block bg-yellow-400 text-green-900 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider mb-4">
+                        {language === 'ms' ? '✓ Pelan Aktif' : '✓ Active Plan'}
+                      </div>
+                      <h2 className="text-4xl font-black mb-2">
+                        {language === 'ms' ? userPlan.nameMs : userPlan.name}
+                      </h2>
+                      <p className="text-green-100 text-lg">
+                        {language === 'ms' 
+                          ? 'Terima kasih kerana mempercayai CropDrive untuk meningkatkan hasil ladang anda!'
+                          : 'Thank you for trusting CropDrive to improve your farm yields!'
+                        }
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-5xl font-black text-yellow-400">
+                        RM{userPlan.monthlyPrice}
+                      </div>
+                      <div className="text-green-100 text-sm">
+                        {language === 'ms' ? '/bulan' : '/month'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Plan Features */}
+                <div className="p-8">
+                  <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    {language === 'ms' ? 'Ciri-ciri Pelan Anda' : 'Your Plan Features'}
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {userPlan.features.map((feature, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.4, delay: index * 0.05 }}
+                        className={`flex items-start gap-3 p-4 rounded-xl ${
+                          feature.included 
+                            ? 'bg-green-50 border-2 border-green-200' 
+                            : 'bg-gray-50 border-2 border-gray-200 opacity-50'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                          feature.included ? 'bg-green-600' : 'bg-gray-400'
+                        }`}>
+                          {feature.included ? (
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className={`font-semibold ${
+                            feature.included ? 'text-gray-900' : 'text-gray-500'
+                          }`}>
+                            {language === 'ms' ? feature.nameMs : feature.name}
+                          </p>
+                          {feature.limit && feature.included && (
+                            <p className="text-sm text-green-700 font-medium mt-1">
+                              {language === 'ms' ? `Had: ${feature.limit}` : `Limit: ${feature.limit}`}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Subscription Info */}
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm font-semibold text-blue-900">
+                          {language === 'ms' ? 'Had Muat Naik' : 'Upload Limit'}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-black text-blue-600">
+                        {userPlan.uploadLimit === -1 ? '∞' : userPlan.uploadLimit}
+                      </p>
+                      <p className="text-xs text-blue-700 mt-1">
+                        {userPlan.uploadLimit === -1 
+                          ? (language === 'ms' ? 'Tanpa had' : 'Unlimited') 
+                          : (language === 'ms' ? 'setiap bulan' : 'per month')
+                        }
+                      </p>
+                    </div>
+
+                    <div className="bg-purple-50 border-2 border-purple-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm font-semibold text-purple-900">
+                          {language === 'ms' ? 'Masa Respons' : 'Response Time'}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-black text-purple-600">
+                        {userPlan.supportLevel === 'basic' ? '48h' : 
+                         userPlan.supportLevel === 'priority' ? '24h' : '12h'}
+                      </p>
+                      <p className="text-xs text-purple-700 mt-1">
+                        {language === 'ms' ? 'Sokongan' : 'Support'} {userPlan.supportLevel}
+                      </p>
+                    </div>
+
+                    <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p className="text-sm font-semibold text-yellow-900">
+                          {language === 'ms' ? 'Diskaun Pembaharuan' : 'Renewal Discount'}
+                        </p>
+                      </div>
+                      <p className="text-2xl font-black text-yellow-600">
+                        {userPlan.renewalDiscount}%
+                      </p>
+                      <p className="text-xs text-yellow-700 mt-1">
+                        {language === 'ms' ? 'Pembaharuan seterusnya' : 'Next renewal'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="mt-8 flex flex-col sm:flex-row gap-4">
+                    <Link href="/assistant" className="flex-1">
+                      <Button className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg">
+                        {language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
+                      </Button>
+                    </Link>
+                    <Link href="/pricing" className="flex-1">
+                      <Button variant="outline" className="w-full py-4 border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold">
+                        {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </section>
+        )}
+
         {/* Main Content */}
         <section className="py-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -304,7 +497,7 @@ export default function DashboardPage() {
 
                     {user.uploadsLimit === -1 || uploadsRemaining > 0 ? (
                       <Link href="/assistant">
-                        <Button className="w-full py-4 text-lg font-bold bg-white text-green-700 hover:bg-gray-50 shadow-lg transform hover:scale-105 transition-all border-2 border-white/20">
+                        <Button className="w-full py-4 border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold">
                           {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
                         </Button>
                       </Link>

@@ -12,15 +12,33 @@ function SuccessPageContent() {
   const { language, t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [countdown, setCountdown] = React.useState(5);
 
   const sessionId = searchParams.get('session_id');
   const plan = searchParams.get('plan') || 'smart';
 
   useEffect(() => {
-    // If no session ID, redirect to home
+    // If no session ID, allow success page but show warning
     if (!sessionId) {
-      router.push('/');
+      console.warn('No session ID found in URL');
+      // Don't redirect immediately - user might have come from direct link
     }
+
+    // Auto-redirect countdown
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          // Add refresh param to trigger user data refresh
+          console.log('🔄 Redirecting to dashboard with refresh=true');
+          router.push('/dashboard?refresh=true');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [sessionId, router]);
 
   const planNames = {
@@ -202,20 +220,61 @@ function SuccessPageContent() {
             </Card>
           </motion.div>
 
-          {/* Action Buttons */}
+          {/* Auto-Redirect Notice */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
+            className="text-center mb-6"
+          >
+            <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-center space-x-3">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                    className="w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full"
+                  />
+                  <div className="text-left">
+                    <p className="text-gray-900 font-semibold">
+                      {language === 'ms' 
+                        ? 'Mengalihkan ke Papan Pemuka...' 
+                        : 'Redirecting to Dashboard...'
+                      }
+                    </p>
+                    <p className="text-gray-600 text-sm">
+                      {language === 'ms' 
+                        ? `Dalam ${countdown} saat` 
+                        : `In ${countdown} seconds`
+                      }
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.9 }}
             className="text-center space-y-4"
           >
-            <Link href="/dashboard">
-              <Button size="lg" className="w-full sm:w-auto">
-                {language === 'ms' ? 'Pergi ke Papan Pemuka' : 'Go to Dashboard'}
+            <Link href="/dashboard?refresh=true">
+              <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg">
+                {language === 'ms' ? '🚀 Pergi ke Papan Pemuka Sekarang' : '🚀 Go to Dashboard Now'}
               </Button>
             </Link>
 
             <div className="text-center">
+              <Link
+                href="/assistant"
+                className="text-green-600 hover:text-green-700 font-semibold"
+              >
+                {language === 'ms' ? '🤖 Mula Analisis AI' : '🤖 Start AI Analysis'}
+              </Link>
+              <span className="text-gray-400 mx-2">•</span>
               <Link
                 href="/tutorials"
                 className="text-primary-600 hover:text-primary-700 font-medium"

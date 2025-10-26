@@ -40,7 +40,6 @@ export default function LoginPage() {
 
     try {
       setLoading(true);
-      toast.loading(language === 'ms' ? 'Sedang log masuk...' : 'Signing in...', { id: 'login' });
       
       await signIn(email, password, language);
 
@@ -50,11 +49,22 @@ export default function LoginPage() {
       } else {
         localStorage.removeItem('cropdrive-remember-email');
       }
-
-      toast.success(language === 'ms' ? 'Berjaya log masuk!' : 'Successfully logged in!', { id: 'login' });
+      
       router.push('/dashboard');
     } catch (error) {
-      toast.error(language === 'ms' ? 'Log masuk gagal' : 'Login failed', { id: 'login' });
+      toast.error(
+        language === 'ms' ? '❌ Log masuk gagal. Sila cuba lagi.' : '❌ Login failed. Please try again.',
+        {
+          duration: 4000,
+          style: {
+            background: '#ef4444',
+            color: '#fff',
+            fontWeight: 'bold',
+            padding: '16px 24px',
+            borderRadius: '12px',
+          },
+        }
+      );
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -237,12 +247,12 @@ export default function LoginPage() {
                 whileTap={{ scale: 0.98 }}
               >
                 {loading ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                  <span className="flex items-center justify-center gap-3">
+                    <svg className="animate-spin h-6 w-6" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
-                    {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+                    {language === 'ms' ? 'Sedang Log Masuk...' : 'Signing In...'}
                   </span>
                 ) : (
                   language === 'ms' ? 'Log Masuk' : 'Sign In'

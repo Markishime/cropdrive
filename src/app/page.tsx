@@ -17,8 +17,6 @@ export default function HomePage() {
   const { language, t } = useTranslation(currentLanguage);
   const [activeSection, setActiveSection] = useState(1);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const videoRefs = React.useRef<(HTMLVideoElement | null)[]>([]);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -33,34 +31,6 @@ export default function HomePage() {
       setShowOnboarding(true);
     }
   }, [user]);
-
-  // Control video playback when index changes
-  useEffect(() => {
-    // Pause all videos first
-    videoRefs.current.forEach((video) => {
-      if (video) {
-        video.pause();
-        video.currentTime = 0;
-      }
-    });
-
-    // Play the current video
-    const currentVideo = videoRefs.current[currentVideoIndex];
-    if (currentVideo) {
-      currentVideo.play().catch((error) => {
-        console.log('Video play error:', error);
-      });
-    }
-  }, [currentVideoIndex]);
-
-  // Auto-advance video carousel every 30 seconds
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentVideoIndex((prev) => (prev + 1) % 5);
-    }, 30000); // 30 seconds
-
-    return () => clearInterval(timer);
-  }, []);
 
   // Listen for language changes
   useEffect(() => {
@@ -87,65 +57,21 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
       <section className="relative h-screen overflow-hidden">
-        {/* Background Video Carousel with Overlay */}
+        {/* Background Video with Overlay */}
         <div className="absolute inset-0">
-          {/* Carousel Container */}
-          <div className="absolute inset-0">
-            {[
-              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4',
-              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/13929079_3840_2160_30fps.mp4',
-              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/12814183_1920_1080_30fps.mp4',
-              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/4822968-hd_1920_1080_30fps.mp4',
-              'https://xppfjkq3d1szutst.public.blob.vercel-storage.com/14578994_3840_2160_30fps.mp4'
-            ].map((video, index) => (
-              <motion.div
-                key={index}
-                className="absolute inset-0"
-                initial={{ opacity: 0 }}
-                animate={{
-                  opacity: currentVideoIndex === index ? 1 : 0,
-                }}
-                transition={{
-                  duration: 1,
-                  ease: "easeInOut"
-                }}
-              >
-                <video
-                  ref={(el) => {
-                    videoRefs.current[index] = el;
-                  }}
-                  src={video}
-                  muted
-                  playsInline
-                  loop
-                  className="w-full h-full object-cover"
-                  preload="auto"
-                />
-              </motion.div>
-            ))}
-          </div>
-          {/* Lighter overlay to make videos more visible */}
+          <video
+            src="/videos/Farmer_s_Oil_Palm_Land_Drone_Shot.mp4"
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="w-full h-full object-cover"
+          />
+          {/* Lighter overlay to make video more visible */}
           <div className="absolute inset-0 bg-gradient-to-br from-green-900/50 via-green-800/40 to-green-900/50"></div>
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
-        {/* Side Navigation - Video Carousel Dots */}
-        <div className="absolute left-8 top-1/2 transform -translate-y-1/2 z-20 hidden lg:block">
-          <div className="flex flex-col items-center space-y-8">
-            <div className="flex flex-col items-center space-y-3">
-              {[0, 1, 2, 3, 4].map((index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentVideoIndex(index)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50 hover:bg-white/80'
-                  }`}
-                  title={`Video ${index + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
 
         {/* Social Links */}
         <div className="absolute left-8 bottom-12 z-20 hidden lg:block">
@@ -338,21 +264,6 @@ export default function HomePage() {
           </svg>
         </div>
 
-        {/* Video Carousel Dots - Mobile */}
-        <div className="absolute top-4 left-0 right-0 z-20 flex justify-center lg:hidden">
-          <div className="flex items-center space-x-2 bg-black/30 backdrop-blur-sm px-3 py-2 rounded-full">
-            {[0, 1, 2, 3, 4].map((index) => (
-              <button
-                key={index}
-                onClick={() => setCurrentVideoIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  currentVideoIndex === index ? 'bg-yellow-400 scale-125 shadow-lg shadow-yellow-400/50' : 'bg-white/50'
-                }`}
-                title={`Video ${index + 1}`}
-              />
-            ))}
-          </div>
-        </div>
 
         {/* Animated Mouse Scroll Indicator - Centered */}
         <motion.div
@@ -1086,167 +997,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Marketing Strategy Section */}
-      <section className="py-24 bg-gradient-to-br from-blue-50 via-green-50 to-yellow-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 uppercase">
-              {language === 'ms' ? 'Strategi' : 'Our'} <span className="text-green-700">{language === 'ms' ? 'Pemasaran Kami' : 'Marketing Strategy'}</span>
-            </h2>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-              {language === 'ms'
-                ? 'Kami membina kesedaran dan kepercayaan melalui strategi pemasaran yang komprehensif'
-                : 'We build awareness and trust through comprehensive marketing strategies'
-              }
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-            {[
-              {
-                icon: '🎯',
-                title: language === 'ms' ? 'Pemasaran Digital' : 'Digital Marketing',
-                items: [
-                  language === 'ms' ? 'Media sosial (Facebook, Instagram)' : 'Social media (Facebook, Instagram)',
-                  language === 'ms' ? 'Iklan Google bertarget' : 'Targeted Google Ads',
-                  language === 'ms' ? 'Kandungan SEO' : 'SEO content',
-                  language === 'ms' ? 'Video tutorial YouTube' : 'YouTube tutorial videos'
-                ]
-              },
-              {
-                icon: '🤝',
-                title: language === 'ms' ? 'Perkongsian' : 'Partnerships',
-                items: [
-                  language === 'ms' ? 'Kerjasama MPOB' : 'MPOB collaboration',
-                  language === 'ms' ? 'Persatuan petani' : 'Farmer associations',
-                  language === 'ms' ? 'Kedai bekalan pertanian' : 'Agricultural supply stores',
-                  language === 'ms' ? 'Institusi kewangan' : 'Financial institutions'
-                ]
-              },
-              {
-                icon: '📚',
-                title: language === 'ms' ? 'Pendidikan & Demo' : 'Education & Demo',
-                items: [
-                  language === 'ms' ? 'Webinar percuma' : 'Free webinars',
-                  language === 'ms' ? 'Lawatan ladang' : 'Farm visits',
-                  language === 'ms' ? 'Demo langsung' : 'Live demonstrations',
-                  language === 'ms' ? 'Pusat latihan' : 'Training centers'
-                ]
-              },
-              {
-                icon: '💬',
-                title: language === 'ms' ? 'Pemasaran Mulut ke Mulut' : 'Word-of-Mouth',
-                items: [
-                  language === 'ms' ? 'Program rujukan' : 'Referral program',
-                  language === 'ms' ? 'Testimoni pelanggan' : 'Customer testimonials',
-                  language === 'ms' ? 'Kajian kes' : 'Case studies',
-                  language === 'ms' ? 'Komuniti dalam talian' : 'Online community'
-                ]
-              }
-            ].map((strategy, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-6 rounded-xl shadow-lg border-t-4 border-green-500 hover:shadow-2xl transition-shadow duration-300"
-              >
-                <div className="text-5xl mb-4 text-center">{strategy.icon}</div>
-                <h3 className="text-xl font-bold text-gray-900 mb-4 text-center">
-                  {strategy.title}
-                </h3>
-                <ul className="space-y-2">
-                  {strategy.items.map((item, idx) => (
-                    <li key={idx} className="flex items-start text-sm text-gray-700">
-                      <span className="text-green-600 mr-2 flex-shrink-0">✓</span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Marketing Channels */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            viewport={{ once: true }}
-            className="bg-gradient-to-r from-green-600 to-green-700 p-10 rounded-2xl shadow-2xl text-white"
-          >
-            <div className="text-center mb-8">
-              <h3 className="text-3xl font-black mb-4">
-                {language === 'ms' ? 'Saluran Pemasaran Utama' : 'Key Marketing Channels'}
-              </h3>
-              <p className="text-green-100">
-                {language === 'ms'
-                  ? 'Kami menjangkau petani di mana mereka berada'
-                  : 'We reach farmers where they are'
-                }
-              </p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
-              {[
-                { icon: '📱', label: language === 'ms' ? 'WhatsApp' : 'WhatsApp' },
-                { icon: '👍', label: language === 'ms' ? 'Facebook' : 'Facebook' },
-                { icon: '📺', label: language === 'ms' ? 'YouTube' : 'YouTube' },
-                { icon: '📧', label: language === 'ms' ? 'E-mel' : 'Email' },
-                { icon: '📻', label: language === 'ms' ? 'Radio' : 'Radio' },
-                { icon: '🏪', label: language === 'ms' ? 'Kedai Agro' : 'Agro Shops' }
-              ].map((channel, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  viewport={{ once: true }}
-                  className="bg-white/10 backdrop-blur-sm p-4 rounded-xl text-center hover:bg-white/20 transition-all duration-300"
-                >
-                  <div className="text-4xl mb-2">{channel.icon}</div>
-                  <p className="text-sm font-semibold">{channel.label}</p>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Success Metrics */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-            viewport={{ once: true }}
-            className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-6"
-          >
-            {[
-              { number: '10,000+', label: language === 'ms' ? 'Petani Aktif' : 'Active Farmers' },
-              { number: '95%', label: language === 'ms' ? 'Kadar Kepuasan' : 'Satisfaction Rate' },
-              { number: '50,000+', label: language === 'ms' ? 'Analisis Selesai' : 'Analyses Completed' },
-              { number: '15+', label: language === 'ms' ? 'Negeri Diliputi' : 'States Covered' }
-            ].map((metric, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.5 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-6 rounded-xl shadow-lg text-center hover:shadow-2xl transition-shadow duration-300"
-              >
-                <p className="text-4xl font-black text-green-700 mb-2">{metric.number}</p>
-                <p className="text-gray-700 font-semibold text-sm">{metric.label}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
       {/* AI Technology Behind CropDrive Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 via-green-900 to-gray-900 text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
@@ -1882,6 +1632,100 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Trust & Guarantee Section */}
+      <section className="py-24 bg-gradient-to-br from-green-50 via-yellow-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading">
+              {language === 'ms' ? 'Kenapa Petani' : 'Why Farmers'} <span className="text-green-700">{language === 'ms' ? 'Mempercayai Kami' : 'Trust Us'}</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              {language === 'ms'
+                ? 'Kami komited untuk kejayaan anda dengan jaminan kualiti dan sokongan terbaik'
+                : 'We\'re committed to your success with quality guarantees and the best support'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                icon: '🏆',
+                title: language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified',
+                desc: language === 'ms'
+                  ? 'AI kami disahkan mengikut piawaian MPOB Malaysia untuk kelapa sawit'
+                  : 'Our AI is validated according to MPOB Malaysian standards for palm oil'
+              },
+              {
+                icon: '🔒',
+                title: language === 'ms' ? 'Data Selamat' : 'Secure Data',
+                desc: language === 'ms'
+                  ? 'Data ladang anda dilindungi dengan keselamatan peringkat bank'
+                  : 'Your farm data is protected with bank-level security'
+              },
+              {
+                icon: '💯',
+                title: language === 'ms' ? 'Jaminan Tepat' : 'Accuracy Guarantee',
+                desc: language === 'ms'
+                  ? 'Analisis disokong oleh penyelidikan saintifik dan data sebenar'
+                  : 'Analysis backed by scientific research and real-world data'
+              },
+              {
+                icon: '🤝',
+                title: language === 'ms' ? 'Sokongan 24/7' : '24/7 Support',
+                desc: language === 'ms'
+                  ? 'Pasukan sokongan sedia membantu bila-bila masa anda perlukan'
+                  : 'Support team ready to help whenever you need it'
+              }
+            ].map((trust, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                whileHover={{ y: -10, scale: 1.05 }}
+                className="bg-white p-8 rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all"
+              >
+                <div className="text-6xl mb-4 text-center">{trust.icon}</div>
+                <h3 className="text-2xl font-black text-gray-900 mb-3 text-center">{trust.title}</h3>
+                <p className="text-gray-600 text-center leading-relaxed">{trust.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Money-Back Guarantee Badge */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            viewport={{ once: true }}
+            className="mt-16 text-center"
+          >
+            <div className="inline-block bg-gradient-to-r from-green-600 to-green-700 text-white px-12 py-8 rounded-3xl shadow-2xl border-4 border-yellow-400">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <span className="text-6xl">✓</span>
+                <h3 className="text-3xl font-black">
+                  {language === 'ms' ? 'Jaminan Kepuasan 100%' : '100% Satisfaction Guarantee'}
+                </h3>
+              </div>
+              <p className="text-xl text-green-50 max-w-2xl mx-auto">
+                {language === 'ms'
+                  ? 'Cuba tanpa risiko. Jika anda tidak berpuas hati dengan hasil dalam 30 hari, kami akan pulangkan wang anda sepenuhnya.'
+                  : 'Try risk-free. If you\'re not satisfied with the results within 30 days, we\'ll refund you in full.'
+                }
+              </p>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* Technology Section */}
       <section className="py-24 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2031,36 +1875,96 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 bg-gradient-to-r from-primary-600 to-secondary-600 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* CTA Section - Enhanced with Urgency */}
+      <section className="py-24 bg-gradient-to-br from-green-600 via-green-700 to-green-800 text-white relative overflow-hidden">
+        {/* Animated Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
+            backgroundSize: '50px 50px'
+          }}></div>
+        </div>
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-6">
-              {language === 'ms' ? 'Sedia untuk Transformasi Ladang Anda?' : 'Ready to Transform Your Farm?'}
+            {/* Urgency Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              viewport={{ once: true }}
+              className="inline-block mb-6"
+            >
+              <div className="bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-black text-sm uppercase tracking-wider shadow-lg">
+                {language === 'ms' ? '⚡ Tawaran Masa Terhad' : '⚡ Limited Time Offer'}
+              </div>
+            </motion.div>
+
+            <h2 className="text-4xl md:text-6xl font-black mb-6 font-heading">
+              {language === 'ms' ? 'Mulakan Transformasi Ladang Anda Hari Ini!' : 'Start Transforming Your Farm Today!'}
             </h2>
-            <p className="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
+            
+            <p className="text-xl md:text-2xl text-green-50 mb-4 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
-                ? 'Sertai ribuan petani Malaysia yang sudah menggunakan AI untuk hasil yang lebih baik.'
-                : 'Join thousands of Malaysian farmers already using AI for better yields.'
+                ? 'Sertai 3,500+ petani pintar yang sudah meningkatkan hasil mereka sehingga 38%'
+                : 'Join 3,500+ smart farmers who have already increased their yields by up to 38%'
               }
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
-                <Button size="lg" className="bg-light-green text-primary-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
-                  {language === 'ms' ? 'Mulakan Sekarang' : 'Get Started Now'}
-                </Button>
+
+            <p className="text-lg text-yellow-300 mb-10 font-semibold">
+              {language === 'ms'
+                ? '✓ Mula dalam 5 minit • ✓ Laporan dalam 1-2 minit • ✓ Jaminan wang dikembalikan'
+                : '✓ Start in 5 minutes • ✓ Reports in 1-2 minutes • ✓ Money-back guarantee'
+              }
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+              <Link href="/pricing">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto px-10 py-5 bg-yellow-400 text-green-900 rounded-full font-black text-xl uppercase tracking-wider shadow-2xl hover:bg-yellow-300 transition-all duration-300 border-4 border-yellow-300"
+                >
+                  {language === 'ms' ? '🚀 Beli Sekarang' : '🚀 Buy Now'}
+                </motion.button>
               </Link>
-              <Link href="/features">
-                <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-4 text-lg">
-                  {language === 'ms' ? 'Ketahui Lebih Lanjut' : 'Learn More'}
-                </Button>
+              <Link href="/how-it-works">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto px-10 py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/50 rounded-full font-bold text-xl uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300"
+                >
+                  {language === 'ms' ? '▶️ Lihat Demo' : '▶️ See Demo'}
+                </motion.button>
               </Link>
             </div>
+
+            {/* Trust Indicators */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.4 }}
+              viewport={{ once: true }}
+              className="flex flex-wrap justify-center gap-6 text-sm text-green-50"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-yellow-400 text-xl">★★★★★</span>
+                <span className="font-semibold">{language === 'ms' ? '4.9/5 Penilaian' : '4.9/5 Rating'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🔒</span>
+                <span className="font-semibold">{language === 'ms' ? 'Pembayaran Selamat' : 'Secure Payment'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">✓</span>
+                <span className="font-semibold">{language === 'ms' ? 'Jaminan 30 Hari' : '30-Day Guarantee'}</span>
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </section>

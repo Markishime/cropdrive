@@ -85,38 +85,21 @@ export default function ReportsPage() {
         });
         
         setReports(fetchedReports);
-      } catch (error) {
+        
+        // If no reports found, just set empty array (no error)
+        if (fetchedReports.length === 0) {
+          console.log('No reports found for user');
+        }
+      } catch (error: any) {
         console.error('Error fetching reports:', error);
-        toast.error(language === 'ms' ? 'Ralat memuatkan laporan' : 'Error loading reports');
-        // Use mock data as fallback
-        setReports([
-          {
-            id: '1',
-            title: language === 'ms' ? 'Analisis Tanah - Januari 2025' : 'Soil Analysis - January 2025',
-            type: 'soil',
-            date: '2025-01-15',
-            status: 'completed',
-            recommendations: 12,
-            summary: language === 'ms' 
-              ? 'pH tanah rendah, perlu menambah kapur'
-              : 'Low soil pH, lime addition recommended',
-            userId: user?.uid || '',
-            createdAt: Timestamp.now()
-          },
-          {
-            id: '2',
-            title: language === 'ms' ? 'Analisis Daun - Januari 2025' : 'Leaf Analysis - January 2025',
-            type: 'leaf',
-            date: '2025-01-10',
-            status: 'completed',
-            recommendations: 8,
-            summary: language === 'ms'
-              ? 'Kekurangan nitrogen, tambah baja NPK'
-              : 'Nitrogen deficiency, add NPK fertilizer',
-            userId: user?.uid || '',
-            createdAt: Timestamp.now()
-          }
-        ]);
+        
+        // Only show error toast for actual errors, not missing index
+        if (error.code !== 'failed-precondition' && error.code !== 'permission-denied') {
+          toast.error(language === 'ms' ? 'Ralat memuatkan laporan' : 'Error loading reports');
+        }
+        
+        // Set empty array on error (don't use mock data)
+        setReports([]);
       } finally {
         setLoadingReports(false);
       }

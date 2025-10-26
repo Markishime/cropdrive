@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import Card, { CardContent } from '@/components/ui/Card';
-import { Play, BookOpen, Video, Image, CheckCircle2, Download, ExternalLink, Lock, Crown, Zap } from 'lucide-react';
+import { Play, BookOpen, Video, CheckCircle2, Lock, Crown, Zap } from 'lucide-react';
 
 export default function TutorialsPage() {
   const [mounted, setMounted] = useState(false);
@@ -146,27 +146,6 @@ export default function TutorialsPage() {
         : 'Our AI will analyze your report and provide recommendations within 1-2 minutes',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
       icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
-    }
-  ];
-
-  const downloadableResources = [
-    {
-      title: language === 'ms' ? 'Panduan Pengguna Lengkap (PDF)' : 'Complete User Guide (PDF)',
-      description: language === 'ms' ? '45 halaman panduan terperinci' : '45-page detailed guide',
-      size: '12 MB',
-      type: 'PDF'
-    },
-    {
-      title: language === 'ms' ? 'Contoh Laporan Analisis' : 'Sample Analysis Report',
-      description: language === 'ms' ? 'Contoh laporan untuk rujukan' : 'Example report for reference',
-      size: '3 MB',
-      type: 'PDF'
-    },
-    {
-      title: language === 'ms' ? 'Quick Reference Card' : 'Quick Reference Card',
-      description: language === 'ms' ? 'Kad rujukan pantas untuk guna harian' : 'Quick reference for daily use',
-      size: '500 KB',
-      type: 'PDF'
     }
   ];
 
@@ -434,61 +413,6 @@ export default function TutorialsPage() {
                     <p className="text-sm text-gray-600">
                       {step.description}
                     </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Downloadable Resources */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-          className="mb-20"
-        >
-          <div className="flex items-center space-x-3 mb-8">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-              <Download className="w-6 h-6 text-white" />
-            </div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              {language === 'ms' ? 'Sumber Muat Turun' : 'Downloadable Resources'}
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {downloadableResources.map((resource, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-              >
-                <Card className="group hover:shadow-xl transition-all duration-300 cursor-pointer">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="w-14 h-14 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                        <span className="text-red-600 font-bold text-sm">{resource.type}</span>
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                          {resource.title}
-                        </h3>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {resource.description}
-                        </p>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-500">{resource.size}</span>
-                          <button className="text-blue-600 text-sm font-semibold flex items-center space-x-1 hover:text-blue-700">
-                            <span>{language === 'ms' ? 'Muat Turun' : 'Download'}</span>
-                            <ExternalLink className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
                   </CardContent>
                 </Card>
               </motion.div>

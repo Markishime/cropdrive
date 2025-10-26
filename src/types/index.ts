@@ -128,6 +128,7 @@ export interface AuthContextType {
   signUp: (userData: SignUpData, language?: 'en' | 'ms') => Promise<void>;
   signOut: (language?: 'en' | 'ms') => Promise<void>;
   updateProfile: (updates: Partial<User>, language?: 'en' | 'ms') => Promise<void>;
+  refreshUser?: () => Promise<void>;
 }
 
 export interface SignUpData {

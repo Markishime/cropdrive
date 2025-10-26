@@ -15,38 +15,91 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('=== Checkout API Called ===');
+    
     // Get the current user
     const authHeader = req.headers.get('authorization');
+    console.log('Auth header present:', !!authHeader);
+    
     if (!authHeader) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      console.error('No authorization header');
+      return NextResponse.json({ error: 'Unauthorized - Please login again' }, { status: 401 });
     }
 
-    // For development, skip token verification if emulators are enabled
+    // For development, skip token verification if in test mode
     let userId: string;
 
-    if (process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-      // In development with emulators, extract user ID from header
-      const token = authHeader.replace('Bearer ', '');
-      userId = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString()).user_id || 'demo-user';
+    // Check if we're in development/test mode
+    const isDevelopment = process.env.NODE_ENV === 'development' || process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
+    
+    if (isDevelopment) {
+      // In development, extract user ID from token without verification
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        userId = decoded.user_id || decoded.uid || 'demo-user';
+        console.log('Development mode: Extracted userId:', userId);
+      } catch (error) {
+        console.error('Error decoding token in dev mode:', error);
+        return NextResponse.json({ error: 'Invalid token format' }, { status: 401 });
+      }
     } else {
       // In production, verify Firebase token
-      const { adminAuth } = await import('@/lib/firebase-admin');
-      const token = authHeader.replace('Bearer ', '');
-      const decodedToken = await adminAuth.verifyIdToken(token);
-      userId = decodedToken.uid;
+      try {
+        const { adminAuth } = await import('@/lib/firebase-admin');
+        const token = authHeader.replace('Bearer ', '');
+        const decodedToken = await adminAuth.verifyIdToken(token);
+        userId = decodedToken.uid;
+        console.log('Production mode: Verified userId:', userId);
+      } catch (error) {
+        console.error('Error verifying token in production:', error);
+        return NextResponse.json({ error: 'Token verification failed' }, { status: 401 });
+      }
     }
 
-    // Get user data from Firestore
-    const userDoc = await getDoc(doc(db, 'users', userId));
-    if (!userDoc.exists()) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    // Get user data - in development mode, decode from token; in production, use Firestore
+    let userData: any;
+    
+    if (isDevelopment) {
+      // In development, extract email from Firebase token
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+        userData = {
+          email: decoded.email || `user-${userId}@test.com`,
+          uid: userId,
+        };
+        console.log('Development mode: Using email from token:', userData.email);
+      } catch (error) {
+        console.error('Error extracting email from token:', error);
+        // Fallback email for testing
+        userData = {
+          email: `user-${userId}@test.com`,
+          uid: userId,
+        };
+      }
+    } else {
+      // In production, get from Firestore using Admin SDK
+      try {
+        const userDoc = await getDoc(doc(db, 'users', userId));
+        if (!userDoc.exists()) {
+          return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+        userData = userDoc.data();
+      } catch (error) {
+        console.error('Error fetching user from Firestore:', error);
+        return NextResponse.json({ error: 'Failed to fetch user data' }, { status: 500 });
+      }
     }
-
-    const userData = userDoc.data();
+    
+    console.log('User data retrieved:', { email: userData.email, uid: userId });
+    
     const { planId, isYearly } = await req.json();
+    console.log('Plan details:', { planId, isYearly });
 
     // Validate plan ID
     if (!planId || !['start', 'smart', 'precision'].includes(planId)) {
+      console.error('Invalid plan ID:', planId);
       return NextResponse.json({ error: 'Invalid plan ID' }, { status: 400 });
     }
 
@@ -83,10 +136,21 @@ export async function POST(req: NextRequest) {
       },
     };
 
-    const priceId = priceIds[planId as keyof typeof priceIds][isYearly ? 'yearly' : 'monthly'];
+    let priceId: string | null = priceIds[planId as keyof typeof priceIds][isYearly ? 'yearly' : 'monthly'];
+    console.log('Price ID resolved:', priceId);
 
-    // Create Stripe checkout session
-    // For testing with dynamic prices (when Stripe Price IDs don't exist yet)
+    // Important: ALWAYS use Stripe Checkout Sessions (not payment links) 
+    // to ensure metadata is properly passed to webhooks for plan activation
+    // If the price ID is a direct URL (https://buy.stripe.com), we need to 
+    // extract the actual Price ID or create an inline price
+    
+    if (priceId && priceId.startsWith('https://buy.stripe.com')) {
+      console.warn('⚠️ Direct Stripe payment link detected. Converting to checkout session...');
+      // Extract price ID from URL if possible, or set to null to use inline pricing
+      priceId = null; // Force inline pricing for proper metadata handling
+    }
+
+    // Create Stripe checkout session (with proper metadata for webhooks)
     const sessionConfig: any = {
       customer_email: userData.email,
       mode: 'subscription',
@@ -99,7 +163,6 @@ export async function POST(req: NextRequest) {
       },
       payment_method_types: ['card'],
       billing_address_collection: 'auto',
-      customer_creation: 'if_required',
       allow_promotion_codes: true,
     };
 
@@ -119,11 +182,12 @@ export async function POST(req: NextRequest) {
         },
       };
     } else {
-      // Create inline price for testing
+      // Create inline price for testing (when no Stripe Price ID is configured)
+      // Prices in cents (smallest currency unit): MYR 24 = 2400 cents
       const planPrices = {
-        start: { monthly: 9900, yearly: 10680 },
-        smart: { monthly: 12900, yearly: 13920 },
-        precision: { monthly: 17900, yearly: 19320 },
+        start: { monthly: 2400, yearly: 19200 },      // 24 RM/month, 192 RM/year
+        smart: { monthly: 3900, yearly: 33600 },      // 39 RM/month, 336 RM/year
+        precision: { monthly: 4900, yearly: 48000 },  // 49 RM/month, 480 RM/year
       };
       
       const price = planPrices[planId as keyof typeof planPrices][isYearly ? 'yearly' : 'monthly'];
@@ -153,10 +217,18 @@ export async function POST(req: NextRequest) {
       url: session.url,
     });
 
-  } catch (error) {
-    console.error('Error creating checkout session:', error);
+  } catch (error: any) {
+    console.error('=== Checkout Error ===');
+    console.error('Error type:', error.constructor.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    
     return NextResponse.json(
-      { error: 'Failed to create checkout session' },
+      { 
+        error: 'Failed to create checkout session',
+        details: error.message,
+        type: error.constructor.name
+      },
       { status: 500 }
     );
   }

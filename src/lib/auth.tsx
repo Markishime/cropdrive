@@ -186,7 +186,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const signOut = async (language: 'en' | 'ms' = 'ms'): Promise<void> => {
     try {
       await firebaseSignOut(auth);
-      toast.success(language === 'ms' ? 'Berjaya log keluar!' : 'Successfully logged out!');
     } catch (error) {
       console.error('Sign out error:', error);
       toast.error(language === 'ms' ? 'Ralat log keluar.' : 'Logout error.');
@@ -211,6 +210,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     } catch (error) {
       console.error('Update profile error:', error);
       toast.error(language === 'ms' ? 'Ralat mengemaskini profil.' : 'Error updating profile.');
+    }
+  };
+
+  // Refresh user data from Firestore
+  const refreshUser = async (): Promise<void> => {
+    try {
+      const currentUser = auth.currentUser;
+      if (currentUser) {
+        console.log('Refreshing user data from Firestore...');
+        const convertedUser = await convertFirebaseUser(currentUser);
+        setUser(convertedUser);
+        console.log('User data refreshed:', convertedUser?.plan);
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
     }
   };
 
@@ -240,6 +254,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signUp,
     signOut,
     updateProfile,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

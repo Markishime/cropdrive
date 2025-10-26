@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
+import toast from 'react-hot-toast';
 
 export default function GetStartedFarmersPage() {
   const [mounted, setMounted] = useState(false);
@@ -43,11 +44,113 @@ export default function GetStartedFarmersPage() {
     setFormData(prev => ({ ...prev, [fieldName]: file }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission logic here
-    console.log('Form submitted:', formData);
-    alert('Thank you! Your submission has been received. Our team will process your data and contact you soon.');
+    setIsSubmitting(true);
+
+    try {
+      // Create FormData object for file upload
+      const submitData = new FormData();
+      submitData.append('firstName', formData.firstName);
+      submitData.append('lastName', formData.lastName);
+      submitData.append('email', formData.email);
+      submitData.append('newsletter', formData.newsletter.toString());
+      submitData.append('whatsapp', formData.whatsapp);
+      submitData.append('plantationSize', formData.plantationSize);
+      submitData.append('palmAge', formData.palmAge);
+      submitData.append('currentYield', formData.currentYield);
+      submitData.append('message', formData.message);
+      
+      if (formData.soilTestFile) {
+        submitData.append('soilTestFile', formData.soilTestFile);
+      }
+      if (formData.leafTestFile) {
+        submitData.append('leafTestFile', formData.leafTestFile);
+      }
+
+      const response = await fetch('/api/submit-farmer-form', {
+        method: 'POST',
+        body: submitData,
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success(
+          language === 'ms' 
+            ? '✅ Terima kasih! Penyerahan anda telah diterima. Pasukan kami akan memproses data anda dan menghubungi anda tidak lama lagi.' 
+            : '✅ Thank you! Your submission has been received. Our team will process your data and contact you soon.',
+          {
+            duration: 6000,
+            position: 'top-center',
+            style: {
+              background: '#16a34a',
+              color: '#fff',
+              padding: '16px 24px',
+              fontSize: '16px',
+              fontWeight: '600',
+              borderRadius: '12px',
+              boxShadow: '0 10px 40px rgba(22, 163, 74, 0.3)',
+            },
+            icon: '🎉',
+          }
+        );
+        
+        // Reset form
+        setFormData({
+          firstName: '',
+          lastName: '',
+          email: '',
+          newsletter: false,
+          whatsapp: '',
+          plantationSize: '',
+          palmAge: '',
+          currentYield: '',
+          soilTestFile: null,
+          leafTestFile: null,
+          message: ''
+        });
+        
+        // Reset file inputs
+        const fileInputs = document.querySelectorAll('input[type="file"]') as NodeListOf<HTMLInputElement>;
+        fileInputs.forEach(input => input.value = '');
+      } else {
+        throw new Error(result.error || 'Failed to submit form');
+      }
+    } catch (error: any) {
+      console.error('Error submitting form:', error);
+      
+      const errorMessage = error.message || 'Unknown error';
+      let displayMessage = language === 'ms'
+        ? '❌ Maaf, terdapat ralat menghantar borang anda.'
+        : '❌ Sorry, there was an error submitting your form.';
+      
+      // Check for specific error messages
+      if (errorMessage.includes('Email service not configured')) {
+        displayMessage = language === 'ms'
+          ? '⚠️ Perkhidmatan emel sedang disediakan. Sila hubungi kami terus di marklloydcuizon@gmail.com'
+          : '⚠️ Email service is being set up. Please contact us directly at marklloydcuizon@gmail.com';
+      }
+      
+      toast.error(displayMessage, {
+        duration: 6000,
+        position: 'top-center',
+        style: {
+          background: '#dc2626',
+          color: '#fff',
+          padding: '16px 24px',
+          fontSize: '16px',
+          fontWeight: '600',
+          borderRadius: '12px',
+          boxShadow: '0 10px 40px rgba(220, 38, 38, 0.3)',
+        },
+        icon: '❌',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!mounted) {
@@ -404,9 +507,20 @@ export default function GetStartedFarmersPage() {
               <div className="text-center pt-4">
                 <button
                   type="submit"
-                  className="px-12 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide"
+                  disabled={isSubmitting}
+                  className="px-12 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  {language === 'ms' ? 'Hantar' : 'Send'}
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      {language === 'ms' ? 'Menghantar...' : 'Sending...'}
+                    </>
+                  ) : (
+                    language === 'ms' ? 'Hantar' : 'Send'
+                  )}
               </button>
               </div>
             </form>
