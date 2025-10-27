@@ -255,6 +255,7 @@ export const Navbar: React.FC = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="p-2 rounded-lg transition-colors duration-200 text-white hover:bg-white/10"
+              aria-label={isOpen ? (language === 'ms' ? 'Tutup menu' : 'Close menu') : (language === 'ms' ? 'Buka menu' : 'Open menu')}
             >
               <svg
                 className="w-6 h-6"

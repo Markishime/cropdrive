@@ -289,14 +289,17 @@ export default function RegisterPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                  <label htmlFor="language-select" className="block text-sm font-bold text-gray-700 mb-2">
                     {language === 'ms' ? 'Bahasa Pilihan' : 'Preferred Language'} <span className="text-red-500">*</span>
                   </label>
                   <select
+                    id="language-select"
+                    name="language"
                     value={formData.language}
                     onChange={(e) => handleInputChange('language', e.target.value)}
                     disabled={loading}
                     className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={language === 'ms' ? 'Bahasa Pilihan' : 'Preferred Language'}
                   >
                     <option value="ms">Bahasa Malaysia</option>
                     <option value="en">English</option>
