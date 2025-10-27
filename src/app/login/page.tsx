@@ -132,7 +132,7 @@ export default function LoginPage() {
             <div className="text-center">
               <Link href="/" className="inline-flex items-center justify-center space-x-3 mb-8 group">
                 <motion.div 
-                  className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-full flex items-center justify-center shadow-xl group-hover:shadow-yellow-400/50 transition-all p-3"
+                  className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-all p-3"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
                 >
