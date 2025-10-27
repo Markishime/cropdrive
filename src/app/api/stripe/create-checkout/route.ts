@@ -15,6 +15,12 @@ export async function POST(req: NextRequest) {
   try {
     console.log('=== Checkout API Called ===');
     
+    // Get the base URL from request headers (for correct redirect in production)
+    const host = req.headers.get('host') || 'cropdrive.vercel.app';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+    console.log('Base URL detected:', baseUrl);
+    
     // Get the current user
     const authHeader = req.headers.get('authorization');
     console.log('Auth header present:', !!authHeader);
@@ -153,8 +159,8 @@ export async function POST(req: NextRequest) {
     const sessionConfig: any = {
       customer_email: userData.email,
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.vercel.app'}/pricing`,
+      success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
+      cancel_url: `${baseUrl}/pricing`,
       metadata: {
         userId: userId,
         planId: planId,
