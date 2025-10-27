@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
@@ -186,24 +187,30 @@ export const Sidebar: React.FC = () => {
             {/* Logo & Collapse Button */}
             <div className="p-6 border-b border-green-700/50">
         <div className="flex items-center justify-between">
-          {!isCollapsed && (
+          {isCollapsed ? (
+            <Link href="/dashboard" className="flex items-center justify-center mx-auto mb-2">
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/images/CropDrive.png"
+                  alt="CropDrive Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </Link>
+          ) : (
             <Link href="/dashboard" className="flex items-center space-x-3 group">
-              <div className="w-10 h-10 flex items-center justify-center text-green-600">
-                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 8 C15 10, 12 15, 10 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                  <path d="M20 8 C25 10, 28 15, 30 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                  <path d="M20 10 C16 12, 14 16, 13 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M20 10 C24 12, 26 16, 27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M20 6 C18 9, 16 12, 15 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M20 6 C22 9, 24 12, 25 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M20 12 C17 14, 15 17, 14 22" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <path d="M20 12 C23 14, 25 17, 26 22" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <rect x="18" y="20" width="4" height="15" rx="1" fill="currentColor"/>
-                  <circle cx="18" cy="22" r="1.5" fill="currentColor" opacity="0.8"/>
-                  <circle cx="22" cy="22" r="1.5" fill="currentColor" opacity="0.8"/>
-                  <circle cx="17" cy="24" r="1.2" fill="currentColor" opacity="0.7"/>
-                  <circle cx="23" cy="24" r="1.2" fill="currentColor" opacity="0.7"/>
-                </svg>
+              <div className="relative w-10 h-10">
+                <Image
+                  src="/images/CropDrive.png"
+                  alt="CropDrive Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                  priority
+                />
               </div>
                 <div className="flex flex-col">
                   <div className="flex items-start leading-tight">
@@ -216,18 +223,25 @@ export const Sidebar: React.FC = () => {
                 </div>
             </Link>
           )}
+          {!isCollapsed && (
+            <button
+              onClick={toggleCollapsed}
+              className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+              title={language === 'ms' ? 'Runtuhkan' : 'Collapse'}
+            >
+              <ChevronLeft className="w-5 h-5 text-white/80" />
+            </button>
+          )}
+        </div>
+        {isCollapsed && (
           <button
             onClick={toggleCollapsed}
-            className={`p-2 rounded-lg hover:bg-white/10 transition-colors ${isCollapsed ? 'mx-auto' : ''}`}
-            title={isCollapsed ? (language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'ms' ? 'Runtuhkan' : 'Collapse')}
+            className="w-full p-2 rounded-lg hover:bg-white/10 transition-colors mt-2"
+            title={language === 'ms' ? 'Kembangkan' : 'Expand'}
           >
-            {isCollapsed ? (
-              <ChevronRight className="w-5 h-5 text-white/80" />
-            ) : (
-              <ChevronLeft className="w-5 h-5 text-white/80" />
-            )}
+            <ChevronRight className="w-5 h-5 text-white/80 mx-auto" />
           </button>
-        </div>
+        )}
       </div>
 
             {/* User Profile */}

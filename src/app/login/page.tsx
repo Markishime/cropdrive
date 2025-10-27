@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
@@ -131,15 +132,18 @@ export default function LoginPage() {
             <div className="text-center">
               <Link href="/" className="inline-flex items-center justify-center space-x-3 mb-8 group">
                 <motion.div 
-                  className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-yellow-400/50 transition-all"
+                  className="w-14 h-14 bg-gradient-to-br from-yellow-400 to-yellow-500 rounded-2xl flex items-center justify-center shadow-xl group-hover:shadow-yellow-400/50 transition-all p-2"
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <svg className="w-8 h-8 text-green-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4 C9 6, 7 9, 6 12" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4 C15 6, 17 9, 18 12" />
-                    <rect x="11" y="12" width="2" height="9" rx="0.5" fill="currentColor"/>
-                  </svg>
+                  <Image
+                    src="/images/CropDrive.png"
+                    alt="CropDrive Logo"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                    priority
+                  />
                 </motion.div>
                 <span className="font-black text-3xl text-white font-heading">
                   CropDrive<span className="text-yellow-400">™</span>

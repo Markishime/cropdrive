@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
@@ -83,28 +84,16 @@ export const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo - CropDrive OP Advisor™ */}
           <Link href="/" className="flex items-center space-x-3 group mr-8 lg:mr-12">
-            {/* Oil Palm Tree Icon */}
-            <div className={`w-10 h-10 flex items-center justify-center transition-all duration-500 ${
-              scrolled ? 'text-green-600' : 'text-yellow-400'
-            }`}>
-              <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Palm Fronds */}
-                <path d="M20 8 C15 10, 12 15, 10 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                <path d="M20 8 C25 10, 28 15, 30 20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none"/>
-                <path d="M20 10 C16 12, 14 16, 13 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <path d="M20 10 C24 12, 26 16, 27 21" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <path d="M20 6 C18 9, 16 12, 15 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <path d="M20 6 C22 9, 24 12, 25 16" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                <path d="M20 12 C17 14, 15 17, 14 22" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                <path d="M20 12 C23 14, 25 17, 26 22" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                {/* Trunk */}
-                <rect x="18" y="20" width="4" height="15" rx="1" fill="currentColor"/>
-                {/* Palm Fruits (clusters) */}
-                <circle cx="18" cy="22" r="1.5" fill="currentColor" opacity="0.8"/>
-                <circle cx="22" cy="22" r="1.5" fill="currentColor" opacity="0.8"/>
-                <circle cx="17" cy="24" r="1.2" fill="currentColor" opacity="0.7"/>
-                <circle cx="23" cy="24" r="1.2" fill="currentColor" opacity="0.7"/>
-              </svg>
+            {/* CropDrive Logo */}
+            <div className="relative w-10 h-10 transition-all duration-500">
+              <Image
+                src="/images/CropDrive.png"
+                alt="CropDrive Logo"
+                width={40}
+                height={40}
+                className="object-contain"
+                priority
+              />
             </div>
             
             <div className="flex items-start leading-tight whitespace-nowrap">
