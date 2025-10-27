@@ -153,8 +153,8 @@ export async function POST(req: NextRequest) {
     const sessionConfig: any = {
       customer_email: userData.email,
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/pricing`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.vercel.app'}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.vercel.app'}/pricing`,
       metadata: {
         userId: userId,
         planId: planId,

@@ -2,7 +2,7 @@
 export const config = {
   app: {
     name: 'CropDrive OP Advisor™',
-    url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    url: process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.vercel.app',
     version: '1.0.0',
   },
 
