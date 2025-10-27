@@ -85,12 +85,14 @@ export const Navbar: React.FC = () => {
           {/* Logo - CropDrive OP Advisor™ */}
           <Link href="/" className="flex items-center space-x-3 group mr-8 lg:mr-12">
             {/* CropDrive Logo */}
-            <div className="relative w-10 h-10 transition-all duration-500">
+            <div className={`relative w-12 h-12 rounded-full flex items-center justify-center p-2 transition-all duration-500 ${
+              scrolled ? 'bg-white shadow-md' : 'bg-white/90 shadow-lg'
+            }`}>
               <Image
                 src="/images/CropDrive.png"
                 alt="CropDrive Logo"
-                width={40}
-                height={40}
+                width={32}
+                height={32}
                 className="object-contain"
                 priority
               />

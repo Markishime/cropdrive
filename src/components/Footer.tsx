@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n';
 
@@ -72,27 +73,17 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <motion.div
-                className="w-10 h-10 bg-gradient-to-br from-green-600 to-yellow-500 rounded-lg flex items-center justify-center"
+                className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shadow-lg"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <svg
-                  className="w-6 h-6 text-white"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  {/* Oil Palm Tree Icon */}
-                  <path d="M12 4 C9 6, 7 9, 6 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M12 4 C15 6, 17 9, 18 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
-                  <path d="M12 5 C10 7, 8 10, 7.5 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <path d="M12 5 C14 7, 16 10, 16.5 13" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <path d="M12 3 C10.5 5, 9 8, 8.5 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <path d="M12 3 C13.5 5, 15 8, 15.5 11" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none"/>
-                  <rect x="11" y="12" width="2" height="9" rx="0.5" fill="currentColor"/>
-                  <circle cx="11" cy="13" r="0.8" fill="currentColor" opacity="0.8"/>
-                  <circle cx="13" cy="13" r="0.8" fill="currentColor" opacity="0.8"/>
-                </svg>
+                <Image
+                  src="/images/CropDrive.png"
+                  alt="CropDrive Logo"
+                  width={32}
+                  height={32}
+                  className="object-contain"
+                />
               </motion.div>
               <span className="font-bold text-xl">
                 CropDrive OP Advisor<sup className="text-xs">™</sup>
