@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 
 // Use Stripe secret key from environment variable
 // For testing, set STRIPE_SECRET_KEY in your .env.local file
@@ -81,8 +79,9 @@ export async function POST(req: NextRequest) {
     } else {
       // In production, get from Firestore using Admin SDK
       try {
-        const userDoc = await getDoc(doc(db, 'users', userId));
-        if (!userDoc.exists()) {
+        const { adminDb } = await import('@/lib/firebase-admin');
+        const userDoc = await adminDb.collection('users').doc(userId).get();
+        if (!userDoc.exists) {
           return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
         userData = userDoc.data();
