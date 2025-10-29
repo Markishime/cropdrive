@@ -171,53 +171,134 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      {/* Enhanced Header with Quick Stats */}
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center sm:text-left"
+          >
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+              <div>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
+                  {language === 'ms' ? 'Sejarah' : 'Reports'} <span className="text-yellow-400">{language === 'ms' ? 'Laporan' : 'History'}</span>
+                </h1>
+                <p className="text-lg sm:text-xl text-white/90 flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  {language === 'ms' 
+                    ? 'Lihat dan urus laporan analisis AI anda'
+                    : 'View and manage your AI analysis reports'
+                  }
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => toast.success(language === 'ms' ? 'Eksport akan tersedia tidak lama lagi' : 'Export coming soon')}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
+                >
+                  <Share2 className="w-4 h-4" />
+                  {language === 'ms' ? 'Eksport' : 'Export'}
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => router.push('/assistant')}
+                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  {language === 'ms' ? 'Baharu' : 'New Report'}
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Jumlah Laporan' : 'Total Reports'}
+                  </span>
+                  <FileText className="w-5 h-5 text-green-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{reports.length}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Bulan Ini' : 'This Month'}
+                  </span>
+                  <Calendar className="w-5 h-5 text-blue-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{thisMonthReports}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Selesai' : 'Completed'}
+                  </span>
+                  <CheckCircle2 className="w-5 h-5 text-green-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{completedReports}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Sedang Diproses' : 'Processing'}
+                  </span>
+                  <Clock className="w-5 h-5 text-yellow-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{processingReports}</p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Search and Filters */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center">
-                <FileText className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {language === 'ms' ? 'Sejarah Laporan' : 'Reports History'}
-                </h1>
-                <p className="text-gray-600 mt-1">
-                  {language === 'ms' 
-                    ? 'Lihat dan urus laporan analisis anda'
-                    : 'View and manage your analysis reports'
-                  }
-                </p>
-              </div>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => toast.success(language === 'ms' ? 'Eksport akan tersedia tidak lama lagi' : 'Export coming soon')}
-                className="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition"
-              >
-                <Share2 className="w-4 h-4" />
-                <span className="hidden sm:inline">{language === 'ms' ? 'Eksport' : 'Export'}</span>
-              </button>
-              <button
-                onClick={() => router.push('/assistant')}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
-              >
-                <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline">{language === 'ms' ? 'Laporan Baharu' : 'New Report'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Search and Filters */}
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
@@ -268,66 +349,6 @@ export default function ReportsPage() {
                 </button>
               ))}
             </div>
-          </div>
-        </motion.div>
-
-        {/* Statistics Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"
-        >
-          {/* Total Reports */}
-          <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-green-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">
-              {language === 'ms' ? 'Jumlah Laporan' : 'Total Reports'}
-            </p>
-            <p className="text-3xl font-bold text-gray-900">{reports.length}</p>
-          </div>
-
-          {/* This Month */}
-          <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-blue-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">
-              {language === 'ms' ? 'Bulan Ini' : 'This Month'}
-            </p>
-            <p className="text-3xl font-bold text-gray-900">{thisMonthReports}</p>
-          </div>
-
-          {/* Completed */}
-          <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle2 className="w-5 h-5 text-green-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">
-              {language === 'ms' ? 'Selesai' : 'Completed'}
-            </p>
-            <p className="text-3xl font-bold text-gray-900">{completedReports}</p>
-          </div>
-
-          {/* Processing */}
-          <div className="bg-white rounded-lg p-6 shadow border border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="w-5 h-5 text-yellow-600" />
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mb-1">
-              {language === 'ms' ? 'Sedang Diproses' : 'Processing'}
-            </p>
-            <p className="text-3xl font-bold text-gray-900">{processingReports}</p>
           </div>
         </motion.div>
 
