@@ -53,6 +53,14 @@ export default function PaymentMethodPage() {
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
+  const [showCardDetails, setShowCardDetails] = useState(false);
+  const [showEditCardModal, setShowEditCardModal] = useState(false);
+  const [editCardData, setEditCardData] = useState({
+    cardNumber: '•••• •••• •••• 4242',
+    cardHolder: '',
+    expiryDate: '12/25',
+    cvv: ''
+  });
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -61,6 +69,16 @@ export default function PaymentMethodPage() {
     const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
     setCurrentLang(lang);
   }, []);
+
+  // Initialize card holder name
+  useEffect(() => {
+    if (user) {
+      setEditCardData(prev => ({
+        ...prev,
+        cardHolder: user.displayName || user.email?.split('@')[0] || ''
+      }));
+    }
+  }, [user]);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
 
@@ -439,10 +457,14 @@ export default function PaymentMethodPage() {
   };
 
   const handleUpdatePaymentMethod = () => {
+    setShowEditCardModal(true);
+  };
+
+  const handleSaveCardDetails = () => {
     toast.promise(
       new Promise((resolve) => setTimeout(resolve, 2000)),
       {
-        loading: language === 'ms' ? 'Mengemas kini kaedah bayaran...' : 'Updating payment method...',
+        loading: language === 'ms' ? 'Menyimpan perubahan...' : 'Saving changes...',
         success: language === 'ms' ? '✅ Kaedah bayaran dikemas kini!' : '✅ Payment method updated!',
         error: language === 'ms' ? '❌ Ralat mengemas kini' : '❌ Error updating',
       },
@@ -465,6 +487,22 @@ export default function PaymentMethodPage() {
             background: '#ef4444',
           },
         },
+      }
+    );
+    setTimeout(() => {
+      setShowEditCardModal(false);
+    }, 2000);
+  };
+
+  const handleToggleCardDetails = () => {
+    setShowCardDetails(!showCardDetails);
+    toast.success(
+      showCardDetails 
+        ? (language === 'ms' ? 'Butiran kad disembunyikan' : 'Card details hidden')
+        : (language === 'ms' ? 'Butiran kad ditunjukkan' : 'Card details shown'),
+      {
+        icon: showCardDetails ? '🙈' : '👁️',
+        duration: 2000,
       }
     );
   };
@@ -698,7 +736,22 @@ export default function PaymentMethodPage() {
                       <CreditCard className="w-6 h-6 text-purple-600" />
                       {language === 'ms' ? 'Kaedah Bayaran' : 'Payment Method'}
                     </h2>
-                    <Lock className="w-5 h-5 text-purple-600" />
+                    <div className="flex items-center gap-2">
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={handleToggleCardDetails}
+                        className="p-2 hover:bg-purple-100 rounded-lg transition"
+                        aria-label="Toggle card details"
+                      >
+                        {showCardDetails ? (
+                          <EyeOff className="w-5 h-5 text-purple-600" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-purple-600" />
+                        )}
+                      </motion.button>
+                      <Lock className="w-5 h-5 text-purple-600" />
+                    </div>
                   </div>
 
                   <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white mb-6 relative overflow-hidden">
@@ -706,48 +759,124 @@ export default function PaymentMethodPage() {
                     <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
                     
                     <div className="relative">
-                      <div className="flex items-center gap-2 mb-6">
-                        <div className="w-12 h-8 bg-yellow-400 rounded flex items-center justify-center">
-                          <div className="w-8 h-6 bg-yellow-500 rounded-sm"></div>
+                      <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-2">
+                          <div className="w-12 h-8 bg-yellow-400 rounded flex items-center justify-center">
+                            <div className="w-8 h-6 bg-yellow-500 rounded-sm"></div>
+                          </div>
+                          <span className="text-sm font-semibold opacity-90">
+                            {language === 'ms' ? 'Kad Kredit' : 'Credit Card'}
+                          </span>
                         </div>
-                        <span className="text-sm font-semibold opacity-90">
-                          {language === 'ms' ? 'Kad Kredit' : 'Credit Card'}
-                        </span>
+                        {showCardDetails && (
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-xs font-bold"
+                          >
+                            <CheckCircle className="w-3 h-3" />
+                            {language === 'ms' ? 'Disahkan' : 'Verified'}
+                          </motion.div>
+                        )}
                       </div>
                       
-                      <p className="text-xl font-mono mb-4 tracking-wider">
-                        •••• •••• •••• 4242
-                      </p>
-                      
-                      <div className="flex justify-between items-end">
-                        <div>
-                          <p className="text-xs opacity-70 mb-1">
-                            {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                          </p>
-                          <p className="font-bold">{user.displayName || user.email?.split('@')[0]}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs opacity-70 mb-1">
-                            {language === 'ms' ? 'Tamat' : 'Expires'}
-                          </p>
-                          <p className="font-bold">12/25</p>
-                        </div>
-                      </div>
+                      <AnimatePresence mode="wait">
+                        {showCardDetails ? (
+                          <motion.div
+                            key="details"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <p className="text-xl font-mono mb-4 tracking-wider">
+                              4532 1234 5678 4242
+                            </p>
+                            
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <p className="text-xs opacity-70 mb-1">
+                                  {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                                </p>
+                                <p className="font-bold">{editCardData.cardHolder}</p>
+                              </div>
+                              <div className="text-center">
+                                <p className="text-xs opacity-70 mb-1">CVV</p>
+                                <p className="font-bold">123</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs opacity-70 mb-1">
+                                  {language === 'ms' ? 'Tamat' : 'Expires'}
+                                </p>
+                                <p className="font-bold">{editCardData.expiryDate}</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ) : (
+                          <motion.div
+                            key="hidden"
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -10 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <p className="text-xl font-mono mb-4 tracking-wider">
+                              •••• •••• •••• 4242
+                            </p>
+                            
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <p className="text-xs opacity-70 mb-1">
+                                  {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                                </p>
+                                <p className="font-bold">{editCardData.cardHolder}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-xs opacity-70 mb-1">
+                                  {language === 'ms' ? 'Tamat' : 'Expires'}
+                                </p>
+                                <p className="font-bold">••/••</p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
                     </div>
                   </div>
 
                   <div className="space-y-3">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleUpdatePaymentMethod}
-                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
-                    >
-                      <RefreshCw className="w-5 h-5" />
-                      {language === 'ms' ? 'Kemas Kini Kaedah Bayaran' : 'Update Payment Method'}
-                    </motion.button>
+                    <div className="grid grid-cols-2 gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleUpdatePaymentMethod}
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                      >
+                        <Settings className="w-5 h-5" />
+                        {language === 'ms' ? 'Edit' : 'Edit'}
+                      </motion.button>
+                      
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleToggleCardDetails}
+                        className="bg-purple-100 hover:bg-purple-200 text-purple-700 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
+                      >
+                        {showCardDetails ? (
+                          <>
+                            <EyeOff className="w-5 h-5" />
+                            {language === 'ms' ? 'Sembunyi' : 'Hide'}
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-5 h-5" />
+                            {language === 'ms' ? 'Tunjuk' : 'Show'}
+                          </>
+                        )}
+                      </motion.button>
+                    </div>
                     
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600 pt-2">
                       <Shield className="w-4 h-4 text-green-600" />
                       <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
                     </div>
@@ -1018,6 +1147,167 @@ export default function PaymentMethodPage() {
             </div>
           </div>
         </section>
+
+        {/* Edit Card Modal */}
+        <AnimatePresence>
+          {showEditCardModal && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowEditCardModal(false)}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              />
+              
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-3xl shadow-2xl z-50 mx-4 overflow-hidden"
+              >
+                {/* Modal Header */}
+                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                      <Settings className="w-6 h-6" />
+                      {language === 'ms' ? 'Edit Kaedah Bayaran' : 'Edit Payment Method'}
+                    </h3>
+                    <motion.button
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
+                      onClick={() => setShowEditCardModal(false)}
+                      className="text-white hover:bg-white/20 p-2 rounded-full transition"
+                      aria-label="Close"
+                    >
+                      <X className="w-6 h-6" />
+                    </motion.button>
+                  </div>
+                  <p className="text-purple-100 text-sm mt-2">
+                    {language === 'ms' ? 'Kemas kini maklumat kad anda' : 'Update your card information'}
+                  </p>
+                </div>
+
+                {/* Modal Content */}
+                <div className="p-6 space-y-4">
+                  {/* Card Number */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cardNumber">
+                      {language === 'ms' ? 'Nombor Kad' : 'Card Number'}
+                    </label>
+                    <div className="relative">
+                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="cardNumber"
+                        value={editCardData.cardNumber}
+                        onChange={(e) => setEditCardData({ ...editCardData, cardNumber: e.target.value })}
+                        placeholder="4532 1234 5678 4242"
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Card Holder */}
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cardHolder">
+                      {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                    </label>
+                    <div className="relative">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        id="cardHolder"
+                        value={editCardData.cardHolder}
+                        onChange={(e) => setEditCardData({ ...editCardData, cardHolder: e.target.value })}
+                        placeholder="John Doe"
+                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Expiry Date and CVV */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="expiryDate">
+                        {language === 'ms' ? 'Tamat Tempoh' : 'Expiry Date'}
+                      </label>
+                      <div className="relative">
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          id="expiryDate"
+                          value={editCardData.expiryDate}
+                          onChange={(e) => setEditCardData({ ...editCardData, expiryDate: e.target.value })}
+                          placeholder="12/25"
+                          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cvv">
+                        CVV
+                      </label>
+                      <div className="relative">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                        <input
+                          type="text"
+                          id="cvv"
+                          value={editCardData.cvv}
+                          onChange={(e) => setEditCardData({ ...editCardData, cvv: e.target.value })}
+                          placeholder="123"
+                          maxLength={3}
+                          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Security Notice */}
+                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-start gap-3">
+                    <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-semibold text-blue-900 mb-1">
+                        {language === 'ms' ? 'Selamat & Dilindungi' : 'Safe & Secure'}
+                      </p>
+                      <p className="text-xs text-blue-700">
+                        {language === 'ms' 
+                          ? 'Maklumat kad anda disulitkan dan selamat. Kami tidak menyimpan butiran kad anda.'
+                          : 'Your card information is encrypted and secure. We don\'t store your card details.'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="bg-gray-50 p-6 border-t border-gray-200">
+                  <div className="flex gap-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowEditCardModal(false)}
+                      className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition"
+                    >
+                      {language === 'ms' ? 'Batal' : 'Cancel'}
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSaveCardDetails}
+                      className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold rounded-xl transition shadow-lg"
+                    >
+                      {language === 'ms' ? '💾 Simpan Perubahan' : '💾 Save Changes'}
+                    </motion.button>
+                  </div>
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </ProtectedRoute>
   );
