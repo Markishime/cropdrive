@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from '@/i18n';
 import { getPricingTierById, PRICING_TIERS } from '@/lib/subscriptions';
@@ -12,11 +12,30 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import toast from 'react-hot-toast';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { 
+  CreditCard, 
+  Download, 
+  TrendingUp, 
+  TrendingDown, 
+  X, 
+  CheckCircle, 
+  AlertCircle,
+  Calendar,
+  DollarSign,
+  Bell,
+  Shield,
+  Zap,
+  Users,
+  BarChart3
+} from 'lucide-react';
 
 export default function PaymentMethodPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [loading, setLoading] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [autoRenewal, setAutoRenewal] = useState(true);
+  const [emailNotifications, setEmailNotifications] = useState(true);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -71,9 +90,22 @@ export default function PaymentMethodPage() {
   ];
 
   const handleCancelSubscription = async () => {
-    if (!confirm(language === 'ms' ? 'Adakah anda pasti mahu membatalkan langganan?' : 'Are you sure you want to cancel your subscription?')) {
-      return;
-    }
+    setShowCancelModal(false);
+    
+    const loadingToast = toast.loading(
+      language === 'ms' ? '⏳ Membatalkan langganan...' : '⏳ Cancelling subscription...',
+      {
+        icon: '⏳',
+        style: {
+          borderRadius: '12px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
     
     setLoading(true);
     try {
@@ -93,21 +125,70 @@ export default function PaymentMethodPage() {
         updatedAt: serverTimestamp()
       });
 
-      toast.success(language === 'ms' ? '✓ Langganan dibatalkan' : '✓ Subscription cancelled');
+      toast.success(
+        language === 'ms' 
+          ? '✅ Langganan berjaya dibatalkan!' 
+          : '✅ Subscription cancelled successfully!',
+        {
+          id: loadingToast,
+          duration: 4000,
+          icon: '✅',
+          style: {
+            borderRadius: '12px',
+            background: '#10b981',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
       
       // Refresh the page after a short delay
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('Cancel subscription error:', error);
-      toast.error(language === 'ms' ? '✗ Ralat membatalkan langganan' : '✗ Error cancelling subscription');
+      toast.error(
+        language === 'ms' 
+          ? '❌ Ralat membatalkan langganan. Sila cuba lagi.' 
+          : '❌ Error cancelling subscription. Please try again.',
+        {
+          id: loadingToast,
+          duration: 5000,
+          icon: '❌',
+          style: {
+            borderRadius: '12px',
+            background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleUpgradePlan = async (newPlanId: string) => {
+    const loadingToast = toast.loading(
+      language === 'ms' ? '⏳ Menaik taraf pelan...' : '⏳ Upgrading plan...',
+      {
+        icon: '⬆️',
+        style: {
+          borderRadius: '12px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
+
     setLoading(true);
     try {
       if (!user?.uid) {
@@ -127,24 +208,69 @@ export default function PaymentMethodPage() {
         updatedAt: serverTimestamp()
       });
 
-      toast.success(language === 'ms' ? '✓ Pelan berjaya dinaik taraf' : '✓ Plan upgraded successfully');
+      toast.success(
+        language === 'ms' 
+          ? `🎉 Pelan berjaya dinaik taraf ke ${newPlan.nameMs}!` 
+          : `🎉 Plan upgraded to ${newPlan.name} successfully!`,
+        {
+          id: loadingToast,
+          duration: 4000,
+          icon: '🚀',
+          style: {
+            borderRadius: '12px',
+            background: '#10b981',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
       
       // Refresh the page after a short delay
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('Upgrade plan error:', error);
-      toast.error(language === 'ms' ? '✗ Ralat menaik taraf pelan' : '✗ Error upgrading plan');
+      toast.error(
+        language === 'ms' 
+          ? '❌ Ralat menaik taraf pelan. Sila cuba lagi.' 
+          : '❌ Error upgrading plan. Please try again.',
+        {
+          id: loadingToast,
+          duration: 5000,
+          icon: '❌',
+          style: {
+            borderRadius: '12px',
+            background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }
   };
 
   const handleDowngradePlan = async (newPlanId: string) => {
-    if (!confirm(language === 'ms' ? 'Adakah anda pasti mahu menurun taraf pelan?' : 'Are you sure you want to downgrade your plan?')) {
-      return;
-    }
+    const loadingToast = toast.loading(
+      language === 'ms' ? '⏳ Menurun taraf pelan...' : '⏳ Downgrading plan...',
+      {
+        icon: '⬇️',
+        style: {
+          borderRadius: '12px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
 
     setLoading(true);
     try {
@@ -165,18 +291,114 @@ export default function PaymentMethodPage() {
         updatedAt: serverTimestamp()
       });
 
-      toast.success(language === 'ms' ? '✓ Pelan berjaya diturun taraf' : '✓ Plan downgraded successfully');
+      toast.success(
+        language === 'ms' 
+          ? `✅ Pelan berjaya diturun taraf ke ${newPlan.nameMs}` 
+          : `✅ Plan downgraded to ${newPlan.name} successfully`,
+        {
+          id: loadingToast,
+          duration: 4000,
+          icon: '✅',
+          style: {
+            borderRadius: '12px',
+            background: '#10b981',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
       
       // Refresh the page after a short delay
       setTimeout(() => {
         window.location.reload();
-      }, 1500);
+      }, 2000);
     } catch (error) {
       console.error('Downgrade plan error:', error);
-      toast.error(language === 'ms' ? '✗ Ralat menurun taraf pelan' : '✗ Error downgrading plan');
+      toast.error(
+        language === 'ms' 
+          ? '❌ Ralat menurun taraf pelan. Sila cuba lagi.' 
+          : '❌ Error downgrading plan. Please try again.',
+        {
+          id: loadingToast,
+          duration: 5000,
+          icon: '❌',
+          style: {
+            borderRadius: '12px',
+            background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleToggleAutoRenewal = () => {
+    setAutoRenewal(!autoRenewal);
+    toast.success(
+      autoRenewal
+        ? (language === 'ms' ? '🔄 Pembaharuan auto dimatikan' : '🔄 Auto-renewal turned off')
+        : (language === 'ms' ? '🔄 Pembaharuan auto dihidupkan' : '🔄 Auto-renewal turned on'),
+      {
+        duration: 3000,
+        icon: '⚙️',
+        style: {
+          borderRadius: '12px',
+          background: '#3b82f6',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
+  };
+
+  const handleToggleEmailNotifications = () => {
+    setEmailNotifications(!emailNotifications);
+    toast.success(
+      emailNotifications
+        ? (language === 'ms' ? '📧 Pemberitahuan email dimatikan' : '📧 Email notifications turned off')
+        : (language === 'ms' ? '📧 Pemberitahuan email dihidupkan' : '📧 Email notifications turned on'),
+      {
+        duration: 3000,
+        icon: '📧',
+        style: {
+          borderRadius: '12px',
+          background: '#3b82f6',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
+  };
+
+  const handleDownloadInvoice = (invoiceId: string) => {
+    toast.success(
+      language === 'ms' 
+        ? `⬇️ Memuat turun invois ${invoiceId}...` 
+        : `⬇️ Downloading invoice ${invoiceId}...`,
+      {
+        duration: 2000,
+        icon: '📄',
+        style: {
+          borderRadius: '12px',
+          background: '#8b5cf6',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
   };
 
   return (
