@@ -1047,7 +1047,7 @@ export default function PaymentMethodPage() {
                                 <CheckCircle className="w-3 h-3" />
                             {language === 'ms' ? 'Dibayar' : 'Paid'}
                           </span>
-                            </div>
+                        </div>
                             
                             <motion.button
                               whileHover={{ scale: 1.1 }}
@@ -1058,7 +1058,7 @@ export default function PaymentMethodPage() {
                             >
                               <Download className="w-4 h-4" />
                             </motion.button>
-                          </div>
+                      </div>
                         </div>
                       </motion.div>
                     ))}
@@ -1158,40 +1158,40 @@ export default function PaymentMethodPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setShowEditCardModal(false)}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-              />
-              
-              {/* Modal */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-3xl shadow-2xl z-50 mx-4 overflow-hidden"
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
               >
-                {/* Modal Header */}
-                <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-2xl font-black text-white flex items-center gap-3">
-                      <Settings className="w-6 h-6" />
-                      {language === 'ms' ? 'Edit Kaedah Bayaran' : 'Edit Payment Method'}
-                    </h3>
-                    <motion.button
-                      whileHover={{ scale: 1.1, rotate: 90 }}
-                      whileTap={{ scale: 0.9 }}
-                      onClick={() => setShowEditCardModal(false)}
-                      className="text-white hover:bg-white/20 p-2 rounded-full transition"
-                      aria-label="Close"
-                    >
-                      <X className="w-6 h-6" />
-                    </motion.button>
+                {/* Modal Container */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+                >
+                  {/* Modal Header */}
+                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 flex-shrink-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                        <Settings className="w-6 h-6" />
+                        {language === 'ms' ? 'Edit Kaedah Bayaran' : 'Edit Payment Method'}
+                      </h3>
+                      <motion.button
+                        whileHover={{ scale: 1.1, rotate: 90 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => setShowEditCardModal(false)}
+                        className="text-white hover:bg-white/20 p-2 rounded-full transition"
+                        aria-label="Close"
+                      >
+                        <X className="w-6 h-6" />
+                      </motion.button>
+                    </div>
+                    <p className="text-purple-100 text-sm mt-2">
+                      {language === 'ms' ? 'Kemas kini maklumat kad anda' : 'Update your card information'}
+                    </p>
                   </div>
-                  <p className="text-purple-100 text-sm mt-2">
-                    {language === 'ms' ? 'Kemas kini maklumat kad anda' : 'Update your card information'}
-                  </p>
-                </div>
 
-                {/* Modal Content */}
-                <div className="p-6 space-y-4">
+                  {/* Modal Content */}
+                  <div className="p-6 space-y-4 overflow-y-auto flex-1">
                   {/* Card Number */}
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cardNumber">
@@ -1281,29 +1281,30 @@ export default function PaymentMethodPage() {
                       </p>
                     </div>
                   </div>
-                </div>
-
-                {/* Modal Footer */}
-                <div className="bg-gray-50 p-6 border-t border-gray-200">
-                  <div className="flex gap-3">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => setShowEditCardModal(false)}
-                      className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition"
-                    >
-                      {language === 'ms' ? 'Batal' : 'Cancel'}
-                    </motion.button>
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={handleSaveCardDetails}
-                      className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold rounded-xl transition shadow-lg"
-                    >
-                      {language === 'ms' ? '💾 Simpan Perubahan' : '💾 Save Changes'}
-                    </motion.button>
                   </div>
-                </div>
+
+                  {/* Modal Footer */}
+                  <div className="bg-gray-50 p-6 border-t border-gray-200 flex-shrink-0">
+                    <div className="flex gap-3">
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => setShowEditCardModal(false)}
+                        className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition"
+                      >
+                        {language === 'ms' ? 'Batal' : 'Cancel'}
+                      </motion.button>
+                      <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={handleSaveCardDetails}
+                        className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold rounded-xl transition shadow-lg"
+                      >
+                        {language === 'ms' ? '💾 Simpan Perubahan' : '💾 Save Changes'}
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
               </motion.div>
             </>
           )}
