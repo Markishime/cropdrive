@@ -26,7 +26,20 @@ import {
   Shield,
   Zap,
   Users,
-  BarChart3
+  BarChart3,
+  Eye,
+  EyeOff,
+  Settings,
+  Lock,
+  Mail,
+  Smartphone,
+  FileText,
+  ArrowUpRight,
+  ArrowDownRight,
+  Info,
+  RefreshCw,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 
 export default function PaymentMethodPage() {
@@ -34,8 +47,12 @@ export default function PaymentMethodPage() {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showUsageDetails, setShowUsageDetails] = useState(false);
   const [autoRenewal, setAutoRenewal] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
@@ -381,6 +398,77 @@ export default function PaymentMethodPage() {
     );
   };
 
+  const handleToggleSmsNotifications = () => {
+    setSmsNotifications(!smsNotifications);
+    toast.success(
+      smsNotifications
+        ? (language === 'ms' ? '📱 Pemberitahuan SMS dimatikan' : '📱 SMS notifications turned off')
+        : (language === 'ms' ? '📱 Pemberitahuan SMS dihidupkan' : '📱 SMS notifications turned on'),
+      {
+        duration: 3000,
+        icon: '📱',
+        style: {
+          borderRadius: '12px',
+          background: '#8b5cf6',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
+  };
+
+  const handleCopyInvoiceId = (invoiceId: string) => {
+    navigator.clipboard.writeText(invoiceId);
+    toast.success(
+      language === 'ms' ? '📋 ID invois disalin!' : '📋 Invoice ID copied!',
+      {
+        duration: 2000,
+        icon: '✅',
+        style: {
+          borderRadius: '12px',
+          background: '#10b981',
+          color: '#fff',
+          padding: '12px 16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+      }
+    );
+  };
+
+  const handleUpdatePaymentMethod = () => {
+    toast.promise(
+      new Promise((resolve) => setTimeout(resolve, 2000)),
+      {
+        loading: language === 'ms' ? 'Mengemas kini kaedah bayaran...' : 'Updating payment method...',
+        success: language === 'ms' ? '✅ Kaedah bayaran dikemas kini!' : '✅ Payment method updated!',
+        error: language === 'ms' ? '❌ Ralat mengemas kini' : '❌ Error updating',
+      },
+      {
+        style: {
+          borderRadius: '12px',
+          background: '#333',
+          color: '#fff',
+          padding: '16px',
+          fontSize: '14px',
+          fontWeight: '600',
+        },
+        success: {
+          style: {
+            background: '#10b981',
+          },
+        },
+        error: {
+          style: {
+            background: '#ef4444',
+          },
+        },
+      }
+    );
+  };
+
   const handleDownloadInvoice = (invoiceId: string) => {
     toast.success(
       language === 'ms' 
@@ -404,20 +492,117 @@ export default function PaymentMethodPage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-        {/* Header */}
-        <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-12 sm:py-16 lg:py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Enhanced Header with Quick Stats */}
+        <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+              backgroundSize: '40px 40px'
+            }}></div>
+          </div>
+          
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
+              className="text-center sm:text-left"
             >
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 leading-tight">
-                {language === 'ms' ? 'Kaedah' : 'Payment'} <span className="text-yellow-400">{language === 'ms' ? 'Bayaran' : 'Method'}</span>
+              <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+                <div>
+                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
+                    {language === 'ms' ? 'Pengurusan' : 'Subscription'} <span className="text-yellow-400">{language === 'ms' ? 'Langganan' : 'Management'}</span>
               </h1>
-              <p className="text-lg sm:text-xl text-white/90">
-                {language === 'ms' ? 'Urus langganan dan bayaran anda' : 'Manage your subscription and payments'}
-              </p>
+                  <p className="text-lg sm:text-xl text-white/90 flex items-center gap-2">
+                    <Shield className="w-5 h-5" />
+                    {language === 'ms' ? 'Urus langganan dan bil anda dengan selamat' : 'Manage your subscriptions and billing securely'}
+                  </p>
+                </div>
+                <div className="flex gap-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowUsageDetails(!showUsageDetails)}
+                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
+                  >
+                    {showUsageDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {language === 'ms' ? 'Butiran' : 'Details'}
+                  </motion.button>
+                </div>
+              </div>
+
+              {/* Quick Stats Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/80 text-sm font-medium">
+                      {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                    </span>
+                    <Zap className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <p className="text-2xl font-black text-white">
+                    {language === 'ms' ? currentPlan?.nameMs : currentPlan?.name}
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/80 text-sm font-medium">
+                      {language === 'ms' ? 'Muat Naik Digunakan' : 'Uploads Used'}
+                    </span>
+                    <BarChart3 className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <p className="text-2xl font-black text-white">
+                    {user.uploadsUsed} <span className="text-lg text-white/70">/ {user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}</span>
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/80 text-sm font-medium">
+                      {language === 'ms' ? 'Bayaran Bulanan' : 'Monthly Cost'}
+                    </span>
+                    <DollarSign className="w-5 h-5 text-green-400" />
+                  </div>
+                  <p className="text-2xl font-black text-white">
+                    RM {currentPlan?.monthlyPrice}
+                  </p>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white/80 text-sm font-medium">
+                      {language === 'ms' ? 'Status' : 'Status'}
+                    </span>
+                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  </div>
+                  <p className="text-2xl font-black text-white flex items-center gap-2">
+                    {language === 'ms' ? 'Aktif' : 'Active'}
+                    <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                  </p>
+                </motion.div>
+              </div>
             </motion.div>
           </div>
         </section>
