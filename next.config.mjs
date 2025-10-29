@@ -15,7 +15,18 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ['images.unsplash.com', 'cdn.coverr.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdn.coverr.co',
+        pathname: '**',
+      },
+    ],
   },
 };
 
