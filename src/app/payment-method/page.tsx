@@ -686,22 +686,221 @@ export default function PaymentMethodPage() {
                   </div>
                 </motion.div>
 
-                {/* Invoices */}
+                {/* Payment Method Card */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 shadow-xl border-2 border-purple-200"
+                >
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                      <CreditCard className="w-6 h-6 text-purple-600" />
+                      {language === 'ms' ? 'Kaedah Bayaran' : 'Payment Method'}
+                    </h2>
+                    <Lock className="w-5 h-5 text-purple-600" />
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white mb-6 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
+                    
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-6">
+                        <div className="w-12 h-8 bg-yellow-400 rounded flex items-center justify-center">
+                          <div className="w-8 h-6 bg-yellow-500 rounded-sm"></div>
+                        </div>
+                        <span className="text-sm font-semibold opacity-90">
+                          {language === 'ms' ? 'Kad Kredit' : 'Credit Card'}
+                        </span>
+                      </div>
+                      
+                      <p className="text-xl font-mono mb-4 tracking-wider">
+                        •••• •••• •••• 4242
+                      </p>
+                      
+                      <div className="flex justify-between items-end">
+                        <div>
+                          <p className="text-xs opacity-70 mb-1">
+                            {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                          </p>
+                          <p className="font-bold">{user.displayName || user.email?.split('@')[0]}</p>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs opacity-70 mb-1">
+                            {language === 'ms' ? 'Tamat' : 'Expires'}
+                          </p>
+                          <p className="font-bold">12/25</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleUpdatePaymentMethod}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
+                    >
+                      <RefreshCw className="w-5 h-5" />
+                      {language === 'ms' ? 'Kemas Kini Kaedah Bayaran' : 'Update Payment Method'}
+                    </motion.button>
+                    
+                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                      <Shield className="w-4 h-4 text-green-600" />
+                      <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Billing Settings */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.18 }}
+                  className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+                >
+                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 mb-6">
+                    <Settings className="w-6 h-6 text-gray-700" />
+                    {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
+                  </h2>
+
+                  <div className="space-y-4">
+                    {/* Auto Renewal Toggle */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${autoRenewal ? 'bg-green-100' : 'bg-gray-200'}`}>
+                          <RefreshCw className={`w-6 h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-500'}`} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {language === 'ms' ? 'Baharu setiap bulan' : 'Renew every month'}
+                          </p>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleToggleAutoRenewal}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                          autoRenewal ? 'bg-green-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <motion.div
+                          animate={{ x: autoRenewal ? 28 : 2 }}
+                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                        />
+                      </motion.button>
+                    </div>
+
+                    {/* Email Notifications */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${emailNotifications ? 'bg-blue-100' : 'bg-gray-200'}`}>
+                          <Mail className={`w-6 h-6 ${emailNotifications ? 'text-blue-600' : 'text-gray-500'}`} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {language === 'ms' ? 'Pemberitahuan Email' : 'Email Notifications'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {language === 'ms' ? 'Invois & kemas kini' : 'Invoices & updates'}
+                          </p>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleToggleEmailNotifications}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                          emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <motion.div
+                          animate={{ x: emailNotifications ? 28 : 2 }}
+                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                        />
+                      </motion.button>
+                    </div>
+
+                    {/* SMS Notifications */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${smsNotifications ? 'bg-purple-100' : 'bg-gray-200'}`}>
+                          <Smartphone className={`w-6 h-6 ${smsNotifications ? 'text-purple-600' : 'text-gray-500'}`} />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {language === 'ms' ? 'Pemberitahuan SMS' : 'SMS Notifications'}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {language === 'ms' ? 'Peringatan pembayaran' : 'Payment reminders'}
+                          </p>
+                        </div>
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleToggleSmsNotifications}
+                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                          smsNotifications ? 'bg-purple-600' : 'bg-gray-300'
+                        }`}
+                      >
+                        <motion.div
+                          animate={{ x: smsNotifications ? 28 : 2 }}
+                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                        />
+                      </motion.button>
+                    </div>
+                  </div>
+                </motion.div>
+
+                {/* Enhanced Invoices Section */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                   className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
                 >
-                  <h2 className="text-2xl font-black text-gray-900 mb-6">
-                    {language === 'ms' ? 'Invois Terkini' : 'Recent Invoices'}
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                      <FileText className="w-6 h-6 text-green-600" />
+                      {language === 'ms' ? 'Sejarah Invois' : 'Invoice History'}
                   </h2>
-                  <div className="space-y-4">
+                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+                      {invoices.length} {language === 'ms' ? 'invois' : 'invoices'}
+                    </span>
+                  </div>
+                  
+                  <div className="space-y-3">
                     {invoices.map((invoice) => (
-                      <div key={invoice.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
+                      <motion.div 
+                        key={invoice.id} 
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        whileHover={{ scale: 1.02 }}
+                        className="group relative"
+                      >
+                        <div className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all shadow-sm hover:shadow-md">
                         <div className="flex-1">
-                          <p className="font-bold text-gray-900">{invoice.id}</p>
-                          <p className="text-sm text-gray-600">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                <FileText className="w-5 h-5 text-green-600" />
+                              </div>
+                              <div>
+                                <p className="font-bold text-gray-900 flex items-center gap-2">
+                                  {invoice.id}
+                                  <button
+                                    onClick={() => handleCopyInvoiceId(invoice.id)}
+                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                                    title={language === 'ms' ? 'Salin ID' : 'Copy ID'}
+                                  >
+                                    <Copy className="w-3 h-3 text-gray-600" />
+                                  </button>
+                                </p>
+                                <p className="text-sm text-gray-600 flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
                             {invoice.date.toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
                               year: 'numeric',
                               month: 'long',
@@ -709,14 +908,39 @@ export default function PaymentMethodPage() {
                             })}
                           </p>
                         </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-4">
                         <div className="text-right">
-                          <p className="font-bold text-gray-900">RM {invoice.amount}</p>
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-semibold">
+                              <p className="text-2xl font-black text-gray-900">RM {invoice.amount}</p>
+                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+                                <CheckCircle className="w-3 h-3" />
                             {language === 'ms' ? 'Dibayar' : 'Paid'}
                           </span>
+                            </div>
+                            
+                            <motion.button
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.9 }}
+                              onClick={() => handleDownloadInvoice(invoice.id)}
+                              className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
+                              title={language === 'ms' ? 'Muat turun' : 'Download'}
+                            >
+                              <Download className="w-4 h-4" />
+                            </motion.button>
+                          </div>
                         </div>
-                      </div>
+                      </motion.div>
                     ))}
+                  </div>
+
+                  {/* View All Button */}
+                  <div className="mt-6 text-center">
+                    <button className="text-green-600 hover:text-green-700 font-bold flex items-center gap-2 mx-auto group">
+                      {language === 'ms' ? 'Lihat semua invois' : 'View all invoices'}
+                      <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </button>
                   </div>
                 </motion.div>
               </div>

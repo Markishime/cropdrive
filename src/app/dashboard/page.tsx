@@ -15,10 +15,7 @@ import {
   TrendingUp, 
   TrendingDown, 
   Download, 
-  Share2, 
-  Copy, 
   Bell, 
-  Settings,
   Award,
   Target,
   Activity,
@@ -28,17 +25,19 @@ import {
   Eye,
   EyeOff,
   Info,
-  Zap
+  Zap,
+  X,
+  BarChart2,
+  PieChart,
+  LineChart
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
-  const [showQuickActions, setShowQuickActions] = useState(true);
-  const [showAchievements, setShowAchievements] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showAnalytics, setShowAnalytics] = useState(true);
 
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
@@ -109,18 +108,6 @@ export default function DashboardPage() {
   }, []);
 
   // Handler functions
-  const handleCopyUserId = () => {
-    if (user?.uid) {
-      navigator.clipboard.writeText(user.uid);
-      setCopiedId(user.uid);
-      toast.success(language === 'ms' ? 'ID pengguna disalin!' : 'User ID copied!', {
-        icon: '📋',
-        duration: 2000,
-      });
-      setTimeout(() => setCopiedId(null), 2000);
-    }
-  };
-
   const handleDownloadReport = () => {
     toast.success(language === 'ms' ? 'Laporan sedang dimuat turun...' : 'Report downloading...', {
       icon: '📥',
@@ -129,21 +116,8 @@ export default function DashboardPage() {
     // Implement actual download logic here
   };
 
-  const handleShareDashboard = () => {
-    toast.success(language === 'ms' ? 'Pautan dashboard disalin!' : 'Dashboard link copied!', {
-      icon: '🔗',
-      duration: 2000,
-    });
-  };
-
   const handleToggleNotifications = () => {
     setShowNotifications(!showNotifications);
-    if (!showNotifications) {
-      toast(language === 'ms' ? 'Pemberitahuan dibuka' : 'Notifications opened', {
-        icon: '🔔',
-        duration: 1500,
-      });
-    }
   };
 
   if (authLoading || loading || !user) {
@@ -236,18 +210,7 @@ export default function DashboardPage() {
                     aria-label="Notifications"
                   >
                     <Bell className="w-5 h-5" />
-                    {showNotifications && (
-                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                    )}
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleShareDashboard}
-                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white p-3 rounded-xl transition"
-                    aria-label="Share"
-                  >
-                    <Share2 className="w-5 h-5" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                   </motion.button>
                   <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -457,121 +420,142 @@ export default function DashboardPage() {
           </section>
         )}
 
-        {/* Notifications Panel */}
+        {/* Notifications Modal */}
         <AnimatePresence>
           {showNotifications && (
-            <motion.section
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="py-6 overflow-hidden"
-            >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <motion.div
-                  initial={{ y: -20 }}
-                  animate={{ y: 0 }}
-                  className="bg-white rounded-2xl p-6 shadow-xl border border-gray-200"
-                >
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-black text-gray-900 flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-blue-600" />
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setShowNotifications(false)}
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              />
+              
+              {/* Modal */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl max-h-[80vh] overflow-y-auto bg-white rounded-3xl shadow-2xl z-50 mx-4"
+              >
+                {/* Modal Header */}
+                <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 p-6 rounded-t-3xl">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-2xl font-black text-white flex items-center gap-3">
+                      <Bell className="w-6 h-6" />
                       {language === 'ms' ? 'Pemberitahuan' : 'Notifications'}
                     </h3>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.1, rotate: 90 }}
+                      whileTap={{ scale: 0.9 }}
                       onClick={() => setShowNotifications(false)}
-                      className="text-gray-400 hover:text-gray-600"
+                      className="text-white hover:bg-white/20 p-2 rounded-full transition"
+                      aria-label="Close"
                     >
-                      <EyeOff className="w-5 h-5" />
+                      <X className="w-6 h-6" />
                     </motion.button>
                   </div>
-                  
-                  <div className="space-y-3">
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl"
-                    >
-                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Info className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          {language === 'ms' ? 'Kemas kini sistem tersedia' : 'System update available'}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {language === 'ms' 
-                            ? 'Versi baharu dengan ciri AI yang lebih baik kini tersedia.'
-                            : 'New version with improved AI features is now available.'
-                          }
-                        </p>
-                        <p className="text-xs text-gray-500 mt-2">
-                          {new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                      </div>
-                    </motion.div>
+                  <p className="text-blue-100 text-sm mt-2">
+                    {language === 'ms' ? 'Anda mempunyai 3 pemberitahuan baharu' : 'You have 3 new notifications'}
+                  </p>
+                </div>
 
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.2 }}
-                      className="flex items-start gap-3 p-4 bg-green-50 border border-green-200 rounded-xl"
-                    >
-                      <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Zap className="w-5 h-5 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          {language === 'ms' ? 'Analisis siap!' : 'Analysis complete!'}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {language === 'ms' 
-                            ? 'Laporan analisis tanah anda telah siap untuk dimuat turun.'
-                            : 'Your soil analysis report is ready for download.'
-                          }
-                        </p>
-                        <button 
-                          onClick={handleDownloadReport}
-                          className="text-xs text-green-700 font-semibold mt-2 hover:underline"
-                        >
-                          {language === 'ms' ? 'Muat turun sekarang →' : 'Download now →'}
-                        </button>
-                      </div>
-                    </motion.div>
+                {/* Modal Content */}
+                <div className="p-6 space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="flex items-start gap-4 p-5 bg-blue-50 border-2 border-blue-200 rounded-2xl hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Info className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-gray-900 text-lg">
+                        {language === 'ms' ? 'Kemas kini sistem tersedia' : 'System update available'}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {language === 'ms' 
+                          ? 'Versi baharu dengan ciri AI yang lebih baik kini tersedia.'
+                          : 'New version with improved AI features is now available.'
+                        }
+                      </p>
+                      <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </motion.div>
 
-                    <motion.div
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.3 }}
-                      className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl"
-                    >
-                      <div className="w-10 h-10 bg-yellow-600 rounded-full flex items-center justify-center flex-shrink-0">
-                        <Award className="w-5 h-5 text-white" />
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="flex items-start gap-4 p-5 bg-green-50 border-2 border-green-200 rounded-2xl hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Zap className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-gray-900 text-lg">
+                        {language === 'ms' ? 'Analisis siap!' : 'Analysis complete!'}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {language === 'ms' 
+                          ? 'Laporan analisis tanah anda telah siap untuk dimuat turun.'
+                          : 'Your soil analysis report is ready for download.'
+                        }
+                      </p>
+                      <button 
+                        onClick={handleDownloadReport}
+                        className="text-sm text-green-700 font-bold mt-3 hover:underline bg-green-100 px-4 py-2 rounded-lg transition"
+                      >
+                        {language === 'ms' ? 'Muat turun sekarang →' : 'Download now →'}
+                      </button>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="flex items-start gap-4 p-5 bg-yellow-50 border-2 border-yellow-200 rounded-2xl hover:shadow-lg transition-all cursor-pointer"
+                  >
+                    <div className="w-12 h-12 bg-yellow-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Award className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-gray-900 text-lg">
+                        {language === 'ms' ? 'Pencapaian dibuka!' : 'Achievement unlocked!'}
+                      </p>
+                      <p className="text-sm text-gray-600 mt-2">
+                        {language === 'ms' 
+                          ? 'Tahniah! Anda telah melengkapkan 5 analisis.'
+                          : 'Congratulations! You\'ve completed 5 analyses.'
+                        }
+                      </p>
+                      <div className="flex items-center gap-2 mt-3 text-yellow-700">
+                        <Award className="w-4 h-4" />
+                        <span className="text-sm font-bold">+100 XP</span>
                       </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">
-                          {language === 'ms' ? 'Pencapaian dibuka!' : 'Achievement unlocked!'}
-                        </p>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {language === 'ms' 
-                            ? 'Tahniah! Anda telah melengkapkan 5 analisis.'
-                            : 'Congratulations! You\'ve completed 5 analyses.'
-                          }
-                        </p>
-                        <button 
-                          onClick={() => setShowAchievements(true)}
-                          className="text-xs text-yellow-700 font-semibold mt-2 hover:underline"
-                        >
-                          {language === 'ms' ? 'Lihat pencapaian →' : 'View achievements →'}
-                        </button>
-                      </div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </div>
-            </motion.section>
+                    </div>
+                  </motion.div>
+                </div>
+
+                {/* Modal Footer */}
+                <div className="sticky bottom-0 bg-gray-50 p-4 rounded-b-3xl border-t border-gray-200">
+                  <button
+                    onClick={() => setShowNotifications(false)}
+                    className="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold rounded-xl transition"
+                  >
+                    {language === 'ms' ? 'Tutup' : 'Close'}
+                  </button>
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
 
@@ -945,112 +929,190 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Quick Tips Section */}
-        {hasPurchasedPlan && showQuickActions && (
-          <section className="py-8 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        {/* Performance Analytics Section */}
+        {hasPurchasedPlan && showAnalytics && (
+          <section className="py-8 bg-gradient-to-br from-indigo-50 via-purple-50 to-blue-50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                  <Sparkles className="w-6 h-6 text-yellow-500" />
-                  {language === 'ms' ? 'Petua Pantas' : 'Quick Tips'}
+                <h2 className="text-3xl font-black text-gray-900 flex items-center gap-3">
+                  <BarChart2 className="w-8 h-8 text-indigo-600" />
+                  {language === 'ms' ? 'Analisis Prestasi' : 'Performance Analytics'}
                 </h2>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowQuickActions(false)}
-                  className="text-gray-400 hover:text-gray-600 transition"
+                  onClick={() => {
+                    setShowAnalytics(false);
+                    toast.success(language === 'ms' ? 'Analisis disembunyikan' : 'Analytics hidden', {
+                      icon: '👁️',
+                      duration: 2000,
+                    });
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition p-2 hover:bg-white/50 rounded-lg"
                 >
                   <EyeOff className="w-5 h-5" />
                 </motion.button>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Monthly Performance */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  whileHover={{ scale: 1.03, rotate: 1 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-200 hover:border-blue-400 transition-all cursor-pointer"
-                  onClick={handleCopyUserId}
+                  whileHover={{ y: -5 }}
+                  className="bg-gradient-to-br from-white to-blue-50 rounded-3xl p-6 shadow-xl border-2 border-blue-200 hover:border-blue-400 transition-all"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
-                    <Copy className="w-6 h-6 text-white" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <LineChart className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                      <TrendingUp className="w-4 h-4" />
+                      <span className="text-xs font-bold">+24%</span>
+                    </div>
                   </div>
                   <h3 className="text-lg font-black text-gray-900 mb-2">
-                    {language === 'ms' ? 'Salin ID Pengguna' : 'Copy User ID'}
+                    {language === 'ms' ? 'Prestasi Bulanan' : 'Monthly Performance'}
                   </h3>
+                  <p className="text-3xl font-black text-blue-600 mb-2">
+                    {user.uploadsUsed * 2} {language === 'ms' ? 'analisis' : 'analyses'}
+                  </p>
                   <p className="text-sm text-gray-600">
                     {language === 'ms' 
-                      ? 'Klik untuk menyalin ID pengguna anda untuk sokongan.'
-                      : 'Click to copy your user ID for support.'
+                      ? 'Peningkatan berbanding bulan lepas'
+                      : 'Increase from last month'
                     }
                   </p>
-                  {copiedId && (
-                    <motion.p
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="text-xs text-green-600 font-bold mt-2"
-                    >
-                      ✓ {language === 'ms' ? 'Disalin!' : 'Copied!'}
-                    </motion.p>
-                  )}
+                  <div className="mt-4 w-full bg-blue-100 rounded-full h-2.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '75%' }}
+                      transition={{ duration: 1, delay: 0.5 }}
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-2.5 rounded-full"
+                    />
+                  </div>
                 </motion.div>
 
+                {/* Success Rate */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  whileHover={{ scale: 1.03, rotate: -1 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg border-2 border-purple-200 hover:border-purple-400 transition-all cursor-pointer"
-                  onClick={() => window.open('/tutorials', '_blank')}
+                  whileHover={{ y: -5 }}
+                  className="bg-gradient-to-br from-white to-green-50 rounded-3xl p-6 shadow-xl border-2 border-green-200 hover:border-green-400 transition-all"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <PieChart className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1 bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                      <Target className="w-4 h-4" />
+                      <span className="text-xs font-bold">98%</span>
+                    </div>
                   </div>
                   <h3 className="text-lg font-black text-gray-900 mb-2">
-                    {language === 'ms' ? 'Tonton Tutorial' : 'Watch Tutorials'}
+                    {language === 'ms' ? 'Kadar Kejayaan' : 'Success Rate'}
                   </h3>
+                  <p className="text-3xl font-black text-green-600 mb-2">
+                    97.5%
+                  </p>
                   <p className="text-sm text-gray-600">
                     {language === 'ms' 
-                      ? 'Pelajari cara menggunakan platform dengan lebih baik.'
-                      : 'Learn how to use the platform better.'
+                      ? 'Analisis berjaya diselesaikan'
+                      : 'Successfully completed analyses'
                     }
                   </p>
-                  <p className="text-xs text-purple-600 font-semibold mt-2 flex items-center gap-1">
-                    {language === 'ms' ? 'Lihat sekarang' : 'Watch now'}
-                    <ExternalLink className="w-3 h-3" />
-                  </p>
+                  <div className="mt-4 w-full bg-green-100 rounded-full h-2.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '97.5%' }}
+                      transition={{ duration: 1, delay: 0.6 }}
+                      className="bg-gradient-to-r from-green-500 to-green-600 h-2.5 rounded-full"
+                    />
+                  </div>
                 </motion.div>
 
+                {/* Average Response Time */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  whileHover={{ scale: 1.03, rotate: 1 }}
-                  className="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200 hover:border-green-400 transition-all cursor-pointer"
-                  onClick={() => router.push('/settings')}
+                  whileHover={{ y: -5 }}
+                  className="bg-gradient-to-br from-white to-purple-50 rounded-3xl p-6 shadow-xl border-2 border-purple-200 hover:border-purple-400 transition-all"
                 >
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4">
-                    <Settings className="w-6 h-6 text-white" />
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                      <Zap className="w-7 h-7 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1 bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                      <TrendingDown className="w-4 h-4" />
+                      <span className="text-xs font-bold">-15s</span>
+                    </div>
                   </div>
                   <h3 className="text-lg font-black text-gray-900 mb-2">
-                    {language === 'ms' ? 'Tetapan Akaun' : 'Account Settings'}
+                    {language === 'ms' ? 'Masa Respons' : 'Response Time'}
                   </h3>
+                  <p className="text-3xl font-black text-purple-600 mb-2">
+                    1.2 {language === 'ms' ? 'min' : 'min'}
+                  </p>
                   <p className="text-sm text-gray-600">
                     {language === 'ms' 
-                      ? 'Urus profil dan tetapan akaun anda.'
-                      : 'Manage your profile and account settings.'
+                      ? 'Purata masa analisis'
+                      : 'Average analysis time'
                     }
                   </p>
-                  <p className="text-xs text-green-600 font-semibold mt-2 flex items-center gap-1">
-                    {language === 'ms' ? 'Buka tetapan' : 'Open settings'}
-                    <ChevronRight className="w-3 h-3" />
-                  </p>
+                  <div className="mt-4 w-full bg-purple-100 rounded-full h-2.5">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: '85%' }}
+                      transition={{ duration: 1, delay: 0.7 }}
+                      className="bg-gradient-to-r from-purple-500 to-purple-600 h-2.5 rounded-full"
+                    />
+                  </div>
                 </motion.div>
               </div>
+
+              {/* Additional Insights */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="mt-6 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 shadow-2xl text-white"
+              >
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+                      <Sparkles className="w-8 h-8 text-yellow-300" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black mb-1">
+                        {language === 'ms' ? 'Prestasi Cemerlang!' : 'Excellent Performance!'}
+                      </h3>
+                      <p className="text-indigo-100">
+                        {language === 'ms' 
+                          ? 'Anda berada di top 10% pengguna paling aktif bulan ini'
+                          : 'You\'re in the top 10% most active users this month'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      toast.success(language === 'ms' ? 'Laporan penuh akan tersedia tidak lama lagi!' : 'Full report coming soon!', {
+                        icon: '📊',
+                        duration: 3000,
+                      });
+                    }}
+                    className="bg-white text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-indigo-50 transition flex items-center gap-2"
+                  >
+                    {language === 'ms' ? 'Lihat Laporan Penuh' : 'View Full Report'}
+                    <ChevronRight className="w-5 h-5" />
+                  </motion.button>
+                </div>
+              </motion.div>
             </div>
           </section>
         )}
