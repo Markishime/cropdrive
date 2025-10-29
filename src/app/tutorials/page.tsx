@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import Card, { CardContent } from '@/components/ui/Card';
-import { Play, BookOpen, Video, CheckCircle2, Lock, Crown, Zap } from 'lucide-react';
+import { Play, BookOpen, Video, CheckCircle2, Lock, Crown, Zap, GraduationCap, Clock, Users } from 'lucide-react';
 
 export default function TutorialsPage() {
   const [mounted, setMounted] = useState(false);
@@ -183,28 +183,110 @@ export default function TutorialsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-16"
-        >
-          <span className="inline-block text-green-600 text-sm font-bold tracking-widest uppercase mb-4 bg-green-50 px-4 py-2 rounded-full">
-            {language === 'ms' ? 'Pusat Pembelajaran' : 'Learning Center'}
-          </span>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            {language === 'ms' ? 'Tutorial & Panduan' : 'Tutorials & Guides'}
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-            {language === 'ms'
-              ? 'Ketahui cara mendapatkan yang terbaik dari CropDrive dengan tutorial video, panduan langkah demi langkah, dan sumber muat turun'
-              : 'Learn how to get the most out of CropDrive with video tutorials, step-by-step guides, and downloadable resources'
-            }
-          </p>
-        </motion.div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      {/* Enhanced Header with Quick Stats */}
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center sm:text-left"
+          >
+            <div className="flex items-center justify-center sm:justify-start flex-wrap gap-4 mb-6">
+              <div className="text-center sm:text-left">
+                <span className="inline-block text-green-200 text-sm font-bold tracking-widest uppercase mb-3 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
+                  {language === 'ms' ? '📚 Pusat Pembelajaran' : '📚 Learning Center'}
+                </span>
+                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
+                  {language === 'ms' ? 'Tutorial &' : 'Tutorials &'} <span className="text-yellow-400">{language === 'ms' ? 'Panduan' : 'Guides'}</span>
+                </h1>
+                <p className="text-lg sm:text-xl text-white/90 flex items-center justify-center sm:justify-start gap-2">
+                  <GraduationCap className="w-5 h-5" />
+                  {language === 'ms'
+                    ? 'Belajar cara maksimumkan penggunaan CropDrive AI'
+                    : 'Learn how to maximize CropDrive AI usage'
+                  }
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Video Tutorial' : 'Video Tutorials'}
+                  </span>
+                  <Video className="w-5 h-5 text-blue-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{videoTutorials.length}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Masa Tonton' : 'Watch Time'}
+                  </span>
+                  <Clock className="w-5 h-5 text-purple-400" />
+                </div>
+                <p className="text-2xl font-black text-white">1.5 {language === 'ms' ? 'jam' : 'hrs'}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Panduan Langkah' : 'Step Guides'}
+                  </span>
+                  <BookOpen className="w-5 h-5 text-yellow-400" />
+                </div>
+                <p className="text-2xl font-black text-white">{guideSteps.length}</p>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/20"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white/80 text-sm font-medium">
+                    {language === 'ms' ? 'Tontonan' : 'Total Views'}
+                  </span>
+                  <Users className="w-5 h-5 text-green-400" />
+                </div>
+                <p className="text-2xl font-black text-white">12.7K</p>
+              </motion.div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         {/* Premium Upgrade Banner - Only shown to logged-in users without plans */}
         {user && !hasPlan && (
