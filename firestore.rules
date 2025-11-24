@@ -1,0 +1,78 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users collection - users can read/write their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null; // Allow reading other users for admin purposes
+      allow create: if request.auth != null; // Allow user creation during signup
+    }
+
+    // Subscriptions collection - users can read their own subscriptions
+    match /subscriptions/{subscriptionId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only server-side functions can write
+    }
+
+    // Allow querying subscriptions by userId for active subscription lookup
+    match /subscriptions {
+      allow read: if request.auth != null &&
+        request.query.where('userId', '==', request.auth.uid).size() == 1 &&
+        request.query.where('status', 'in', ['active', 'trialing']).size() == 1 &&
+        request.query.orderBy('createdAt', 'desc').size() == 1 &&
+        request.query.limit().size() == 1;
+    }
+
+    // Support messages collection - users can create/read their own messages
+    match /supportMessages/{messageId} {
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false; // Messages are immutable once created
+    }
+
+    // Allow querying support messages filtered by userId for monthly limit checking
+    match /supportMessages {
+      allow read: if request.auth != null &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1;
+    }
+
+    // Notifications collection - users can read/write their own notifications
+    match /notifications/{notificationId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Allow querying notifications by userId
+    match /notifications {
+      allow read: if request.auth != null;
+    }
+
+    // Memberships collection - users can read/write their own memberships
+    match /memberships/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Reports collection - users can read their own reports
+    match /reports/{reportId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only server-side functions can create reports
+    }
+
+    // Contacts collection - for contact form submissions (public)
+    match /contacts/{contactId} {
+      allow create: if true; // Anyone can submit contact forms
+      allow read, write: if false; // Only admin access
+    }
+
+    // Admin-only collections (if any)
+    match /admin/{document=**} {
+      allow read, write: if false; // No client access
+    }
+
+    // Public collections (if any)
+    match /public/{document=**} {
+      allow read: if true;
+      allow write: if false;
+    }
+  }
+}

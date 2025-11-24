@@ -1,0 +1,438 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Information",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "download": "Download",
+    "upload": "Upload",
+    "submit": "Submit",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "ok": "OK",
+    "retry": "Retry",
+    "skip": "Skip",
+    "finish": "Finish",
+    "start": "Start",
+    "stop": "Stop",
+    "pause": "Pause",
+    "resume": "Resume"
+  },
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "tutorials": "Tutorials",
+    "reviews": "Reviews",
+    "login": "Login",
+    "register": "Register",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language"
+  },
+  "hero": {
+    "title": "Smart Farm Analysis with AI",
+    "subtitle": "Transform your palm oil farming with AI-powered soil and leaf analysis",
+    "description": "Upload your lab reports and get instant AI insights, recommendations, and trend analysis to optimize your farm's productivity.",
+    "cta": {
+      "primary": "Sign Up Now",
+      "secondary": "View Pricing"
+    }
+  },
+  "features": {
+    "title": "CropDrive™ Oil Palm AI Advisor - 11 Core Features",
+    "subtitle": "Smart Farming Intelligence for Palm Oil Plantations",
+    "tagline": "Your personal farming expert that analyzes soil and leaf test reports using artificial intelligence",
+    "simpleProcess": "Simple Process: Upload Report → AI Analyzes → Get Recommendations",
+    "whoIsItFor": "Who Is It For?",
+    "coreFeatures": {
+      "feature1": {
+        "title": "Smart Document Reading (OCR & AI)",
+        "description": "Automatically reads PDF reports from any laboratory, extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~30 seconds."
+      },
+      "feature2": {
+        "title": "Intelligent Nutrient Analysis",
+        "description": "Compares results against MPOB standards. Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient."
+      },
+      "feature3": {
+        "title": "AI-Powered Recommendations",
+        "description": "Powered by Google Gemini AI, providing three investment options: HIGH (Fast, premium), MEDIUM (Balanced), LOW (Budget). Includes exact product names, application rates, cost estimates in RM."
+      },
+      "feature4": {
+        "title": "Regenerative Agriculture Integration",
+        "description": "Sustainable practices to reduce long-term fertilizer dependence: EFB Mulching, Leguminous Cover Crops, Composting, Biochar Application."
+      },
+      "feature5": {
+        "title": "Economic Impact Forecasting",
+        "description": "5-year financial projections for each investment option with year-by-year breakdown: Investment costs, Yield improvements, Additional revenue, Net profit, ROI percentage."
+      },
+      "feature6": {
+        "title": "Professional PDF Reports",
+        "description": "Export complete analysis to PDF format with professional formatting suitable for meetings. Includes complete nutrient analysis tables, color-coded severity indicators, all AI recommendations."
+      },
+      "feature7": {
+        "title": "Historical Data Tracking",
+        "description": "Saves every analysis automatically. Compare results across different time periods. Track improvements from treatments. Identify seasonal patterns."
+      },
+      "feature8": {
+        "title": "Multi-Farm Management",
+        "description": "Manage multiple plantations from one dashboard. Track different blocks or estates separately. Compare performance across locations."
+      },
+      "feature9": {
+        "title": "User Authentication & Data Security",
+        "description": "Secure login with email and password. Bank-level encryption (Google Firebase). Role-based access control. Automatic cloud backup."
+      },
+      "feature10": {
+        "title": "Mobile-Friendly Design",
+        "description": "Works perfectly on smartphones and tablets. Upload photos of reports directly from phone camera. Responsive design adapts to screen size."
+      },
+      "feature11": {
+        "title": "Admin Panel (For Managers)",
+        "description": "Configure AI analysis settings. Manage user accounts and permissions. Monitor system usage. View organization-wide reports."
+      }
+    },
+    "benefits": {
+      "timeSavings": "Time Savings",
+      "costSavings": "Cost Savings",
+      "revenueIncrease": "Revenue Increase & ROI",
+      "accuracy": "Accuracy",
+      "accessibility": "Accessibility"
+    },
+    "soil": {
+      "title": "Soil Analysis",
+      "description": "Upload soil test PDFs and get AI-powered analysis of pH, nitrogen, phosphorus, and potassium levels with MPOB standard comparisons."
+    },
+    "leaf": {
+      "title": "Leaf Analysis",
+      "description": "Analyze leaf nutrient content and receive fertilizer recommendations based on optimal palm oil standards."
+    },
+    "reports": {
+      "title": "Smart Reports",
+      "description": "Generate comprehensive PDF reports with graphs, trends, and actionable recommendations."
+    },
+    "trends": {
+      "title": "Historical Trends",
+      "description": "Track your farm's progress over time with visual analytics and year-to-year comparisons."
+    }
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Transparent pricing with no hidden fees",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "save": "Save",
+    "perMonth": "/month",
+    "perYear": "/year",
+    "currencyNote": "Payments processed securely in euros (€). Ringgit prices shown for reference only.",
+    "features": {
+      "aiReports": "AI Agronomic Report",
+      "support": "Clarification Support (WhatsApp/Email)",
+      "responseTime": "Response Time (hours)",
+      "renewalDiscount": "Renewal Discount",
+      "referralBonus": "Referral Bonus (next annual plan)",
+      "comparativeAnalysis": "Comparative Analysis (year-to-year progress)",
+      "partnerDiscounts": "Partner Discounts (test kits, fertilizers, etc.)",
+      "earlyAccess": "Early Access to New Features",
+      "unlimited": "Unlimited",
+      "standard": "Standard"
+    },
+    "cta": {
+      "getStarted": "Get Started",
+      "mostPopular": "Most Popular",
+      "upgrade": "Upgrade Now"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome Back",
+      "subtitle": "Sign in to your CropDrive account",
+      "email": "Email",
+      "password": "Password",
+      "forgotPassword": "Forgot Password?",
+      "rememberMe": "Remember me",
+      "signIn": "Sign In",
+      "noAccount": "Don't have an account?",
+      "signUp": "Sign up here"
+    },
+    "register": {
+      "title": "Create Account",
+      "subtitle": "Join thousands of farmers using AI for better yields",
+      "name": "Full Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "farmName": "Farm Name",
+      "farmLocation": "Farm Location",
+      "password": "Password",
+      "confirmPassword": "Confirm Password",
+      "language": "Preferred Language",
+      "agreeToTerms": "I agree to the",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "signUp": "Sign Up",
+      "haveAccount": "Already have an account?",
+      "signIn": "Sign in here"
+    },
+    "forgotPassword": {
+      "title": "Reset Password",
+      "subtitle": "Enter your email to receive a password reset link",
+      "email": "Email",
+      "sendResetLink": "Send Reset Link",
+      "backToLogin": "Back to Login"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome back",
+    "overview": "Overview",
+    "recentActivity": "Recent Activity",
+    "uploadAnalysis": "Upload & Analysis",
+    "history": "Analysis History",
+    "subscription": "Subscription",
+    "multiFarm": "Multi-Farm Management",
+    "farms": "Farms",
+    "allFarms": "All Farms",
+    "addFarm": "Add Farm",
+    "farmDetails": "Farm Details",
+    "farmName": "Farm Name",
+    "location": "Location",
+    "size": "Size (hectares)",
+    "status": {
+      "critical": "Critical Issues",
+      "low": "Low Issues",
+      "balanced": "All Balanced",
+      "noData": "No Data"
+    },
+    "stats": {
+      "totalUploads": "Total Uploads",
+      "thisMonth": "This Month",
+      "remaining": "Remaining",
+      "plan": "Current Plan",
+      "totalFarms": "Total Farms",
+      "criticalIssues": "Critical Issues",
+      "averageHealth": "Average Health"
+    },
+    "upload": {
+      "title": "Upload Lab Report",
+      "description": "Upload your soil or leaf analysis PDF",
+      "selectFile": "Select File",
+      "takePhoto": "Take Photo",
+      "dragDrop": "Drag and drop your file here",
+      "or": "or",
+      "browse": "browse to upload",
+      "supportedFormats": "Supported formats: PDF, JPG, PNG, Excel, CSV",
+      "maxSize": "Max file size: 10MB",
+      "analyzing": "Analyzing with AI...",
+      "analysisComplete": "Analysis Complete!",
+      "viewResults": "View Results",
+      "processingTime": "Processing time: ~30 seconds"
+    },
+    "analysis": {
+      "results": "Analysis Results",
+      "recommendations": "Recommendations",
+      "viewReport": "View Full Report",
+      "downloadPDF": "Download PDF",
+      "share": "Share Results",
+      "colorCoded": "Color-Coded Status",
+      "green": "Balanced - Within 5% of ideal",
+      "yellow": "Low - 5-15% gap",
+      "red": "Critical - >15% gap",
+      "investmentOptions": "Investment Options",
+      "high": "High Investment - Fast results (6-12 months)",
+      "medium": "Medium Investment - Balanced approach (12-18 months)",
+      "low": "Low Investment - Budget-friendly (18-36 months)",
+      "fiveYearForecast": "5-Year Financial Forecast",
+      "roi": "Return on Investment"
+    }
+  },
+  "subscription": {
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade Plan",
+    "downgrade": "Downgrade Plan",
+    "cancel": "Cancel Subscription",
+    "reactivate": "Reactivate",
+    "manage": "Manage Subscription",
+    "billingHistory": "Billing History",
+    "nextBilling": "Next billing date",
+    "amount": "Amount",
+    "status": "Status",
+    "active": "Active",
+    "canceled": "Canceled",
+    "pastDue": "Past Due"
+  },
+  "tutorials": {
+    "title": "Tutorials & Guides",
+    "subtitle": "Learn how to get the most out of CropDrive",
+    "gettingStarted": "Getting Started",
+    "uploadingReports": "Uploading Lab Reports",
+    "understandingResults": "Understanding AI Results",
+    "mobileTips": "Mobile Upload Tips",
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": [
+        {
+          "q": "What is CropDrive™?",
+          "a": "It is an AI-powered agronomy assistant that interprets your soil and leaf test results and turns them into clear fertilizer and soil-health recommendations. You get reliable, science-based guidance to improve productivity and profitability."
+        },
+        {
+          "q": "Who can benefit from CropDrive™?",
+          "a": "Farmers, plantations, soil and leaf testing labs, fertilizer suppliers, NGOs, development programs, and agribusinesses use CropDrive™."
+        },
+        {
+          "q": "How does CropDrive™ work?",
+          "a": "You upload soil or leaf test results. The AI analyzes them, identifies nutrient gaps, and generates a field-specific plan with cost and return-on-investment estimates so you grow more with less waste."
+        },
+        {
+          "q": "What results can I expect?",
+          "a": "Farmers report reduced fertilizer waste, higher yields, stronger palms, and lower production costs within months, leading to better income and more sustainable farm management."
+        },
+        {
+          "q": "Is CropDrive™ suitable for smallholders?",
+          "a": "Yes. It makes expert agronomy support accessible to smallholders by giving affordable recommendations that raise yields and improve incomes."
+        },
+        {
+          "q": "Can CropDrive™ help estates and plantations?",
+          "a": "Yes. Agronomists on large estates use it to streamline soil health improvement, fertilization planning, and long-term economic projections. Estates and plantations save significant man-hours and get results based on the latest science."
+        },
+        {
+          "q": "How do NGOs and development programs use CropDrive™?",
+          "a": "They organize farmers into cooperatives and link them to CropDrive™. This gives smallholders access to advanced agronomy tools and expert-level recommendations at low cost."
+        },
+        {
+          "q": "How do soil and leaf testing labs use CropDrive™?",
+          "a": "Labs attach tailored CropDrive™ reports to lab results, giving farmers clear and practical recommendations. This adds value to the lab's services and makes them more competitive."
+        },
+        {
+          "q": "How do fertilizer suppliers and distributors use CropDrive™?",
+          "a": "They provide customized fertilization plans tied directly to their products. Short- and long-term nutrient strategies add value for clients and strengthen their market position."
+        },
+        {
+          "q": "How do agribusinesses and public institutions use CropDrive™?",
+          "a": "They rely on field-level data from CropDrive™ to track adoption, verify results, support extension programs, guide training, and inform sustainability policies."
+        },
+        {
+          "q": "What crops does CropDrive™ work with?",
+          "a": "It currently supports oil palm. Plans are underway to add coffee, cacao, and other tropical crops, bringing AI-driven support to more farming systems."
+        },
+        {
+          "q": "How fast will I get my report?",
+          "a": "Fertilization and soil-health plans are generated within fifteen to twenty minutes after you upload your test results, so you can act quickly to improve yields and income."
+        },
+        {
+          "q": "How do I start using CropDrive™?",
+          "a": "Click \"Subscribe\" on cropdrive.com, create an account, and upload your lab results. You will receive your first AI-generated report with clear recommendations."
+        },
+        {
+          "q": "Is the advice backed by science?",
+          "a": "Yes. CropDrive™ combines proven agronomic practices with AI analysis to ensure recommendations are practical, evidence-based, and focused on long-term productivity and profitability."
+        }
+      ]
+    }
+  },
+  "reviews": {
+    "title": "What Farmers Say",
+    "subtitle": "Success stories from Malaysian palm oil farmers"
+  },
+  "footer": {
+    "company": "Company",
+    "product": "Product",
+    "support": "Support",
+    "legal": "Legal",
+    "about": "About Us",
+    "careers": "Careers",
+    "press": "Press",
+    "blog": "Blog",
+    "features": "Features",
+    "pricing": "Pricing",
+    "tutorials": "Tutorials",
+    "api": "API",
+    "help": "Help Center",
+    "contact": "Contact Us",
+    "whatsapp": "WhatsApp Support",
+    "status": "System Status",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "copyright": "© 2025 CropDrive OP Advisor™. All rights reserved."
+  },
+  "landing": {
+    "challenge": {
+      "title": "The Challenge",
+      "subtitle": "Soil and leaf test results are difficult to interpret without expert support. This often leads to:",
+      "item1": "Wasted fertilizer",
+      "item2": "Higher costs",
+      "item3": "Missed yield potential",
+      "item4": "Long-term soil degradation"
+    },
+    "howWeHelp": {
+      "title": "How We Help",
+      "subtitle": "CropDrive™ AI Agronomist:",
+      "item1": "Interprets test data",
+      "item2": "Provides field-specific recommendations",
+      "item3": "Designs soil health improvement strategies",
+      "item4": "Links every step to clear economic and return-on-investment values"
+    },
+    "whatWeOffer": {
+      "title": "What We Offer",
+      "description": "We interpret lab results, provide clear fertilization strategies, and deliver long-term investment plans with soil health restoration tailored to each farm."
+    },
+    "tailoredSolutions": {
+      "title": "Tailored Solutions for Key Audiences",
+      "farmers": {
+        "title": "Farmers & Estates",
+        "desc": "Turn raw test results into clear advisory reports, adding value through practical improvement strategies."
+      },
+      "labs": {
+        "title": "Soil & Leaf Testing Labs",
+        "desc": "Strengthen farmer cooperatives by adding agronomy services that make advanced tools accessible to smallholders with limited resources."
+      },
+      "ngos": {
+        "title": "NGOs & Development Programs",
+        "desc": "Save man-time with fertilization plans delivered in minutes instead of days, ensuring consistency across estates."
+      },
+      "plantations": {
+        "title": "Plantations & Agri-businesses",
+        "desc": "Boost your fertilizer sales by linking products to tailored field recommendations that deliver clear value to farmers."
+      },
+      "suppliers": {
+        "title": "Fertilizer Suppliers",
+        "desc": "Enhance product adoption through integrated, data-driven recommendations."
+      },
+      "research": {
+        "title": "Public, Research & Certification Bodies",
+        "desc": "Use farm-level data to track adoption, verify impact, and support extension, training, policy, and long-term sustainability."
+      }
+    },
+    "turnLabResults": {
+      "title": "Turn Lab Test Results Into Real Yield Gains",
+      "subtitle": "Faster, clearer, and reliable decisions backed by science and AI",
+      "forOrganizations": {
+        "title": "For Organizations",
+        "item1": "Streamline operations with instant, expert-level insights",
+        "item2": "Scale support for large networks or programs",
+        "item3": "Measure and report on sustainability metrics"
+      },
+      "forFarmers": {
+        "title": "For Farmers",
+        "item1": "Simple, actionable plans from complex data",
+        "item2": "Cost savings and yield boosts tailored to your fields",
+        "item3": "Long-term soil health for future seasons"
+      },
+      "backedBy": "Results Backed by Wide Experience",
+      "expertise": "Our AI draws from proven agronomic expertise to deliver trusted outcomes in tropical agriculture."
+    }
+  }
+}
