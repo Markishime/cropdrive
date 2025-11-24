@@ -67,6 +67,12 @@ export const Navbar: React.FC = () => {
   const toggleLanguage = () => {
     const newLanguage = language === 'en' ? 'ms' : 'en';
     localStorage.setItem('cropdrive-language', newLanguage);
+    
+    // Dispatch custom event before reload so components can react
+    window.dispatchEvent(new CustomEvent('languageChanged', { 
+      detail: { language: newLanguage } 
+    }));
+    
     window.location.reload();
   };
 

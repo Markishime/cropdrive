@@ -32,24 +32,63 @@ export default function AssistantPage() {
     setCurrentLang(lang);
   }, []);
 
-  // Listen for language changes
+  // Listen for language changes - multiple methods to catch changes
   useEffect(() => {
-    const handleStorageChange = () => {
-      const lang = getCurrentLanguage();
-      setCurrentLang(lang);
-      // Reload iframe with new language
-      setIframeKey(prev => prev + 1);
+    if (!mounted) return;
+    
+    const handleLanguageChange = (newLang?: 'en' | 'ms') => {
+      const lang = newLang || getCurrentLanguage();
+      if (lang !== currentLang) {
+        setCurrentLang(lang);
+        // Reload iframe with new language (updates URL)
+        setIframeKey(prev => prev + 1);
+        
+        // Also send message to iframe to update language immediately
+        // This allows Streamlit to update without reading URL params
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage({
+            type: 'LANGUAGE_CHANGE',
+            language: lang,
+          }, 'https://ags-ai-assistant.streamlit.app');
+        }
+      }
     };
     
+    // Method 1: Listen for storage events (works across tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cropdrive-language' && e.newValue) {
+        handleLanguageChange(e.newValue as 'en' | 'ms');
+      }
+    };
+    
+    // Method 2: Listen for custom language change events (from Navbar before reload)
+    const handleCustomLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.language) {
+        handleLanguageChange(customEvent.detail.language);
+      } else {
+        handleLanguageChange();
+      }
+    };
+    
+    // Method 3: Poll localStorage periodically to catch changes in same window
+    // (since storage events don't fire in same window before reload)
+    const pollInterval = setInterval(() => {
+      const lang = getCurrentLanguage();
+      if (lang !== currentLang) {
+        handleLanguageChange(lang);
+      }
+    }, 1000); // Check every 1 second (less aggressive)
+    
     window.addEventListener('storage', handleStorageChange);
-    // Also listen for custom language change events
-    window.addEventListener('languageChanged', handleStorageChange);
+    window.addEventListener('languageChanged', handleCustomLanguageChange);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('languageChanged', handleStorageChange);
+      window.removeEventListener('languageChanged', handleCustomLanguageChange);
+      clearInterval(pollInterval);
     };
-  }, []);
+  }, [currentLang, mounted]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -272,6 +311,17 @@ export default function AssistantPage() {
       iframeRef.current.contentWindow.postMessage(config, 'https://ags-ai-assistant.streamlit.app');
     }
   };
+
+  // Update iframe language when currentLang changes
+  useEffect(() => {
+    if (mounted && iframeRef.current?.contentWindow && user) {
+      // Send language update message to iframe
+      iframeRef.current.contentWindow.postMessage({
+        type: 'LANGUAGE_CHANGE',
+        language: currentLang,
+      }, 'https://ags-ai-assistant.streamlit.app');
+    }
+  }, [currentLang, mounted, user]);
 
   const handleRefresh = () => {
     setIsLoading(true);
