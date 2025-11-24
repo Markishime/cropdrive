@@ -211,18 +211,38 @@ export default function AssistantPage() {
 
         // Handle feature restriction notifications
         if (data.type === 'FEATURE_RESTRICTED') {
-          toast.error(
-            language === 'ms'
-              ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
-              : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`,
-            {
-              duration: 5000,
-              action: {
-                label: language === 'ms' ? 'Lihat Pelan' : 'View Plans',
-                onClick: () => router.push('/pricing'),
-              },
-            }
-          );
+          const message = language === 'ms'
+            ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
+            : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`;
+          
+          toast.error(message, {
+            duration: 5000,
+            icon: '🔒',
+          });
+          
+          // Show a follow-up toast with action after a short delay
+          setTimeout(() => {
+            toast(
+              (t) => (
+                <div className="flex items-center gap-3">
+                  <span>{language === 'ms' ? 'Lihat pelan tersedia' : 'View available plans'}</span>
+                  <button
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      router.push('/pricing');
+                    }}
+                    className="px-3 py-1 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                  >
+                    {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
+                  </button>
+                </div>
+              ),
+              {
+                duration: 6000,
+                icon: '💡',
+              }
+            );
+          }, 500);
         }
       } catch (error) {
         console.error('Error handling iframe message:', error);
