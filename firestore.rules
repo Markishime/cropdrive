@@ -1,11 +1,23 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user owns the resource
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
     // Users collection - users can read/write their own profile
+    // Works for both website and Streamlit app (when authenticated)
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-      allow read: if request.auth != null; // Allow reading other users for admin purposes
-      allow create: if request.auth != null; // Allow user creation during signup
+      allow read, write: if isOwner(userId);
+      allow read: if isAuthenticated(); // Allow reading other users for admin purposes
+      allow create: if isAuthenticated(); // Allow user creation during signup
     }
 
     // Subscriptions collection - users can read their own subscriptions
@@ -52,10 +64,46 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    // Reports collection - users can read their own reports
+    // Analysis Results collection - users can read and create their own analysis results
+    // Works for both website and Streamlit app (when authenticated)
+    match /analysis_results/{resultId} {
+      // Read: User can read their own analysis results
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        // Allow reading if document doesn't exist yet (for create operations)
+        !resource.exists
+      );
+      
+      // Create: User can create analysis results with their own userId
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        // Validate required fields
+        request.resource.data.keys().hasAll(['userId', 'title', 'type', 'status', 'date', 'createdAt']);
+      
+      // Update/Delete: User can only modify their own analysis results
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    // Allow querying analysis_results by userId (for both website and Streamlit)
+    match /analysis_results {
+      allow read: if isAuthenticated() &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1;
+    }
+    
+    // Reports collection - kept for backward compatibility (deprecated, use analysis_results)
     match /reports/{reportId} {
-      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-      allow write: if false; // Only server-side functions can create reports
+      allow read: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid || !resource.exists
+      );
+      allow create: if isAuthenticated() && 
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.keys().hasAll(['userId', 'title', 'type', 'status', 'date', 'createdAt']);
+      allow update, delete: if isOwner(resource.data.userId);
+    }
+    
+    match /reports {
+      allow read: if isAuthenticated() &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1;
     }
 
     // Contacts collection - for contact form submissions (public)

@@ -57,7 +57,7 @@ export default function ReportsPage() {
 
       setLoadingReports(true);
       try {
-        const reportsRef = collection(db, 'reports');
+        const reportsRef = collection(db, 'analysis_results');
         const q = query(
           reportsRef,
           where('userId', '==', user.uid),
@@ -132,7 +132,7 @@ export default function ReportsPage() {
 
     setDeletingId(reportId);
     try {
-      await deleteDoc(doc(db, 'reports', reportId));
+      await deleteDoc(doc(db, 'analysis_results', reportId));
       setReports(reports.filter(r => r.id !== reportId));
       toast.success(language === 'ms' ? '✓ Laporan dipadam' : '✓ Report deleted');
     } catch (error) {

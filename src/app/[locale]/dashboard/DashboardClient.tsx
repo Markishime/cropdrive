@@ -188,7 +188,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
 
     console.log('📊 Setting up real-time reports listener...');
     
-    const reportsRef = collection(db, 'reports');
+    const reportsRef = collection(db, 'analysis_results');
     const q = query(
       reportsRef,
       where('userId', '==', user.uid),

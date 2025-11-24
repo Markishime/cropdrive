@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
+import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { auth } from '@/lib/firebase';
 import { 
   MessageSquare, 
   RefreshCw,
@@ -12,6 +14,7 @@ import {
   Zap,
   CheckCircle2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);
@@ -20,11 +23,32 @@ export default function AssistantPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const { language } = useTranslation(mounted ? currentLang : 'en');
 
   useEffect(() => {
     setMounted(true);
-    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+    const lang = getCurrentLanguage();
     setCurrentLang(lang);
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLang(lang);
+      // Reload iframe with new language
+      setIframeKey(prev => prev + 1);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Also listen for custom language change events
+    window.addEventListener('languageChanged', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('languageChanged', handleStorageChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -38,8 +62,196 @@ export default function AssistantPage() {
     // }
   }, [user, authLoading, router]);
 
-  const language = currentLang;
-  const AGS_AI_URL = 'https://ags-ai-assistant.streamlit.app/?embedded=true';
+  // Build iframe URL with parameters
+  const buildIframeUrl = () => {
+    const baseUrl = 'https://ags-ai-assistant.streamlit.app/?embedded=true';
+    const params = new URLSearchParams();
+    
+    // Add language parameter
+    params.append('lang', currentLang);
+    
+    // Add user ID (for tracking)
+    if (user?.uid) {
+      params.append('userId', user.uid);
+    }
+    
+    // Add plan information
+    const userPlan = user?.plan || 'none';
+    params.append('plan', userPlan);
+    
+    // Add plan limits
+    const planLimits = {
+      start: { uploadLimit: 10, features: ['basic'] },
+      smart: { uploadLimit: 50, features: ['basic', 'priority'] },
+      precision: { uploadLimit: -1, features: ['basic', 'priority', 'premium', 'comparative', 'early_access'] },
+    };
+    
+    const limits = planLimits[userPlan as keyof typeof planLimits] || planLimits.start;
+    params.append('uploadLimit', limits.uploadLimit.toString());
+    params.append('features', limits.features.join(','));
+    
+    return `${baseUrl}&${params.toString()}`;
+  };
+
+  const AGS_AI_URL = buildIframeUrl();
+
+  // Listen for messages from iframe
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      // Verify origin for security
+      if (event.origin !== 'https://ags-ai-assistant.streamlit.app') {
+        return;
+      }
+
+      try {
+        const data = event.data;
+        
+        // Handle analysis completion
+        if (data.type === 'ANALYSIS_COMPLETE' && user?.uid) {
+          console.log('📊 Analysis completed:', data);
+          
+          // Get Firebase auth token
+          const firebaseUser = auth.currentUser;
+          if (!firebaseUser) {
+            toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+            return;
+          }
+
+          const token = await firebaseUser.getIdToken();
+
+          // Try API first, fallback to direct Firestore save
+          try {
+            const response = await fetch('/api/save-analysis-report', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                userId: user.uid,
+                title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
+                type: data.analysisType || 'soil', // 'soil' or 'leaf'
+                summary: data.summary || '',
+                recommendations: data.recommendationsCount || 0,
+                fileUrl: data.fileUrl || null,
+                analysisData: data.analysisData || null,
+              }),
+            });
+
+            if (response.ok) {
+              const result = await response.json();
+              toast.success(
+                language === 'ms' 
+                  ? '✅ Laporan analisis telah disimpan!' 
+                  : '✅ Analysis report saved!',
+                {
+                  duration: 4000,
+                  icon: '📊',
+                }
+              );
+              console.log('Report saved:', result.reportId);
+            } else {
+              throw new Error('API save failed');
+            }
+          } catch (apiError) {
+            // Fallback: Save directly to Firestore (security rules will validate)
+            console.log('API save failed, trying direct Firestore save...');
+            try {
+              const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+              const { db } = await import('@/lib/firebase');
+              
+              const reportData = {
+                userId: user.uid,
+                title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
+                type: data.analysisType || 'soil',
+                summary: data.summary || '',
+                recommendations: data.recommendationsCount || 0,
+                status: 'completed' as const,
+                date: new Date().toISOString().split('T')[0],
+                fileUrl: data.fileUrl || null,
+                analysisData: data.analysisData || null,
+                createdAt: serverTimestamp(),
+                updatedAt: serverTimestamp(),
+              };
+
+              const docRef = await addDoc(collection(db, 'analysis_results'), reportData);
+              toast.success(
+                language === 'ms' 
+                  ? '✅ Laporan analisis telah disimpan!' 
+                  : '✅ Analysis report saved!',
+                {
+                  duration: 4000,
+                  icon: '📊',
+                }
+              );
+              console.log('Report saved directly:', docRef.id);
+            } catch (firestoreError) {
+              console.error('Error saving report:', firestoreError);
+              toast.error(
+                language === 'ms' 
+                  ? 'Ralat menyimpan laporan' 
+                  : 'Error saving report'
+              );
+            }
+          }
+        }
+
+        // Handle language change request from iframe
+        if (data.type === 'LANGUAGE_CHANGE_REQUEST') {
+          const newLang = data.language;
+          if (newLang === 'en' || newLang === 'ms') {
+            localStorage.setItem('cropdrive-language', newLang);
+            setCurrentLang(newLang);
+            // Dispatch custom event
+            window.dispatchEvent(new CustomEvent('languageChanged'));
+            // Reload iframe
+            setIframeKey(prev => prev + 1);
+          }
+        }
+
+        // Handle feature restriction notifications
+        if (data.type === 'FEATURE_RESTRICTED') {
+          toast.error(
+            language === 'ms'
+              ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
+              : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`,
+            {
+              duration: 5000,
+              action: {
+                label: language === 'ms' ? 'Lihat Pelan' : 'View Plans',
+                onClick: () => router.push('/pricing'),
+              },
+            }
+          );
+        }
+      } catch (error) {
+        console.error('Error handling iframe message:', error);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [user, language, router]);
+
+  // Send initial configuration to iframe when it loads
+  const handleIframeLoad = () => {
+    setIsLoading(false);
+    
+    // Send configuration to iframe
+    if (iframeRef.current?.contentWindow && user) {
+      const config = {
+        type: 'CONFIG',
+        language: currentLang,
+        userId: user.uid,
+        plan: user.plan || 'none',
+        userEmail: user.email,
+      };
+      
+      iframeRef.current.contentWindow.postMessage(config, 'https://ags-ai-assistant.streamlit.app');
+    }
+  };
 
   const handleRefresh = () => {
     setIsLoading(true);
@@ -198,12 +410,13 @@ export default function AssistantPage() {
         )}
         
         <iframe
+          ref={iframeRef}
           key={iframeKey}
           id="ags-iframe"
           src={AGS_AI_URL}
           className="w-full h-full border-0"
           title="CropDrive™ Oil Palm AI Advisor"
-          onLoad={() => setIsLoading(false)}
+          onLoad={handleIframeLoad}
           allow="camera; microphone; clipboard-read; clipboard-write; accelerometer; gyroscope"
           referrerPolicy="no-referrer-when-downgrade"
           style={{ 
