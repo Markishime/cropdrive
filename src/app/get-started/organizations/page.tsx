@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
@@ -135,44 +134,26 @@ export default function GetStartedOrganizationsPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center lg:text-left"
-            >
-              <div className="inline-block bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-bold mb-8 uppercase tracking-wide text-sm">
-                {language === 'ms' ? 'Untuk Organisasi' : 'For Organizations'}
-              </div>
-              <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-                {language === 'ms' ? 'CropDrive™ Bekerja dengan' : 'CropDrive™ Working with'}<br />
-                <span className="text-yellow-400">{language === 'ms' ? 'Organisasi' : 'Organizations'}</span>
-              </h1>
-              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto lg:mx-0 leading-relaxed">
-                {language === 'ms'
-                  ? 'CropDrive™ bekerjasama dengan organisasi komersial dan bukan komersial yang menyokong atau melayani petani. Penyelesaian agronomi digital kami menukar data makmal kepada pandangan yang jelas dan boleh diambil tindakan yang meningkatkan produktiviti, kecekapan, dan kemampanan jangka panjang.'
-                  : 'CropDrive™ works with commercial and non-commercial organizations that support or serve farmers. Our digital agronomy solutions turn laboratory data into clear, actionable insights that improve productivity, efficiency, and long-term sustainability.'
-                }
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex justify-center lg:justify-end"
-            >
-              <div className="relative w-full max-w-md h-96 rounded-2xl overflow-hidden shadow-2xl border-4 border-yellow-400">
-                <Image
-                  src="/images/our_future_optimized.jpg"
-                  alt={language === 'ms' ? 'Masa Depan CropDrive' : 'CropDrive Future'}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </motion.div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <div className="inline-block bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-bold mb-8 uppercase tracking-wide text-sm">
+              {language === 'ms' ? 'Untuk Organisasi' : 'For Organizations'}
+            </div>
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+              {language === 'ms' ? 'CropDrive™ Bekerja dengan' : 'CropDrive™ Working with'}<br />
+              <span className="text-yellow-400">{language === 'ms' ? 'Organisasi' : 'Organizations'}</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
+              {language === 'ms'
+                ? 'CropDrive™ bekerjasama dengan organisasi komersial dan bukan komersial yang menyokong atau melayani petani. Penyelesaian agronomi digital kami menukar data makmal kepada pandangan yang jelas dan boleh diambil tindakan yang meningkatkan produktiviti, kecekapan, dan kemampanan jangka panjang.'
+                : 'CropDrive™ works with commercial and non-commercial organizations that support or serve farmers. Our digital agronomy solutions turn laboratory data into clear, actionable insights that improve productivity, efficiency, and long-term sustainability.'
+              }
+            </p>
+          </motion.div>
         </div>
       </section>
 

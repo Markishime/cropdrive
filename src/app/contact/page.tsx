@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { Mail, Phone, MapPin, Clock, Globe, MessageSquare } from 'lucide-react';
@@ -64,48 +63,30 @@ export default function ContactUsPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center lg:text-left"
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="text-center"
+          >
+            <motion.span
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 0.2 }}
+              className="inline-block text-yellow-400 text-5xl xs:text-6xl sm:text-7xl mb-4 xs:mb-6"
             >
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ type: 'spring', delay: 0.2 }}
-                className="inline-block text-yellow-400 text-5xl xs:text-6xl sm:text-7xl mb-4 xs:mb-6"
-              >
-                ✉️
-              </motion.span>
-              <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 xs:mb-6 sm:mb-8 leading-tight">
-                {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
-              </h1>
-              <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
-                {language === 'ms'
-                  ? 'Kami di sini untuk membantu anda. Hubungi kami melalui mana-mana saluran di bawah.'
-                  : 'We\'re here to help you. Reach out to us through any of the channels below.'
-                }
-              </p>
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="flex justify-center lg:justify-end"
-            >
-              <div className="relative w-full max-w-md h-80 xs:h-96 rounded-2xl overflow-hidden shadow-2xl border-4 border-yellow-400">
-                <Image
-                  src="/images/our_team_optimized.jpg"
-                  alt={language === 'ms' ? 'Pasukan CropDrive' : 'CropDrive Team'}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-              </div>
-            </motion.div>
-          </div>
+              ✉️
+            </motion.span>
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 xs:mb-6 sm:mb-8 leading-tight">
+              {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
+            </h1>
+            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+              {language === 'ms'
+                ? 'Kami di sini untuk membantu anda. Hubungi kami melalui mana-mana saluran di bawah.'
+                : 'We\'re here to help you. Reach out to us through any of the channels below.'
+              }
+            </p>
+          </motion.div>
         </div>
       </section>
 
