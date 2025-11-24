@@ -4,7 +4,7 @@ import React, { useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/i18n';
+import { useTranslation, getCurrentLanguage } from '@/i18n';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/lib/auth';
@@ -13,12 +13,32 @@ import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
 function SuccessPageContent() {
-  const { language, t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [countdown, setCountdown] = React.useState(5);
   const { user } = useAuth();
   const [planActivated, setPlanActivated] = React.useState(false);
+  const [mounted, setMounted] = React.useState(false);
+  const [currentLanguage, setCurrentLanguage] = React.useState<'en' | 'ms'>('en');
+
+  React.useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLanguage(lang);
+  }, []);
+
+  // Listen for language changes
+  React.useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLanguage(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
 
   const sessionId = searchParams.get('session_id');
   const plan = searchParams.get('plan') || 'smart';

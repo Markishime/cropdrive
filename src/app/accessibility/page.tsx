@@ -1,12 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { useTranslation } from '@/i18n';
+import { useTranslation, getCurrentLanguage } from '@/i18n';
 
 export default function AccessibilityPage() {
-  const { language } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+
+  useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLanguage(lang);
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLanguage(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const { language } = useTranslation(mounted ? currentLanguage : 'en');
 
   return (
     <div className="min-h-screen">

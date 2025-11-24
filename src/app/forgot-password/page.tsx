@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/i18n';
+import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
@@ -16,9 +16,29 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
 
-  const { language } = useTranslation();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLanguage(lang);
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLanguage(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const { language } = useTranslation(mounted ? currentLanguage : 'en');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/i18n';
+import { useTranslation, getCurrentLanguage } from '@/i18n';
 
 interface FooterLink {
   href: string;
@@ -66,7 +66,27 @@ const footerSections: FooterSection[] = [
 ];
 
 export const Footer: React.FC = () => {
-  const { language, t } = useTranslation();
+  const [mounted, setMounted] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  
+  useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLanguage(lang);
+  }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLanguage(lang);
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  const { language } = useTranslation(mounted ? currentLanguage : 'en');
 
   return (
     <footer className="bg-secondary-900 text-white">
