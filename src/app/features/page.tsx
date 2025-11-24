@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { useAuth } from '@/lib/auth';
@@ -221,46 +222,64 @@ export default function FeaturesPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <motion.span
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center lg:text-left"
             >
-              {language === 'ms' ? '11 Ciri Utama' : '11 Core Features'}
-            </motion.span>
+              <motion.span
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+              >
+                {language === 'ms' ? '11 Ciri Utama' : '11 Core Features'}
+              </motion.span>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
-              {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'CIRI-CIRI' : 'FEATURES'}</span>
-            </h1>
+              <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+                {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}<br />
+                <span className="text-yellow-400">{language === 'ms' ? 'CIRI-CIRI' : 'FEATURES'}</span>
+              </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Teknologi terkini untuk analisis ladang kelapa sawit yang tepat, menyeluruh, dan mudah digunakan'
-                : 'Latest technology for accurate, comprehensive, and easy-to-use palm oil farm analysis'
-              }
-            </p>
+              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
+                {language === 'ms'
+                  ? 'Teknologi terkini untuk analisis ladang kelapa sawit yang tepat, menyeluruh, dan mudah digunakan'
+                  : 'Latest technology for accurate, comprehensive, and easy-to-use palm oil farm analysis'
+                }
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register">
-                <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  {language === 'ms' ? 'Daftar Sekarang' : 'Sign Up Now'}
-                </button>
-              </Link>
-              <Link href="/get-started/farmers">
-                <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200 hover:bg-white/10">
-                  {language === 'ms' ? 'Ketahui Lebih Lanjut' : 'Learn More'}
-                </button>
-              </Link>
-            </div>
-          </motion.div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Link href="/register">
+                  <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    {language === 'ms' ? 'Daftar Sekarang' : 'Sign Up Now'}
+                  </button>
+                </Link>
+                <Link href="/get-started/farmers">
+                  <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200 hover:bg-white/10">
+                    {language === 'ms' ? 'Ketahui Lebih Lanjut' : 'Learn More'}
+                  </button>
+                </Link>
+              </div>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex justify-center lg:justify-end"
+            >
+              <div className="relative w-full max-w-md h-96 rounded-2xl overflow-hidden shadow-2xl border-4 border-yellow-400">
+                <Image
+                  src="/images/our_team_optimized.jpg"
+                  alt={language === 'ms' ? 'Pasukan CropDrive' : 'CropDrive Team'}
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
@@ -221,23 +222,41 @@ export default function GetStartedFarmersPage() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center"
-          >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Kami Membantu Anda Memutuskan' : 'We help you decide'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'Apa yang Tanaman Anda Perlukan' : 'what your crops really need'}</span>
-            </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Muat naik keputusan makmal tanah dan daun anda dan terima cadangan yang direka untuk anda bagi mengurangkan perbelanjaan dan meningkatkan produktiviti'
-                : 'Upload your soil and leaf lab results and receive recommendations designed for you to reduce your expenses and boost your productivity'
-              }
-            </p>
-          </motion.div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-center lg:text-left"
+            >
+              <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+                {language === 'ms' ? 'Kami Membantu Anda Memutuskan' : 'We help you decide'}<br />
+                <span className="text-yellow-400">{language === 'ms' ? 'Apa yang Tanaman Anda Perlukan' : 'what your crops really need'}</span>
+              </h1>
+              <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto lg:mx-0 leading-relaxed">
+                {language === 'ms'
+                  ? 'Muat naik keputusan makmal tanah dan daun anda dan terima cadangan yang direka untuk anda bagi mengurangkan perbelanjaan dan meningkatkan produktiviti'
+                  : 'Upload your soil and leaf lab results and receive recommendations designed for you to reduce your expenses and boost your productivity'
+                }
+              </p>
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="flex justify-center lg:justify-end"
+            >
+              <div className="relative w-full max-w-md h-96 rounded-2xl overflow-hidden shadow-2xl border-4 border-yellow-400">
+                <Image
+                  src="/images/icon_farmers.png"
+                  alt={language === 'ms' ? 'Petani' : 'Farmers'}
+                  fill
+                  className="object-contain bg-white/10 p-8"
+                  priority
+                />
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
