@@ -87,10 +87,10 @@ export const Navbar: React.FC = () => {
   return (
     <>
     <nav className={navbarClasses}>
-      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16">
+      <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
           {/* Logo - CropDrive OP Advisor™ */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group mr-4 sm:mr-8 lg:mr-12 flex-shrink-0">
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group mr-2 sm:mr-8 lg:mr-12 flex-shrink min-w-0 max-w-[65%] sm:max-w-none">
             {/* CropDrive Logo */}
             <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center p-1.5 sm:p-2 transition-all duration-500 flex-shrink-0 ${
               scrolled ? 'bg-white shadow-md' : 'bg-white/90 shadow-lg'
@@ -105,8 +105,8 @@ export const Navbar: React.FC = () => {
               />
             </div>
             
-            <div className="flex items-start leading-tight">
-              <span className={`font-black text-sm xs:text-base sm:text-lg md:text-xl tracking-tight transition-all duration-500 ${
+            <div className="flex items-start leading-tight min-w-0">
+              <span className={`font-black text-sm xs:text-base sm:text-lg md:text-xl tracking-tight transition-all duration-500 truncate ${
                 scrolled ? 'text-gray-900' : 'text-white'
               } font-heading hidden xs:block`}>
                 <span className="hidden sm:inline">CropDrive OP Advisor</span>
@@ -300,7 +300,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
+          <div className="md:hidden flex items-center gap-2 flex-shrink-0">
             {/* Mobile Language Switcher - Toggle Switch */}
             <button
               onClick={toggleLanguage}
