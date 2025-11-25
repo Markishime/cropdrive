@@ -80,7 +80,7 @@ export const Navbar: React.FC = () => {
     fixed top-0 left-0 right-0 z-[100] transition-all duration-500
     ${scrolled
       ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-      : 'bg-transparent'
+      : 'bg-white/80 backdrop-blur-md shadow'
     }
   `;
 
@@ -129,7 +129,7 @@ export const Navbar: React.FC = () => {
                 className={`font-semibold text-xs lg:text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 relative group whitespace-nowrap px-1 ${
                   scrolled 
                     ? 'text-gray-700' 
-                    : 'text-white'
+                    : 'text-gray-800'
                 }`}
               >
                 {language === 'ms' ? link.labelMs : link.label}
@@ -146,7 +146,7 @@ export const Navbar: React.FC = () => {
               >
                 <button
                   className={`font-semibold text-xs lg:text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 flex items-center space-x-1 relative group whitespace-nowrap ${
-                    scrolled ? 'text-gray-700' : 'text-white'
+                    scrolled ? 'text-gray-700' : 'text-gray-800'
                   }`}
                 >
                   <span>{language === 'ms' ? 'Mula' : 'Get Started'}</span>
@@ -172,7 +172,7 @@ export const Navbar: React.FC = () => {
                       className={`absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border-2 ${
                         scrolled 
                           ? 'bg-white/95 border-green-200' 
-                          : 'bg-gray-900/95 border-yellow-400/30'
+                          : 'bg-white border-green-200/60'
                       }`}
                     >
                       {getStartedLinks.map((item, index) => (
@@ -182,11 +182,11 @@ export const Navbar: React.FC = () => {
                           className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 ${
                             scrolled 
                               ? 'text-gray-700 hover:bg-green-50/80 hover:text-green-700' 
-                              : 'text-white hover:bg-yellow-400/20 hover:text-yellow-300'
-                          } ${index > 0 ? 'border-t' : ''} ${scrolled ? 'border-gray-200' : 'border-gray-700'}`}
+                              : 'text-gray-700 hover:bg-green-50/80 hover:text-green-700'
+                          } ${index > 0 ? 'border-t' : ''} ${scrolled ? 'border-gray-200' : 'border-green-100'}`}
                         >
                           <div className="font-bold text-base mb-1">{language === 'ms' ? item.labelMs : item.label}</div>
-                          <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-500'}`}>
                             {item.label === 'For Farmers' 
                               ? (language === 'ms' ? 'Untuk petani kelapa sawit individu' : 'Individual palm oil farmers & smallholders')
                               : (language === 'ms' ? 'Untuk ladang dan organisasi besar' : 'Large plantations & organizations')
@@ -204,9 +204,9 @@ export const Navbar: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className={`relative flex items-center rounded-full p-1 transition-all duration-300 ${
-                scrolled
-                  ? 'bg-gray-200 hover:bg-gray-300'
-                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                    scrolled
+                      ? 'bg-gray-200 hover:bg-gray-300'
+                      : 'bg-white hover:bg-gray-100'
               }`}
               title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
             >
@@ -234,7 +234,7 @@ export const Navbar: React.FC = () => {
                       ? 'text-green-700'
                       : scrolled
                         ? 'text-gray-500'
-                        : 'text-white/60'
+                        : 'text-gray-400'
                   }`}
                 >
                   EN
@@ -246,7 +246,7 @@ export const Navbar: React.FC = () => {
                       ? 'text-green-700'
                       : scrolled
                         ? 'text-gray-500'
-                        : 'text-white/60'
+                        : 'text-gray-400'
                   }`}
                 >
                   MS
@@ -267,9 +267,9 @@ export const Navbar: React.FC = () => {
                   }
                 }}
                 className={`px-3 sm:px-5 py-2 rounded-md font-medium text-xs sm:text-sm transition-colors duration-200 whitespace-nowrap ${
-                  scrolled
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                    scrolled
+                      ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      : 'bg-green-50 text-green-800 hover:bg-green-100'
                 }`}
               >
                 <span className="hidden sm:inline">{language === 'ms' ? 'Log Keluar' : 'Logout'}</span>
@@ -281,7 +281,7 @@ export const Navbar: React.FC = () => {
                   <button className={`px-3 sm:px-5 py-2 rounded-lg font-semibold text-xs sm:text-sm transition-all duration-300 whitespace-nowrap ${
                     scrolled
                       ? 'text-gray-700 hover:bg-gray-100'
-                      : 'text-white hover:bg-white/10'
+                      : 'text-gray-800 hover:bg-gray-100'
                   }`}>
                     {language === 'ms' ? 'Masuk' : 'Login'}
                   </button>
@@ -290,7 +290,7 @@ export const Navbar: React.FC = () => {
                   <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap ${
                     scrolled
                       ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                      : 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
                   }`}>
                     {language === 'ms' ? 'Daftar' : 'Register'}
                   </button>
@@ -305,9 +305,9 @@ export const Navbar: React.FC = () => {
             <button
               onClick={toggleLanguage}
               className={`relative flex items-center rounded-full p-1 transition-all duration-300 ${
-                scrolled
-                  ? 'bg-gray-200 hover:bg-gray-300'
-                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
+                    scrolled
+                      ? 'bg-gray-200 hover:bg-gray-300'
+                      : 'bg-white hover:bg-gray-100'
               }`}
               title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
             >
@@ -335,7 +335,7 @@ export const Navbar: React.FC = () => {
                       ? 'text-green-700'
                       : scrolled
                         ? 'text-gray-500'
-                        : 'text-white/60'
+                        : 'text-gray-400'
                   }`}
                 >
                   EN
@@ -347,7 +347,7 @@ export const Navbar: React.FC = () => {
                       ? 'text-green-700'
                       : scrolled
                         ? 'text-gray-500'
-                        : 'text-white/60'
+                        : 'text-gray-400'
                   }`}
                 >
                   MS
@@ -356,10 +356,10 @@ export const Navbar: React.FC = () => {
             </button>
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`p-2 rounded-lg transition-colors duration-200 z-[110] relative ${
+                className={`p-2 rounded-lg transition-colors duration-200 z-[110] relative ${
                 scrolled
                   ? 'text-gray-700 hover:bg-gray-100'
-                  : 'text-white hover:bg-white/10'
+                  : 'text-gray-800 hover:bg-gray-100'
               }`}
               aria-label={isOpen ? (language === 'ms' ? 'Tutup menu' : 'Close menu') : (language === 'ms' ? 'Buka menu' : 'Open menu')}
               style={{ position: 'relative', zIndex: 110 }}

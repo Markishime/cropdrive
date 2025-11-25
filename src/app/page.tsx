@@ -44,7 +44,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
-      <section className="relative min-h-[calc(100vh-4rem)] sm:min-h-screen overflow-hidden">
+      <section className="relative min-h-[calc(100vh-4rem)] sm:min-h-screen overflow-hidden pt-20 sm:pt-24">
         {/* Background Video with Overlay */}
         <div className="absolute inset-0">
           <video
@@ -72,7 +72,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative h-full flex items-center justify-center z-10 pt-6 sm:pt-10 md:pt-0">
+        <div className="relative h-full flex items-center justify-center z-10 pt-2 sm:pt-6 md:pt-0">
           <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 text-center w-full">
             {/* Dynamic Label */}
             <motion.div
