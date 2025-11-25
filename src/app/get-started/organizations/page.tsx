@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
@@ -52,8 +53,8 @@ export default function GetStartedOrganizationsPage() {
       if (response.ok) {
         toast.success(
           language === 'ms'
-            ? '✅ Terima kasih atas minat anda! Pasukan kami akan menghubungi anda tidak lama lagi.'
-            : '✅ Thank you for your interest! Our team will contact you shortly.',
+            ? '✅ Terima kasih! Penyerahan anda telah diterima. Pasukan kami akan menghubungi anda tidak lama lagi.'
+            : '✅ Thank you! Your submission has been received. Our team will contact you soon.',
           {
             duration: 6000,
             position: 'top-center',
@@ -69,7 +70,7 @@ export default function GetStartedOrganizationsPage() {
             icon: '🎉',
           }
         );
-        
+
         // Reset form
         setFormData({
           firstName: '',
@@ -86,19 +87,19 @@ export default function GetStartedOrganizationsPage() {
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      
+
       const errorMessage = error.message || 'Unknown error';
       let displayMessage = language === 'ms'
         ? '❌ Maaf, terdapat ralat menghantar borang anda.'
         : '❌ Sorry, there was an error submitting your form.';
-      
+
       // Check for specific error messages
       if (errorMessage.includes('Email service not configured')) {
         displayMessage = language === 'ms'
           ? '⚠️ Perkhidmatan emel sedang disediakan. Sila hubungi kami terus di contact@agriglobalsolutions.com'
           : '⚠️ Email service is being set up. Please contact us directly at contact@agriglobalsolutions.com';
       }
-      
+
       toast.error(displayMessage, {
         duration: 6000,
         position: 'top-center',
@@ -140,24 +141,110 @@ export default function GetStartedOrganizationsPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="inline-block bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-bold mb-8 uppercase tracking-wide text-sm">
-              {language === 'ms' ? 'Untuk Organisasi' : 'For Organizations'}
-            </div>
             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'CropDrive™ Bekerja dengan' : 'CropDrive™ Working with'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'Organisasi' : 'Organizations'}</span>
+              {language === 'ms' ? 'Kami Membantu Organisasi Anda' : 'We help your organization'}<br />
+              <span className="text-yellow-400">{language === 'ms' ? 'Berjaya dalam Industri Kelapa Sawit' : 'succeed in the palm oil industry'}</span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
-                ? 'CropDrive™ bekerjasama dengan organisasi komersial dan bukan komersial yang menyokong atau melayani petani. Penyelesaian agronomi digital kami menukar data makmal kepada pandangan yang jelas dan boleh diambil tindakan yang meningkatkan produktiviti, kecekapan, dan kemampanan jangka panjang.'
-                : 'CropDrive™ works with commercial and non-commercial organizations that support or serve farmers. Our digital agronomy solutions turn laboratory data into clear, actionable insights that improve productivity, efficiency, and long-term sustainability.'
+                ? 'Gunakan teknologi AI untuk mengoptimumkan pengurusan ladang kelapa sawit anda, meningkatkan produktiviti, dan mengurangkan kos operasi'
+                : 'Use AI technology to optimize your oil palm plantation management, increase productivity, and reduce operational costs'
               }
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Working with Our Partners Section */}
+      {/* Working with our partners Section */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
+              {language === 'ms' ? 'Bekerja dengan' : 'Working with'} <span className="text-green-700">{language === 'ms' ? 'Rakan Kongsi Kami' : 'our partners'}</span>
+            </h2>
+            <p className="text-xl text-gray-600 mt-4 max-w-3xl mx-auto">
+              {language === 'ms'
+                ? 'Kami menyesuaikan persediaan untuk rakan kongsi komersial dan bukan komersial untuk memenuhi matlamat operasi dan keperluan pelaporan'
+                : 'We tailor setups for commercial and non-commercial partners to meet operational goals and reporting needs'
+              }
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-white p-8 rounded-2xl shadow-lg"
+            >
+              <div className="mb-6">
+                <Image 
+                  src="/images/Organizations/org-commercial_optimized.jpg" 
+                  alt={language === 'ms' ? 'Organisasi komersial' : 'Commercial organizations'} 
+                  width={600} 
+                  height={400} 
+                  className="rounded-lg object-cover w-full h-64"
+                />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 font-heading">
+                {language === 'ms' ? 'Untuk Organisasi Komersial' : 'For Commercial Organizations'}
+              </h3>
+              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                {language === 'ms'
+                  ? 'Ladang, perniagaan pertanian, pembekal baja, dan makmal. Kami membantu anda:'
+                  : 'Plantations, agribusinesses, fertilizer suppliers, and laboratories. We help you:'
+                }
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 text-lg">
+                <li>{language === 'ms' ? 'Menambah nilai kepada produk dan perkhidmatan sedia ada anda' : 'Add value to your existing products and services'}</li>
+                <li>{language === 'ms' ? 'Memperkukuhkan sokongan teknikal anda kepada petani' : 'Strengthen your technical support to farmers'}</li>
+                <li>{language === 'ms' ? 'Menghubungkan cadangan berasaskan sains kepada penggunaan produk anda' : 'Link science based recommendations to your product use'}</li>
+              </ul>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+              className="bg-white p-8 rounded-2xl shadow-lg"
+            >
+              <div className="mb-6">
+                <Image 
+                  src="/images/Organizations/org-noncommercial_optimized.jpg" 
+                  alt={language === 'ms' ? 'Organisasi bukan komersial' : 'Non-commercial organizations'} 
+                  width={600} 
+                  height={400} 
+                  className="rounded-lg object-cover w-full h-64"
+                />
+              </div>
+              <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 font-heading">
+                {language === 'ms' ? 'Untuk Organisasi Bukan Komersial' : 'For Non-Commercial Organizations'}
+              </h3>
+              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+                {language === 'ms'
+                  ? 'Agensi kerajaan, NGO, program pembangunan, dan organisasi antarabangsa. Kami membantu anda:'
+                  : 'Government agencies, NGOs, development programs, and international organizations. We help you:'
+                }
+              </p>
+              <ul className="list-disc list-inside text-gray-700 space-y-2 text-lg">
+                <li>{language === 'ms' ? 'Mencapai lebih ramai petani dengan nasihat agronomi yang konsisten' : 'Reach more farmers with consistent agronomy advice'}</li>
+                <li>{language === 'ms' ? 'Menggunakan data makmal untuk menyokong kerja sambungan anda' : 'Use lab data to support your extension work'}</li>
+                <li>{language === 'ms' ? 'Melaporkan hasil kepada penderma dan program kebangsaan' : 'Report results to donors and national programs'}</li>
+              </ul>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Membership Plans Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -167,191 +254,51 @@ export default function GetStartedOrganizationsPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Bekerja dengan' : 'Working with'} <span className="text-green-700">{language === 'ms' ? 'Rakan Kongsi Kami' : 'Our Partners'}</span>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
+              {language === 'ms' ? 'Pelan Keahlian dan' : 'Membership Plans and'} <span className="text-green-700">{language === 'ms' ? 'Harga' : 'Pricing'}</span>
             </h2>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-600 mt-4">
               {language === 'ms'
-                ? 'Setiap organisasi mempunyai matlamat dan keadaan operasi sendiri. Kami bekerjasama dengan setiap rakan kongsi secara individu untuk membangunkan penyelesaian yang sesuai dengan keperluan dan aliran kerja mereka yang tepat.'
-                : 'Every organization has its own goals and operating conditions. We work with each partner individually to develop solutions that fit their exact needs and workflow.'
+                ? 'Pilih pelan yang sesuai dengan saiz dan keperluan organisasi anda'
+                : 'Choose the plan that fits your organization\'s size and needs'
               }
             </p>
           </motion.div>
+
+          <div className="text-center">
+            <Link href="/pricing">
+              <button className="px-10 py-5 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide">
+                {language === 'ms' ? 'Lihat Pelan Harga' : 'View Pricing Plans'}
+              </button>
+            </Link>
+          </div>
         </div>
       </section>
 
-      {/* Commercial Organizations Section */}
+      {/* Form Section */}
       <section className="py-24 bg-gradient-to-br from-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Untuk Organisasi' : 'For Commercial'} <span className="text-green-700">{language === 'ms' ? 'Komersial' : 'Organizations'}</span>
-            </h2>
-            <p className="text-lg text-gray-600 mb-4">
-              {language === 'ms'
-                ? '(Ladang, perniagaan agri, pembekal baja, dan makmal)'
-                : '(Plantations, agribusinesses, fertilizer suppliers, and laboratories)'
-              }
-            </p>
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed max-w-4xl">
-              {language === 'ms'
-                ? 'Perkhidmatan kami secara langsung meningkatkan pendapatan dan daya saing pasaran. Dengan mengintegrasikan analisis CropDrive™ ke dalam operasi sedia ada anda, anda boleh:'
-                : 'Our services directly increase revenue and market competitiveness. By integrating CropDrive™ analysis into your existing operations, you can:'
-              }
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: '💎',
-                title: language === 'ms' ? 'Tambah Nilai yang Boleh Diukur' : 'Add measurable value',
-                desc: language === 'ms' ? 'Tambahkan nilai yang boleh diukur kepada produk dan perkhidmatan anda sendiri' : 'Add measurable value to your own products and services'
-              },
-              {
-                icon: '🤝',
-                title: language === 'ms' ? 'Tingkatkan Kepercayaan Pelanggan' : 'Improve customer trust',
-                desc: language === 'ms' ? 'Tingkatkan kepercayaan dan pengekalan pelanggan' : 'Improve customer trust and retention'
-              },
-              {
-                icon: '🎯',
-                title: language === 'ms' ? 'Beza dengan Sains' : 'Differentiate with science',
-                desc: language === 'ms' ? 'Bezakan syarikat anda dengan cadangan berasaskan sains yang dikaitkan terus dengan penggunaan produk anda' : 'Differentiate your company with science-based recommendations that link directly to your product use'
-              }
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="text-5xl mb-4">{item.icon}</div>
-                <h3 className="text-2xl font-black text-gray-900 mb-3 font-heading">
-                  {item.title}
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {item.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Non-Commercial Organizations Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="mb-12"
-          >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Untuk Organisasi' : 'For Non-Commercial'} <span className="text-green-700">{language === 'ms' ? 'Bukan Komersial' : 'Organizations'}</span>
-            </h2>
-            <p className="text-lg text-gray-600 mb-4">
-              {language === 'ms'
-                ? '(Agensi kerajaan, NGO, program pembangunan, dan organisasi antarabangsa)'
-                : '(Government agencies, NGOs, development programs, and international organizations)'
-              }
-            </p>
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed max-w-4xl">
-              {language === 'ms'
-                ? 'Kami mengukuhkan jangkauan anda kepada komuniti pertanian dengan menyampaikan perkhidmatan sambungan digital berdasarkan data yang berpatutan. CropDrive™ membantu program anda:'
-                : 'We strengthen your outreach to farming communities by delivering affordable, data-based digital extension services. CropDrive™ helps your programs:'
-              }
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: '🌍',
-                title: language === 'ms' ? 'Jangkau Lebih Ramai Petani' : 'Reach more farmers',
-                desc: language === 'ms' ? 'Jangkau lebih ramai petani dengan cekap' : 'Reach more farmers efficiently'
-              },
-              {
-                icon: '✅',
-                title: language === 'ms' ? 'Panduan Agronomi Tepat' : 'Accurate guidance',
-                desc: language === 'ms' ? 'Berikan panduan agronomi yang tepat dan konsisten' : 'Provide accurate, consistent agronomic guidance'
-              },
-              {
-                icon: '🎯',
-                title: language === 'ms' ? 'Sokong Sasaran Nasional' : 'Support targets',
-                desc: language === 'ms' ? 'Sokong sasaran nasional dan penderma untuk produktiviti dan kemampanan' : 'Support national and donor targets for productivity and sustainability'
-              }
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-gradient-to-br from-green-50 to-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <div className="text-5xl mb-4">{item.icon}</div>
-                <h3 className="text-2xl font-black text-gray-900 mb-3 font-heading">
-                  {item.title}
-                </h3>
-                <p className="text-gray-700 leading-relaxed">
-                  {item.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Us Section with Form */}
-      <section className="py-24 bg-gradient-to-br from-gray-50 to-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-green-700">{language === 'ms' ? 'Kami' : 'Us'}</span>
-            </h2>
-            <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed mb-4">
-              {language === 'ms'
-                ? 'Setiap organisasi adalah berbeza. Beritahu kami tentang organisasi anda supaya kami boleh mereka bentuk penyelesaian yang sesuai dengan matlamat anda. Sama ada anda ingin mengukuhkan jangkauan petani, menambah nilai kepada produk anda, atau meningkatkan kecekapan lapangan, pasukan kami akan menyesuaikan perkhidmatan CropDrive™ kepada keperluan khusus anda.'
-                : 'Every organization is different. Tell us about yours so we can design a solution that fits your goals. Whether you want to strengthen farmer outreach, add value to your products, or improve field efficiency, our team will tailor CropDrive™ services to your specific needs.'
-              }
-            </p>
-            <p className="text-lg text-gray-700 mb-2">
-              {language === 'ms'
-                ? 'Hubungi kami dan kami akan bekerjasama dengan anda untuk mencipta hasil yang boleh diukur untuk organisasi anda.'
-                : 'Get in touch with us and we will work with you to create measurable results for your organization.'
-              }
-            </p>
-            <p className="text-lg text-gray-600">
-              {language === 'ms' ? 'Isi borang atau hantar mesej kepada kami di:' : 'Fill out the form or send us a message at:'}{' '}
-              <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 font-bold hover:text-green-800">
-                contact@agriglobalsolutions.com
-              </a>
-            </p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
             viewport={{ once: true }}
             className="bg-white rounded-3xl shadow-2xl p-8 md:p-12"
           >
+            <div className="text-center mb-8">
+              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 font-heading">
+                {language === 'ms' ? 'Hubungi Kami untuk Kerjasama' : 'Contact Us for Partnership'}
+              </h2>
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                <p className="text-gray-700 leading-relaxed">
+                  {language === 'ms'
+                    ? 'Isi borang di bawah untuk memulakan perbincangan tentang bagaimana CropDrive™ boleh membantu organisasi anda mencapai matlamat pengurusan ladang kelapa sawit yang lebih baik.'
+                    : 'Fill out the form below to start a discussion about how CropDrive™ can help your organization achieve better oil palm plantation management goals.'
+                  }
+                </p>
+              </div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -401,49 +348,54 @@ export default function GetStartedOrganizationsPage() {
 
               <div>
                 <label htmlFor="org-organization" className="block text-sm font-bold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Organisasi' : 'Organization'}
+                  {language === 'ms' ? 'Nama Organisasi' : 'Organization Name'} <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="org-organization"
                   type="text"
                   name="organization"
+                  required
                   value={formData.organization}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                  placeholder={language === 'ms' ? 'Masukkan nama organisasi anda' : 'Enter your organization name'}
                 />
               </div>
 
-              <div>
-                <label htmlFor="org-location" className="block text-sm font-bold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Lokasi atau Alamat' : 'Location or address'}
-                </label>
-                <input
-                  id="org-location"
-                  type="text"
-                  name="location"
-                  value={formData.location}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="org-phone" className="block text-sm font-bold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Telefon' : 'Phone'}
-                </label>
-                <input
-                  id="org-phone"
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label htmlFor="org-location" className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Lokasi' : 'Location'}
+                  </label>
+                  <input
+                    id="org-location"
+                    type="text"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                    placeholder={language === 'ms' ? 'Bandar, Negeri, Negara' : 'City, State, Country'}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="org-phone" className="block text-sm font-bold text-gray-700 mb-2">
+                    {language === 'ms' ? 'Nombor Telefon' : 'Phone Number'}
+                  </label>
+                  <input
+                    id="org-phone"
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                    placeholder="+60123456789"
+                  />
+                </div>
               </div>
 
               <div>
                 <label htmlFor="org-website" className="block text-sm font-bold text-gray-700 mb-2">
-                  Website
+                  {language === 'ms' ? 'Laman Web' : 'Website'}
                 </label>
                 <input
                   id="org-website"
@@ -451,14 +403,14 @@ export default function GetStartedOrganizationsPage() {
                   name="website"
                   value={formData.website}
                   onChange={handleInputChange}
-                  placeholder="http://"
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                  placeholder="https://www.yourorganization.com"
                 />
               </div>
 
               <div>
                 <label htmlFor="org-message" className="block text-sm font-bold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Mesej Anda' : 'Your message'} <span className="text-red-500">*</span>
+                  {language === 'ms' ? 'Mesej' : 'Message'} <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   id="org-message"
@@ -468,7 +420,10 @@ export default function GetStartedOrganizationsPage() {
                   value={formData.message}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
-                  placeholder={language === 'ms' ? 'Beritahu kami tentang organisasi anda dan bagaimana kami boleh membantu...' : 'Tell us about your organization and how we can help...'}
+                  placeholder={language === 'ms'
+                    ? 'Sila berikan butiran tentang organisasi anda, cabaran yang anda hadapi, dan bagaimana anda fikir CropDrive™ boleh membantu...'
+                    : 'Please provide details about your organization, the challenges you face, and how you think CropDrive™ can help...'
+                  }
                 />
               </div>
 
@@ -493,6 +448,15 @@ export default function GetStartedOrganizationsPage() {
               </div>
             </form>
           </motion.div>
+
+          <div className="text-center mt-6">
+            <p className="text-sm text-gray-700">
+              {language === 'ms'
+                ? 'Anda juga boleh menulis kepada kami terus di contact@agriglobalsolutions.com'
+                : 'You can also write to us directly at contact@agriglobalsolutions.com'
+              }
+            </p>
+          </div>
         </div>
       </section>
     </div>

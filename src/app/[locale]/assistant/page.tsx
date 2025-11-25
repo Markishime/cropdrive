@@ -268,12 +268,12 @@ export default function AIAssistantPage() {
 
             <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-yellow-400">
               <h3 className="text-lg font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                {language === 'ms' ? 'Tutorial Video' : 'Video Tutorials'}
+                {language === 'ms' ? 'Panduan' : 'Guides'}
               </h3>
               <p className="text-gray-600 text-sm">
                 {language === 'ms'
-                  ? 'Tonton tutorial kami untuk memaksimumkan penggunaan AI Assistant.'
-                  : 'Watch our tutorials to maximize your use of AI Assistant.'
+                  ? 'Tonton panduan kami untuk memaksimumkan penggunaan AI Assistant.'
+                  : 'Read our guides to maximize your use of AI Assistant.'
                 }
               </p>
             </div>
@@ -307,4 +307,3 @@ export default function AIAssistantPage() {
     </div>
   );
 }
-

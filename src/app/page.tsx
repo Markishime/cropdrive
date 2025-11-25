@@ -514,7 +514,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <Link href="/contact">
+              <Link href="/organizations">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -1735,25 +1735,25 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                title: language === 'ms' ? 'Google Gemini AI' : 'Google Gemini AI',
+                title: language === 'ms' ? 'Analisis Laporan Anda Dengan Serta-Merta' : 'Instant Analysis of Your Reports',
                 desc: language === 'ms'
-                  ? 'Model AI generasi terkini untuk analisis data yang kompleks dan cadangan yang tepat'
-                  : 'Latest generation AI model for complex data analysis and precise recommendations',
-                icon: '🤖'
-              },
-              {
-                title: language === 'ms' ? 'Teknologi OCR' : 'OCR Technology',
-                desc: language === 'ms'
-                  ? 'Membaca dokumen makmal secara automatik tanpa perlu taip manual'
-                  : 'Automatically reads laboratory documents without manual typing',
+                  ? 'Sistem kami membaca hasil ujian tanah dan daun anda secara automatik dan menyerlahkan apa yang penting. Tiada pengetikan manual. Tiada tekaan. Anda muat naik laporan, dan AI menjelaskan penemuan dalam langkah mudah.'
+                  : 'Our system reads your soil and leaf test results automatically and highlights what matters. No manual typing. No guessing. You upload your report, and the AI explains the findings in simple steps.',
                 icon: '📄'
               },
               {
-                title: language === 'ms' ? 'Model Agronomi' : 'Agronomic Models',
+                title: language === 'ms' ? 'Cadangan Pintar Berdasarkan Sains Kelapa Sawit Sebenar' : 'Smart Recommendations Based on Real Oil Palm Science',
                 desc: language === 'ms'
-                  ? 'Berdasarkan penyelidikan antarabangsa dan disahkan dalam keadaan tropika'
-                  : 'Based on international research and validated in tropical conditions',
+                  ? 'Setiap pelan baja dijana menggunakan penyelidikan kelapa sawit terkini, standard nutrien MPOB, dan amalan agronomi terbukti. Anda mendapat keputusan yang jelas dan sesuai dengan keadaan lapangan sebenar.'
+                  : 'Every fertilizer plan is generated using up-to-date oil palm research, MPOB nutrient standards, and proven agronomy practices. You get clear decisions that match real field conditions.',
                 icon: '🔬'
+              },
+              {
+                title: language === 'ms' ? 'Sokongan Berterusan Untuk Semua Soalan Lapangan Anda' : 'Continuous Support for All Your Field Questions',
+                desc: language === 'ms'
+                  ? 'Pembantu AI sedia membantu setiap hari untuk menjawab soalan anda tentang jadual baja, masalah nutrien, isu tanah, dan keputusan lapangan. Anda mendapat panduan apabila diperlukan.'
+                  : 'The AI assistant is available every day to answer your questions about fertilizer schedules, nutrient problems, soil issues, and field decisions. You get guidance whenever you need it.',
+                icon: '🤖'
               }
             ].map((tech, index) => (
               <motion.div
@@ -1871,15 +1871,6 @@ export default function HomePage() {
                   className="w-full sm:w-auto px-10 py-5 bg-yellow-400 text-green-900 rounded-full font-black text-xl uppercase tracking-wider shadow-2xl hover:bg-yellow-300 transition-all duration-300 border-4 border-yellow-300"
                 >
                   {language === 'ms' ? '🚀 Sertai Sekarang' : '🚀 Join Us Now'}
-                </motion.button>
-              </Link>
-              <Link href="/how-it-works">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-10 py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/50 rounded-full font-bold text-xl uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300"
-                >
-                  {language === 'ms' ? '▶️ Lihat Demo' : '▶️ See Demo'}
                 </motion.button>
               </Link>
             </div>
