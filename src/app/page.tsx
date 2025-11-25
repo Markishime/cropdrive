@@ -17,7 +17,7 @@ export default function HomePage() {
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const { language, t } = useTranslation(currentLanguage);
   const [activeSection, setActiveSection] = useState(1);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -37,6 +37,12 @@ export default function HomePage() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  useEffect(() => {
+    if (mounted && !authLoading && user) {
+      router.replace('/dashboard');
+    }
+  }, [mounted, authLoading, user, router]);
+
   if (!mounted) {
     return null;
   }
@@ -44,7 +50,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section - Full Screen with Image Carousel Background */}
-      <section className="relative min-h-[calc(100vh-4rem)] sm:min-h-screen overflow-hidden pt-20 sm:pt-24">
+      <section className="relative min-h-[calc(100vh-4rem)] sm:min-h-screen overflow-hidden pt-24 sm:pt-28">
         {/* Background Video with Overlay */}
         <div className="absolute inset-0">
           <video
@@ -72,7 +78,7 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative h-full flex items-center justify-center z-10 pt-2 sm:pt-6 md:pt-0">
+        <div className="relative h-full flex items-center justify-center z-10 pt-6 xs:pt-10 sm:pt-12 md:pt-0">
           <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 text-center w-full">
             {/* Dynamic Label */}
             <motion.div
@@ -1802,14 +1808,14 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="mt-16 text-center"
           >
-            <div className="w-full max-w-3xl mx-auto bg-gradient-to-r from-green-600 to-green-700 text-white px-6 sm:px-10 py-8 sm:py-10 rounded-[32px] shadow-2xl border-4 border-yellow-400">
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-4">
-                <span className="text-4xl sm:text-6xl">✓</span>
-                <h3 className="text-2xl sm:text-3xl font-black text-center">
+            <div className="w-full max-w-3xl mx-auto bg-gradient-to-r from-green-600 to-green-700 text-white px-6 sm:px-10 py-8 rounded-3xl shadow-2xl border-4 border-yellow-400">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-between gap-3 sm:gap-4 mb-4 text-center sm:text-left">
+                <span className="text-5xl sm:text-6xl">✓</span>
+                <h3 className="text-2xl sm:text-3xl font-black leading-tight">
                   {language === 'ms' ? 'Jaminan Kepuasan 100%' : '100% Satisfaction Guarantee'}
                 </h3>
               </div>
-              <p className="text-base sm:text-xl text-green-50 max-w-2xl mx-auto leading-relaxed">
+              <p className="text-base sm:text-xl text-green-50 max-w-2xl mx-auto">
                 {language === 'ms'
                   ? 'Cuba tanpa risiko. Jika anda tidak berpuas hati dengan hasil dalam 30 hari, kami akan pulangkan wang anda sepenuhnya.'
                   : 'Try risk-free. If you\'re not satisfied with the results within 30 days, we\'ll refund you in full.'

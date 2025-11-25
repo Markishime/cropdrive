@@ -1,41 +1,12 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { usePathname, useRouter } from 'next/navigation';
 import Navbar from './Navbar';
 import AuthenticatedNavbar from './AuthenticatedNavbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
-
-const AUTH_ROUTE_PREFIXES = [
-  '/dashboard',
-  '/assistant',
-  '/reports',
-  '/profile',
-  '/settings',
-  '/support',
-  '/payment-method',
-  '/consumer-info',
-];
-
-const normalizePath = (pathname: string | null) => {
-  if (!pathname) return '/';
-  const localeMatch = pathname.match(/^\/[a-zA-Z-]{2,5}(\/.*)/);
-  if (localeMatch && localeMatch[1]) {
-    return localeMatch[1];
-  }
-  return pathname;
-};
-
-const getDashboardRedirect = (pathname: string | null) => {
-  if (!pathname) return '/dashboard';
-  const localeMatch = pathname.match(/^\/([a-zA-Z-]{2,5})\//);
-  if (localeMatch && localeMatch[1]) {
-    return `/${localeMatch[1]}/dashboard`;
-  }
-  return '/dashboard';
-};
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -46,26 +17,15 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
   const router = useRouter();
 
-  const normalizedPath = useMemo(() => normalizePath(pathname), [pathname]);
-
-  const isAuthRoute = useMemo(() => {
-    return AUTH_ROUTE_PREFIXES.some((prefix) => 
-      normalizedPath === prefix || normalizedPath?.startsWith(`${prefix}/`)
-    );
-  }, [normalizedPath]);
+  useEffect(() => {
+    if (!loading && user && pathname === '/') {
+      router.replace('/dashboard');
+    }
+  }, [loading, user, pathname, router]);
 
   // Pages that should never show any layout (login/register/forgot-password)
   const noLayoutPages = ['/login', '/register', '/forgot-password'];
-  const shouldHideLayout = noLayoutPages.includes(normalizedPath);
-
-  useEffect(() => {
-    if (!loading && user && pathname && !isAuthRoute && !shouldHideLayout) {
-      const target = getDashboardRedirect(pathname);
-      if (pathname !== target) {
-        router.replace(target);
-      }
-    }
-  }, [user, loading, pathname, isAuthRoute, shouldHideLayout, router]);
+  const shouldHideLayout = noLayoutPages.includes(pathname);
 
   // Show loading state
   if (loading) {
@@ -84,14 +44,14 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     return <>{children}</>;
   }
 
-  // If user is logged in - show dashboard layout for app routes
+  // If user is logged in - show AuthenticatedNavbar + Sidebar (except landing redirect case)
   if (user) {
-    if (!isAuthRoute) {
+    if (pathname === '/') {
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="flex flex-col items-center space-y-3 text-gray-600">
-            <div className="w-10 h-10 border-4 border-green-600 border-t-transparent rounded-full animate-spin" />
-            <p className="font-medium">Redirecting to dashboard...</p>
+          <div className="flex flex-col items-center space-y-4 text-center px-6">
+            <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-gray-600 font-semibold">Redirecting to dashboard...</p>
           </div>
         </div>
       );
@@ -114,7 +74,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-16 sm:pt-20">
+      <main className="flex-1">
         {children}
       </main>
       <Footer />
