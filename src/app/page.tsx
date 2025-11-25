@@ -1389,7 +1389,7 @@ export default function HomePage() {
             {[
               {
                 title: language === 'ms' ? 'Petani & Estet' : 'Farmers & Estates',
-                desc: language === 'ms'
+                desc: language === 'ms' 
                   ? 'Ubah keputusan ujian mentah menjadi laporan nasihat yang jelas, menambah nilai melalui strategi peningkatan praktikal.'
                   : 'Turn raw test results into clear advisory reports, adding value through practical improvement strategies.',
                 number: '01',
@@ -1571,7 +1571,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Statistics Section */}
+      {/* What Farmers Can Expect Section */}
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -1582,59 +1582,64 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Hasil Dalam Angka' : 'Results in Numbers'}
+              {language === 'ms' ? 'Apa Yang Petani Boleh' : 'What Farmers Can'} <span className="text-green-700">{language === 'ms' ? 'Jangkakan' : 'Expect'}</span>
             </h2>
             <p className="text-xl text-gray-600">
               {language === 'ms' 
-                ? 'Data sebenar daripada petani yang menggunakan CropDrive'
-                : 'Real data from farmers using CropDrive'
+                ? 'Hasil sebenar yang boleh dicapai dengan CropDrive'
+                : 'Real results achievable with CropDrive'
               }
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
             {[
               {
-                number: '3,500+',
-                label: language === 'ms' ? 'Petani Aktif' : 'Active Farmers',
-                icon: '👨‍🌾'
-              },
-              {
-                number: '45,000+',
-                label: language === 'ms' ? 'Hektar Diuruskan' : 'Hectares Managed',
-                icon: '🌾'
-              },
-              {
-                number: '38%',
+                image: '/images/results-in-numbers/1   30 percent Average Yield Increase (2)_optimized.jpg',
+                number: '30%+',
                 label: language === 'ms' ? 'Purata Peningkatan Hasil' : 'Average Yield Increase',
-                icon: '📈'
               },
               {
-                number: 'RM12M+',
-                label: language === 'ms' ? 'Penjimatan Kos' : 'Cost Savings',
-                icon: '💰'
+                image: '/images/results-in-numbers/2   20 40 percent improved efficiency (2)_optimized.jpg',
+                number: '20–40%',
+                label: language === 'ms' ? 'Kecekapan Bertambah Baik' : 'Improved Efficiency',
+              },
+              {
+                image: '/images/results-in-numbers/3    RM800 2000 less input costs  (2)_optimized.jpg',
+                number: 'RM800–2,000/ha',
+                label: language === 'ms' ? 'Kos Input Lebih Rendah' : 'Lower Input Costs',
+              },
+              {
+                image: '/images/results-in-numbers/4   15 20 percent healthier soil profile_optimized.jpg',
+                number: '15–25%',
+                label: language === 'ms' ? 'Status Tanah Lebih Sihat' : 'Healthier Soil Status',
+              },
+              {
+                image: '/images/results-in-numbers/5  RM7000 12000 ha additional revenue_optimized.jpg',
+                number: 'RM7,000–12,000/ha',
+                label: language === 'ms' ? 'Pendapatan Tambahan' : 'Additional Revenue',
               }
-            ].map((stat: any, index) => (
+            ].map((stat, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.8 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.05 }}
-                className="bg-white rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all overflow-hidden"
+                whileHover={{ scale: 1.05, y: -10 }}
+                className="bg-white rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all overflow-hidden group"
               >
-                <div className="h-48 overflow-hidden">
+                <div className="relative h-48 overflow-hidden">
                   <Image
                     src={stat.image}
                     alt={stat.label}
-                    width={300}
-                    height={200}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 20vw"
+                    className="object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-6">
-                  <div className="text-3xl font-black text-green-700 mb-2">{stat.number}</div>
+                  <div className="text-4xl font-black text-green-700 mb-2">{stat.number}</div>
                   <div className="text-lg font-semibold text-gray-700">{stat.label}</div>
                 </div>
               </motion.div>
@@ -1664,90 +1669,129 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="flex flex-wrap justify-center gap-4 md:gap-5 mb-16"
+          >
             {[
-              {
-                image: '/images/why-farmers-trust-us/1. MPOB-Aligned Recommendations_optimized.jpg',
-                title: {
-                  en: 'MPOB-Aligned Recommendations',
-                  ms: 'Cadangan Selari MPOB',
-                },
-                desc: {
-                  en: 'Our fertilization and soil-improvement plans follow the latest MPOB nutrient standards and international Good Agricultural Practices (GAP) for oil palm. Every recommendation is grounded in verified agronomic science.',
-                  ms: 'Pelan pembajaan dan penambahbaikan tanah kami mengikut piawaian nutrien MPOB terkini serta Amalan Pertanian Baik antarabangsa untuk kelapa sawit. Setiap cadangan berpaksikan sains agronomi yang disahkan.',
-                },
-              },
-              {
-                image: '/images/why-farmers-trust-us/2   Clear, Actionable Advice_optimized.jpg',
-                title: {
-                  en: 'Clear, Actionable Advice',
-                  ms: 'Nasihat Jelas dan Mudah Diamal',
-                },
-                desc: {
-                  en: 'Every recommendation includes simple field steps, so farmers no longer have to guess or interpret soil and leaf test results. The system does the analysis for them and turns it into easy actions they can apply immediately.',
-                  ms: 'Setiap cadangan disertakan langkah lapangan yang ringkas, jadi petani tidak lagi perlu meneka atau mentafsir keputusan ujian tanah dan daun. Sistem menganalisis untuk anda dan menukarnya kepada tindakan mudah yang boleh dilaksanakan serta-merta.',
-                },
-              },
-              {
-                image: '/images/why-farmers-trust-us/3. Research-Driven Accuracy_optimized.jpg',
-                title: {
-                  en: 'Research-Driven Accuracy',
-                  ms: 'Ketepatan Berpandukan Penyelidikan',
-                },
-                desc: {
-                  en: 'All insights are generated using AI models trained on current oil palm research, nutrient response studies, and peer-reviewed science. Every output is based on measurable field data, not guesswork.',
-                  ms: 'Semua pandangan dijana menggunakan model AI yang dilatih dengan penyelidikan kelapa sawit terkini, kajian tindak balas nutrien dan sains disemak rakan sebaya. Setiap output berasaskan data lapangan yang boleh diukur, bukan tekaan.',
-                },
-              },
-              {
-                image: '/images/why-farmers-trust-us/4. Daily AI Support for Farmers_optimized.jpg',
-                title: {
-                  en: 'Daily AI Support for Farmers',
-                  ms: 'Sokongan AI Harian untuk Petani',
-                },
-                desc: {
-                  en: 'Subscribers receive continuous assistance from our AI agronomy assistant, available every day to answer questions about fertilizer plans, soil tests, nutrient corrections, and field decisions.',
-                  ms: 'Pelanggan menerima bantuan berterusan daripada pembantu agronomi AI kami, tersedia setiap hari untuk menjawab soalan tentang pelan baja, ujian tanah, pembetulan nutrien dan keputusan lapangan.',
-                },
-              },
-              {
-                image: '/images/why-farmers-trust-us/5. Localized Oil Palm Knowledge_optimized.jpg',
-                title: {
-                  en: 'Localized Oil Palm Knowledge',
-                  ms: 'Pengetahuan Kelapa Sawit Setempat',
-                },
-                desc: {
-                  en: 'All recommendations are built specifically for Malaysian oil palm farmers, designed with local soils, planting conditions, and MPOB standards in mind. Everything is tailored to real Malaysian field needs, not generic global advice.',
-                  ms: 'Semua cadangan dibina khusus untuk petani kelapa sawit Malaysia, direka dengan mengambil kira tanah tempatan, keadaan penanaman dan piawaian MPOB. Segala-galanya disesuaikan dengan keperluan lapangan Malaysia, bukan nasihat generik global.',
-                },
-              },
-            ].map((trust, index) => (
-              <motion.div
-                key={trust.title.en}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ y: -10, scale: 1.03 }}
-                className="bg-white p-6 rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all flex flex-col"
+              { icon: '✅', label: language === 'ms' ? 'Disahkan MPOB' : 'MPOB Verified' },
+              { icon: '🔐', label: language === 'ms' ? 'Keselamatan Data Tahap Bank' : 'Bank-Level Data Security' },
+              { icon: '⚗️', label: language === 'ms' ? 'Disokong Penyelidikan' : 'Research Backed' },
+              { icon: '🤖', label: language === 'ms' ? 'Pembantu AI Harian' : 'Daily AI Assistant' },
+              { icon: '🌱', label: language === 'ms' ? 'Fokus Kelapa Sawit Malaysia' : 'Built for Malaysian Oil Palm' },
+            ].map((badge) => (
+              <div
+                key={badge.label}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white shadow-lg border border-green-100 text-sm font-semibold text-green-800"
               >
-                <div className="relative w-full h-48 mb-6 overflow-hidden rounded-2xl border border-green-100">
-                  <Image
-                    src={trust.image}
-                    alt={trust.title.en}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 20vw"
-                    className="object-cover hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <h3 className="text-2xl font-black text-gray-900 mb-3 text-center">
-                  {language === 'ms' ? trust.title.ms : trust.title.en}
-                </h3>
-                <p className="text-gray-600 text-center leading-relaxed text-base">
-                  {language === 'ms' ? trust.desc.ms : trust.desc.en}
-                </p>
-              </motion.div>
+                <span className="text-lg">{badge.icon}</span>
+                {badge.label}
+              </div>
             ))}
+          </motion.div>
+
+          <div className="relative max-w-7xl mx-auto">
+            <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 via-yellow-100/20 to-transparent rounded-4xl blur-3xl opacity-60"></div>
+            <div className="absolute inset-y-6 inset-x-10 border border-dashed border-green-200/50 rounded-[40px] pointer-events-none"></div>
+            
+            <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 lg:gap-8 px-4">
+              {[
+                {
+                  image: '/images/why-farmers-trust-us/1. MPOB-Aligned Recommendations_optimized.jpg',
+                  title: {
+                    en: 'MPOB-Aligned Recommendations',
+                    ms: 'Cadangan Selari MPOB',
+                  },
+                  desc: {
+                    en: 'Our fertilization and soil-improvement plans follow the latest MPOB nutrient standards and international Good Agricultural Practices (GAP) for oil palm. Every recommendation is grounded in verified agronomic science.',
+                    ms: 'Pelan pembajaan dan penambahbaikan tanah kami mengikut piawaian nutrien MPOB terkini serta Amalan Pertanian Baik antarabangsa untuk kelapa sawit. Setiap cadangan berpaksikan sains agronomi yang disahkan.',
+                  },
+                },
+                {
+                  image: '/images/why-farmers-trust-us/2   Clear, Actionable Advice_optimized.jpg',
+                  title: {
+                    en: 'Clear, Actionable Advice',
+                    ms: 'Nasihat Jelas dan Mudah Diamal',
+                  },
+                  desc: {
+                    en: 'Every recommendation includes simple field steps, so farmers no longer have to guess or interpret soil and leaf test results. The system does the analysis for them and turns it into easy actions they can apply immediately.',
+                    ms: 'Setiap cadangan disertakan langkah lapangan yang ringkas, jadi petani tidak lagi perlu meneka atau mentafsir keputusan ujian tanah dan daun. Sistem menganalisis untuk anda dan menukarnya kepada tindakan mudah yang boleh dilaksanakan serta-merta.',
+                  },
+                },
+                {
+                  image: '/images/why-farmers-trust-us/3. Research-Driven Accuracy_optimized.jpg',
+                  title: {
+                    en: 'Research-Driven Accuracy',
+                    ms: 'Ketepatan Berpandukan Penyelidikan',
+                  },
+                  desc: {
+                    en: 'All insights are generated using AI models trained on current oil palm research, nutrient response studies, and peer-reviewed science. Every output is based on measurable field data, not guesswork.',
+                    ms: 'Semua pandangan dijana menggunakan model AI yang dilatih dengan penyelidikan kelapa sawit terkini, kajian tindak balas nutrien dan sains disemak rakan sebaya. Setiap output berasaskan data lapangan yang boleh diukur, bukan tekaan.',
+                  },
+                },
+                {
+                  image: '/images/why-farmers-trust-us/4. Daily AI Support for Farmers_optimized.jpg',
+                  title: {
+                    en: 'Daily AI Support for Farmers',
+                    ms: 'Sokongan AI Harian untuk Petani',
+                  },
+                  desc: {
+                    en: 'Subscribers receive continuous assistance from our AI agronomy assistant, available every day to answer questions about fertilizer plans, soil tests, nutrient corrections, and field decisions.',
+                    ms: 'Pelanggan menerima bantuan berterusan daripada pembantu agronomi AI kami, tersedia setiap hari untuk menjawab soalan tentang pelan baja, ujian tanah, pembetulan nutrien dan keputusan lapangan.',
+                  },
+                },
+                {
+                  image: '/images/why-farmers-trust-us/5. Localized Oil Palm Knowledge_optimized.jpg',
+                  title: {
+                    en: 'Localized Oil Palm Knowledge',
+                    ms: 'Pengetahuan Kelapa Sawit Setempat',
+                  },
+                  desc: {
+                    en: 'All recommendations are built specifically for Malaysian oil palm farmers, designed with local soils, planting conditions, and MPOB standards in mind. Everything is tailored to real Malaysian field needs, not generic global advice.',
+                    ms: 'Semua cadangan dibina khusus untuk petani kelapa sawit Malaysia, direka dengan mengambil kira tanah tempatan, keadaan penanaman dan piawaian MPOB. Segala-galanya disesuaikan dengan keperluan lapangan Malaysia, bukan nasihat generik global.',
+                  },
+                },
+              ].map((trust, index) => (
+                <motion.div
+                  key={trust.title.en}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  whileHover={{ y: -12, scale: 1.03 }}
+                  className="bg-white rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all duration-300 overflow-hidden group flex flex-col h-full"
+                >
+                  <div className="relative w-full h-52 overflow-hidden bg-gradient-to-br from-green-50 to-yellow-50">
+                    <Image
+                      src={trust.image}
+                      alt={language === 'ms' ? trust.title.ms : trust.title.en}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 20vw"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-5 sm:p-6 flex flex-col flex-grow min-h-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 text-white font-black text-base flex items-center justify-center mb-3 mx-auto shadow-md">
+                      {String(index + 1).padStart(2, '0')}
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-3 text-center font-heading leading-tight">
+                      {language === 'ms' ? trust.title.ms : trust.title.en}
+                    </h3>
+                    <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed flex-grow mb-4 line-clamp-6">
+                      {language === 'ms' ? trust.desc.ms : trust.desc.en}
+                    </p>
+                    <div className="mt-auto pt-3 flex items-center justify-center gap-2 text-green-700 font-semibold text-xs sm:text-sm uppercase tracking-wide">
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                      {language === 'ms' ? 'Diperakui' : 'Verified Benefit'}
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
 
           {/* Money-Back Guarantee Badge */}
