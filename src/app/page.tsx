@@ -1389,45 +1389,51 @@ export default function HomePage() {
             {[
               {
                 title: language === 'ms' ? 'Petani & Estet' : 'Farmers & Estates',
-                desc: language === 'ms' 
+                desc: language === 'ms'
                   ? 'Ubah keputusan ujian mentah menjadi laporan nasihat yang jelas, menambah nilai melalui strategi peningkatan praktikal.'
                   : 'Turn raw test results into clear advisory reports, adding value through practical improvement strategies.',
-                number: '01'
+                number: '01',
+                image: '/images/tailored-solutions/1. Farmers & Estates_optimized.jpg'
               },
               {
                 title: language === 'ms' ? 'Makmal Ujian Tanah & Daun' : 'Soil & Leaf Testing Labs',
                 desc: language === 'ms'
                   ? 'Perkukuh koperasi petani dengan menambah perkhidmatan agronomi yang menjadikan alat canggih boleh diakses oleh pekebun kecil dengan sumber terhad.'
                   : 'Strengthen farmer cooperatives by adding agronomy services that make advanced tools accessible to smallholders with limited resources.',
-                number: '02'
+                number: '02',
+                image: '/images/tailored-solutions/2. Soil & Leaf Testing Labs_optimized.jpg'
               },
               {
                 title: language === 'ms' ? 'NGO & Program Pembangunan' : 'NGOs & Development Programs',
                 desc: language === 'ms'
                   ? 'Jimat masa kerja dengan pelan pemupukan yang disampaikan dalam minit bukannya hari, memastikan konsistensi merentas estet.'
                   : 'Save man-time with fertilization plans delivered in minutes instead of days, ensuring consistency across estates.',
-                number: '03'
+                number: '03',
+                image: '/images/tailored-solutions/3. NGOs & Development Programs_optimized.jpg'
               },
               {
                 title: language === 'ms' ? 'Ladang & Perniagaan Pertanian' : 'Plantations & Agri-businesses',
                 desc: language === 'ms'
                   ? 'Tingkatkan jualan baja anda dengan mengaitkan produk kepada cadangan ladang tersuai yang memberikan nilai jelas kepada petani.'
                   : 'Boost your fertilizer sales by linking products to tailored field recommendations that deliver clear value to farmers.',
-                number: '04'
+                number: '04',
+                image: '/images/tailored-solutions/4. Plantations & Agri-businesses_optimized.jpg'
               },
               {
                 title: language === 'ms' ? 'Pembekal Baja' : 'Fertilizer Suppliers',
                 desc: language === 'ms'
                   ? 'Tingkatkan penerimaan produk melalui cadangan bersepadu berasaskan data.'
                   : 'Enhance product adoption through integrated, data-driven recommendations.',
-                number: '05'
+                number: '05',
+                image: '/images/tailored-solutions/5. Fertilizer Suppliers_optimized.jpg'
               },
               {
                 title: language === 'ms' ? 'Badan Awam, Penyelidikan & Pensijilan' : 'Public, Research & Certification Bodies',
                 desc: language === 'ms'
                   ? 'Gunakan data peringkat ladang untuk menjejaki penerimaan, mengesahkan impak, dan menyokong pengembangan, latihan, dasar, dan kemampanan jangka panjang.'
                   : 'Use farm-level data to track adoption, verify impact, and support extension, training, policy, and long-term sustainability.',
-                number: '06'
+                number: '06',
+                image: '/images/tailored-solutions/6. Public, Research & Certification Bodies_optimized.jpg'
               },
             ].map((solution, index) => (
               <motion.div
@@ -1437,18 +1443,28 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1, type: "spring" }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="relative bg-gradient-to-br from-green-50 to-white p-8 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border-2 border-green-200 hover:border-yellow-400 overflow-hidden group"
+                className="relative bg-white rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 border-2 border-green-200 hover:border-yellow-400 overflow-hidden group"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-green-200 to-yellow-200 opacity-20 rounded-bl-full transform translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-500"></div>
-                <motion.div 
-                  className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-600 to-green-800 rounded-2xl mb-4 shadow-lg"
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.6 }}
-                >
-                  <span className="text-white font-black text-xl">{solution.number}</span>
-                </motion.div>
-                <h3 className="text-xl font-black text-gray-900 mb-3 font-heading tracking-tight">{solution.title}</h3>
-                <p className="text-gray-700 leading-relaxed font-medium">{solution.desc}</p>
+                <div className="h-48 overflow-hidden">
+                  <Image
+                    src={solution.image}
+                    alt={solution.title}
+                    width={400}
+                    height={250}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="p-6">
+                  <motion.div
+                    className="inline-flex items-center justify-center w-14 h-14 bg-gradient-to-br from-green-600 to-green-800 rounded-2xl mb-4 shadow-lg"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <span className="text-white font-black text-xl">{solution.number}</span>
+                  </motion.div>
+                  <h3 className="text-xl font-black text-gray-900 mb-3 font-heading tracking-tight">{solution.title}</h3>
+                  <p className="text-gray-700 leading-relaxed font-medium">{solution.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -1598,7 +1614,7 @@ export default function HomePage() {
                 label: language === 'ms' ? 'Penjimatan Kos' : 'Cost Savings',
                 icon: '💰'
               }
-            ].map((stat, index) => (
+            ].map((stat: any, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -1606,11 +1622,21 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
-                className="bg-gradient-to-br from-green-50 to-yellow-50 p-8 rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all"
+                className="bg-white rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all overflow-hidden"
               >
-                <div className="text-5xl mb-4">{stat.icon}</div>
-                <div className="text-5xl font-black text-green-700 mb-2">{stat.number}</div>
-                <div className="text-lg font-semibold text-gray-700">{stat.label}</div>
+                <div className="h-48 overflow-hidden">
+                  <Image
+                    src={stat.image}
+                    alt={stat.label}
+                    width={300}
+                    height={200}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="p-6">
+                  <div className="text-3xl font-black text-green-700 mb-2">{stat.number}</div>
+                  <div className="text-lg font-semibold text-gray-700">{stat.label}</div>
+                </div>
               </motion.div>
             ))}
           </div>
@@ -1638,49 +1664,88 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
             {[
               {
-                icon: '🏆',
-                title: language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified',
-                desc: language === 'ms'
-                  ? 'AI kami disahkan mengikut piawaian MPOB Malaysia untuk kelapa sawit'
-                  : 'Our AI is validated according to MPOB Malaysian standards for palm oil'
+                image: '/images/why-farmers-trust-us/1. MPOB-Aligned Recommendations_optimized.jpg',
+                title: {
+                  en: 'MPOB-Aligned Recommendations',
+                  ms: 'Cadangan Selari MPOB',
+                },
+                desc: {
+                  en: 'Our fertilization and soil-improvement plans follow the latest MPOB nutrient standards and international Good Agricultural Practices (GAP) for oil palm. Every recommendation is grounded in verified agronomic science.',
+                  ms: 'Pelan pembajaan dan penambahbaikan tanah kami mengikut piawaian nutrien MPOB terkini serta Amalan Pertanian Baik antarabangsa untuk kelapa sawit. Setiap cadangan berpaksikan sains agronomi yang disahkan.',
+                },
               },
               {
-                icon: '🔒',
-                title: language === 'ms' ? 'Data Selamat' : 'Secure Data',
-                desc: language === 'ms'
-                  ? 'Data ladang anda dilindungi dengan keselamatan peringkat bank'
-                  : 'Your farm data is protected with bank-level security'
+                image: '/images/why-farmers-trust-us/2   Clear, Actionable Advice_optimized.jpg',
+                title: {
+                  en: 'Clear, Actionable Advice',
+                  ms: 'Nasihat Jelas dan Mudah Diamal',
+                },
+                desc: {
+                  en: 'Every recommendation includes simple field steps, so farmers no longer have to guess or interpret soil and leaf test results. The system does the analysis for them and turns it into easy actions they can apply immediately.',
+                  ms: 'Setiap cadangan disertakan langkah lapangan yang ringkas, jadi petani tidak lagi perlu meneka atau mentafsir keputusan ujian tanah dan daun. Sistem menganalisis untuk anda dan menukarnya kepada tindakan mudah yang boleh dilaksanakan serta-merta.',
+                },
               },
               {
-                icon: '💯',
-                title: language === 'ms' ? 'Jaminan Tepat' : 'Accuracy Guarantee',
-                desc: language === 'ms'
-                  ? 'Analisis disokong oleh penyelidikan saintifik dan data sebenar'
-                  : 'Analysis backed by scientific research and real-world data'
+                image: '/images/why-farmers-trust-us/3. Research-Driven Accuracy_optimized.jpg',
+                title: {
+                  en: 'Research-Driven Accuracy',
+                  ms: 'Ketepatan Berpandukan Penyelidikan',
+                },
+                desc: {
+                  en: 'All insights are generated using AI models trained on current oil palm research, nutrient response studies, and peer-reviewed science. Every output is based on measurable field data, not guesswork.',
+                  ms: 'Semua pandangan dijana menggunakan model AI yang dilatih dengan penyelidikan kelapa sawit terkini, kajian tindak balas nutrien dan sains disemak rakan sebaya. Setiap output berasaskan data lapangan yang boleh diukur, bukan tekaan.',
+                },
               },
               {
-                icon: '🤝',
-                title: language === 'ms' ? 'Sokongan 24/7' : '24/7 Support',
-                desc: language === 'ms'
-                  ? 'Pasukan sokongan sedia membantu bila-bila masa anda perlukan'
-                  : 'Support team ready to help whenever you need it'
-              }
+                image: '/images/why-farmers-trust-us/4. Daily AI Support for Farmers_optimized.jpg',
+                title: {
+                  en: 'Daily AI Support for Farmers',
+                  ms: 'Sokongan AI Harian untuk Petani',
+                },
+                desc: {
+                  en: 'Subscribers receive continuous assistance from our AI agronomy assistant, available every day to answer questions about fertilizer plans, soil tests, nutrient corrections, and field decisions.',
+                  ms: 'Pelanggan menerima bantuan berterusan daripada pembantu agronomi AI kami, tersedia setiap hari untuk menjawab soalan tentang pelan baja, ujian tanah, pembetulan nutrien dan keputusan lapangan.',
+                },
+              },
+              {
+                image: '/images/why-farmers-trust-us/5. Localized Oil Palm Knowledge_optimized.jpg',
+                title: {
+                  en: 'Localized Oil Palm Knowledge',
+                  ms: 'Pengetahuan Kelapa Sawit Setempat',
+                },
+                desc: {
+                  en: 'All recommendations are built specifically for Malaysian oil palm farmers, designed with local soils, planting conditions, and MPOB standards in mind. Everything is tailored to real Malaysian field needs, not generic global advice.',
+                  ms: 'Semua cadangan dibina khusus untuk petani kelapa sawit Malaysia, direka dengan mengambil kira tanah tempatan, keadaan penanaman dan piawaian MPOB. Segala-galanya disesuaikan dengan keperluan lapangan Malaysia, bukan nasihat generik global.',
+                },
+              },
             ].map((trust, index) => (
               <motion.div
-                key={index}
+                key={trust.title.en}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                whileHover={{ y: -10, scale: 1.05 }}
-                className="bg-white p-8 rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all"
+                whileHover={{ y: -10, scale: 1.03 }}
+                className="bg-white p-6 rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all flex flex-col"
               >
-                <div className="text-6xl mb-4 text-center">{trust.icon}</div>
-                <h3 className="text-2xl font-black text-gray-900 mb-3 text-center">{trust.title}</h3>
-                <p className="text-gray-600 text-center leading-relaxed">{trust.desc}</p>
+                <div className="relative w-full h-48 mb-6 overflow-hidden rounded-2xl border border-green-100">
+                  <Image
+                    src={trust.image}
+                    alt={trust.title.en}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 20vw"
+                    className="object-cover hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-3 text-center">
+                  {language === 'ms' ? trust.title.ms : trust.title.en}
+                </h3>
+                <p className="text-gray-600 text-center leading-relaxed text-base">
+                  {language === 'ms' ? trust.desc.ms : trust.desc.en}
+                </p>
               </motion.div>
             ))}
           </div>
