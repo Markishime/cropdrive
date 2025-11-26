@@ -246,7 +246,6 @@ export default function HowItWorksPage() {
                       height={600}
                       className="w-full h-96 object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 to-transparent"></div>
                     <div className="absolute bottom-8 left-8 text-8xl opacity-50">{step.icon}</div>
                   </div>
                 </div>

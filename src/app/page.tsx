@@ -613,7 +613,6 @@ export default function HomePage() {
                     height={256}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-green-900/95 via-green-800/40 to-transparent"></div>
                   <motion.div 
                     className="absolute top-4 right-4 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-lg"
                     initial={{ scale: 0, rotate: -180 }}
@@ -624,7 +623,7 @@ export default function HomePage() {
                     <span className="text-green-900 font-black text-xl">{index + 1}</span>
                   </motion.div>
                 </div>
-                <div className="p-6 bg-gradient-to-b from-white to-green-50/30">
+                <div className="p-6 bg-white">
                   <h3 className="text-xl font-black text-gray-900 mb-2 font-heading tracking-tight">
                     {item.title}
                   </h3>
@@ -1237,7 +1236,6 @@ export default function HomePage() {
                       height={400}
                       className="w-full h-80 object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-green-900/80 to-transparent"></div>
                     <div className="absolute top-6 left-6 w-20 h-20 bg-yellow-400 rounded-2xl flex items-center justify-center shadow-xl">
                       <span className="text-3xl font-black text-green-900">{step.step}</span>
                     </div>
@@ -1700,7 +1698,6 @@ export default function HomePage() {
           </motion.div>
 
           <div className="relative max-w-7xl mx-auto">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-100/40 via-yellow-100/20 to-transparent rounded-4xl blur-3xl opacity-60"></div>
             <div className="absolute inset-y-6 inset-x-10 border border-dashed border-green-200/50 rounded-[40px] pointer-events-none"></div>
             
             <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 lg:gap-8 px-4">
@@ -1770,7 +1767,7 @@ export default function HomePage() {
                   whileHover={{ y: -12, scale: 1.03 }}
                   className="bg-white rounded-3xl shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all duration-300 overflow-hidden group flex flex-col h-full"
                 >
-                  <div className="relative w-full h-52 overflow-hidden bg-gradient-to-br from-green-50 to-yellow-50">
+                  <div className="relative w-full h-52 overflow-hidden bg-white">
                     <Image
                       src={trust.image}
                       alt={language === 'ms' ? trust.title.ms : trust.title.en}
