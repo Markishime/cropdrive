@@ -9,13 +9,16 @@ export interface User {
   language: 'en' | 'ms';
   registrationDate: Date;
   plan: string; // Plan ID: 'none' | 'start' | 'smart' | 'precision'
+  billingCycle?: 'monthly' | 'yearly'; // User's current billing cycle
   status: 'active' | 'inactive' | 'suspended';
   stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
   uploadsUsed: number;
   uploadsLimit: number;
   lastLogin: Date;
   preferences: UserPreferences;
   profilePictureUrl?: string;
+  currentPeriodEnd?: Date; // When the current billing period ends
 }
 
 export interface UserPreferences {

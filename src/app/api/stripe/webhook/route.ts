@@ -167,10 +167,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
     await userRef.update({
       plan: planId,
+      billingCycle: isYearly ? 'yearly' : 'monthly',
       uploadsLimit: limits.uploadsLimit,
       uploadsUsed: 0,
       stripeCustomerId: session.customer as string,
       stripeSubscriptionId: session.subscription as string,
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000)),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     

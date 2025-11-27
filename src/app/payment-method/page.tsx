@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -10,58 +10,82 @@ import { getPricingTierById, PRICING_TIERS } from '@/lib/subscriptions';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import toast from 'react-hot-toast';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import { 
   CreditCard, 
   Download, 
-  TrendingUp, 
-  TrendingDown, 
   X, 
   CheckCircle, 
   AlertCircle,
   Calendar,
-  DollarSign,
   Bell,
   Shield,
   Zap,
-  Users,
   BarChart3,
   Eye,
   EyeOff,
   Settings,
   Lock,
   Mail,
-  Smartphone,
   FileText,
-  ArrowUpRight,
-  ArrowDownRight,
-  Info,
   RefreshCw,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Loader2,
+  Clock,
+  TrendingUp,
+  ChevronRight,
+  Sparkles
 } from 'lucide-react';
+
+interface StripeInvoice {
+  id: string;
+  number: string | null;
+  amount: number;
+  currency: string;
+  status: string | null;
+  date: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+  pdfUrl: string | null;
+  hostedUrl: string | null;
+  description: string;
+  planName: string;
+}
+
+interface SubscriptionData {
+  id: string;
+  status: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  cancelAt: string | null;
+  billingCycle: string;
+  paymentMethod: {
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+  } | null;
+}
 
 export default function PaymentMethodPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showUsageDetails, setShowUsageDetails] = useState(false);
+  const [showAllInvoicesModal, setShowAllInvoicesModal] = useState(false);
   const [autoRenewal, setAutoRenewal] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [smsNotifications, setSmsNotifications] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<string | null>(null);
   const [showCardDetails, setShowCardDetails] = useState(false);
-  const [showEditCardModal, setShowEditCardModal] = useState(false);
-  const [editCardData, setEditCardData] = useState({
-    cardNumber: '•••• •••• •••• 4242',
-    cardHolder: '',
-    expiryDate: '12/25',
-    cvv: ''
-  });
-  const { user, loading: authLoading } = useAuth();
+  const [invoices, setInvoices] = useState<StripeInvoice[]>([]);
+  const [loadingInvoices, setLoadingInvoices] = useState(true);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [updatingAutoRenewal, setUpdatingAutoRenewal] = useState(false);
+  const [updatingEmailNotifications, setUpdatingEmailNotifications] = useState(false);
+  
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -70,17 +94,88 @@ export default function PaymentMethodPage() {
     setCurrentLang(lang);
   }, []);
 
-  // Initialize card holder name
-  useEffect(() => {
-    if (user) {
-      setEditCardData(prev => ({
-        ...prev,
-        cardHolder: user.displayName || user.email?.split('@')[0] || ''
-      }));
+  const { language } = useTranslation(mounted ? currentLang : 'en');
+
+  // Fetch invoices from Stripe
+  const fetchInvoices = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingInvoices(true);
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/invoices', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setInvoices(data.invoices || []);
+      }
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+    } finally {
+      setLoadingInvoices(false);
     }
   }, [user]);
 
-  const { language } = useTranslation(mounted ? currentLang : 'en');
+  // Fetch subscription details from Stripe
+  const fetchSubscription = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingSubscription(true);
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/subscription', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setSubscription(data.subscription);
+        if (data.subscription) {
+          setAutoRenewal(!data.subscription.cancelAtPeriodEnd);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    } finally {
+      setLoadingSubscription(false);
+    }
+  }, [user]);
+
+  // Fetch billing settings
+  const fetchBillingSettings = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/billing-settings', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setEmailNotifications(data.settings?.emailNotifications ?? true);
+      }
+    } catch (error) {
+      console.error('Error fetching billing settings:', error);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -89,6 +184,14 @@ export default function PaymentMethodPage() {
       router.push('/pricing');
     }
   }, [user, authLoading, router]);
+
+  useEffect(() => {
+    if (user && user.plan && user.plan !== 'none') {
+      fetchInvoices();
+      fetchSubscription();
+      fetchBillingSettings();
+    }
+  }, [user, fetchInvoices, fetchSubscription, fetchBillingSettings]);
 
   if (authLoading || !user || user.plan === 'none' || !user.plan) {
     return (
@@ -105,336 +208,110 @@ export default function PaymentMethodPage() {
 
   const currentPlan = getPricingTierById(user.plan);
   const uploadPercentage = user.uploadsLimit === -1 ? 100 : user.uploadsLimit > 0 ? (user.uploadsUsed / user.uploadsLimit) * 100 : 0;
+  const billingCycle = user.billingCycle || 'monthly';
 
-  // Mock invoices data (replace with real data from your backend)
-  const invoices = [
-    {
-      id: 'INV-2025-001',
-      date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-      amount: currentPlan?.monthlyPrice || 0,
-      status: 'paid',
-      plan: currentPlan?.name || 'Basic'
-    },
-    {
-      id: 'INV-2025-002',
-      date: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000),
-      amount: currentPlan?.monthlyPrice || 0,
-      status: 'paid',
-      plan: currentPlan?.name || 'Basic'
-    }
-  ];
-
-  const handleCancelSubscription = async () => {
-    setShowCancelModal(false);
+  const handleToggleAutoRenewal = async () => {
+    if (!subscription) return;
     
-    const loadingToast = toast.loading(
-      language === 'ms' ? '⏳ Membatalkan langganan...' : '⏳ Cancelling subscription...',
-      {
-        icon: '⏳',
-        style: {
-          borderRadius: '12px',
-          background: '#333',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
-    
-    setLoading(true);
+    setUpdatingAutoRenewal(true);
     try {
-      if (!user?.uid) {
-        throw new Error('User not found');
-      }
-
-      // Update user's plan in Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        plan: 'none',
-        uploadsLimit: 0,
-        uploadsUsed: 0,
-        stripeSubscriptionId: null,
-        stripeCustomerId: null,
-        subscriptionStatus: 'cancelled',
-        updatedAt: serverTimestamp()
-      });
-
-      toast.success(
-        language === 'ms' 
-          ? '✅ Langganan berjaya dibatalkan!' 
-          : '✅ Subscription cancelled successfully!',
-        {
-          id: loadingToast,
-          duration: 4000,
-          icon: '✅',
-          style: {
-            borderRadius: '12px',
-            background: '#10b981',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
       
-      // Refresh the page after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      const token = await firebaseUser.getIdToken();
+      const newCancelAtPeriodEnd = !subscription.cancelAtPeriodEnd;
+      
+      const response = await fetch('/api/stripe/subscription', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'toggle_auto_renewal',
+          cancelAtPeriodEnd: newCancelAtPeriodEnd,
+        }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setAutoRenewal(!data.cancelAtPeriodEnd);
+        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
+        
+        toast.success(
+          data.cancelAtPeriodEnd
+            ? (language === 'ms' ? '🔄 Pembaharuan auto dimatikan' : '🔄 Auto-renewal turned off')
+            : (language === 'ms' ? '🔄 Pembaharuan auto dihidupkan' : '🔄 Auto-renewal turned on'),
+          {
+            duration: 3000,
+            style: {
+              borderRadius: '12px',
+              background: '#10b981',
+              color: '#fff',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+            },
+          }
+        );
+      } else {
+        throw new Error('Failed to update');
+      }
     } catch (error) {
-      console.error('Cancel subscription error:', error);
-      toast.error(
-        language === 'ms' 
-          ? '❌ Ralat membatalkan langganan. Sila cuba lagi.' 
-          : '❌ Error cancelling subscription. Please try again.',
-        {
-          id: loadingToast,
-          duration: 5000,
-          icon: '❌',
-          style: {
-            borderRadius: '12px',
-            background: '#ef4444',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
+      console.error('Error toggling auto-renewal:', error);
+      toast.error(language === 'ms' ? 'Ralat mengemas kini' : 'Error updating');
     } finally {
-      setLoading(false);
+      setUpdatingAutoRenewal(false);
     }
   };
 
-  const handleUpgradePlan = async (newPlanId: string) => {
-    const loadingToast = toast.loading(
-      language === 'ms' ? '⏳ Menaik taraf pelan...' : '⏳ Upgrading plan...',
-      {
-        icon: '⬆️',
-        style: {
-          borderRadius: '12px',
-          background: '#333',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
-
-    setLoading(true);
+  const handleToggleEmailNotifications = async () => {
+    setUpdatingEmailNotifications(true);
     try {
-      if (!user?.uid) {
-        throw new Error('User not found');
-      }
-
-      const newPlan = getPricingTierById(newPlanId);
-      if (!newPlan) {
-        throw new Error('Plan not found');
-      }
-
-      // Update user's plan in Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        plan: newPlanId,
-        uploadsLimit: newPlan.uploadLimit || 0,
-        updatedAt: serverTimestamp()
-      });
-
-      toast.success(
-        language === 'ms' 
-          ? `🎉 Pelan berjaya dinaik taraf ke ${newPlan.nameMs}!` 
-          : `🎉 Plan upgraded to ${newPlan.name} successfully!`,
-        {
-          id: loadingToast,
-          duration: 4000,
-          icon: '🚀',
-          style: {
-            borderRadius: '12px',
-            background: '#10b981',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
       
-      // Refresh the page after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } catch (error) {
-      console.error('Upgrade plan error:', error);
-      toast.error(
-        language === 'ms' 
-          ? '❌ Ralat menaik taraf pelan. Sila cuba lagi.' 
-          : '❌ Error upgrading plan. Please try again.',
-        {
-          id: loadingToast,
-          duration: 5000,
-          icon: '❌',
-          style: {
-            borderRadius: '12px',
-            background: '#ef4444',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDowngradePlan = async (newPlanId: string) => {
-    const loadingToast = toast.loading(
-      language === 'ms' ? '⏳ Menurun taraf pelan...' : '⏳ Downgrading plan...',
-      {
-        icon: '⬇️',
-        style: {
-          borderRadius: '12px',
-          background: '#333',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
-
-    setLoading(true);
-    try {
-      if (!user?.uid) {
-        throw new Error('User not found');
-      }
-
-      const newPlan = getPricingTierById(newPlanId);
-      if (!newPlan) {
-        throw new Error('Plan not found');
-      }
-
-      // Update user's plan in Firestore
-      const userRef = doc(db, 'users', user.uid);
-      await updateDoc(userRef, {
-        plan: newPlanId,
-        uploadsLimit: newPlan.uploadLimit || 0,
-        updatedAt: serverTimestamp()
-      });
-
-      toast.success(
-        language === 'ms' 
-          ? `✅ Pelan berjaya diturun taraf ke ${newPlan.nameMs}` 
-          : `✅ Plan downgraded to ${newPlan.name} successfully`,
-        {
-          id: loadingToast,
-          duration: 4000,
-          icon: '✅',
-          style: {
-            borderRadius: '12px',
-            background: '#10b981',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
+      const token = await firebaseUser.getIdToken();
+      const newValue = !emailNotifications;
       
-      // Refresh the page after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
+      const response = await fetch('/api/stripe/billing-settings', {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          emailNotifications: newValue,
+        }),
+      });
+      
+      if (response.ok) {
+        setEmailNotifications(newValue);
+        toast.success(
+          newValue
+            ? (language === 'ms' ? '📧 Pemberitahuan email dihidupkan' : '📧 Email notifications turned on')
+            : (language === 'ms' ? '📧 Pemberitahuan email dimatikan' : '📧 Email notifications turned off'),
+          {
+            duration: 3000,
+            style: {
+              borderRadius: '12px',
+              background: '#3b82f6',
+              color: '#fff',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+            },
+          }
+        );
+      } else {
+        throw new Error('Failed to update');
+      }
     } catch (error) {
-      console.error('Downgrade plan error:', error);
-      toast.error(
-        language === 'ms' 
-          ? '❌ Ralat menurun taraf pelan. Sila cuba lagi.' 
-          : '❌ Error downgrading plan. Please try again.',
-        {
-          id: loadingToast,
-          duration: 5000,
-          icon: '❌',
-          style: {
-            borderRadius: '12px',
-            background: '#ef4444',
-            color: '#fff',
-            padding: '16px',
-            fontSize: '14px',
-            fontWeight: '600',
-          },
-        }
-      );
+      console.error('Error toggling email notifications:', error);
+      toast.error(language === 'ms' ? 'Ralat mengemas kini' : 'Error updating');
     } finally {
-      setLoading(false);
+      setUpdatingEmailNotifications(false);
     }
-  };
-
-  const handleToggleAutoRenewal = () => {
-    setAutoRenewal(!autoRenewal);
-    toast.success(
-      autoRenewal
-        ? (language === 'ms' ? '🔄 Pembaharuan auto dimatikan' : '🔄 Auto-renewal turned off')
-        : (language === 'ms' ? '🔄 Pembaharuan auto dihidupkan' : '🔄 Auto-renewal turned on'),
-      {
-        duration: 3000,
-        icon: '⚙️',
-        style: {
-          borderRadius: '12px',
-          background: '#3b82f6',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
-  };
-
-  const handleToggleEmailNotifications = () => {
-    setEmailNotifications(!emailNotifications);
-    toast.success(
-      emailNotifications
-        ? (language === 'ms' ? '📧 Pemberitahuan email dimatikan' : '📧 Email notifications turned off')
-        : (language === 'ms' ? '📧 Pemberitahuan email dihidupkan' : '📧 Email notifications turned on'),
-      {
-        duration: 3000,
-        icon: '📧',
-        style: {
-          borderRadius: '12px',
-          background: '#3b82f6',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
-  };
-
-  const handleToggleSmsNotifications = () => {
-    setSmsNotifications(!smsNotifications);
-    toast.success(
-      smsNotifications
-        ? (language === 'ms' ? '📱 Pemberitahuan SMS dimatikan' : '📱 SMS notifications turned off')
-        : (language === 'ms' ? '📱 Pemberitahuan SMS dihidupkan' : '📱 SMS notifications turned on'),
-      {
-        duration: 3000,
-        icon: '📱',
-        style: {
-          borderRadius: '12px',
-          background: '#8b5cf6',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
   };
 
   const handleCopyInvoiceId = (invoiceId: string) => {
@@ -443,7 +320,6 @@ export default function PaymentMethodPage() {
       language === 'ms' ? '📋 ID invois disalin!' : '📋 Invoice ID copied!',
       {
         duration: 2000,
-        icon: '✅',
         style: {
           borderRadius: '12px',
           background: '#10b981',
@@ -456,88 +332,127 @@ export default function PaymentMethodPage() {
     );
   };
 
-  const handleUpdatePaymentMethod = () => {
-    setShowEditCardModal(true);
+  const handleDownloadInvoice = (invoice: StripeInvoice) => {
+    if (invoice.pdfUrl) {
+      window.open(invoice.pdfUrl, '_blank');
+      toast.success(
+        language === 'ms' 
+          ? `⬇️ Memuat turun invois...` 
+          : `⬇️ Downloading invoice...`,
+        {
+          duration: 2000,
+          style: {
+            borderRadius: '12px',
+            background: '#8b5cf6',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
+    } else if (invoice.hostedUrl) {
+      window.open(invoice.hostedUrl, '_blank');
+    } else {
+      toast.error(language === 'ms' ? 'Invois tidak tersedia' : 'Invoice not available');
+    }
   };
 
-  const handleSaveCardDetails = () => {
-    toast.promise(
-      new Promise((resolve) => setTimeout(resolve, 2000)),
-      {
-        loading: language === 'ms' ? 'Menyimpan perubahan...' : 'Saving changes...',
-        success: language === 'ms' ? '✅ Kaedah bayaran dikemas kini!' : '✅ Payment method updated!',
-        error: language === 'ms' ? '❌ Ralat mengemas kini' : '❌ Error updating',
-      },
-      {
-        style: {
-          borderRadius: '12px',
-          background: '#333',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
+  const handleCancelSubscription = async () => {
+    setShowCancelModal(false);
+    setLoading(true);
+    
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error('Not authenticated');
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/subscription', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
         },
-        success: {
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        toast.success(
+          language === 'ms' 
+            ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
+            : '✅ Subscription will be cancelled at end of billing period',
+          {
+            duration: 4000,
+            style: {
+              borderRadius: '12px',
+              background: '#10b981',
+              color: '#fff',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+            },
+          }
+        );
+        
+        // Refresh data
+        await fetchSubscription();
+        if (refreshUser) await refreshUser();
+      } else {
+        throw new Error('Failed to cancel');
+      }
+    } catch (error) {
+      console.error('Cancel subscription error:', error);
+      toast.error(
+        language === 'ms' 
+          ? '❌ Ralat membatalkan langganan' 
+          : '❌ Error cancelling subscription',
+        {
+          duration: 5000,
           style: {
-            background: '#10b981',
-          },
-        },
-        error: {
-          style: {
+            borderRadius: '12px',
             background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
           },
-        },
-      }
-    );
-    setTimeout(() => {
-      setShowEditCardModal(false);
-    }, 2000);
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleToggleCardDetails = () => {
-    setShowCardDetails(!showCardDetails);
-    toast.success(
-      showCardDetails 
-        ? (language === 'ms' ? 'Butiran kad disembunyikan' : 'Card details hidden')
-        : (language === 'ms' ? 'Butiran kad ditunjukkan' : 'Card details shown'),
-      {
-        icon: showCardDetails ? '🙈' : '👁️',
-        duration: 2000,
-      }
-    );
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
-  const handleDownloadInvoice = (invoiceId: string) => {
-    toast.success(
-      language === 'ms' 
-        ? `⬇️ Memuat turun invois ${invoiceId}...` 
-        : `⬇️ Downloading invoice ${invoiceId}...`,
-      {
-        duration: 2000,
-        icon: '📄',
-        style: {
-          borderRadius: '12px',
-          background: '#8b5cf6',
-          color: '#fff',
-          padding: '16px',
-          fontSize: '14px',
-          fontWeight: '600',
-        },
-      }
-    );
+  const getDaysUntilRenewal = () => {
+    if (!subscription?.currentPeriodEnd) return null;
+    const endDate = new Date(subscription.currentPeriodEnd);
+    const now = new Date();
+    const diffTime = endDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
   };
+
+  const daysUntilRenewal = getDaysUntilRenewal();
 
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-        {/* Enhanced Header with Quick Stats */}
-        <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
+        {/* Enhanced Header */}
+        <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-amber-400/10 rounded-full blur-3xl"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-400/10 rounded-full blur-3xl"></div>
+            <div className="absolute inset-0 opacity-10">
+            <div className="absolute inset-0 bg-dot-grid opacity-80"></div>
+            </div>
           </div>
           
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -545,31 +460,46 @@ export default function PaymentMethodPage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
-              className="text-center sm:text-left"
             >
-              <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
                 <div>
-                  <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
-                    {language === 'ms' ? 'Pengurusan' : 'Subscription'} <span className="text-yellow-400">{language === 'ms' ? 'Langganan' : 'Management'}</span>
-              </h1>
-                  <p className="text-lg sm:text-xl text-white/90 flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
+                      <CreditCard className="w-6 h-6 text-green-900" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
+                        {language === 'ms' ? 'Pengurusan' : 'Subscription'}
+                      </h1>
+                      <span className="text-amber-400 text-3xl sm:text-4xl md:text-5xl font-black">
+                        {language === 'ms' ? 'Langganan' : 'Management'}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-lg text-white/80 flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-amber-400" />
                     {language === 'ms' ? 'Urus langganan dan bil anda dengan selamat' : 'Manage your subscriptions and billing securely'}
                   </p>
                 </div>
-                <div className="flex gap-3">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setShowUsageDetails(!showUsageDetails)}
-                    className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
-                  >
-                    {showUsageDetails ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    {language === 'ms' ? 'Butiran' : 'Details'}
-                  </motion.button>
+                
+                {/* Quick Stats */}
+                <div className="flex flex-wrap gap-4">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/20">
+                    <p className="text-white/70 text-xs font-medium mb-1">
+                      {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                    </p>
+                    <p className="text-white font-black text-lg">{currentPlan?.name || 'N/A'}</p>
+                  </div>
+                  {daysUntilRenewal !== null && (
+                    <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/20">
+                      <p className="text-white/70 text-xs font-medium mb-1">
+                        {language === 'ms' ? 'Pembaharuan Dalam' : 'Renews In'}
+                      </p>
+                      <p className="text-amber-400 font-black text-lg">{daysUntilRenewal} {language === 'ms' ? 'hari' : 'days'}</p>
+                    </div>
+                  )}
                 </div>
               </div>
-
             </motion.div>
           </div>
         </section>
@@ -578,78 +508,153 @@ export default function PaymentMethodPage() {
         <section className="py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Current Plan */}
+              {/* Left Column - Main Content */}
               <div className="lg:col-span-2 space-y-8">
+                {/* Current Plan Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 overflow-hidden relative"
                 >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900">
-                      {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
-                    </h2>
-                    <span className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold">
-                      {language === 'ms' ? 'Aktif' : 'Active'}
-                    </span>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-green-50 to-white p-6 rounded-xl border-2 border-green-200 mb-6">
-                    <h3 className="text-3xl font-black text-gray-900 mb-2">
-                      {language === 'ms' ? currentPlan?.nameMs : currentPlan?.name}
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      {language === 'ms' ? currentPlan?.taglineMs : currentPlan?.tagline}
-                    </p>
-                    <div className="flex items-baseline">
-                      <span className="text-5xl font-black text-green-700">
-                        {currentPlan?.monthlyPrice}
-                      </span>
-                      <span className="text-xl text-gray-600 ml-2">
-                        RM/{language === 'ms' ? 'bulan' : 'month'}
+                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-green-100 to-transparent rounded-bl-full opacity-50"></div>
+                  
+                  <div className="relative">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                        <Sparkles className="w-6 h-6 text-amber-500" />
+                        {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                      </h2>
+                      <span className={`px-4 py-2 rounded-full text-sm font-bold ${
+                        subscription?.cancelAtPeriodEnd 
+                          ? 'bg-amber-100 text-amber-700' 
+                          : 'bg-green-100 text-green-700'
+                      }`}>
+                        {subscription?.cancelAtPeriodEnd 
+                          ? (language === 'ms' ? 'Akan Dibatalkan' : 'Cancelling')
+                          : (language === 'ms' ? 'Aktif' : 'Active')
+                        }
                       </span>
                     </div>
-                  </div>
 
-                  {/* Usage Stats */}
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between mb-2">
-                        <span className="text-sm font-semibold text-gray-700">
+                    <div className="bg-gradient-to-br from-green-50 to-amber-50 p-6 rounded-2xl border-2 border-green-200 mb-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                          <h3 className="text-3xl font-black text-gray-900 mb-1">
+                            {language === 'ms' ? currentPlan?.nameMs : currentPlan?.name}
+                          </h3>
+                          <p className="text-gray-600">
+                            {language === 'ms' ? currentPlan?.taglineMs : currentPlan?.tagline}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                              billingCycle === 'yearly' 
+                                ? 'bg-amber-100 text-amber-700' 
+                                : 'bg-green-100 text-green-700'
+                            }`}>
+                              {billingCycle === 'yearly' 
+                                ? (language === 'ms' ? 'Tahunan' : 'Yearly')
+                                : (language === 'ms' ? 'Bulanan' : 'Monthly')
+                              }
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-baseline gap-1">
+                            <span className="text-4xl font-black text-green-700">
+                              RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
+                            </span>
+                          </div>
+                          <span className="text-gray-500">
+                            /{billingCycle === 'yearly' ? (language === 'ms' ? 'tahun' : 'year') : (language === 'ms' ? 'bulan' : 'month')}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Upload Usage */}
+                    <div className="mb-6">
+                      <div className="flex justify-between mb-3">
+                        <span className="text-sm font-bold text-gray-700 flex items-center gap-2">
+                          <BarChart3 className="w-4 h-4 text-green-600" />
                           {language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
                         </span>
-                        <span className="text-sm font-bold text-gray-900">
+                        <span className="text-sm font-black text-gray-900">
                           {user.uploadsUsed} / {user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}
                         </span>
                       </div>
                       {user.uploadsLimit !== -1 && (
-                        <div className="w-full bg-gray-200 rounded-full h-3">
-                          <div 
-                            className="bg-gradient-to-r from-green-600 to-green-700 h-full rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min(uploadPercentage, 100)}%` }}
-                          />
+                        <div className="relative">
+                          <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
+                            <motion.div 
+                              initial={{ width: 0 }}
+                              animate={{ width: `${Math.min(uploadPercentage, 100)}%` }}
+                              transition={{ duration: 1, ease: "easeOut" }}
+                            className={`h-full rounded-full ${
+                                uploadPercentage > 80 ? 'bg-gradient-to-r from-amber-500 to-red-500' : 'bg-gradient-to-r from-green-500 to-green-700'
+                              }`}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {uploadPercentage > 80 
+                              ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
+                              : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
+                            }
+                          </p>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  {/* Actions */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
-                    <Link href="/pricing">
-                      <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold">
-                        {language === 'ms' ? '⬆️ Naik Taraf' : '⬆️ Upgrade'}
+                    {/* Next Billing Info */}
+                    {subscription && (
+                      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <Clock className="w-5 h-5 text-gray-500" />
+                            <div>
+                              <p className="text-sm font-bold text-gray-700">
+                                {subscription.cancelAtPeriodEnd 
+                                  ? (language === 'ms' ? 'Langganan Tamat' : 'Subscription Ends')
+                                  : (language === 'ms' ? 'Bil Seterusnya' : 'Next Billing')
+                                }
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {formatDate(subscription.currentPeriodEnd)}
+                              </p>
+                            </div>
+                          </div>
+                          {!subscription.cancelAtPeriodEnd && (
+                            <p className="text-lg font-black text-green-600">
+                              RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Link href="/pricing">
+                        <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
+                        </Button>
+                      </Link>
+                      <Button 
+                        onClick={() => setShowCancelModal(true)}
+                        disabled={loading || subscription?.cancelAtPeriodEnd}
+                        className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <X className="w-4 h-4 mr-2" />
+                        )}
+                        {subscription?.cancelAtPeriodEnd 
+                          ? (language === 'ms' ? 'Akan Dibatalkan' : 'Will Cancel')
+                          : (language === 'ms' ? 'Batalkan' : 'Cancel')
+                        }
                       </Button>
-                    </Link>
-                    <Button 
-                      onClick={handleCancelSubscription}
-                      disabled={loading}
-                      className="w-full bg-red-600 text-white hover:bg-red-700 py-3 font-bold"
-                    >
-                      {loading 
-                        ? (language === 'ms' ? 'Memproses...' : 'Processing...') 
-                        : (language === 'ms' ? '✗ Batalkan' : '✗ Cancel')
-                      }
-                    </Button>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -657,158 +662,93 @@ export default function PaymentMethodPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
-                  className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 shadow-xl border-2 border-purple-200"
+                  transition={{ delay: 0.1 }}
+                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                      <CreditCard className="w-6 h-6 text-purple-600" />
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                      <CreditCard className="w-6 h-6 text-violet-600" />
                       {language === 'ms' ? 'Kaedah Bayaran' : 'Payment Method'}
                     </h2>
-                    <div className="flex items-center gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.1 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={handleToggleCardDetails}
-                        className="p-2 hover:bg-purple-100 rounded-lg transition"
-                        aria-label="Toggle card details"
-                      >
-                        {showCardDetails ? (
-                          <EyeOff className="w-5 h-5 text-purple-600" />
-                        ) : (
-                          <Eye className="w-5 h-5 text-purple-600" />
-                        )}
-                      </motion.button>
-                      <Lock className="w-5 h-5 text-purple-600" />
-                    </div>
+                    <button
+                      onClick={() => setShowCardDetails(!showCardDetails)}
+                      aria-label={showCardDetails ? (language === 'ms' ? 'Sorok butiran kad' : 'Hide card details') : (language === 'ms' ? 'Tunjuk butiran kad' : 'Show card details')}
+                      title={showCardDetails ? (language === 'ms' ? 'Sorok butiran kad' : 'Hide card details') : (language === 'ms' ? 'Tunjuk butiran kad' : 'Show card details')}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition"
+                    >
+                      {showCardDetails ? (
+                        <EyeOff className="w-5 h-5 text-gray-500" />
+                      ) : (
+                        <Eye className="w-5 h-5 text-gray-500" />
+                      )}
+                    </button>
                   </div>
 
-                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white mb-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
-                    <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
-                    
-                    <div className="relative">
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-2">
-                          <div className="w-12 h-8 bg-yellow-400 rounded flex items-center justify-center">
-                            <div className="w-8 h-6 bg-yellow-500 rounded-sm"></div>
+                  {loadingSubscription ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
+                    </div>
+                  ) : subscription?.paymentMethod ? (
+                    <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+                      
+                      <div className="relative">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
+                              <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
+                            </div>
+                            <span className="text-sm font-semibold opacity-90 capitalize">
+                              {subscription.paymentMethod.brand}
+                            </span>
                           </div>
-                          <span className="text-sm font-semibold opacity-90">
-                            {language === 'ms' ? 'Kad Kredit' : 'Credit Card'}
-                          </span>
-                        </div>
-                        {showCardDetails && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-xs font-bold"
-                          >
+                          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
                             <CheckCircle className="w-3 h-3" />
                             {language === 'ms' ? 'Disahkan' : 'Verified'}
-                          </motion.div>
-                        )}
+                          </div>
+                        </div>
+                        
+                        <p className="text-xl font-mono mb-4 tracking-wider">
+                          {showCardDetails 
+                            ? `•••• •••• •••• ${subscription.paymentMethod.last4}`
+                            : '•••• •••• •••• ••••'
+                          }
+                        </p>
+                        
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-xs opacity-70 mb-1">
+                              {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                            </p>
+                            <p className="font-bold">{user.displayName || user.email}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs opacity-70 mb-1">
+                              {language === 'ms' ? 'Tamat' : 'Expires'}
+                            </p>
+                            <p className="font-bold">
+                              {showCardDetails 
+                                ? `${String(subscription.paymentMethod.expMonth).padStart(2, '0')}/${subscription.paymentMethod.expYear}`
+                                : '••/••'
+                              }
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      
-                      <AnimatePresence mode="wait">
-                        {showCardDetails ? (
-                          <motion.div
-                            key="details"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <p className="text-xl font-mono mb-4 tracking-wider">
-                              4532 1234 5678 4242
-                            </p>
-                            
-                            <div className="flex justify-between items-end">
-                              <div>
-                                <p className="text-xs opacity-70 mb-1">
-                                  {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                                </p>
-                                <p className="font-bold">{editCardData.cardHolder}</p>
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs opacity-70 mb-1">CVV</p>
-                                <p className="font-bold">123</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs opacity-70 mb-1">
-                                  {language === 'ms' ? 'Tamat' : 'Expires'}
-                                </p>
-                                <p className="font-bold">{editCardData.expiryDate}</p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ) : (
-                          <motion.div
-                            key="hidden"
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <p className="text-xl font-mono mb-4 tracking-wider">
-                              •••• •••• •••• 4242
-                            </p>
-                            
-                            <div className="flex justify-between items-end">
-                              <div>
-                                <p className="text-xs opacity-70 mb-1">
-                                  {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                                </p>
-                                <p className="font-bold">{editCardData.cardHolder}</p>
-                              </div>
-                              <div className="text-right">
-                                <p className="text-xs opacity-70 mb-1">
-                                  {language === 'ms' ? 'Tamat' : 'Expires'}
-                                </p>
-                                <p className="font-bold">••/••</p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
                     </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-2 gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleUpdatePaymentMethod}
-                        className="bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg"
-                      >
-                        <Settings className="w-5 h-5" />
-                        {language === 'ms' ? 'Edit' : 'Edit'}
-                      </motion.button>
-                      
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleToggleCardDetails}
-                        className="bg-purple-100 hover:bg-purple-200 text-purple-700 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all"
-                      >
-                        {showCardDetails ? (
-                          <>
-                            <EyeOff className="w-5 h-5" />
-                            {language === 'ms' ? 'Sembunyi' : 'Hide'}
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="w-5 h-5" />
-                            {language === 'ms' ? 'Tunjuk' : 'Show'}
-                          </>
-                        )}
-                      </motion.button>
+                  ) : (
+                    <div className="bg-gray-50 rounded-xl p-6 text-center">
+                      <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500">
+                        {language === 'ms' ? 'Tiada kaedah bayaran' : 'No payment method on file'}
+                      </p>
                     </div>
-                    
-                    <div className="flex items-center justify-center gap-2 text-sm text-gray-600 pt-2">
-                      <Shield className="w-4 h-4 text-green-600" />
-                      <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
-                    </div>
+                  )}
+                  
+                  <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
                   </div>
                 </motion.div>
 
@@ -816,202 +756,215 @@ export default function PaymentMethodPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.18 }}
-                  className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+                  transition={{ delay: 0.15 }}
+                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
                 >
-                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2 mb-6">
+                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 mb-6">
                     <Settings className="w-6 h-6 text-gray-700" />
                     {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
                   </h2>
 
                   <div className="space-y-4">
                     {/* Auto Renewal Toggle */}
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${autoRenewal ? 'bg-green-100' : 'bg-gray-200'}`}>
-                          <RefreshCw className={`w-6 h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-500'}`} />
+                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-green-50 to-white rounded-2xl border border-green-100 hover:border-green-200 transition">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${autoRenewal ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <RefreshCw className={`w-6 h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-400'}`} />
                         </div>
                         <div>
                           <p className="font-bold text-gray-900">
                             {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
                           </p>
-                          <p className="text-sm text-gray-600">
-                            {language === 'ms' ? 'Baharu setiap bulan' : 'Renew every month'}
+                          <p className="text-sm text-gray-500">
+                            {autoRenewal 
+                              ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik' : 'Subscription will renew automatically')
+                              : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh' : 'Subscription will end at period end')
+                            }
                           </p>
                         </div>
                       </div>
-                      <motion.button
-                        whileTap={{ scale: 0.95 }}
+                      <button
                         onClick={handleToggleAutoRenewal}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                        disabled={updatingAutoRenewal || !subscription}
+                        aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                        title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                        className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 ${
                           autoRenewal ? 'bg-green-600' : 'bg-gray-300'
                         }`}
                       >
-                        <motion.div
-                          animate={{ x: autoRenewal ? 28 : 2 }}
-                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-                        />
-                      </motion.button>
+                        {updatingAutoRenewal ? (
+                          <Loader2 className="w-4 h-4 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
+                        ) : (
+                          <motion.div
+                            animate={{ x: autoRenewal ? 28 : 2 }}
+                            className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                          />
+                        )}
+                      </button>
                     </div>
 
                     {/* Email Notifications */}
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${emailNotifications ? 'bg-blue-100' : 'bg-gray-200'}`}>
-                          <Mail className={`w-6 h-6 ${emailNotifications ? 'text-blue-600' : 'text-gray-500'}`} />
+                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-white rounded-2xl border border-blue-100 hover:border-blue-200 transition">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${emailNotifications ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                          <Mail className={`w-6 h-6 ${emailNotifications ? 'text-blue-600' : 'text-gray-400'}`} />
                         </div>
                         <div>
                           <p className="font-bold text-gray-900">
                             {language === 'ms' ? 'Pemberitahuan Email' : 'Email Notifications'}
                           </p>
-                          <p className="text-sm text-gray-600">
-                            {language === 'ms' ? 'Invois & kemas kini' : 'Invoices & updates'}
+                          <p className="text-sm text-gray-500">
+                            {language === 'ms' ? 'Terima invois & kemas kini bil melalui email' : 'Receive invoices & billing updates via email'}
                           </p>
                         </div>
                       </div>
-                      <motion.button
-                        whileTap={{ scale: 0.95 }}
+                      <button
                         onClick={handleToggleEmailNotifications}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${
+                        disabled={updatingEmailNotifications}
+                        aria-label={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
+                        title={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
+                        className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 ${
                           emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
                         }`}
                       >
-                        <motion.div
-                          animate={{ x: emailNotifications ? 28 : 2 }}
-                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-                        />
-                      </motion.button>
-                    </div>
-
-                    {/* SMS Notifications */}
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${smsNotifications ? 'bg-purple-100' : 'bg-gray-200'}`}>
-                          <Smartphone className={`w-6 h-6 ${smsNotifications ? 'text-purple-600' : 'text-gray-500'}`} />
-                        </div>
-                        <div>
-                          <p className="font-bold text-gray-900">
-                            {language === 'ms' ? 'Pemberitahuan SMS' : 'SMS Notifications'}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {language === 'ms' ? 'Peringatan pembayaran' : 'Payment reminders'}
-                          </p>
-                        </div>
-                      </div>
-                      <motion.button
-                        whileTap={{ scale: 0.95 }}
-                        onClick={handleToggleSmsNotifications}
-                        className={`relative w-14 h-7 rounded-full transition-colors ${
-                          smsNotifications ? 'bg-purple-600' : 'bg-gray-300'
-                        }`}
-                      >
-                        <motion.div
-                          animate={{ x: smsNotifications ? 28 : 2 }}
-                          className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-                        />
-                      </motion.button>
+                        {updatingEmailNotifications ? (
+                          <Loader2 className="w-4 h-4 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
+                        ) : (
+                          <motion.div
+                            animate={{ x: emailNotifications ? 28 : 2 }}
+                            className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                          />
+                        )}
+                      </button>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Enhanced Invoices Section */}
+                {/* Invoice History */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-white rounded-2xl p-8 shadow-xl border border-gray-200"
+                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
                 >
                   <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
                       <FileText className="w-6 h-6 text-green-600" />
                       {language === 'ms' ? 'Sejarah Invois' : 'Invoice History'}
-                  </h2>
-                    <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold">
+                    </h2>
+                    <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
                       {invoices.length} {language === 'ms' ? 'invois' : 'invoices'}
                     </span>
                   </div>
                   
-                  <div className="space-y-3">
-                    {invoices.map((invoice) => (
-                      <motion.div 
-                        key={invoice.id} 
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        whileHover={{ scale: 1.02 }}
-                        className="group relative"
-                      >
-                        <div className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border-2 border-gray-200 hover:border-green-300 transition-all shadow-sm hover:shadow-md">
-                        <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                                <FileText className="w-5 h-5 text-green-600" />
+                  {loadingInvoices ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-green-600" />
+                    </div>
+                  ) : invoices.length === 0 ? (
+                    <div className="text-center py-12">
+                      <FileText className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                      <p className="text-gray-500">
+                        {language === 'ms' ? 'Tiada invois lagi' : 'No invoices yet'}
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-3">
+                        {invoices.slice(0, 3).map((invoice) => (
+                          <motion.div 
+                            key={invoice.id}
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            whileHover={{ scale: 1.01 }}
+                            className="group"
+                          >
+                            <div className="flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-white rounded-xl border border-gray-100 hover:border-green-200 transition-all">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                                  <FileText className="w-6 h-6 text-green-600" />
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-bold text-gray-900">
+                                      {invoice.number || invoice.id.slice(0, 14)}
+                                    </p>
+                                    <button
+                                      onClick={() => handleCopyInvoiceId(invoice.number || invoice.id)}
+                                      aria-label={language === 'ms' ? 'Salin ID invois' : 'Copy invoice ID'}
+                                      title={language === 'ms' ? 'Salin ID invois' : 'Copy invoice ID'}
+                                      className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
+                                    >
+                                      <Copy className="w-3 h-3 text-gray-500" />
+                                    </button>
+                                  </div>
+                                  <p className="text-sm text-gray-500 flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {formatDate(invoice.date)}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-bold text-gray-900 flex items-center gap-2">
-                                  {invoice.id}
-                                  <button
-                                    onClick={() => handleCopyInvoiceId(invoice.id)}
-                                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
-                                    title={language === 'ms' ? 'Salin ID' : 'Copy ID'}
-                                  >
-                                    <Copy className="w-3 h-3 text-gray-600" />
-                                  </button>
-                                </p>
-                                <p className="text-sm text-gray-600 flex items-center gap-1">
-                                  <Calendar className="w-3 h-3" />
-                            {invoice.date.toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
-                              year: 'numeric',
-                              month: 'long',
-                              day: 'numeric'
-                            })}
-                          </p>
-                        </div>
+                              
+                              <div className="flex items-center gap-4">
+                                <div className="text-right">
+                                  <p className="text-xl font-black text-gray-900">
+                                    {invoice.currency} {invoice.amount.toFixed(2)}
+                                  </p>
+                                  <span className={`inline-flex items-center gap-1 text-xs px-2 py-1 rounded-full font-semibold ${
+                                    invoice.status === 'paid' 
+                                      ? 'bg-green-100 text-green-700' 
+                                      : 'bg-amber-100 text-amber-700'
+                                  }`}>
+                                    <CheckCircle className="w-3 h-3" />
+                                    {invoice.status === 'paid' 
+                                      ? (language === 'ms' ? 'Dibayar' : 'Paid')
+                                      : invoice.status
+                                    }
+                                  </span>
+                                </div>
+                                
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => handleDownloadInvoice(invoice)}
+                                  aria-label={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                                  title={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                                  className="p-3 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all"
+                                >
+                                  <Download className="w-4 h-4" />
+                                </motion.button>
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="flex items-center gap-4">
-                        <div className="text-right">
-                              <p className="text-2xl font-black text-gray-900">RM {invoice.amount}</p>
-                              <span className="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
-                                <CheckCircle className="w-3 h-3" />
-                            {language === 'ms' ? 'Dibayar' : 'Paid'}
-                          </span>
-                        </div>
-                            
-                            <motion.button
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.9 }}
-                              onClick={() => handleDownloadInvoice(invoice.id)}
-                              className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all"
-                              title={language === 'ms' ? 'Muat turun' : 'Download'}
-                            >
-                              <Download className="w-4 h-4" />
-                            </motion.button>
+                          </motion.div>
+                        ))}
                       </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
 
-                  {/* View All Button */}
-                  <div className="mt-6 text-center">
-                    <button className="text-green-600 hover:text-green-700 font-bold flex items-center gap-2 mx-auto group">
-                      {language === 'ms' ? 'Lihat semua invois' : 'View all invoices'}
-                      <ExternalLink className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                  </div>
+                      {invoices.length > 3 && (
+                        <div className="mt-6 text-center">
+                          <button 
+                            onClick={() => setShowAllInvoicesModal(true)}
+                            className="text-green-600 hover:text-green-700 font-bold flex items-center gap-2 mx-auto group"
+                          >
+                            {language === 'ms' ? 'Lihat semua invois' : 'View all invoices'}
+                            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )}
                 </motion.div>
               </div>
 
-              {/* Sidebar */}
+              {/* Right Column - Sidebar */}
               <div className="space-y-8">
                 {/* Plan Comparison */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="bg-gradient-to-br from-blue-50 to-white rounded-2xl p-6 shadow-xl border-2 border-blue-200"
+                  className="bg-gradient-to-br from-green-50 to-white rounded-3xl p-6 shadow-xl border border-green-100"
                 >
-                  <h3 className="text-xl font-black text-gray-900 mb-4">
+                  <h3 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-green-500" />
                     {language === 'ms' ? 'Pelan Lain' : 'Other Plans'}
                   </h3>
                   <div className="space-y-3">
@@ -1022,52 +975,54 @@ export default function PaymentMethodPage() {
                       const isUpgrade = targetIndex > currentIndex;
                       
                       return (
-                        <div key={tier.id} className="p-4 bg-white rounded-lg border border-gray-200 hover:border-green-400 transition">
-                          <p className="font-bold text-gray-900 mb-1">
-                            {language === 'ms' ? tier.nameMs : tier.name}
-                          </p>
-                          <p className="text-sm text-gray-600 mb-3">
-                            RM {tier.monthlyPrice}/{language === 'ms' ? 'bulan' : 'month'}
-                          </p>
-                          <button
-                            onClick={() => isUpgrade ? handleUpgradePlan(tier.id) : handleDowngradePlan(tier.id)}
-                            disabled={loading}
-                            className={`w-full text-sm font-bold py-2 px-4 rounded-lg transition ${
-                              isUpgrade 
-                                ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800' 
-                                : 'bg-gray-600 text-white hover:bg-gray-700'
-                            } disabled:opacity-50`}
-                          >
-                            {loading ? (language === 'ms' ? 'Memproses...' : 'Processing...') : (
-                              isUpgrade 
-                                ? (language === 'ms' ? '⬆️ Naik Taraf' : '⬆️ Upgrade')
-                                : (language === 'ms' ? '⬇️ Turun Taraf' : '⬇️ Downgrade')
-                            )}
-                          </button>
-                        </div>
+                        <Link key={tier.id} href="/pricing">
+                          <div className="p-4 bg-white rounded-xl border border-gray-100 hover:border-green-300 hover:shadow-md transition-all cursor-pointer group">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-bold text-gray-900 group-hover:text-green-700 transition">
+                                  {language === 'ms' ? tier.nameMs : tier.name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  RM {tier.monthlyPrice}/{language === 'ms' ? 'bulan' : 'month'}
+                                </p>
+                              </div>
+                              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                                isUpgrade 
+                                  ? 'bg-green-100 text-green-700' 
+                                  : 'bg-gray-100 text-gray-600'
+                              }`}>
+                                {isUpgrade 
+                                  ? (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
+                                  : (language === 'ms' ? 'Turun Taraf' : 'Downgrade')
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </Link>
                       );
                     })}
                   </div>
                 </motion.div>
 
-                {/* Support */}
+                {/* Support Card */}
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-yellow-50 to-white rounded-2xl p-6 shadow-xl border-2 border-yellow-200"
+                  className="bg-gradient-to-br from-green-600 to-green-800 rounded-3xl p-6 shadow-xl text-white"
                 >
-                  <h3 className="text-xl font-black text-gray-900 mb-4">
+                  <h3 className="text-xl font-black mb-3 flex items-center gap-2">
+                    <Bell className="w-5 h-5" />
                     {language === 'ms' ? 'Perlukan Bantuan?' : 'Need Help?'}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-4">
+                  <p className="text-white/80 text-sm mb-4">
                     {language === 'ms' 
                       ? 'Hubungi pasukan sokongan kami untuk sebarang pertanyaan mengenai pembayaran.'
                       : 'Contact our support team for any questions about payments.'
                     }
                   </p>
                   <Link href="/contact">
-                    <Button className="w-full bg-yellow-400 text-green-900 hover:bg-yellow-500 py-2 font-bold">
+                    <Button className="w-full bg-yellow-500 text-white hover:bg-green-500 py-3 font-bold rounded-xl shadow-lg">
                       {language === 'ms' ? '📞 Hubungi Sokongan' : '📞 Contact Support'}
                     </Button>
                   </Link>
@@ -1077,169 +1032,134 @@ export default function PaymentMethodPage() {
           </div>
         </section>
 
-        {/* Edit Card Modal */}
+        {/* Cancel Subscription Modal */}
         <AnimatePresence>
-          {showEditCardModal && (
-            <>
-              {/* Backdrop */}
+          {showCancelModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowCancelModal(false)}
+            >
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setShowEditCardModal(false)}
-                className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
               >
-                {/* Modal Container */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
-                >
-                  {/* Modal Header */}
-                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 flex-shrink-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-2xl font-black text-white flex items-center gap-3">
-                        <Settings className="w-6 h-6" />
-                        {language === 'ms' ? 'Edit Kaedah Bayaran' : 'Edit Payment Method'}
-                      </h3>
-                      <motion.button
-                        whileHover={{ scale: 1.1, rotate: 90 }}
-                        whileTap={{ scale: 0.9 }}
-                        onClick={() => setShowEditCardModal(false)}
-                        className="text-white hover:bg-white/20 p-2 rounded-full transition"
-                        aria-label="Close"
-                      >
-                        <X className="w-6 h-6" />
-                      </motion.button>
-                    </div>
-                    <p className="text-purple-100 text-sm mt-2">
-                      {language === 'ms' ? 'Kemas kini maklumat kad anda' : 'Update your card information'}
-                    </p>
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-red-600" />
                   </div>
-
-                  {/* Modal Content */}
-                  <div className="p-6 space-y-4 overflow-y-auto flex-1">
-                  {/* Card Number */}
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cardNumber">
-                      {language === 'ms' ? 'Nombor Kad' : 'Card Number'}
-                    </label>
-                    <div className="relative">
-                      <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        id="cardNumber"
-                        value={editCardData.cardNumber}
-                        onChange={(e) => setEditCardData({ ...editCardData, cardNumber: e.target.value })}
-                        placeholder="4532 1234 5678 4242"
-                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Card Holder */}
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cardHolder">
-                      {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                    </label>
-                    <div className="relative">
-                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                      <input
-                        type="text"
-                        id="cardHolder"
-                        value={editCardData.cardHolder}
-                        onChange={(e) => setEditCardData({ ...editCardData, cardHolder: e.target.value })}
-                        placeholder="John Doe"
-                        className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Expiry Date and CVV */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="expiryDate">
-                        {language === 'ms' ? 'Tamat Tempoh' : 'Expiry Date'}
-                      </label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          id="expiryDate"
-                          value={editCardData.expiryDate}
-                          onChange={(e) => setEditCardData({ ...editCardData, expiryDate: e.target.value })}
-                          placeholder="12/25"
-                          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2" htmlFor="cvv">
-                        CVV
-                      </label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <input
-                          type="text"
-                          id="cvv"
-                          value={editCardData.cvv}
-                          onChange={(e) => setEditCardData({ ...editCardData, cvv: e.target.value })}
-                          placeholder="123"
-                          maxLength={3}
-                          className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition font-mono"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Security Notice */}
-                  <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4 flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-blue-900 mb-1">
-                        {language === 'ms' ? 'Selamat & Dilindungi' : 'Safe & Secure'}
-                      </p>
-                      <p className="text-xs text-blue-700">
-                        {language === 'ms' 
-                          ? 'Maklumat kad anda disulitkan dan selamat. Kami tidak menyimpan butiran kad anda.'
-                          : 'Your card information is encrypted and secure. We don\'t store your card details.'
-                        }
-                      </p>
-                    </div>
-                  </div>
-                  </div>
-
-                  {/* Modal Footer */}
-                  <div className="bg-gray-50 p-6 border-t border-gray-200 flex-shrink-0">
-                    <div className="flex gap-3">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={() => setShowEditCardModal(false)}
-                        className="flex-1 py-3 px-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition"
-                      >
-                        {language === 'ms' ? 'Batal' : 'Cancel'}
-                      </motion.button>
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        onClick={handleSaveCardDetails}
-                        className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-bold rounded-xl transition shadow-lg"
-                      >
-                        {language === 'ms' ? '💾 Simpan Perubahan' : '💾 Save Changes'}
-                      </motion.button>
-                    </div>
-                  </div>
-                </motion.div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-2">
+                    {language === 'ms' ? 'Batalkan Langganan?' : 'Cancel Subscription?'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {language === 'ms' 
+                      ? 'Langganan anda akan kekal aktif sehingga akhir tempoh bil semasa.'
+                      : 'Your subscription will remain active until the end of the current billing period.'
+                    }
+                  </p>
+                </div>
+                
+                <div className="flex gap-3">
+                  <Button
+                    onClick={() => setShowCancelModal(false)}
+                    className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl"
+                  >
+                    {language === 'ms' ? 'Kembali' : 'Go Back'}
+                  </Button>
+                  <Button
+                    onClick={handleCancelSubscription}
+                    disabled={loading}
+                    className="flex-1 bg-red-600 text-white hover:bg-red-700 py-3 font-bold rounded-xl"
+                  >
+                    {loading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      language === 'ms' ? 'Ya, Batalkan' : 'Yes, Cancel'
+                    )}
+                  </Button>
+                </div>
               </motion.div>
-            </>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* All Invoices Modal */}
+        <AnimatePresence>
+          {showAllInvoicesModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => setShowAllInvoicesModal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl max-w-2xl w-full max-h-[80vh] overflow-hidden shadow-2xl"
+              >
+                <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                  <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
+                    <FileText className="w-6 h-6 text-green-600" />
+                    {language === 'ms' ? 'Semua Invois' : 'All Invoices'}
+                  </h3>
+                  <button
+                    onClick={() => setShowAllInvoicesModal(false)}
+                    aria-label={language === 'ms' ? 'Tutup modal' : 'Close modal'}
+                    title={language === 'ms' ? 'Tutup modal' : 'Close modal'}
+                    className="p-2 hover:bg-gray-100 rounded-xl transition"
+                  >
+                    <X className="w-5 h-5 text-gray-500" />
+                  </button>
+                </div>
+                
+                <div className="p-6 overflow-y-auto max-h-[60vh] space-y-3">
+                  {invoices.map((invoice) => (
+                    <div 
+                      key={invoice.id}
+                      className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <FileText className="w-5 h-5 text-green-600" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">{invoice.number || invoice.id.slice(0, 14)}</p>
+                          <p className="text-sm text-gray-500">{formatDate(invoice.date)}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <p className="font-bold text-gray-900">{invoice.currency} {invoice.amount.toFixed(2)}</p>
+                          <span className={`text-xs ${invoice.status === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
+                            {invoice.status === 'paid' ? (language === 'ms' ? 'Dibayar' : 'Paid') : invoice.status}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleDownloadInvoice(invoice)}
+                          aria-label={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                          title={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                          className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>
     </ProtectedRoute>
   );
 }
-

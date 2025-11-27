@@ -21,6 +21,16 @@ export default function PricingPage() {
   
   // Get user's current plan (none means no plan purchased yet)
   const currentUserPlan = user?.plan || 'none';
+  // Get user's billing cycle to show current plan indicator correctly
+  const userBillingCycle = user?.billingCycle || 'monthly';
+  
+  // Check if current plan should be shown based on billing cycle toggle
+  const isCurrentPlanVisible = (tierId: string) => {
+    if (!user || currentUserPlan === 'none') return false;
+    if (tierId !== currentUserPlan) return false;
+    // Only show "current plan" when the toggle matches the user's actual billing cycle
+    return (isYearly && userBillingCycle === 'yearly') || (!isYearly && userBillingCycle === 'monthly');
+  };
 
   // Refresh user data when component mounts (in case returning from purchase)
   useEffect(() => {
@@ -62,7 +72,8 @@ export default function PricingPage() {
       };
     }
     
-    if (currentUserPlan === tierId) {
+    // Only show "Current Plan" when plan matches AND billing cycle matches
+    if (isCurrentPlanVisible(tierId)) {
       return {
         text: language === 'ms' ? '✓ Pelan Semasa' : '✓ Current Plan',
         className: 'bg-gray-300 text-gray-600 cursor-not-allowed',
@@ -75,6 +86,18 @@ export default function PricingPage() {
       return {
         text: language === 'ms' ? '🛒 Beli Pelan' : '🛒 Buy Plan',
         className: 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 font-bold shadow-lg',
+        disabled: false,
+      };
+    }
+    
+    // If same plan but different billing cycle, show switch option
+    if (currentUserPlan === tierId) {
+      const switchText = isYearly 
+        ? (language === 'ms' ? '🔄 Tukar ke Tahunan' : '🔄 Switch to Yearly')
+        : (language === 'ms' ? '🔄 Tukar ke Bulanan' : '🔄 Switch to Monthly');
+      return {
+        text: switchText,
+        className: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 font-bold shadow-lg',
         disabled: false,
       };
     }
@@ -175,10 +198,7 @@ export default function PricingPage() {
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
+          <div className="absolute inset-0 bg-dot-grid"></div>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -273,6 +293,8 @@ export default function PricingPage() {
               </span>
               <button
                 onClick={() => setIsYearly(!isYearly)}
+                aria-label={isYearly ? (language === 'ms' ? 'Tukar ke bil bulanan' : 'Switch to monthly billing') : (language === 'ms' ? 'Tukar ke bil tahunan' : 'Switch to yearly billing')}
+                title={isYearly ? (language === 'ms' ? 'Tukar ke bil bulanan' : 'Switch to monthly billing') : (language === 'ms' ? 'Tukar ke bil tahunan' : 'Switch to yearly billing')}
                 className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 focus:outline-none ${
                   isYearly ? 'bg-yellow-400' : 'bg-white/30'
                 }`}
@@ -311,7 +333,7 @@ export default function PricingPage() {
               className={`relative ${tier.popular ? 'scale-105' : ''}`}
             >
               
-              {user && currentUserPlan !== 'none' && tier.id === currentUserPlan && (
+              {isCurrentPlanVisible(tier.id) && (
                 <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 z-10">
                   <span className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-full text-xs font-black uppercase tracking-wide shadow-xl whitespace-nowrap">
                     {language === 'ms' ? '✓ PELAN ANDA' : '✓ YOUR CURRENT PLAN'}
@@ -320,7 +342,7 @@ export default function PricingPage() {
               )}
 
               <div className={`h-full bg-white rounded-xl shadow-xl hover:shadow-2xl transition-all duration-300 border-4 ${
-                (user && currentUserPlan !== 'none' && tier.id === currentUserPlan) ? 'border-green-600 transform scale-105 pt-4' : tier.popular ? 'border-yellow-400 transform scale-105 pt-4' : 'border-gray-200'
+                isCurrentPlanVisible(tier.id) ? 'border-green-600 transform scale-105 pt-4' : tier.popular ? 'border-yellow-400 transform scale-105 pt-4' : 'border-gray-200'
               }`}>
                 <div className={`p-8 ${tier.popular ? 'bg-gradient-to-br from-green-50 to-white' : ''}`}>
                   <div className="text-center mb-8">
@@ -684,10 +706,7 @@ export default function PricingPage() {
       {(!user || currentUserPlan === 'none') && (
         <section className="relative py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
+            <div className="absolute inset-0 bg-dot-grid"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -730,10 +749,7 @@ export default function PricingPage() {
       {user && currentUserPlan !== 'none' && (
         <section className="relative py-24 bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
+            <div className="absolute inset-0 bg-dot-grid"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">

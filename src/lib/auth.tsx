@@ -43,8 +43,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
           language: userData.language || 'ms',
           registrationDate: userData.registrationDate?.toDate() || new Date(),
           plan: userData.plan || 'none',
+          billingCycle: userData.billingCycle || undefined,
           status: userData.status || 'active',
           stripeCustomerId: userData.stripeCustomerId,
+          stripeSubscriptionId: userData.stripeSubscriptionId,
           uploadsUsed: userData.uploadsUsed || 0,
           uploadsLimit: userData.uploadsLimit || 0,
           lastLogin: new Date(),
@@ -55,6 +57,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             units: 'metric',
           },
           profilePictureUrl: userData.profilePictureUrl || firebaseUser.photoURL || undefined,
+          currentPeriodEnd: userData.currentPeriodEnd?.toDate() || undefined,
         };
       } else {
         // Create new user document if it doesn't exist - NO PLAN BY DEFAULT
