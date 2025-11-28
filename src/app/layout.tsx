@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
+import { Analytics } from '@vercel/analytics/next';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import { Toaster } from 'react-hot-toast';
 import '@/styles/globals.css';
@@ -122,6 +123,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <LayoutWrapper>
             {children}
           </LayoutWrapper>
+          <Analytics />
         </AuthProvider>
       </body>
     </html>
