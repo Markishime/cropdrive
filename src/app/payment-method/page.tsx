@@ -374,8 +374,9 @@ export default function PaymentMethodPage() {
         },
       });
       
+      const data = await response.json();
+      
       if (response.ok) {
-        const data = await response.json();
         toast.success(
           language === 'ms' 
             ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
@@ -397,14 +398,99 @@ export default function PaymentMethodPage() {
         await fetchSubscription();
         if (refreshUser) await refreshUser();
       } else {
-        throw new Error('Failed to cancel');
+        throw new Error(data.error || 'Failed to cancel');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Cancel subscription error:', error);
       toast.error(
         language === 'ms' 
-          ? '❌ Ralat membatalkan langganan' 
-          : '❌ Error cancelling subscription',
+          ? `❌ Ralat membatalkan langganan: ${error.message}` 
+          : `❌ Error cancelling subscription: ${error.message}`,
+        {
+          duration: 5000,
+          style: {
+            borderRadius: '12px',
+            background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setLoading(true);
+    
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error('Not authenticated');
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/subscription', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success(
+          language === 'ms' 
+            ? '🎉 Langganan telah diaktifkan semula!' 
+            : '🎉 Subscription has been reactivated!',
+          {
+            duration: 4000,
+            style: {
+              borderRadius: '12px',
+              background: '#10b981',
+              color: '#fff',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+            },
+          }
+        );
+        
+        // Refresh data
+        await fetchSubscription();
+        if (refreshUser) await refreshUser();
+      } else {
+        if (data.expired) {
+          toast.error(
+            language === 'ms' 
+              ? '⚠️ Tempoh langganan telah tamat. Sila langgan pelan baru.' 
+              : '⚠️ Subscription period has ended. Please subscribe to a new plan.',
+            {
+              duration: 5000,
+              style: {
+                borderRadius: '12px',
+                background: '#f59e0b',
+                color: '#fff',
+                padding: '16px',
+                fontSize: '14px',
+                fontWeight: '600',
+              },
+            }
+          );
+          router.push('/pricing');
+        } else {
+          throw new Error(data.error || 'Failed to reactivate');
+        }
+      }
+    } catch (error: any) {
+      console.error('Reactivate subscription error:', error);
+      toast.error(
+        language === 'ms' 
+          ? `❌ Ralat mengaktifkan semula langganan: ${error.message}` 
+          : `❌ Error reactivating subscription: ${error.message}`,
         {
           duration: 5000,
           style: {
@@ -606,18 +692,22 @@ export default function PaymentMethodPage() {
 
                     {/* Next Billing Info */}
                     {subscription && (
-                      <div className="bg-gray-50 rounded-xl p-4 mb-6">
+                      <div className={`rounded-xl p-4 mb-6 ${
+                        subscription.cancelAtPeriodEnd 
+                          ? 'bg-amber-50 border-2 border-amber-200' 
+                          : 'bg-gray-50'
+                      }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Clock className="w-5 h-5 text-gray-500" />
+                            <Clock className={`w-5 h-5 ${subscription.cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-500'}`} />
                             <div>
-                              <p className="text-sm font-bold text-gray-700">
+                              <p className={`text-sm font-bold ${subscription.cancelAtPeriodEnd ? 'text-amber-700' : 'text-gray-700'}`}>
                                 {subscription.cancelAtPeriodEnd 
                                   ? (language === 'ms' ? 'Langganan Tamat' : 'Subscription Ends')
                                   : (language === 'ms' ? 'Bil Seterusnya' : 'Next Billing')
                                 }
                               </p>
-                              <p className="text-xs text-gray-500">
+                              <p className={`text-xs ${subscription.cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-500'}`}>
                                 {formatDate(subscription.currentPeriodEnd)}
                               </p>
                             </div>
@@ -631,29 +721,81 @@ export default function PaymentMethodPage() {
                       </div>
                     )}
 
+                    {/* Cancellation Warning Banner */}
+                    {subscription?.cancelAtPeriodEnd && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-4 mb-6 text-white"
+                      >
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-bold mb-1">
+                              {language === 'ms' 
+                                ? 'Langganan Anda Akan Dibatalkan' 
+                                : 'Your Subscription Will Be Cancelled'}
+                            </p>
+                            <p className="text-sm text-white/90 mb-3">
+                              {language === 'ms' 
+                                ? `Anda masih boleh menggunakan semua ciri sehingga ${formatDate(subscription.currentPeriodEnd)}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
+                                : `You can still use all features until ${formatDate(subscription.currentPeriodEnd)}. After that, you won't be able to access the AI assistant.`}
+                            </p>
+                            <Button
+                              onClick={handleReactivateSubscription}
+                              disabled={loading}
+                              className="bg-white text-amber-600 hover:bg-amber-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm"
+                            >
+                              {loading ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                              )}
+                              {language === 'ms' ? 'Aktifkan Semula Langganan' : 'Reactivate Subscription'}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
                     {/* Actions */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Link href="/pricing">
                         <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
                           <TrendingUp className="w-4 h-4 mr-2" />
-                          {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
+                          {subscription?.cancelAtPeriodEnd 
+                            ? (language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe New Plan')
+                            : (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
+                          }
                         </Button>
                       </Link>
-                      <Button 
-                        onClick={() => setShowCancelModal(true)}
-                        disabled={loading || subscription?.cancelAtPeriodEnd}
-                        className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
-                      >
-                        {loading ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <X className="w-4 h-4 mr-2" />
-                        )}
-                        {subscription?.cancelAtPeriodEnd 
-                          ? (language === 'ms' ? 'Akan Dibatalkan' : 'Will Cancel')
-                          : (language === 'ms' ? 'Batalkan' : 'Cancel')
-                        }
-                      </Button>
+                      {subscription?.cancelAtPeriodEnd ? (
+                        <Button 
+                          onClick={handleReactivateSubscription}
+                          disabled={loading}
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-3 font-bold rounded-xl shadow-lg"
+                        >
+                          {loading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                          )}
+                          {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={() => setShowCancelModal(true)}
+                          disabled={loading}
+                          className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
+                        >
+                          {loading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <X className="w-4 h-4 mr-2" />
+                          )}
+                          {language === 'ms' ? 'Batalkan' : 'Cancel'}
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </motion.div>

@@ -12,9 +12,14 @@ import {
   Maximize2,
   Info,
   Zap,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  CreditCard
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);
@@ -90,13 +95,36 @@ export default function AssistantPage() {
     };
   }, [currentLang, mounted]);
 
+  // Check if subscription has expired (cancelled and past period end)
+  const isSubscriptionExpired = (): boolean => {
+    if (!user) return false;
+    
+    // If user has no plan or plan is 'none', they need to subscribe
+    if (!user.plan || user.plan === 'none') return true;
+    
+    // If subscription is set to cancel at period end
+    if (user.cancelAtPeriodEnd && user.currentPeriodEnd) {
+      const periodEnd = new Date(user.currentPeriodEnd);
+      const now = new Date();
+      // If current period has ended, subscription is expired
+      if (now >= periodEnd) return true;
+    }
+    
+    // If subscription status is canceled
+    if (user.subscriptionStatus === 'canceled') return true;
+    
+    return false;
+  };
+
+  const subscriptionExpired = user ? isSubscriptionExpired() : false;
+  const subscriptionCancelling = user?.cancelAtPeriodEnd && !subscriptionExpired;
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
-    // For testing: Allow access without payment
-    // Remove this condition once you want to enforce payment
-    // else if (user && (user.plan === 'none' || !user.plan)) {
+    // Redirect to pricing if subscription has fully expired
+    // else if (user && isSubscriptionExpired()) {
     //   router.push('/pricing');
     // }
   }, [user, authLoading, router]);
@@ -351,6 +379,54 @@ export default function AssistantPage() {
     );
   }
 
+  // Show subscription expired screen
+  if (subscriptionExpired) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-lg w-full bg-white rounded-3xl p-8 shadow-2xl text-center"
+        >
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <XCircle className="w-10 h-10 text-red-600" />
+          </div>
+          
+          <h1 className="text-2xl font-black text-gray-900 mb-3">
+            {language === 'ms' ? 'Langganan Tamat' : 'Subscription Expired'}
+          </h1>
+          
+          <p className="text-gray-600 mb-6">
+            {language === 'ms' 
+              ? 'Langganan anda telah tamat. Sila langgan pelan baru untuk terus menggunakan Pembantu AI CropDrive.' 
+              : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.'}
+          </p>
+          
+          <div className="space-y-3">
+            <Link href="/pricing" className="block">
+              <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
+                <CreditCard className="w-5 h-5 mr-2" />
+                {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
+              </Button>
+            </Link>
+            
+            <Link href="/payment-method" className="block">
+              <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
+                {language === 'ms' ? 'Urus Langganan' : 'Manage Subscription'}
+              </Button>
+            </Link>
+          </div>
+          
+          <p className="text-xs text-gray-400 mt-6">
+            {language === 'ms' 
+              ? 'Perlukan bantuan? Hubungi sokongan kami.' 
+              : 'Need help? Contact our support team.'}
+          </p>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Enhanced Header */}
@@ -416,11 +492,45 @@ export default function AssistantPage() {
         </div>
       </motion.div>
 
+      {/* Subscription Cancelling Warning Banner */}
+      {subscriptionCancelling && user?.currentPeriodEnd && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-white flex-shrink-0" />
+                <p className="text-sm font-semibold">
+                  {language === 'ms' 
+                    ? `⚠️ Langganan anda akan tamat pada ${new Date(user.currentPeriodEnd).toLocaleDateString('ms-MY', { dateStyle: 'long' })}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
+                    : `⚠️ Your subscription will end on ${new Date(user.currentPeriodEnd).toLocaleDateString('en-US', { dateStyle: 'long' })}. After that, you won't be able to access the AI assistant.`
+                  }
+                </p>
+              </div>
+              <Link href="/payment-method">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-amber-600 rounded-xl font-bold text-sm shadow-md hover:bg-amber-50 transition"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
+                </motion.button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick Guide Banner */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.2 }}
+        transition={{ duration: 0.5, delay: subscriptionCancelling ? 0.3 : 0.2 }}
         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
       >
         <div className="max-w-7xl mx-auto">

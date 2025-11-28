@@ -11,6 +11,8 @@ export interface User {
   plan: string; // Plan ID: 'none' | 'start' | 'smart' | 'precision'
   billingCycle?: 'monthly' | 'yearly'; // User's current billing cycle
   status: 'active' | 'inactive' | 'suspended';
+  subscriptionStatus?: 'active' | 'canceling' | 'canceled' | 'past_due'; // Stripe subscription status
+  cancelAtPeriodEnd?: boolean; // Whether subscription will cancel at period end
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   uploadsUsed: number;

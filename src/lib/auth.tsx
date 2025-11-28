@@ -45,6 +45,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
           plan: userData.plan || 'none',
           billingCycle: userData.billingCycle || undefined,
           status: userData.status || 'active',
+          subscriptionStatus: userData.subscriptionStatus || undefined,
+          cancelAtPeriodEnd: userData.cancelAtPeriodEnd || false,
           stripeCustomerId: userData.stripeCustomerId,
           stripeSubscriptionId: userData.stripeSubscriptionId,
           uploadsUsed: userData.uploadsUsed || 0,
