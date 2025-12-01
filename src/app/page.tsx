@@ -939,32 +939,32 @@ export default function HomePage() {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
             {[
               {
-                icon: '/images/icon_sustainability.png',
+                icon: '/images/how-we-help/optimized_4_ICON_Links_every_step_to_clear_economic_and_return-on-investment_values_png.png',
                 number: language === 'ms' ? 'Sehingga 25%' : 'Up to 25%',
                 text: language === 'ms' ? 'Pengurangan pembaziran baja melalui dos yang tepat' : 'Reduction in fertilizer waste through accurate dosing'
               },
               {
-                icon: '/images/icon_leaf.png',
+                icon: '/images/how-we-help/optimized_3_ICON_Designs_soil_health_improvement_strategies_png.png',
                 number: language === 'ms' ? 'Sehingga 35%' : 'Up to 35%',
                 text: language === 'ms' ? 'Peningkatan ketumpatan nutrien zon akar di bawah pelan input yang dipandu AI' : 'Increase in root zone nutrient density under AI-guided input plans'
               },
               {
-                icon: '/images/icon_farmers.png',
+                icon: '/images/how-we-help/optimized_5_ICON_Predicts_yield_growth_and_economic_outcomes_over_several_years_png.png',
                 number: language === 'ms' ? 'Sehingga 30%' : 'Up to 30%',
                 text: language === 'ms' ? 'Peningkatan jangkaan pulangan daripada strategi input yang lebih baik' : 'Increase in expected return from improved input strategy'
               },
               {
-                icon: '/images/icon_sustainability.png',
+                icon: '/images/how-we-help/optimized_6_ICON_Supports_soil_health_improvement_through_regenerative_approaches_png.png',
                 number: language === 'ms' ? 'Sehingga 50%' : 'Up to 50%',
                 text: language === 'ms' ? 'Peningkatan aktiviti mikrob tanah dengan keseimbangan dan masa input yang lebih baik' : 'Rise in soil microbial activity with better input balance and timing'
               },
               {
-                icon: '/images/icon_leaf.png',
+                icon: '/images/how-we-help/optimized_2_ICON_Provides_field-specific_recommendations_png.png',
                 number: language === 'ms' ? 'Sehingga 25%' : 'Up to 25%',
                 text: language === 'ms' ? 'Peningkatan kecekapan pengambilan nutrien menggunakan cadangan dos khusus tapak' : 'Increase in nutrient uptake efficiency using site-specific dose recommendations'
               },
               {
-                icon: '/images/icon_farmers.png',
+                icon: '/images/how-we-help/optimized_1_ICON_Interprets_test_data_png.png',
                 number: language === 'ms' ? 'Sehingga 21%' : 'Up to 21%',
                 text: language === 'ms' ? 'Pengurangan kerugian hasil daripada input yang salah aplikasi' : 'Reduction in yield losses from misapplied inputs'
               },

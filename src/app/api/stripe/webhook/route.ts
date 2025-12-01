@@ -38,6 +38,36 @@ function jsonResponse(data: object, status: number): Response {
   });
 }
 
+// GET handler - for health checks and browser visits
+export async function GET() {
+  return jsonResponse({
+    status: 'ok',
+    message: 'Stripe webhook endpoint is active. This endpoint only accepts POST requests from Stripe.',
+    timestamp: new Date().toISOString(),
+  }, 200);
+}
+
+// HEAD handler - for health checks
+export async function HEAD() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
+// OPTIONS handler - for CORS preflight
+export async function OPTIONS() {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Allow': 'GET, POST, HEAD, OPTIONS',
+      'Content-Type': 'application/json',
+    },
+  });
+}
+
 // Process events with individual error handling per event type
 async function processEvent(event: Stripe.Event, stripe: Stripe): Promise<void> {
   const startTime = Date.now();
