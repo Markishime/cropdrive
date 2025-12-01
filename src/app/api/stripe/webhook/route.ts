@@ -1,5 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import { NextRequest } from 'next/server';
 import Stripe from 'stripe';
 import admin, { adminDb } from '@/lib/firebase-admin';
 import { addPaymentToSheet, updateSubscriptionStatus, addCancellationToSheet } from '@/lib/googleSheets';
@@ -10,24 +9,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-export async function POST(req: NextRequest) {
+// Process events asynchronously after returning 200 to Stripe
+async function processEventAsync(event: Stripe.Event) {
   try {
-    const body = await req.text();
-    const signature = headers().get('stripe-signature')!;
-
-    let event: Stripe.Event;
-
-    try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    } catch (err) {
-      console.error('Webhook signature verification failed:', err);
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
-    }
-
-    // Handle the event
     switch (event.type) {
       case 'checkout.session.completed':
-        // Fetch the session with expanded line_items to get price information
         const sessionId = (event.data.object as Stripe.Checkout.Session).id;
         const session = await stripe.checkout.sessions.retrieve(sessionId, {
           expand: ['line_items', 'line_items.data.price']
@@ -58,15 +44,92 @@ export async function POST(req: NextRequest) {
       default:
         console.log(`Unhandled event type ${event.type}`);
     }
-
-    return NextResponse.json({ received: true });
   } catch (error) {
-    console.error('Webhook error:', error);
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
-    );
+    console.error(`Error processing event ${event.type}:`, error);
   }
+}
+
+export async function POST(req: NextRequest) {
+  console.log('🔔 Stripe webhook received');
+  
+  let body: string;
+  let signature: string | null;
+  
+  try {
+    // Read the raw body as text - critical for signature verification
+    body = await req.text();
+    console.log('📦 Body length:', body.length);
+    
+    // Get signature from headers - use req.headers directly (not next/headers)
+    signature = req.headers.get('stripe-signature');
+    console.log('🔑 Signature present:', !!signature);
+    
+    if (!signature) {
+      console.error('❌ No stripe-signature header found');
+      return new Response(JSON.stringify({ error: 'No signature' }), { 
+        status: 400,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    if (!webhookSecret) {
+      console.error('❌ STRIPE_WEBHOOK_SECRET not configured');
+      return new Response(JSON.stringify({ error: 'Webhook secret not configured' }), { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+  } catch (err) {
+    console.error('❌ Error reading request:', err);
+    return new Response(JSON.stringify({ error: 'Failed to read request' }), { 
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    // Verify the webhook signature
+    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+    console.log('✅ Signature verified, event type:', event.type);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+    console.error('❌ Webhook signature verification failed:', errorMessage);
+    return new Response(JSON.stringify({ error: `Invalid signature: ${errorMessage}` }), { 
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  // IMPORTANT: Return 200 immediately to Stripe, then process asynchronously
+  // This prevents Stripe timeouts on Vercel serverless functions
+  // Note: On Vercel, we can't truly run async after response, but we can try
+  // The key is to return quickly
+  
+  try {
+    // Process the event - but with a timeout wrapper
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Processing timeout')), 8000);
+    });
+    
+    await Promise.race([
+      processEventAsync(event),
+      timeoutPromise
+    ]);
+    
+    console.log('✅ Event processed successfully:', event.type);
+  } catch (error) {
+    // Log but don't fail - we've already verified the signature
+    console.error('⚠️ Event processing error (non-fatal):', error);
+  }
+
+  // Always return 200 after successful signature verification
+  return new Response(JSON.stringify({ received: true }), { 
+    status: 200,
+    headers: { 'Content-Type': 'application/json' }
+  });
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
@@ -226,15 +289,15 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   try {
     console.log('Subscription created:', subscription.id);
 
-    // Update subscription in Firestore using Admin SDK
+    // Update subscription in Firestore using Admin SDK - use set with merge to handle missing docs
     const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.update({
+    await subscriptionRef.set({
       status: subscription.status,
       currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
       currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
 
     console.log('✅ Updated subscription in database:', subscription.id);
 
@@ -247,15 +310,15 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   try {
     console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
 
-    // Update subscription in Firestore using Admin SDK
+    // Update subscription in Firestore using Admin SDK - use set with merge
     const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.update({
+    await subscriptionRef.set({
       status: subscription.status,
       currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
       currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
 
     // If subscription is canceled, update user status
     if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
@@ -296,12 +359,12 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   try {
     console.log('Subscription deleted:', subscription.id);
 
-    // Update subscription status in Firestore using Admin SDK
+    // Update subscription status in Firestore using Admin SDK - use set with merge
     const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.update({
+    await subscriptionRef.set({
       status: 'canceled',
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
 
     // Downgrade user to basic plan
     const subscriptionDoc = await subscriptionRef.get();
@@ -345,13 +408,13 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       if (subscriptionDoc.exists) {
         const subscriptionData = subscriptionDoc.data();
 
-        // Update subscription status and period
-        await subscriptionRef.update({
+        // Update subscription status and period - use set with merge
+        await subscriptionRef.set({
           status: 'active',
           currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(invoice.period_start * 1000)),
           currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(invoice.period_end * 1000)),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+        }, { merge: true });
 
         // Reset user upload count for new billing period
         if (subscriptionData && subscriptionData.userId) {
@@ -383,11 +446,11 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       if (subscriptionDoc.exists) {
         const subscriptionData = subscriptionDoc.data();
 
-        // Update subscription status
-        await subscriptionRef.update({
+        // Update subscription status - use set with merge
+        await subscriptionRef.set({
           status: 'past_due',
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
+        }, { merge: true });
 
         // Update user status (but don't downgrade immediately - give grace period)
         if (subscriptionData && subscriptionData.userId) {
