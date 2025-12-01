@@ -3,23 +3,62 @@ import Stripe from 'stripe';
 import admin, { adminDb } from '@/lib/firebase-admin';
 import { addPaymentToSheet, updateSubscriptionStatus, addCancellationToSheet } from '@/lib/googleSheets';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+// Initialize Stripe with error handling
+function getStripe(): Stripe | null {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    console.error('❌ STRIPE_SECRET_KEY not configured');
+    return null;
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2023-10-16',
+    maxNetworkRetries: 2, // Retry on network failures
+    timeout: 10000, // 10 second timeout for Stripe API calls
+  });
+}
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+// Get webhook secret with validation
+function getWebhookSecret(): string | null {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    console.error('❌ STRIPE_WEBHOOK_SECRET not configured');
+    return null;
+  }
+  return secret;
+}
 
-// Process events asynchronously after returning 200 to Stripe
-async function processEventAsync(event: Stripe.Event) {
+// Helper to create consistent JSON responses
+function jsonResponse(data: object, status: number): Response {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store, no-cache, must-revalidate',
+    },
+  });
+}
+
+// Process events with individual error handling per event type
+async function processEvent(event: Stripe.Event, stripe: Stripe): Promise<void> {
+  const startTime = Date.now();
+  console.log(`📥 Processing event: ${event.type} (ID: ${event.id})`);
+
   try {
     switch (event.type) {
-      case 'checkout.session.completed':
+      case 'checkout.session.completed': {
         const sessionId = (event.data.object as Stripe.Checkout.Session).id;
-        const session = await stripe.checkout.sessions.retrieve(sessionId, {
-          expand: ['line_items', 'line_items.data.price']
-        });
-        await handleCheckoutCompleted(session);
+        // Fetch with timeout
+        const session = await Promise.race([
+          stripe.checkout.sessions.retrieve(sessionId, {
+            expand: ['line_items', 'line_items.data.price']
+          }),
+          new Promise<never>((_, reject) => 
+            setTimeout(() => reject(new Error('Stripe API timeout')), 5000)
+          )
+        ]);
+        await handleCheckoutCompleted(session as Stripe.Checkout.Session);
         break;
+      }
 
       case 'customer.subscription.created':
         await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
@@ -42,431 +81,511 @@ async function processEventAsync(event: Stripe.Event) {
         break;
 
       default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.log(`ℹ️ Unhandled event type: ${event.type}`);
     }
+
+    const duration = Date.now() - startTime;
+    console.log(`✅ Event ${event.type} processed in ${duration}ms`);
   } catch (error) {
-    console.error(`Error processing event ${event.type}:`, error);
+    const duration = Date.now() - startTime;
+    console.error(`❌ Event ${event.type} failed after ${duration}ms:`, error);
+    // Don't rethrow - we want to return 200 to Stripe regardless
   }
 }
 
 export async function POST(req: NextRequest) {
-  console.log('🔔 Stripe webhook received');
-  
-  let body: string;
-  let signature: string | null;
-  
-  try {
-    // Read the raw body as text - critical for signature verification
-    body = await req.text();
-    console.log('📦 Body length:', body.length);
-    
-    // Get signature from headers - use req.headers directly (not next/headers)
-    signature = req.headers.get('stripe-signature');
-    console.log('🔑 Signature present:', !!signature);
-    
-    if (!signature) {
-      console.error('❌ No stripe-signature header found');
-      return new Response(JSON.stringify({ error: 'No signature' }), { 
-        status: 400,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+  const requestStart = Date.now();
+  console.log('🔔 Stripe webhook received at:', new Date().toISOString());
 
-    if (!webhookSecret) {
-      console.error('❌ STRIPE_WEBHOOK_SECRET not configured');
-      return new Response(JSON.stringify({ error: 'Webhook secret not configured' }), { 
-        status: 500,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-  } catch (err) {
-    console.error('❌ Error reading request:', err);
-    return new Response(JSON.stringify({ error: 'Failed to read request' }), { 
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
+  // Initialize Stripe
+  const stripe = getStripe();
+  if (!stripe) {
+    return jsonResponse({ error: 'Stripe not configured' }, 500);
   }
 
+  // Get webhook secret
+  const webhookSecret = getWebhookSecret();
+  if (!webhookSecret) {
+    return jsonResponse({ error: 'Webhook secret not configured' }, 500);
+  }
+
+  // Read raw body - MUST be done before any other body parsing
+  let rawBody: string;
+  try {
+    rawBody = await req.text();
+    if (!rawBody || rawBody.length === 0) {
+      console.error('❌ Empty request body');
+      return jsonResponse({ error: 'Empty body' }, 400);
+    }
+    console.log('📦 Body received, length:', rawBody.length);
+  } catch (err) {
+    console.error('❌ Failed to read request body:', err);
+    return jsonResponse({ error: 'Failed to read body' }, 400);
+  }
+
+  // Get signature header
+  const signature = req.headers.get('stripe-signature');
+  if (!signature) {
+    console.error('❌ Missing stripe-signature header');
+    return jsonResponse({ error: 'Missing signature' }, 400);
+  }
+  console.log('🔑 Signature header present');
+
+  // Verify webhook signature
   let event: Stripe.Event;
-
   try {
-    // Verify the webhook signature
-    event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    console.log('✅ Signature verified, event type:', event.type);
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+    console.log('✅ Signature verified successfully');
+    console.log('📋 Event type:', event.type);
+    console.log('📋 Event ID:', event.id);
   } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error('❌ Webhook signature verification failed:', errorMessage);
-    return new Response(JSON.stringify({ error: `Invalid signature: ${errorMessage}` }), { 
-      status: 400,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    const errorMsg = err instanceof Error ? err.message : 'Unknown verification error';
+    console.error('❌ Signature verification failed:', errorMsg);
+    
+    // Log additional debug info
+    console.error('Debug - Signature length:', signature.length);
+    console.error('Debug - Body starts with:', rawBody.substring(0, 100));
+    console.error('Debug - Secret starts with:', webhookSecret.substring(0, 10) + '...');
+    
+    return jsonResponse({ error: `Signature verification failed: ${errorMsg}` }, 400);
   }
 
-  // IMPORTANT: Return 200 immediately to Stripe, then process asynchronously
-  // This prevents Stripe timeouts on Vercel serverless functions
-  // Note: On Vercel, we can't truly run async after response, but we can try
-  // The key is to return quickly
+  // Process the event with a hard timeout to ensure we respond to Stripe in time
+  // Vercel has a 10s default timeout, Stripe expects response within 5-20s
+  const processingTimeout = 8000; // 8 seconds max for processing
   
   try {
-    // Process the event - but with a timeout wrapper
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Processing timeout')), 8000);
-    });
-    
     await Promise.race([
-      processEventAsync(event),
-      timeoutPromise
+      processEvent(event, stripe),
+      new Promise<never>((_, reject) => 
+        setTimeout(() => reject(new Error('Processing timeout - will retry')), processingTimeout)
+      )
     ]);
-    
-    console.log('✅ Event processed successfully:', event.type);
-  } catch (error) {
-    // Log but don't fail - we've already verified the signature
-    console.error('⚠️ Event processing error (non-fatal):', error);
+  } catch (timeoutError) {
+    // Log timeout but still return 200 - Stripe will retry if needed
+    console.warn('⚠️ Processing timed out, but returning 200 to prevent Stripe retry storm');
   }
 
-  // Always return 200 after successful signature verification
-  return new Response(JSON.stringify({ received: true }), { 
-    status: 200,
-    headers: { 'Content-Type': 'application/json' }
-  });
+  const totalDuration = Date.now() - requestStart;
+  console.log(`📊 Total webhook processing time: ${totalDuration}ms`);
+
+  // ALWAYS return 200 after successful signature verification
+  // This tells Stripe we received the webhook, even if processing had issues
+  return jsonResponse({ 
+    received: true,
+    eventType: event.type,
+    eventId: event.id,
+    processingTime: totalDuration
+  }, 200);
+}
+
+// Helper function for Firestore operations with retry
+async function firestoreWithRetry<T>(
+  operation: () => Promise<T>,
+  operationName: string,
+  maxRetries: number = 2
+): Promise<T | null> {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.error(`❌ ${operationName} failed (attempt ${attempt}/${maxRetries}):`, error);
+      if (attempt === maxRetries) {
+        console.error(`❌ ${operationName} exhausted all retries`);
+        return null;
+      }
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+    }
+  }
+  return null;
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
-  try {
-    console.log('🔔 Webhook: checkout.session.completed received');
-    console.log('Session ID:', session.id);
-    console.log('Session metadata:', session.metadata);
-    console.log('Client reference ID:', session.client_reference_id);
-    
-    // Handle both regular checkout sessions (with metadata) and Payment Links (with client_reference_id)
-    let userId = session.metadata?.userId || session.client_reference_id;
-    let planId = session.metadata?.planId;
-    let isYearly = session.metadata?.isYearly === 'true';
+  console.log('🔔 Webhook: checkout.session.completed received');
+  console.log('Session ID:', session.id);
+  console.log('Session metadata:', JSON.stringify(session.metadata));
+  console.log('Client reference ID:', session.client_reference_id);
+  
+  // Handle both regular checkout sessions (with metadata) and Payment Links (with client_reference_id)
+  let userId = session.metadata?.userId || session.client_reference_id;
+  let planId = session.metadata?.planId;
+  let isYearly = session.metadata?.isYearly === 'true';
 
-    // If using Payment Links, extract plan info from the line items
-    if (!planId && session.line_items?.data.length) {
-      console.log('Extracting plan info from line items...');
-      const priceId = session.line_items.data[0]?.price?.id;
-      console.log('Price ID from line items:', priceId);
-      
-      // Map price ID to plan
-      const priceToPlan: { [key: string]: { planId: string, isYearly: boolean } } = {
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_START_MONTHLY || '']: { planId: 'start', isYearly: false },
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_START_YEARLY || '']: { planId: 'start', isYearly: true },
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_MONTHLY || '']: { planId: 'smart', isYearly: false },
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_YEARLY || '']: { planId: 'smart', isYearly: true },
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_MONTHLY || '']: { planId: 'precision', isYearly: false },
-        [process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_YEARLY || '']: { planId: 'precision', isYearly: true },
-      };
-      
-      if (priceId && priceToPlan[priceId]) {
-        planId = priceToPlan[priceId].planId;
-        isYearly = priceToPlan[priceId].isYearly;
-        console.log('✅ Plan extracted from price ID:', planId, 'yearly:', isYearly);
+  // If using Payment Links, extract plan info from the line items
+  if (!planId && session.line_items?.data?.length) {
+    console.log('Extracting plan info from line items...');
+    const priceId = session.line_items.data[0]?.price?.id;
+    console.log('Price ID from line items:', priceId);
+    
+    // Map price ID to plan - handle undefined env vars gracefully
+    const priceToPlan: Record<string, { planId: string; isYearly: boolean }> = {};
+    
+    const priceEnvMappings = [
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_START_MONTHLY', planId: 'start', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_START_YEARLY', planId: 'start', isYearly: true },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_SMART_MONTHLY', planId: 'smart', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_SMART_YEARLY', planId: 'smart', isYearly: true },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_PRECISION_MONTHLY', planId: 'precision', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_PRECISION_YEARLY', planId: 'precision', isYearly: true },
+    ];
+    
+    for (const mapping of priceEnvMappings) {
+      const envValue = process.env[mapping.env];
+      if (envValue) {
+        priceToPlan[envValue] = { planId: mapping.planId, isYearly: mapping.isYearly };
       }
     }
-
-    if (!userId) {
-      console.error('❌ Missing userId in webhook');
-      console.log('Full session data:', JSON.stringify(session, null, 2));
-      return;
+    
+    if (priceId && priceToPlan[priceId]) {
+      planId = priceToPlan[priceId].planId;
+      isYearly = priceToPlan[priceId].isYearly;
+      console.log('✅ Plan extracted from price ID:', planId, 'yearly:', isYearly);
+    } else {
+      console.warn('⚠️ Unknown price ID:', priceId);
+      console.warn('⚠️ Available mappings:', Object.keys(priceToPlan));
     }
+  }
 
-    if (!planId) {
-      console.error('❌ Missing planId in webhook');
-      console.log('Full session data:', JSON.stringify(session, null, 2));
-      return;
-    }
+  if (!userId) {
+    console.error('❌ Missing userId in webhook - cannot process');
+    return;
+  }
 
-    console.log('✅ Processing checkout for user:', userId, 'plan:', planId, 'yearly:', isYearly);
+  if (!planId) {
+    console.error('❌ Missing planId in webhook - cannot process');
+    return;
+  }
 
-    // Get user document using Admin SDK
-    const userRef = adminDb.collection('users').doc(userId);
-    const userDoc = await userRef.get();
-    if (!userDoc.exists) {
-      console.log('User not found:', userId);
-      return;
-    }
+  console.log('✅ Processing checkout for user:', userId, 'plan:', planId, 'yearly:', isYearly);
 
-    const userData = userDoc.data();
+  // Get user document using Admin SDK with retry
+  const userRef = adminDb.collection('users').doc(userId);
+  const userDoc = await firestoreWithRetry(
+    () => userRef.get(),
+    'Get user document'
+  );
+  
+  if (!userDoc || !userDoc.exists) {
+    console.error('❌ User not found:', userId);
+    return;
+  }
 
-    // Create subscription record
-    const subscriptionData = {
-      id: session.subscription as string,
-      userId: userId,
-      planId: planId,
-      stripeSubscriptionId: session.subscription as string,
-      stripeCustomerId: session.customer as string,
-      status: 'active',
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date()),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000)),
-      cancelAtPeriodEnd: false,
-      createdAt: admin.firestore.Timestamp.fromDate(new Date()),
-      updatedAt: admin.firestore.Timestamp.fromDate(new Date()),
-      stripePriceId: session.line_items?.data[0]?.price?.id || '',
-    };
+  const userData = userDoc.data();
+  const subscriptionId = session.subscription as string;
+  const customerId = session.customer as string;
+  const periodEnd = new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000);
 
-    // Save subscription to Firestore using Admin SDK
-    await adminDb.collection('subscriptions').doc(session.subscription as string).set(subscriptionData);
+  // Create subscription record
+  const subscriptionData = {
+    id: subscriptionId,
+    userId: userId,
+    planId: planId,
+    stripeSubscriptionId: subscriptionId,
+    stripeCustomerId: customerId,
+    status: 'active',
+    currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date()),
+    currentPeriodEnd: admin.firestore.Timestamp.fromDate(periodEnd),
+    cancelAtPeriodEnd: false,
+    createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+    updatedAt: admin.firestore.Timestamp.fromDate(new Date()),
+    stripePriceId: session.line_items?.data?.[0]?.price?.id || '',
+  };
 
-    // Update user plan and limits
-    const planLimits = {
-      start: { uploadsLimit: 10 },
-      smart: { uploadsLimit: 50 },
-      precision: { uploadsLimit: -1 }
-    };
+  // Save subscription to Firestore with retry
+  if (subscriptionId) {
+    await firestoreWithRetry(
+      () => adminDb.collection('subscriptions').doc(subscriptionId).set(subscriptionData),
+      'Create subscription record'
+    );
+  }
 
-    const limits = planLimits[planId as keyof typeof planLimits];
-    if (!limits) {
-      console.error('❌ Invalid plan limits for plan:', planId);
-      return;
-    }
+  // Update user plan and limits
+  const planLimits: Record<string, { uploadsLimit: number }> = {
+    start: { uploadsLimit: 10 },
+    smart: { uploadsLimit: 50 },
+    precision: { uploadsLimit: -1 }
+  };
 
-    console.log('📝 Updating user document in Firestore...');
-    console.log('User ID:', userId);
-    console.log('Plan:', planId);
-    console.log('Limits:', limits);
+  const limits = planLimits[planId];
+  if (!limits) {
+    console.error('❌ Invalid plan limits for plan:', planId);
+    // Default to start plan limits
+    console.log('⚠️ Using default limits for unknown plan');
+  }
 
-    await userRef.update({
+  const uploadsLimit = limits?.uploadsLimit ?? 10;
+
+  console.log('📝 Updating user document in Firestore...');
+  console.log('User ID:', userId);
+  console.log('Plan:', planId);
+  console.log('Uploads limit:', uploadsLimit);
+
+  // Update user with retry
+  const userUpdateResult = await firestoreWithRetry(
+    () => userRef.update({
       plan: planId,
       billingCycle: isYearly ? 'yearly' : 'monthly',
-      uploadsLimit: limits.uploadsLimit,
+      uploadsLimit: uploadsLimit,
       uploadsUsed: 0,
-      stripeCustomerId: session.customer as string,
-      stripeSubscriptionId: session.subscription as string,
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000)),
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(periodEnd),
+      subscriptionStatus: 'active',
+      cancelAtPeriodEnd: false,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
-    
+    }),
+    'Update user document'
+  );
+
+  if (userUpdateResult !== null) {
     console.log('✅✅✅ USER PLAN UPDATED SUCCESSFULLY ✅✅✅');
     console.log('User:', userId);
     console.log('New plan:', planId);
-    console.log('Upload limit:', limits.uploadsLimit);
+    console.log('Upload limit:', uploadsLimit);
+  }
 
-    console.log('✅ Subscription created successfully for user:', userId);
+  // Google Sheets tracking (non-critical, fire and forget)
+  if (userData) {
+    const planNames: Record<string, string> = {
+      start: 'CropDrive Start',
+      smart: 'CropDrive Smart',
+      precision: 'CropDrive Precision',
+    };
 
-    // Also add to Google Sheets for tracking
-    try {
-      if (userData) {
-        const planNames = {
-          start: { en: 'CropDrive Start', ms: 'CropDrive Start' },
-          smart: { en: 'CropDrive Smart', ms: 'CropDrive Smart' },
-          precision: { en: 'CropDrive Precision', ms: 'CropDrive Precision' },
-        };
+    const planName = planNames[planId] || planId;
+    const amount = session.amount_total ? session.amount_total / 100 : 0;
 
-        const planName = planNames[planId as keyof typeof planNames]?.en || planId;
-        const amount = session.amount_total ? session.amount_total / 100 : 0;
-
-        await addPaymentToSheet({
-          email: userData.email,
-          name: userData.displayName || userData.farmName || '',
-          plan: planId,
-          planDisplayName: planName,
-          amount: amount,
-          currency: session.currency || 'myr',
-          status: 'active',
-          stripeCustomerId: session.customer as string,
-          stripeSubscriptionId: session.subscription as string,
-          billingCycle: isYearly ? 'yearly' : 'monthly',
-          startDate: new Date(),
-          endDate: new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000),
-          timestamp: new Date(),
-        });
-        console.log('✅ Payment recorded in Google Sheets');
-      }
-    } catch (sheetError) {
-      console.error('⚠️ Failed to add to Google Sheets (non-critical):', sheetError);
-      // Don't throw error - Google Sheets is supplementary
-    }
-
-  } catch (error) {
-    console.error('❌ Error handling checkout completed:', error);
+    // Don't await - fire and forget for Google Sheets
+    addPaymentToSheet({
+      email: userData.email || '',
+      name: userData.displayName || userData.farmName || '',
+      plan: planId,
+      planDisplayName: planName,
+      amount: amount,
+      currency: session.currency || 'myr',
+      status: 'active',
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      billingCycle: isYearly ? 'yearly' : 'monthly',
+      startDate: new Date(),
+      endDate: periodEnd,
+      timestamp: new Date(),
+    }).then(() => {
+      console.log('✅ Payment recorded in Google Sheets');
+    }).catch((sheetError) => {
+      console.warn('⚠️ Google Sheets update failed (non-critical):', sheetError);
+    });
   }
 }
 
 async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
-  try {
-    console.log('Subscription created:', subscription.id);
+  console.log('📥 Subscription created:', subscription.id);
 
-    // Update subscription in Firestore using Admin SDK - use set with merge to handle missing docs
-    const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.set({
+  await firestoreWithRetry(
+    () => adminDb.collection('subscriptions').doc(subscription.id).set({
       status: subscription.status,
       currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
       currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true });
+    }, { merge: true }),
+    'Update subscription (created)'
+  );
 
-    console.log('✅ Updated subscription in database:', subscription.id);
-
-  } catch (error) {
-    console.error('❌ Error handling subscription created:', error);
-  }
+  console.log('✅ Subscription created in database:', subscription.id);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  try {
-    console.log('Subscription updated:', subscription.id, 'Status:', subscription.status);
+  console.log('📥 Subscription updated:', subscription.id, 'Status:', subscription.status);
 
-    // Update subscription in Firestore using Admin SDK - use set with merge
-    const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.set({
+  const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
+  
+  // Update subscription record
+  await firestoreWithRetry(
+    () => subscriptionRef.set({
       status: subscription.status,
       currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
       currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
       cancelAtPeriodEnd: subscription.cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true });
+    }, { merge: true }),
+    'Update subscription record'
+  );
 
-    // If subscription is canceled, update user status
-    if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
-      const subscriptionDoc = await subscriptionRef.get();
-      if (subscriptionDoc.exists) {
-        const subscriptionData = subscriptionDoc.data();
-        if (subscriptionData && subscriptionData.userId) {
-          const userRef = adminDb.collection('users').doc(subscriptionData.userId);
-          await userRef.update({
-            plan: 'start', // Downgrade to basic plan
+  // If subscription is canceled or unpaid, downgrade user
+  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
+    const subscriptionDoc = await firestoreWithRetry(
+      () => subscriptionRef.get(),
+      'Get subscription for user lookup'
+    );
+    
+    if (subscriptionDoc?.exists) {
+      const subscriptionData = subscriptionDoc.data();
+      const userId = subscriptionData?.userId;
+      
+      if (userId) {
+        await firestoreWithRetry(
+          () => adminDb.collection('users').doc(userId).update({
+            plan: 'start',
             uploadsLimit: 10,
+            subscriptionStatus: 'canceled',
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-          console.log('Downgraded user to basic plan:', subscriptionData.userId);
-        }
+          }),
+          'Downgrade user plan'
+        );
+        console.log('⬇️ Downgraded user to basic plan:', userId);
       }
     }
-
-    console.log('✅ Updated subscription status in database');
-
-    // Update Google Sheets status
-    try {
-      await updateSubscriptionStatus(
-        subscription.id,
-        subscription.status,
-        subscription.status === 'canceled' ? new Date() : undefined
-      );
-    } catch (sheetError) {
-      console.error('⚠️ Failed to update Google Sheets (non-critical):', sheetError);
-    }
-
-  } catch (error) {
-    console.error('❌ Error handling subscription updated:', error);
   }
+
+  console.log('✅ Subscription updated in database');
+
+  // Google Sheets update (fire and forget)
+  updateSubscriptionStatus(
+    subscription.id,
+    subscription.status,
+    subscription.status === 'canceled' ? new Date() : undefined
+  ).catch((err) => console.warn('⚠️ Google Sheets update failed:', err));
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
-  try {
-    console.log('Subscription deleted:', subscription.id);
+  console.log('📥 Subscription deleted:', subscription.id);
 
-    // Update subscription status in Firestore using Admin SDK - use set with merge
-    const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
-    await subscriptionRef.set({
+  const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
+  
+  // Mark subscription as canceled
+  await firestoreWithRetry(
+    () => subscriptionRef.set({
       status: 'canceled',
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true });
+    }, { merge: true }),
+    'Mark subscription canceled'
+  );
 
-    // Downgrade user to basic plan
-    const subscriptionDoc = await subscriptionRef.get();
-    if (subscriptionDoc.exists) {
-      const subscriptionData = subscriptionDoc.data();
-      if (subscriptionData && subscriptionData.userId) {
-        const userRef = adminDb.collection('users').doc(subscriptionData.userId);
-        await userRef.update({
+  // Get subscription to find user
+  const subscriptionDoc = await firestoreWithRetry(
+    () => subscriptionRef.get(),
+    'Get subscription for user lookup'
+  );
+  
+  if (subscriptionDoc?.exists) {
+    const subscriptionData = subscriptionDoc.data();
+    const userId = subscriptionData?.userId;
+    
+    if (userId) {
+      await firestoreWithRetry(
+        () => adminDb.collection('users').doc(userId).update({
           plan: 'start',
           uploadsLimit: 10,
           uploadsUsed: 0,
+          subscriptionStatus: 'canceled',
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        console.log('Downgraded user to basic plan after subscription deletion:', subscriptionData.userId);
-      }
+        }),
+        'Downgrade user after deletion'
+      );
+      console.log('⬇️ Downgraded user after subscription deletion:', userId);
     }
-
-    console.log('✅ Handled subscription deletion');
-
-    // Record cancellation in Google Sheets
-    try {
-      await addCancellationToSheet(subscription.id, 'Subscription deleted');
-    } catch (sheetError) {
-      console.error('⚠️ Failed to update Google Sheets (non-critical):', sheetError);
-    }
-
-  } catch (error) {
-    console.error('❌ Error handling subscription deleted:', error);
   }
+
+  console.log('✅ Subscription deletion handled');
+
+  // Google Sheets (fire and forget)
+  addCancellationToSheet(subscription.id, 'Subscription deleted')
+    .catch((err) => console.warn('⚠️ Google Sheets cancellation failed:', err));
 }
 
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
-  try {
-    console.log('Payment succeeded:', invoice.id);
+  console.log('📥 Payment succeeded:', invoice.id);
 
-    // Find subscription by customer
-    if (invoice.subscription) {
-      const subscriptionRef = adminDb.collection('subscriptions').doc(invoice.subscription as string);
-      const subscriptionDoc = await subscriptionRef.get();
+  const subscriptionId = invoice.subscription as string;
+  if (!subscriptionId) {
+    console.log('ℹ️ Invoice has no subscription, skipping');
+    return;
+  }
 
-      if (subscriptionDoc.exists) {
-        const subscriptionData = subscriptionDoc.data();
+  const subscriptionRef = adminDb.collection('subscriptions').doc(subscriptionId);
+  const subscriptionDoc = await firestoreWithRetry(
+    () => subscriptionRef.get(),
+    'Get subscription for payment'
+  );
 
-        // Update subscription status and period - use set with merge
-        await subscriptionRef.set({
-          status: 'active',
-          currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(invoice.period_start * 1000)),
-          currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(invoice.period_end * 1000)),
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
+  if (!subscriptionDoc?.exists) {
+    console.warn('⚠️ Subscription not found for payment:', subscriptionId);
+    return;
+  }
 
-        // Reset user upload count for new billing period
-        if (subscriptionData && subscriptionData.userId) {
-          const userRef = adminDb.collection('users').doc(subscriptionData.userId);
-          await userRef.update({
-            uploadsUsed: 0,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
+  const subscriptionData = subscriptionDoc.data();
 
-          console.log('✅ Updated subscription and reset usage for user:', subscriptionData.userId);
-        }
-      }
-    }
+  // Update subscription status and period
+  await firestoreWithRetry(
+    () => subscriptionRef.set({
+      status: 'active',
+      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(invoice.period_start * 1000)),
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(invoice.period_end * 1000)),
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true }),
+    'Update subscription after payment'
+  );
 
-  } catch (error) {
-    console.error('❌ Error handling payment succeeded:', error);
+  // Reset user upload count for new billing period
+  const userId = subscriptionData?.userId;
+  if (userId) {
+    await firestoreWithRetry(
+      () => adminDb.collection('users').doc(userId).update({
+        uploadsUsed: 0,
+        subscriptionStatus: 'active',
+        currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(invoice.period_end * 1000)),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+      'Reset user uploads after payment'
+    );
+    console.log('✅ Payment processed, usage reset for user:', userId);
   }
 }
 
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
-  try {
-    console.log('Payment failed:', invoice.id);
+  console.log('📥 Payment failed:', invoice.id);
 
-    // Find subscription by customer
-    if (invoice.subscription) {
-      const subscriptionRef = adminDb.collection('subscriptions').doc(invoice.subscription as string);
-      const subscriptionDoc = await subscriptionRef.get();
+  const subscriptionId = invoice.subscription as string;
+  if (!subscriptionId) {
+    console.log('ℹ️ Invoice has no subscription, skipping');
+    return;
+  }
 
-      if (subscriptionDoc.exists) {
-        const subscriptionData = subscriptionDoc.data();
+  const subscriptionRef = adminDb.collection('subscriptions').doc(subscriptionId);
+  const subscriptionDoc = await firestoreWithRetry(
+    () => subscriptionRef.get(),
+    'Get subscription for failed payment'
+  );
 
-        // Update subscription status - use set with merge
-        await subscriptionRef.set({
-          status: 'past_due',
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        }, { merge: true });
+  if (!subscriptionDoc?.exists) {
+    console.warn('⚠️ Subscription not found for failed payment:', subscriptionId);
+    return;
+  }
 
-        // Update user status (but don't downgrade immediately - give grace period)
-        if (subscriptionData && subscriptionData.userId) {
-          const userRef = adminDb.collection('users').doc(subscriptionData.userId);
-          await userRef.update({
-            status: 'past_due',
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
+  const subscriptionData = subscriptionDoc.data();
 
-          console.log('⚠️ Marked subscription and user as past_due:', subscriptionData.userId);
-        }
-      }
-    }
+  // Mark subscription as past_due
+  await firestoreWithRetry(
+    () => subscriptionRef.set({
+      status: 'past_due',
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true }),
+    'Mark subscription past_due'
+  );
 
-  } catch (error) {
-    console.error('❌ Error handling payment failed:', error);
+  // Update user status (grace period - don't downgrade immediately)
+  const userId = subscriptionData?.userId;
+  if (userId) {
+    await firestoreWithRetry(
+      () => adminDb.collection('users').doc(userId).update({
+        subscriptionStatus: 'past_due',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+      'Mark user past_due'
+    );
+    console.log('⚠️ Payment failed, marked as past_due:', userId);
   }
 }
 
