@@ -137,15 +137,18 @@ export default function AIAssistantPage() {
 
             {/* Embedded Streamlit App */}
             <div className="relative" style={{ height: 'calc(100vh - 350px)', minHeight: '600px' }}>
-              {/* Get Streamlit URL from environment variable */}
+              {/* Embedded AI Assistant via iframe */}
               {(() => {
-                const streamlitUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL || '';
-                const isConfigured = streamlitUrl && streamlitUrl !== '' && !streamlitUrl.includes('your-streamlit');
-                
+                // Prefer environment variable if set, otherwise default to hosted AGS AI URL
+                const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
+                const defaultUrl = 'https://markishime-ags.hf.space/';
+                const assistantUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
+                const isConfigured = !!assistantUrl;
+
                 if (isConfigured) {
                   return (
                     <iframe
-                      src={streamlitUrl}
+                      src={assistantUrl}
                       title="CropDrive™ Oil Palm AI Advisor"
                       className="w-full h-full border-0"
                       allow="camera; microphone"
@@ -154,7 +157,7 @@ export default function AIAssistantPage() {
                     />
                   );
                 }
-                
+
                 return (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     <div className="text-center p-8">
