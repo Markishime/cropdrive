@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
-// Contact form submission handler
+const resendApiKey = process.env.RESEND_API_KEY;
+const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
+const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive <noreply@cropdrive.ai>';
+
+// Contact form submission handler (Resend)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -24,25 +28,23 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Create email transporter
-    // Using environment variables for SMTP configuration
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: process.env.SMTP_SECURE === 'true',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    if (!resendApiKey) {
+      console.warn('⚠️ RESEND_API_KEY not configured. Logging contact submission instead of sending email.');
+      console.log('Name:', name);
+      console.log('Email:', email);
+      console.log('Organization:', organization || 'N/A');
+      console.log('Role:', role || 'N/A');
+      console.log('Message:', message);
 
-    // Email content
-    const mailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@cropdrive.ai',
-      to: 'contact@agriglobalsolutions.com',
-      replyTo: email,
-      subject: `[CropDrive Contact Form] New message from ${name}`,
-      html: `
+      return NextResponse.json({
+        success: true,
+        message: 'Your message has been received. We will get back to you soon!',
+      });
+    }
+
+    const resend = new Resend(resendApiKey);
+
+    const htmlBody = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">New Contact Form Submission</h1>
@@ -88,8 +90,9 @@ export async function POST(req: NextRequest) {
             </p>
           </div>
         </div>
-      `,
-      text: `
+      `;
+
+    const textBody = `
 New Contact Form Submission
 
 Name: ${name}
@@ -101,12 +104,21 @@ ${message}
 
 ---
 Sent from CropDrive contact form at ${new Date().toISOString()}
-      `,
-    };
+      `;
+
+    // Send email to team / CEO
+    await resend.emails.send({
+      from: contactFromEmail,
+      to: contactToEmail,
+      replyTo: email,
+      subject: `[CropDrive Contact Form] New message from ${name}`,
+      html: htmlBody,
+      text: textBody,
+    });
 
     // Send confirmation email to the user
-    const confirmationMailOptions = {
-      from: process.env.SMTP_FROM || 'noreply@cropdrive.ai',
+    await resend.emails.send({
+      from: contactFromEmail,
       to: email,
       subject: 'Thank you for contacting CropDrive',
       html: `
@@ -144,32 +156,9 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
           </div>
         </div>
       `,
-    };
+    });
 
-    // Try to send emails
-    try {
-      // Check if SMTP is configured
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        await transporter.sendMail(mailOptions);
-        console.log('✅ Contact form email sent to team');
-        
-        // Send confirmation to user
-        await transporter.sendMail(confirmationMailOptions);
-        console.log('✅ Confirmation email sent to user');
-      } else {
-        // If SMTP is not configured, just log the submission
-        console.log('📧 Contact form submission (SMTP not configured):');
-        console.log('Name:', name);
-        console.log('Email:', email);
-        console.log('Organization:', organization || 'N/A');
-        console.log('Role:', role || 'N/A');
-        console.log('Message:', message);
-      }
-    } catch (emailError) {
-      console.error('⚠️ Email sending failed:', emailError);
-      // Still return success - the form data was received
-      // You might want to store it in a database as backup
-    }
+    console.log('✅ Contact form emails sent via Resend');
 
     return NextResponse.json({
       success: true,
