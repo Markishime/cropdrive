@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { Mail, Phone, MapPin, Clock, Globe, MessageSquare } from 'lucide-react';
 
 export default function ContactUsPage() {
   const [mounted, setMounted] = useState(false);
@@ -19,37 +18,6 @@ export default function ContactUsPage() {
   if (!mounted) {
     return null;
   }
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: language === 'ms' ? 'E-mel' : 'Email',
-      content: 'contact@agriglobalsolutions.com',
-      link: 'mailto:contact@agriglobalsolutions.com',
-      color: 'from-blue-500 to-blue-600'
-    },
-    {
-      icon: Phone,
-      title: language === 'ms' ? 'Telefon' : 'Phone',
-      content: '+60 12-345 6789',
-      link: 'tel:+60123456789',
-      color: 'from-green-500 to-green-600'
-    },
-    {
-      icon: MapPin,
-      title: language === 'ms' ? 'Lokasi' : 'Location',
-      content: 'Kuala Lumpur, Malaysia',
-      link: null,
-      color: 'from-red-500 to-red-600'
-    },
-    {
-      icon: Clock,
-      title: language === 'ms' ? 'Waktu Perniagaan' : 'Business Hours',
-      content: language === 'ms' ? 'Isnin - Jumaat, 9:00 - 18:00' : 'Monday - Friday, 9:00 AM - 6:00 PM',
-      link: null,
-      color: 'from-purple-500 to-purple-600'
-    }
-  ];
 
   return (
     <div className="min-h-screen">
@@ -69,131 +37,124 @@ export default function ContactUsPage() {
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <motion.span
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', delay: 0.2 }}
-              className="inline-block text-yellow-400 text-5xl xs:text-6xl sm:text-7xl mb-4 xs:mb-6"
-            >
-              ✉️
-            </motion.span>
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 xs:mb-6 sm:mb-8 leading-tight">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 xs:mb-8 leading-tight font-heading px-2">
               {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
             </h1>
-            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-8 xs:mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-3 xs:px-4">
               {language === 'ms'
-                ? 'Kami di sini untuk membantu anda. Hubungi kami melalui mana-mana saluran di bawah.'
-                : 'We\'re here to help you. Reach out to us through any of the channels below.'
+                ? 'Isi borang di bawah atau hubungi kami terus melalui e-mel untuk respons yang cepat.'
+                : 'Fill in the form below or reach us directly by email for a quick response.'
               }
             </p>
           </motion.div>
         </div>
       </section>
 
-      {/* Contact Information Section */}
+      {/* Contact Form Section */}
       <section className="py-16 sm:py-20 md:py-24 bg-gradient-to-br from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="text-center mb-12 sm:mb-16"
+            className="text-center mb-10 sm:mb-12"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4">
-              {language === 'ms' ? 'Maklumat' : 'Contact'} <span className="text-green-700">{language === 'ms' ? 'Hubungan' : 'Information'}</span>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
+              {language === 'ms' ? 'Borang Hubungi' : 'Contact Form'}
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
-                ? 'Pilih kaedah komunikasi yang paling sesuai untuk anda'
-                : 'Choose the communication method that works best for you'
-              }
+                ? 'Isi butiran anda di bawah dan kami akan menghubungi anda secepat mungkin. Untuk respons lebih cepat, e-mel kami di'
+                : 'Share your details below and we\'ll get back to you as soon as possible. For quicker reach, email us at'}
+              {' '}
+              <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 font-semibold underline">
+                contact@agriglobalsolutions.com
+              </a>
+              .
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
-            {contactInfo.map((info, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 border-2 border-gray-100 hover:border-green-200"
-              >
-                <div className={`w-14 h-14 bg-gradient-to-br ${info.color} rounded-xl flex items-center justify-center mb-4 shadow-md`}>
-                  <info.icon className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {info.title}
-                </h3>
-                {info.link ? (
-                  <a
-                    href={info.link}
-                    className="text-green-700 hover:text-green-800 font-medium break-words transition-colors"
-                  >
-                    {info.content}
-                  </a>
-                ) : (
-                  <p className="text-gray-700 font-medium">
-                    {info.content}
-                  </p>
-                )}
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Member Support Notice */}
-          <motion.div
+          <motion.form
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
-            className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-8 sm:p-12 border-2 border-green-200 shadow-lg"
+            className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8 space-y-6"
           >
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="flex-shrink-0">
-                <div className="w-20 h-20 bg-gradient-to-br from-green-600 to-green-700 rounded-full flex items-center justify-center shadow-xl">
-                  <MessageSquare className="w-10 h-10 text-white" />
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {language === 'ms' ? 'Nama Penuh' : 'Full Name'}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder={language === 'ms' ? 'Masukkan nama anda' : 'Enter your name'}
+                  required
+                />
               </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-3">
-                  {language === 'ms' ? '👤 Ahli CropDrive?' : '👤 CropDrive Member?'}
-                </h3>
-                <p className="text-lg text-gray-700 mb-4">
-                  {language === 'ms'
-                    ? 'Jika anda seorang ahli dengan pelan aktif, sila gunakan borang Sokongan dalam papan pemuka anda untuk mendapatkan bantuan keutamaan dengan had mesej bulanan anda.'
-                    : 'If you\'re a member with an active plan, please use the Support form in your dashboard for priority assistance with your monthly message allowance.'
-                  }
-                </p>
-                <a
-                  href="/support"
-                  className="inline-flex items-center gap-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-105"
-                >
-                  <MessageSquare className="w-5 h-5" />
-                  {language === 'ms' ? 'Pergi ke Sokongan Ahli' : 'Go to Member Support'}
-                </a>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {language === 'ms' ? 'E-mel' : 'Email'}
+                </label>
+                <input
+                  type="email"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="you@example.com"
+                  required
+                />
               </div>
             </div>
-          </motion.div>
 
-          {/* Additional Info */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-            className="mt-12 text-center"
-          >
-            <div className="inline-flex items-center gap-2 bg-white rounded-full px-6 py-3 shadow-md border border-gray-200">
-              <Globe className="w-5 h-5 text-green-600" />
-              <span className="text-gray-700 font-medium">
-                {language === 'ms' ? 'Sokongan dalam Bahasa Malaysia & English' : 'Support in Bahasa Malaysia & English'}
-              </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {language === 'ms' ? 'Organisasi (pilihan)' : 'Organization (optional)'}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder={language === 'ms' ? 'Nama syarikat atau ladang' : 'Company or farm name'}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  {language === 'ms' ? 'Peranan Anda' : 'Your Role'}
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder={language === 'ms' ? 'Contoh: Petani, NGO, Makmal' : 'e.g. Farmer, NGO, Lab'}
+                />
+              </div>
             </div>
-          </motion.div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                {language === 'ms' ? 'Mesej Anda' : 'Your Message'}
+              </label>
+              <textarea
+                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base min-h-[140px] resize-y focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                placeholder={language === 'ms' ? 'Bagaimana kami boleh membantu anda?' : 'How can we help you?'}
+                required
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <p className="text-sm text-gray-500">
+                {language === 'ms'
+                  ? 'Dengan menghantar, anda bersetuju untuk dihubungi oleh pasukan CropDrive.'
+                  : 'By submitting, you agree to be contacted by the CropDrive team.'}
+              </p>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold text-base sm:text-lg shadow-lg transition-transform duration-200 hover:-translate-y-0.5"
+              >
+                {language === 'ms' ? 'Hantar Mesej' : 'Send Message'}
+              </button>
+            </div>
+          </motion.form>
         </div>
       </section>
     </div>

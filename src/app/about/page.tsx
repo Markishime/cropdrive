@@ -199,21 +199,21 @@ export default function AboutUsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                icon: '🎯',
+                img: '/images/our-values/Precision.png',
                 title: language === 'ms' ? 'Ketepatan' : 'Accuracy',
                 desc: language === 'ms' 
                   ? 'Menggunakan standard MPOB dan AI terkini untuk analisis yang tepat'
                   : 'Using MPOB standards and latest AI for accurate analysis'
               },
               {
-                icon: '🤝',
+                img: '/images/our-values/Accessibility.png',
                 title: language === 'ms' ? 'Kebolehcapaian' : 'Accessibility',
                 desc: language === 'ms'
                   ? 'Menjadikan teknologi AI mudah dan mampu milik untuk semua petani'
                   : 'Making AI technology easy and affordable for all farmers'
               },
               {
-                icon: '🌱',
+                img: '/images/our-values/Sustainability .png',
                 title: language === 'ms' ? 'Kemampanan' : 'Sustainability',
                 desc: language === 'ms'
                   ? 'Mempromosikan amalan pertanian regeneratif untuk masa depan yang lebih baik'
@@ -228,51 +228,21 @@ export default function AboutUsPage() {
                 viewport={{ once: true }}
                 className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-center"
               >
-                <div className="text-6xl mb-6">{value.icon}</div>
+                <div className="w-24 h-24 mx-auto mb-6 relative">
+                  <Image
+                    src={value.img}
+                    alt={value.title}
+                    width={96}
+                    height={96}
+                    className="object-contain"
+                  />
+                </div>
                 <h3 className="text-2xl font-black text-gray-900 mb-4 font-heading">
                   {value.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
                   {value.desc}
                 </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 xs:mb-4 font-heading px-2">
-              {language === 'ms' ? 'Pencapaian Kami' : 'Our Achievements'}
-            </h2>
-          </motion.div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 xs:gap-6 sm:gap-8">
-            {[
-              { number: '10,000+', label: language === 'ms' ? 'Petani Berdaftar' : 'Registered Farmers' },
-              { number: '50,000+', label: language === 'ms' ? 'Analisis Selesai' : 'Analyses Completed' },
-              { number: '100,000+', label: language === 'ms' ? 'Hektar Diuruskan' : 'Hectares Managed' },
-              { number: '150-300%', label: language === 'ms' ? 'Purata ROI' : 'Average ROI' },
-            ].map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 xs:p-6 sm:p-8 border-2 border-yellow-400/30"
-              >
-                <p className="text-3xl xs:text-4xl sm:text-5xl font-black text-yellow-400 mb-2 xs:mb-3">{stat.number}</p>
-                <p className="text-white/90 text-xs xs:text-sm font-semibold uppercase tracking-wide leading-tight">{stat.label}</p>
               </motion.div>
             ))}
           </div>

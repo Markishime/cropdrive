@@ -1162,8 +1162,8 @@ export default function HomePage() {
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
               {language === 'ms' 
-                ? 'Dari laporan makmal ke hasil yang lebih baik dalam 4 langkah mudah'
-                : 'From lab reports to better yields in 4 easy steps'
+                ? 'Dari laporan makmal ke hasil yang lebih baik dalam 5 langkah mudah'
+                : 'From lab reports to better yields in 5 easy steps'
               }
             </p>
           </motion.div>
@@ -1212,6 +1212,21 @@ export default function HomePage() {
                   language === 'ms' ? 'Penjejakan masa nyata' : 'Real-time tracking',
                   language === 'ms' ? 'Sejarah data' : 'Data history',
                   language === 'ms' ? 'Laporan kemajuan' : 'Progress reports'
+                ]
+              },
+              {
+                step: '05',
+                title: language === 'ms' ? 'Terus Berhubung dengan Penasihat AI' : 'Keep in Touch with the AI Advisor',
+                desc: language === 'ms'
+                  ? 'Terus berhubung dengan Penasihat AI CropDrive™ untuk sokongan berterusan sepanjang musim.'
+                  : 'Keep in touch with the CropDrive™ AI Advisor for ongoing support throughout the season.',
+                image: '/images/keep_in_touch_with_the_ai_advisor_optimized.jpg',
+                features: [
+                  language === 'ms' ? 'Terus berhubung dengan Penasihat AI untuk sokongan berterusan.' : 'Keep in touch with the AI Advisor for ongoing support.',
+                  language === 'ms' ? 'Jawapan pantas untuk soalan nutrien, tanah dan pengurusan ladang.' : 'Quick answers to nutrient, soil, and field management questions.',
+                  language === 'ms' ? 'Bantuan mentafsir laporan makmal baharu.' : 'Help interpreting new lab reports.',
+                  language === 'ms' ? 'Nasihat tentang simptom ladang yang anda perhatikan.' : 'Advice on field symptoms you observe.',
+                  language === 'ms' ? 'Tindak lanjut apabila hasil tidak sepadan dengan jangkaan anda.' : 'Follow up when results do not match your expectations.'
                 ]
               }
             ].map((step, index) => (
@@ -1516,6 +1531,10 @@ export default function HomePage() {
                   language === 'ms' ? 'Memperkemas operasi dengan pandangan pakar segera' : 'Streamline operations with instant, expert-level insights',
                   language === 'ms' ? 'Meluaskan sokongan untuk rangkaian atau program besar' : 'Scale support for large networks or programs',
                   language === 'ms' ? 'Mengukur dan melaporkan metrik kemampanan' : 'Measure and report on sustainability metrics',
+                  language === 'ms' ? 'Meningkatkan daya saing dengan keputusan yang lebih pantas' : 'Increase competitiveness with faster decisions',
+                  language === 'ms' ? 'Mengurangkan jam kerja melalui analisis automatik' : 'Reduce man hours through automated analysis',
+                  language === 'ms' ? 'Menurunkan kos operasi merentasi program besar' : 'Lower operational costs across large programs',
+                  language === 'ms' ? 'Meningkatkan keuntungan dengan aliran kerja yang lebih cekap' : 'Improve profitability with more efficient workflows',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <svg className="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -1543,6 +1562,10 @@ export default function HomePage() {
                   language === 'ms' ? 'Pelan mudah dan boleh dilaksanakan dari data kompleks' : 'Simple, actionable plans from complex data',
                   language === 'ms' ? 'Penjimatan kos dan peningkatan hasil disesuaikan dengan ladang anda' : 'Cost savings and yield boosts tailored to your fields',
                   language === 'ms' ? 'Kesihatan tanah jangka panjang untuk musim akan datang' : 'Long-term soil health for future seasons',
+                  language === 'ms' ? 'Akses kepada agronomis AI bertauliah pada bila-bila masa' : 'Access to a qualified AI agronomist at any time',
+                  language === 'ms' ? 'Jawapan jelas untuk sebarang soalan agronomi yang dihadapi' : 'Clear answers to any agronomic questions you face',
+                  language === 'ms' ? 'Sokongan untuk masalah harian di ladang tanpa perlu menunggu' : 'Support for daily field problems without waiting',
+                  language === 'ms' ? 'Panduan yang boleh dipercayai untuk setiap peringkat kitaran tanaman anda' : 'Reliable guidance for each stage of your crop cycle',
                 ].map((item, i) => (
                   <li key={i} className="flex items-start">
                     <svg className="w-6 h-6 text-yellow-400 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
@@ -1783,14 +1806,9 @@ export default function HomePage() {
                     <h3 className="text-lg sm:text-xl font-black text-gray-900 mb-3 text-center font-heading leading-tight">
                       {language === 'ms' ? trust.title.ms : trust.title.en}
                     </h3>
-                    <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed flex-grow mb-4 line-clamp-6">
+                    <p className="text-sm sm:text-base text-gray-600 text-center leading-relaxed flex-grow mb-0">
                       {language === 'ms' ? trust.desc.ms : trust.desc.en}
                     </p>
-                    <div className="mt-auto pt-3 flex items-center justify-center gap-2 text-green-700 font-semibold text-xs sm:text-sm uppercase tracking-wide">
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-                      {language === 'ms' ? 'Diperakui' : 'Verified Benefit'}
-                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"></span>
-                    </div>
                   </div>
                 </motion.div>
               ))}
