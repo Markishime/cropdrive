@@ -160,7 +160,8 @@ export async function POST(req: NextRequest) {
     }
     
     // Also reject invalid/test price IDs that don't actually exist in Stripe
-    if (priceId && !priceId.startsWith('price_1')) {
+    // Valid Stripe price IDs start with 'price_' (can be price_1xxxxx for live or price_testxxxxx for test)
+    if (priceId && !priceId.startsWith('price_')) {
       console.warn('⚠️ Price ID does not look like a real Stripe price ID:', priceId);
       priceId = null; // Force inline pricing
     }

@@ -65,7 +65,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
           setLimitStatus({
             canSend: true,
             monthlyCount: 0,
-            limit: 3,
+            limit: 5,
             plan: 'smart'
           });
         }
@@ -75,7 +75,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
         setLimitStatus({
           canSend: true,
           monthlyCount: 0,
-          limit: 3,
+          limit: 5,
           plan: 'smart'
         });
       } finally {

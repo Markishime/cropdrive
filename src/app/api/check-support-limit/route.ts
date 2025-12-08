@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // Plan-based monthly limits
 const PLAN_LIMITS = {
-  start: 1,
-  smart: 3,
+  start: 3,
+  smart: 5,
   precision: -1, // unlimited
 } as const;
 

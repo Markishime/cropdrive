@@ -7,8 +7,8 @@ const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_for_buil
 
 // Plan-based monthly limits
 const PLAN_LIMITS = {
-  start: 1,
-  smart: 3,
+  start: 3,
+  smart: 5,
   precision: -1, // unlimited
 } as const;
 
