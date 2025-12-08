@@ -3,17 +3,31 @@ import Stripe from 'stripe';
 
 // Use Stripe secret key from environment variable
 // For testing, set STRIPE_SECRET_KEY in your .env.local file
-if (!process.env.STRIPE_SECRET_KEY) {
-  console.error('STRIPE_SECRET_KEY is not set in environment variables');
+function getStripe(): Stripe | null {
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    console.error('❌ STRIPE_SECRET_KEY is not set in environment variables');
+    return null;
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2023-10-16',
+  });
 }
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
 
 export async function POST(req: NextRequest) {
   try {
     console.log('=== Checkout API Called ===');
+    
+    // Initialize Stripe
+    const stripe = getStripe();
+    if (!stripe) {
+      console.error('❌ Stripe not initialized - STRIPE_SECRET_KEY missing');
+      return NextResponse.json(
+        { error: 'Payment system not configured', details: 'Stripe secret key is missing' },
+        { status: 500 }
+      );
+    }
+    console.log('✅ Stripe initialized successfully');
     
     // Get the base URL from request headers (for correct redirect in production)
     // We prioritize the production URL unless we are explicitly in a localhost environment
@@ -115,41 +129,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid plan ID' }, { status: 400 });
     }
 
-    // For testing: use test price IDs or create them on the fly
-    // In production, you should use actual Stripe Price IDs from environment variables
-    const testPriceIds = {
-      start: {
-        monthly: 'price_test_start_monthly',
-        yearly: 'price_test_start_yearly',
-      },
-      smart: {
-        monthly: 'price_test_smart_monthly',
-        yearly: 'price_test_smart_yearly',
-      },
-      precision: {
-        monthly: 'price_test_precision_monthly',
-        yearly: 'price_test_precision_yearly',
-      },
-    };
-
-    // Get price ID from environment or use test IDs
+    // Get price ID from environment variables ONLY
+    // Only use price IDs that are properly configured in Stripe
     const priceIds = {
       start: {
-        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_START_MONTHLY || testPriceIds.start.monthly,
-        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_START_YEARLY || testPriceIds.start.yearly,
+        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_START_MONTHLY || null,
+        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_START_YEARLY || null,
       },
       smart: {
-        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_MONTHLY || testPriceIds.smart.monthly,
-        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_YEARLY || testPriceIds.smart.yearly,
+        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_MONTHLY || null,
+        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_SMART_YEARLY || null,
       },
       precision: {
-        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_MONTHLY || testPriceIds.precision.monthly,
-        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_YEARLY || testPriceIds.precision.yearly,
+        monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_MONTHLY || null,
+        yearly: process.env.NEXT_PUBLIC_STRIPE_PRICE_PRECISION_YEARLY || null,
       },
     };
 
     let priceId: string | null = priceIds[planId as keyof typeof priceIds][isYearly ? 'yearly' : 'monthly'];
-    console.log('Price ID resolved:', priceId);
+    console.log('Price ID from env:', priceId || '(not set - will use inline pricing)');
 
     // Important: ALWAYS use Stripe Checkout Sessions (not payment links) 
     // to ensure metadata is properly passed to webhooks for plan activation
@@ -158,8 +156,13 @@ export async function POST(req: NextRequest) {
     
     if (priceId && priceId.startsWith('https://buy.stripe.com')) {
       console.warn('⚠️ Direct Stripe payment link detected. Converting to checkout session...');
-      // Extract price ID from URL if possible, or set to null to use inline pricing
       priceId = null; // Force inline pricing for proper metadata handling
+    }
+    
+    // Also reject invalid/test price IDs that don't actually exist in Stripe
+    if (priceId && !priceId.startsWith('price_1')) {
+      console.warn('⚠️ Price ID does not look like a real Stripe price ID:', priceId);
+      priceId = null; // Force inline pricing
     }
 
     // Create Stripe checkout session (with proper metadata for webhooks)
@@ -222,7 +225,22 @@ export async function POST(req: NextRequest) {
       ];
     }
 
+    console.log('📤 Creating Stripe checkout session with config:', {
+      customer_email: sessionConfig.customer_email,
+      mode: sessionConfig.mode,
+      success_url: sessionConfig.success_url,
+      cancel_url: sessionConfig.cancel_url,
+      metadata: sessionConfig.metadata,
+      hasLineItems: !!sessionConfig.line_items,
+      lineItemType: sessionConfig.line_items?.[0]?.price ? 'existing_price' : 'inline_price',
+    });
+
     const session = await stripe.checkout.sessions.create(sessionConfig);
+
+    console.log('✅ Stripe checkout session created:', {
+      sessionId: session.id,
+      url: session.url?.substring(0, 50) + '...',
+    });
 
     return NextResponse.json({
       sessionId: session.id,
@@ -233,15 +251,32 @@ export async function POST(req: NextRequest) {
     console.error('=== Checkout Error ===');
     console.error('Error type:', error.constructor.name);
     console.error('Error message:', error.message);
+    console.error('Error code:', error.code);
     console.error('Error stack:', error.stack);
+    
+    // Check for specific Stripe errors
+    let errorMessage = 'Failed to create checkout session';
+    let statusCode = 500;
+    
+    if (error.type === 'StripeInvalidRequestError') {
+      errorMessage = `Stripe configuration error: ${error.message}`;
+      console.error('Stripe raw:', error.raw);
+    } else if (error.type === 'StripeAuthenticationError') {
+      errorMessage = 'Stripe API key is invalid';
+    } else if (error.type === 'StripeConnectionError') {
+      errorMessage = 'Could not connect to Stripe';
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
     
     return NextResponse.json(
       { 
-        error: 'Failed to create checkout session',
+        error: errorMessage,
         details: error.message,
-        type: error.constructor.name
+        type: error.type || error.constructor.name,
+        code: error.code
       },
-      { status: 500 }
+      { status: statusCode }
     );
   }
 }
