@@ -12,6 +12,7 @@ interface ButtonProps {
   className?: string;
   icon?: React.ReactNode;
   iconPosition?: 'left' | 'right';
+  title?: string;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -25,6 +26,7 @@ export const Button: React.FC<ButtonProps> = ({
   className = '',
   icon,
   iconPosition = 'left',
+  title,
 }) => {
   const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
 
@@ -83,6 +85,7 @@ export const Button: React.FC<ButtonProps> = ({
       className={combinedClasses}
       onClick={onClick}
       disabled={disabled || loading}
+      title={title}
       whileHover={!disabled && !loading ? { scale: 1.05 } : {}}
       whileTap={!disabled && !loading ? { scale: 0.95 } : {}}
       transition={{ duration: 0.2 }}

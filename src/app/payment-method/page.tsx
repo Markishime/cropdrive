@@ -84,6 +84,7 @@ export default function PaymentMethodPage() {
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [updatingAutoRenewal, setUpdatingAutoRenewal] = useState(false);
   const [updatingEmailNotifications, setUpdatingEmailNotifications] = useState(false);
+  const [creatingPortalSession, setCreatingPortalSession] = useState(false);
   
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
@@ -209,9 +210,21 @@ export default function PaymentMethodPage() {
   const currentPlan = getPricingTierById(user.plan);
   const uploadPercentage = user.uploadsLimit === -1 ? 100 : user.uploadsLimit > 0 ? (user.uploadsUsed / user.uploadsLimit) * 100 : 0;
   const billingCycle = user.billingCycle || 'monthly';
+  const subscriptionInterval = subscription?.billingCycle || (billingCycle === 'yearly' ? 'year' : 'month');
+  const isMonthlySubscription = subscriptionInterval === 'month';
+  const isYearlySubscription = subscriptionInterval === 'year';
+  const canSelfCancel = isYearlySubscription;
 
   const handleToggleAutoRenewal = async () => {
     if (!subscription) return;
+    if (isMonthlySubscription) {
+      toast.error(
+        language === 'ms'
+          ? 'Pelan bulanan memerlukan komitmen 12 bulan. Hubungi sokongan untuk pembatalan.'
+          : 'Monthly plans have a 12-month minimum. Please contact support to cancel.'
+      );
+      return;
+    }
     
     setUpdatingAutoRenewal(true);
     try {
@@ -311,6 +324,56 @@ export default function PaymentMethodPage() {
       toast.error(language === 'ms' ? 'Ralat mengemas kini' : 'Error updating');
     } finally {
       setUpdatingEmailNotifications(false);
+    }
+  };
+
+  const handleOpenBillingPortal = async () => {
+    if (!subscription) {
+      toast.error(
+        language === 'ms'
+          ? 'Tiada langganan aktif untuk diurus'
+          : 'No active subscription to manage'
+      );
+      return;
+    }
+
+    try {
+      setCreatingPortalSession(true);
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) {
+        throw new Error('Not authenticated');
+      }
+
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/billing-portal', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.url) {
+        throw new Error(data.error || 'Failed to create portal session');
+      }
+
+      toast.loading(
+        language === 'ms'
+          ? '🔄 Membuka portal Stripe...'
+          : '🔄 Opening Stripe portal...',
+        { duration: 1200 }
+      );
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Error opening billing portal:', error);
+      toast.error(
+        language === 'ms'
+          ? 'Tidak dapat membuka portal bil'
+          : 'Unable to open billing portal'
+      );
+    } finally {
+      setCreatingPortalSession(false);
     }
   };
 
@@ -782,7 +845,7 @@ export default function PaymentMethodPage() {
                           )}
                           {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
                         </Button>
-                      ) : (
+                      ) : canSelfCancel ? (
                         <Button 
                           onClick={() => setShowCancelModal(true)}
                           disabled={loading}
@@ -795,7 +858,43 @@ export default function PaymentMethodPage() {
                           )}
                           {language === 'ms' ? 'Batalkan' : 'Cancel'}
                         </Button>
+                      ) : (
+                        <Button 
+                          disabled
+                          className="w-full bg-gray-100 text-gray-500 py-3 font-bold rounded-xl"
+                          title={language === 'ms'
+                            ? 'Pelan bulanan tidak boleh dibatalkan dalam portal. Hubungi sokongan.'
+                            : 'Monthly plans cannot be cancelled in-portal. Contact support.'
+                          }
+                        >
+                          <Shield className="w-4 h-4 mr-2" />
+                          {language === 'ms' ? 'Hubungi sokongan untuk batal' : 'Contact support to cancel'}
+                        </Button>
                       )}
+                    </div>
+                    <div className="mt-3">
+                      <Button
+                        onClick={handleOpenBillingPortal}
+                        disabled={creatingPortalSession || !subscription}
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 py-3 font-bold rounded-xl shadow-lg disabled:opacity-60"
+                      >
+                        {creatingPortalSession ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                        )}
+                        {language === 'ms' ? 'Urus di Portal Stripe' : 'Manage in Stripe Portal'}
+                      </Button>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {isMonthlySubscription
+                          ? (language === 'ms'
+                              ? 'Pelan bulanan mempunyai tempoh minimum 12 bulan. Pilihan batal tidak akan dipaparkan dalam portal.'
+                              : 'Monthly plans have a 12-month minimum term. The portal will hide cancellation options.')
+                          : (language === 'ms'
+                              ? 'Pelan tahunan boleh pilih untuk tamat pada akhir tahun berbayar melalui portal.'
+                              : 'Yearly plans can choose to end renewal at the end of the paid year inside the portal.')
+                        }
+                      </p>
                     </div>
                   </div>
                 </motion.div>
@@ -918,16 +1017,20 @@ export default function PaymentMethodPage() {
                             {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {autoRenewal 
-                              ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik' : 'Subscription will renew automatically')
-                              : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh' : 'Subscription will end at period end')
-                            }
+                            {isMonthlySubscription
+                              ? (language === 'ms'
+                                  ? 'Pelan bulanan mempunyai komitmen 12 bulan. Hubungi sokongan untuk pembatalan.'
+                                  : 'Monthly plans carry a 12-month commitment. Contact support to cancel.')
+                              : autoRenewal 
+                                ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik' : 'Subscription will renew automatically')
+                                : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh' : 'Subscription will end at period end')
+                              }
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={handleToggleAutoRenewal}
-                        disabled={updatingAutoRenewal || !subscription}
+                        disabled={updatingAutoRenewal || !subscription || isMonthlySubscription}
                         aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 ${
