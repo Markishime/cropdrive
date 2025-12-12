@@ -56,7 +56,7 @@ export default function LoginPage() {
       if (loading) return;
 
       if (shouldShowSuccess) {
-        // User just logged in via form
+        // User just logged in via form submission - redirect to dashboard
         toast.dismiss('login-success');
         toast.success(
           language === 'ms' ? 'Berjaya log masuk!' : 'Successfully logged in!',
@@ -74,12 +74,15 @@ export default function LoginPage() {
         );
         
         const timer = setTimeout(() => {
+          // Reset the flag before redirecting
+          setShouldShowSuccess(false);
           router.push('/dashboard');
           router.refresh();
         }, 1000);
         return () => clearTimeout(timer);
       } else {
-        // User was already logged in - redirect to home instead of dashboard
+        // User was already logged in (opened login page while authenticated) - redirect to landing page
+        // This handles cases where user opens website in another browser or reopens after being logged in
         router.push('/');
       }
     }
