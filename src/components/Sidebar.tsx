@@ -101,6 +101,21 @@ export const Sidebar: React.FC = () => {
   // Dynamic sidebar items based on user's plan
   const hasPlan = user && user.plan && user.plan !== 'none';
   
+  // Helper function to check if pathname matches item href (handles locale-prefixed routes)
+  const isPathActive = (itemHref: string, currentPathname: string): boolean => {
+    // Match exact path (e.g., /dashboard)
+    if (currentPathname === itemHref || currentPathname.startsWith(itemHref + '/')) {
+      return true;
+    }
+    // Match locale-prefixed paths (e.g., /en/dashboard, /ms/dashboard)
+    const localePattern = /^\/(en|ms)\//;
+    if (localePattern.test(currentPathname)) {
+      const pathWithoutLocale = currentPathname.replace(/^\/(en|ms)/, '');
+      return pathWithoutLocale === itemHref || pathWithoutLocale.startsWith(itemHref + '/');
+    }
+    return false;
+  };
+  
   const sidebarItems = [
     {
       href: '/',
@@ -291,7 +306,7 @@ export const Sidebar: React.FC = () => {
             key={item.href}
             {...item}
             language={language}
-            isActive={pathname === item.href}
+            isActive={isPathActive(item.href, pathname)}
             isCollapsed={isCollapsed}
             onClick={() => setIsOpen(false)}
           />
