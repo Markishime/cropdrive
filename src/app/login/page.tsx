@@ -79,8 +79,8 @@ export default function LoginPage() {
         }, 1000);
         return () => clearTimeout(timer);
       } else {
-        // User was already logged in
-        router.push('/dashboard');
+        // User was already logged in - redirect to home instead of dashboard
+        router.push('/');
       }
     }
   }, [user, authLoading, loading, shouldShowSuccess, router, language]);

@@ -333,16 +333,23 @@ export default function DashboardPage() {
 
                   {/* Action Buttons */}
                   <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                    <Link href="/assistant" className="flex-1">
-                      <Button className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg">
+                    <div className="flex-1">
+                      <Button 
+                        onClick={() => router.push('/assistant')}
+                        className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg"
+                      >
                         {language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
                       </Button>
-                    </Link>
-                    <Link href="/pricing" className="flex-1">
-                      <Button variant="outline" className="w-full py-4 border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold">
+                    </div>
+                    <div className="flex-1">
+                      <Button 
+                        onClick={() => router.push('/pricing')}
+                        variant="outline" 
+                        className="w-full py-4 border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold"
+                      >
                         {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
                       </Button>
-                    </Link>
+                    </div>
                   </div>
                 </div>
               </motion.div>
@@ -435,21 +442,23 @@ export default function DashboardPage() {
                 </div>
 
                 {user.uploadsLimit === -1 || uploadsRemaining > 0 ? (
-                  <Link href="/assistant">
-                    <Button className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg">
-                      {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
-                    </Button>
-                  </Link>
+                  <Button 
+                    onClick={() => router.push('/assistant')}
+                    className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg"
+                  >
+                    {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
+                  </Button>
                 ) : (
                   <div>
                     <p className="text-yellow-300 text-sm mb-4 font-semibold bg-yellow-500/20 p-3 rounded-lg">
                       {language === 'ms' ? '⚠️ Had muat naik tercapai' : '⚠️ Upload limit reached'}
                     </p>
-                    <Link href="/payment-method">
-                      <Button className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg">
-                        {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
-                      </Button>
-                    </Link>
+                    <Button 
+                      onClick={() => router.push('/payment-method')}
+                      className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg"
+                    >
+                      {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
+                    </Button>
                   </div>
                 )}
               </motion.div>

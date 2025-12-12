@@ -37,11 +37,7 @@ export default function HomePage() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
-  useEffect(() => {
-    if (mounted && !authLoading && user) {
-      router.replace('/dashboard');
-    }
-  }, [mounted, authLoading, user, router]);
+  // Removed automatic redirect to dashboard - logged in users can access landing page
 
   if (!mounted) {
     return null;

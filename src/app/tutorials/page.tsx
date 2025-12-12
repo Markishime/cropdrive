@@ -343,12 +343,16 @@ export default function TutorialsPage() {
                 }
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-                <button className="px-8 py-4 bg-white text-green-700 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 shadow-xl">
-                  {language === 'ms' ? 'Hubungi Sokongan' : 'Contact Support'}
-                </button>
-                <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors duration-200">
-                  {language === 'ms' ? 'Jadualkan Demo' : 'Schedule Demo'}
-                </button>
+                <Link href={hasPlan ? "/support" : "/contact"}>
+                  <button className="px-8 py-4 bg-white text-green-700 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 shadow-xl">
+                    {language === 'ms' ? 'Hubungi Sokongan' : 'Contact Support'}
+                  </button>
+                </Link>
+                <a href={`mailto:contact@agriglobalsolutins.com?subject=${encodeURIComponent(language === 'ms' ? 'Jadualkan Demo - CropDrive' : 'Schedule Demo - CropDrive')}`}>
+                  <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors duration-200">
+                    {language === 'ms' ? 'Jadualkan Demo' : 'Schedule Demo'}
+                  </button>
+                </a>
               </div>
             </CardContent>
           </Card>

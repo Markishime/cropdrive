@@ -9,7 +9,6 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "export": "next build && next export",
     "analyze": "next build --analyze",
     "clean": "rm -rf .next out node_modules/.cache",
     "setup": "npm install && npm run type-check",
@@ -19,27 +18,27 @@
     "setup:all": "npm run firebase:setup && npm run stripe:setup && npm run db:init"
   },
   "dependencies": {
-    "@headlessui/react": "^1.7.17",
-    "@heroicons/react": "^2.0.18",
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
     "@stripe/stripe-js": "^2.1.11",
     "@types/node": "^20.8.10",
-    "@types/react": "^18.2.37",
-    "@types/react-dom": "^18.2.15",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "@vercel/analytics": "^1.5.0",
     "@vercel/speed-insights": "^1.2.0",
     "autoprefixer": "^10.4.16",
     "dotenv": "^16.3.1",
     "eslint": "^8.53.0",
-    "eslint-config-next": "^14.0.2",
+    "eslint-config-next": "^16.0.7",
     "firebase": "^12.6.0",
     "firebase-admin": "^12.7.0",
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^12.0.0",
     "googleapis": "^164.1.0",
     "lucide-react": "^0.547.0",
-    "next": "^14.0.2",
+    "next": "^16.0.7",
     "nodemailer": "^7.0.11",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "react-dropzone": "^14.2.3",
     "react-firebase-hooks": "^5.1.1",
     "react-hot-toast": "^2.4.1",
@@ -59,5 +58,9 @@
   },
   "overrides": {
     "glob": "^10.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

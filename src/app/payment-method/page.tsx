@@ -872,30 +872,6 @@ export default function PaymentMethodPage() {
                         </Button>
                       )}
                     </div>
-                    <div className="mt-3">
-                      <Button
-                        onClick={handleOpenBillingPortal}
-                        disabled={creatingPortalSession || !subscription}
-                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white hover:from-blue-700 hover:to-indigo-800 py-3 font-bold rounded-xl shadow-lg disabled:opacity-60"
-                      >
-                        {creatingPortalSession ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : (
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                        )}
-                        {language === 'ms' ? 'Urus di Portal Stripe' : 'Manage in Stripe Portal'}
-                      </Button>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {isMonthlySubscription
-                          ? (language === 'ms'
-                              ? 'Pelan bulanan mempunyai tempoh minimum 12 bulan. Pilihan batal tidak akan dipaparkan dalam portal.'
-                              : 'Monthly plans have a 12-month minimum term. The portal will hide cancellation options.')
-                          : (language === 'ms'
-                              ? 'Pelan tahunan boleh pilih untuk tamat pada akhir tahun berbayar melalui portal.'
-                              : 'Yearly plans can choose to end renewal at the end of the paid year inside the portal.')
-                        }
-                      </p>
-                    </div>
                   </div>
                 </motion.div>
 
@@ -1082,6 +1058,41 @@ export default function PaymentMethodPage() {
                         )}
                       </button>
                     </div>
+
+                    {/* Cancel Subscription Button */}
+                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-red-50 to-white rounded-2xl border border-red-100 hover:border-red-200 transition">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-100">
+                          <X className="w-6 h-6 text-red-600" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {isMonthlySubscription
+                              ? (language === 'ms'
+                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Pembayaran akan berterusan sehingga akhir kitaran bil (minimum 1 tahun).'
+                                  : 'Cancellation will take effect immediately. Payments will continue until the end of billing cycle (minimum 1 year).')
+                              : (language === 'ms'
+                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir kitaran bil.'
+                                  : 'Cancellation will take effect immediately. Services will continue until the end of billing cycle.')
+                            }
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        onClick={() => setShowCancelModal(true)}
+                        disabled={loading || !subscription || subscription.cancelAtPeriodEnd}
+                        className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          language === 'ms' ? 'Batal' : 'Cancel'
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </motion.div>
 
@@ -1266,7 +1277,7 @@ export default function PaymentMethodPage() {
                       : 'Contact our support team for any questions about payments.'
                     }
                   </p>
-                  <Link href="/contact">
+                  <Link href="/support">
                     <Button className="w-full bg-yellow-500 text-white hover:bg-green-500 py-3 font-bold rounded-xl shadow-lg">
                       {language === 'ms' ? '📞 Hubungi Sokongan' : '📞 Contact Support'}
                     </Button>
@@ -1301,12 +1312,26 @@ export default function PaymentMethodPage() {
                   <h3 className="text-2xl font-black text-gray-900 mb-2">
                     {language === 'ms' ? 'Batalkan Langganan?' : 'Cancel Subscription?'}
                   </h3>
-                  <p className="text-gray-600">
-                    {language === 'ms' 
-                      ? 'Langganan anda akan kekal aktif sehingga akhir tempoh bil semasa.'
-                      : 'Your subscription will remain active until the end of the current billing period.'
+                  <p className="text-gray-600 mb-4">
+                    {isMonthlySubscription
+                      ? (language === 'ms' 
+                          ? 'Pembatalan akan berkuat kuasa serta-merta. Pembayaran akan berterusan sehingga akhir kitaran bil (minimum 1 tahun komitmen). Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
+                          : 'Cancellation will take effect immediately. Payments will continue until the end of billing cycle (minimum 1 year commitment). Services will continue until the end of the current billing period.')
+                      : (language === 'ms' 
+                          ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
+                          : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.')
                     }
                   </p>
+                  {isMonthlySubscription && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-4">
+                      <p className="text-sm text-amber-800">
+                        {language === 'ms' 
+                          ? '⚠️ Pelan bulanan mempunyai komitmen minimum 1 tahun. Pembayaran akan berterusan sehingga akhir kitaran bil.'
+                          : '⚠️ Monthly plans have a minimum 1-year commitment. Payments will continue until the end of billing cycle.'
+                        }
+                      </p>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex gap-3">

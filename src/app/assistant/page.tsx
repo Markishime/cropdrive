@@ -54,7 +54,7 @@ export default function AssistantPage() {
           iframeRef.current.contentWindow.postMessage({
             type: 'LANGUAGE_CHANGE',
             language: lang,
-          }, 'https://ags-ai-assistant.streamlit.app');
+          }, 'https://markishime-ags.hf.space');
         }
       }
     };
@@ -131,7 +131,7 @@ export default function AssistantPage() {
 
   // Build iframe URL with parameters
   const buildIframeUrl = () => {
-    const baseUrl = 'https://ags-ai-assistant.streamlit.app/?embedded=true';
+    const baseUrl = 'https://markishime-ags.hf.space/';
     const params = new URLSearchParams();
     
     // Add language parameter
@@ -157,7 +157,7 @@ export default function AssistantPage() {
     params.append('uploadLimit', limits.uploadLimit.toString());
     params.append('features', limits.features.join(','));
     
-    return `${baseUrl}&${params.toString()}`;
+    return `${baseUrl}?${params.toString()}`;
   };
 
   const AGS_AI_URL = buildIframeUrl();
@@ -166,7 +166,7 @@ export default function AssistantPage() {
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       // Verify origin for security
-      if (event.origin !== 'https://ags-ai-assistant.streamlit.app') {
+      if (event.origin !== 'https://markishime-ags.hf.space') {
         return;
       }
 
@@ -336,7 +336,7 @@ export default function AssistantPage() {
         userEmail: user.email,
       };
       
-      iframeRef.current.contentWindow.postMessage(config, 'https://ags-ai-assistant.streamlit.app');
+      iframeRef.current.contentWindow.postMessage(config, 'https://markishime-ags.hf.space');
     }
   };
 
@@ -347,7 +347,7 @@ export default function AssistantPage() {
       iframeRef.current.contentWindow.postMessage({
         type: 'LANGUAGE_CHANGE',
         language: currentLang,
-      }, 'https://ags-ai-assistant.streamlit.app');
+      }, 'https://markishime-ags.hf.space');
     }
   }, [currentLang, mounted, user]);
 

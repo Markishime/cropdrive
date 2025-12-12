@@ -319,7 +319,7 @@ export default function PricingPage() {
       </section>
 
       {/* Pricing Cards Section */}
-      <section className="py-24 bg-gray-50">
+      <section id="pricing-plans" className="py-24 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* Pricing Cards */}
@@ -669,16 +669,22 @@ export default function PricingPage() {
                     : 'No, the prices shown are final. There are no setup fees, transaction fees, or hidden charges.',
                 },
                 {
-                  question: language === 'ms' ? 'Bolehkah saya batalkan langganan?' : 'Can I cancel my subscription?',
+                  question: language === 'ms' ? 'Bolehkah saya batalkan langganan bulanan?' : 'Can I cancel my monthly subscription?',
                   answer: language === 'ms'
-                    ? 'Ya, anda boleh batalkan langganan anda pada bila-bila masa. Akses anda akan kekal sehingga akhir tempoh bil semasa.'
-                    : 'Yes, you can cancel your subscription at any time. Your access will remain until the end of your current billing period.',
+                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Walau bagaimanapun, tempoh langganan minimum ialah satu tahun, jadi anda masih perlu membayar sehingga akhir tahun semasa anda.'
+                    : 'Yes. You can cancel any time. However, the minimum subscription period is one year, so you will still pay until the end of your current year.',
+                },
+                {
+                  question: language === 'ms' ? 'Bolehkah saya batalkan langganan tahunan?' : 'Can I cancel my yearly subscription?',
+                  answer: language === 'ms'
+                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Anda akan terus mempunyai akses ke akaun anda sehingga akhir tahun bil semasa.'
+                    : 'Yes. You can cancel any time. You will keep access to your account until the end of your current billing year.',
                 },
                 {
                   question: language === 'ms' ? 'Bagaimana dengan sokongan?' : 'What about support?',
                   answer: language === 'ms'
-                    ? 'Kami menyediakan sokongan melalui WhatsApp dan email. Masa respons bergantung kepada pelan anda.'
-                    : 'We provide support through WhatsApp and email. Response times depend on your plan.',
+                    ? 'Hantar mesej atau emel kepada kami. Kami akan membalas secepat mungkin.'
+                    : 'Send us a message or an email. We respond as soon as possible.',
                 },
               ].map((faq, index) => (
                 <motion.div
@@ -734,7 +740,14 @@ export default function PricingPage() {
                 </Link>
               ) : (
                 <button
-                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  onClick={() => {
+                    const pricingSection = document.getElementById('pricing-plans');
+                    if (pricingSection) {
+                      pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    } else {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                  }}
                   className="px-10 py-5 bg-yellow-400 text-green-900 rounded-lg font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105"
                 >
                   {language === 'ms' ? 'Pilih Pelan Di Atas' : 'Choose Plan Above'}

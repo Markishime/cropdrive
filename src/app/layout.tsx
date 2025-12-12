@@ -21,8 +21,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'CropDrive OP Advisor™ - AI-Powered Palm Oil Farm Analysis',
-  description: 'Transform your palm oil farming with AI-powered soil and leaf analysis. Get instant insights, recommendations, and trend analysis for optimal farm productivity.',
+  title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
+  description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture.',
   keywords: 'palm oil, AI analysis, farm management, soil analysis, leaf analysis, Malaysia, agriculture technology',
   authors: [{ name: 'CropDrive OP Advisor' }],
   creator: 'CropDrive OP Advisor',
@@ -38,12 +38,16 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: '/images/CropDrive.png', sizes: 'any', type: 'image/png' },
+      { url: '/images/CropDrive.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/CropDrive.png', sizes: '32x32', type: 'image/png' },
       { url: '/favicon.ico' },
-      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
-      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
     ],
     apple: [
-      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/CropDrive.png', sizes: '180x180', type: 'image/png' },
+    ],
+    shortcut: [
+      { url: '/images/CropDrive.png', type: 'image/png' },
     ],
   },
   manifest: '/site.webmanifest',
@@ -51,8 +55,8 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://cropdrive.ai',
-    title: 'CropDrive OP Advisor™ - AI-Powered Palm Oil Farm Analysis',
-    description: 'Transform your palm oil farming with AI-powered soil and leaf analysis. Get instant insights, recommendations, and trend analysis for optimal farm productivity.',
+    title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
+    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture.',
     siteName: 'CropDrive OP Advisor',
     images: [
       {
@@ -65,8 +69,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CropDrive OP Advisor™ - AI-Powered Palm Oil Farm Analysis',
-    description: 'Transform your palm oil farming with AI-powered soil and leaf analysis.',
+    title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
+    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture.',
     images: ['/og-image.jpg'],
     creator: '@cropdrive',
   },
