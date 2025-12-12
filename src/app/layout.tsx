@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      // Using circular favicon - logo centered in circular transparent background
+      // Prioritize PNG favicons for better circular display
       { 
         url: '/favicon-32x32.png', 
         sizes: '32x32', 
@@ -49,7 +49,18 @@ export const metadata: Metadata = {
         sizes: '16x16', 
         type: 'image/png',
       },
-      { url: '/favicon.ico' },
+      // Fallback to ICO (for older browsers)
+      { 
+        url: '/favicon.ico', 
+        sizes: '32x32',
+        type: 'image/x-icon',
+      },
+      // Larger icon for Google search results and social sharing
+      {
+        url: '/apple-touch-icon.png',
+        sizes: '180x180',
+        type: 'image/png',
+      },
     ],
     apple: [
       { 
@@ -71,22 +82,28 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://cropdrive.ai',
     title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
-    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture.',
-    siteName: 'CropDrive OP Advisor',
+    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.',
+    siteName: 'CropDrive Oil Palm Advisor™',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://cropdrive.ai/images/Cropdrive Logo.png',
         width: 1200,
         height: 630,
-        alt: 'CropDrive OP Advisor - AI Farm Analysis',
+        alt: 'CropDrive Oil Palm Advisor™ - AI-Powered Palm Oil Farm Analysis',
+      },
+      {
+        url: 'https://cropdrive.ai/apple-touch-icon.png',
+        width: 180,
+        height: 180,
+        alt: 'CropDrive Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
-    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture.',
-    images: ['/og-image.jpg'],
+    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.',
+    images: ['https://cropdrive.ai/images/Cropdrive Logo.png'],
     creator: '@cropdrive',
   },
   robots: {
@@ -112,6 +129,13 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+      <head>
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
           <Toaster 

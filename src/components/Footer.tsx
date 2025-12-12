@@ -96,16 +96,16 @@ export const Footer: React.FC = () => {
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <motion.div
-                className="w-12 h-12 bg-white rounded-full flex items-center justify-center p-2 shadow-lg"
+                className="w-12 h-12 bg-white rounded-full overflow-hidden shadow-lg"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
                 <Image
-                  src="/images/CropDrive.png"
+                  src="/images/Cropdrive Logo.png"
                   alt="CropDrive Logo"
-                  width={32}
-                  height={32}
-                  className="object-contain"
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
                 />
               </motion.div>
               <span className="font-bold text-xl">

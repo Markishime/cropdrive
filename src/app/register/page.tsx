@@ -192,11 +192,11 @@ export default function RegisterPage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Image
-                    src="/images/CropDrive.png"
+                    src="/images/Cropdrive Logo.png"
                     alt="CropDrive Logo"
                     width={40}
                     height={40}
-                    className="object-contain"
+                    className="object-cover w-full h-full rounded-full"
                     priority
                   />
                 </motion.div>

@@ -1,7 +1,7 @@
 {
-  "name": "CropDrive - AI-Powered Oil Palm Analytics",
+  "name": "CropDrive Oil Palm Advisor™",
   "short_name": "CropDrive",
-  "description": "AI-powered analytics platform for Malaysian oil palm farmers. Upload lab reports and get instant insights with MPOB-certified recommendations.",
+  "description": "Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -9,13 +9,31 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/images/CropDrive.png",
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-16x16.png",
+      "sizes": "16x16",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/Cropdrive Logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/CropDrive.png",
+      "src": "/images/Cropdrive Logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -26,18 +44,15 @@
     {
       "src": "/images/screenshot-wide.png",
       "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
+      "type": "image/png"
     },
     {
       "src": "/images/screenshot-narrow.png",
       "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "type": "image/png"
     }
   ],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false
 }
-
