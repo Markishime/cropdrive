@@ -43,8 +43,23 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   // If user is logged in - show AuthenticatedNavbar + Sidebar for dashboard pages, Navbar for landing page
   if (user) {
     // Dashboard pages (protected routes) - show sidebar and authenticated navbar
-    const dashboardPages = ['/dashboard', '/assistant', '/reports', '/payment-method', '/tutorials', '/support', '/pricing'];
-    const isDashboardPage = dashboardPages.some(page => pathname.startsWith(page));
+    // When logged in, these pages show sidebar + authenticated navbar (like tutorials)
+    const dashboardPages = ['/dashboard', '/assistant', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing'];
+
+    // Check if pathname matches dashboard pages (handles both regular and locale-prefixed routes)
+    const isDashboardPage = dashboardPages.some(page => {
+      // Match exact path (e.g., /dashboard)
+      if (pathname === page || pathname.startsWith(page + '/')) {
+        return true;
+      }
+      // Match locale-prefixed paths (e.g., /en/dashboard, /ms/dashboard)
+      const localePattern = /^\/(en|ms)\//;
+      if (localePattern.test(pathname)) {
+        const pathWithoutLocale = pathname.replace(/^\/(en|ms)/, '');
+        return pathWithoutLocale === page || pathWithoutLocale.startsWith(page + '/');
+      }
+      return false;
+    });
     
     if (isDashboardPage) {
       return (

@@ -17,7 +17,8 @@ import {
   ChevronRight,
   ChevronLeft,
   HelpCircle,
-  FileText
+  FileText,
+  Home
 } from 'lucide-react';
 
 interface SidebarItemProps {
@@ -101,6 +102,13 @@ export const Sidebar: React.FC = () => {
   const hasPlan = user && user.plan && user.plan !== 'none';
   
   const sidebarItems = [
+    {
+      href: '/',
+      icon: <Home className="w-5 h-5" />,
+      label: 'Home',
+      labelMs: 'Laman Utama',
+      showAlways: true
+    },
     {
       href: '/dashboard',
       icon: <LayoutDashboard className="w-5 h-5" />,
