@@ -15,7 +15,8 @@
     "firebase:setup": "node firebase-setup.js",
     "stripe:setup": "node stripe-setup.js",
     "db:init": "node database-init.js",
-    "setup:all": "npm run firebase:setup && npm run stripe:setup && npm run db:init"
+    "setup:all": "npm run firebase:setup && npm run stripe:setup && npm run db:init",
+    "favicon:circular": "node scripts/create-circular-favicon.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
