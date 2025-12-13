@@ -19,11 +19,17 @@ const CRON_SECRET = process.env.CRON_SECRET;
  */
 export async function GET(req: NextRequest) {
   try {
-    // Verify cron secret (basic protection)
+    // Verify this is a legitimate Vercel cron request
+    // Vercel sends a special header for cron jobs, or we can use a secret in query params
+    const vercelCronHeader = req.headers.get('x-vercel-cron');
     const authHeader = req.headers.get('authorization');
-    const cronSecret = authHeader?.replace('Bearer ', '');
+    const cronSecret = authHeader?.replace('Bearer ', '') || req.nextUrl.searchParams.get('secret');
     
-    if (cronSecret !== CRON_SECRET) {
+    // Allow if it's from Vercel cron OR if secret matches
+    const isVercelCron = vercelCronHeader === '1';
+    const isAuthorized = cronSecret === CRON_SECRET;
+    
+    if (!isVercelCron && !isAuthorized) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
