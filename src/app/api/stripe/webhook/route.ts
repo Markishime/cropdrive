@@ -528,6 +528,13 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   console.log('📥 Payment succeeded:', invoice.id);
 
+  // Check if this is a contract buyout invoice (Option B monthly cancellation)
+  if (invoice.metadata?.type === 'contract_buyout') {
+    console.log('📥 Contract buyout invoice paid, proceeding to cancel subscription');
+    await handleContractBuyoutPaid(invoice);
+    return;
+  }
+
   const subscriptionId = invoice.subscription as string;
   if (!subscriptionId) {
     console.log('ℹ️ Invoice has no subscription, skipping');
@@ -571,6 +578,72 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
       'Reset user uploads after payment'
     );
     console.log('✅ Payment processed, usage reset for user:', userId);
+  }
+}
+
+// Handle contract buyout invoice payment (Option B monthly cancellation)
+async function handleContractBuyoutPaid(invoice: Stripe.Invoice) {
+  const subscriptionId = invoice.metadata?.subscriptionId;
+  if (!subscriptionId) {
+    console.error('❌ Contract buyout invoice missing subscriptionId in metadata');
+    return;
+  }
+
+  console.log('📥 Processing contract buyout for subscription:', subscriptionId);
+
+  // Get Stripe instance
+  const stripe = getStripe();
+  if (!stripe) {
+    console.error('❌ Stripe not configured for buyout processing');
+    return;
+  }
+
+  try {
+    // Cancel the subscription in Stripe
+    await stripe.subscriptions.cancel(subscriptionId);
+    console.log('✅ Subscription cancelled after buyout payment:', subscriptionId);
+
+    // Get subscription document to find user
+    const subscriptionRef = adminDb.collection('subscriptions').doc(subscriptionId);
+    const subscriptionDoc = await firestoreWithRetry(
+      () => subscriptionRef.get(),
+      'Get subscription for buyout'
+    );
+
+    // Update subscription document
+    await firestoreWithRetry(
+      () => subscriptionRef.set({
+        status: 'canceled',
+        pendingBuyoutCancellation: false,
+        buyoutPaid: true,
+        buyoutPaidAt: admin.firestore.FieldValue.serverTimestamp(),
+        cancellationType: 'option_b_paid_via_webhook',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true }),
+      'Update subscription after buyout'
+    );
+
+    // Update user document
+    if (subscriptionDoc?.exists) {
+      const subscriptionData = subscriptionDoc.data();
+      const userId = subscriptionData?.userId;
+      
+      if (userId) {
+        await firestoreWithRetry(
+          () => adminDb.collection('users').doc(userId).update({
+            plan: 'none',
+            uploadsLimit: 0,
+            subscriptionStatus: 'canceled',
+            pendingBuyoutCancellation: false,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          }),
+          'Downgrade user after buyout'
+        );
+        console.log('✅ User downgraded after contract buyout:', userId);
+      }
+    }
+  } catch (error) {
+    console.error('❌ Error processing contract buyout:', error);
   }
 }
 

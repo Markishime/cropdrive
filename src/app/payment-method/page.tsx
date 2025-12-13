@@ -67,6 +67,17 @@ interface SubscriptionData {
     expMonth: number;
     expYear: number;
   } | null;
+  // Monthly contract year fields
+  subscriptionStartDate?: string;
+  contractYearEnd?: string;
+  monthsUsed?: number;
+  remainingMonths?: number;
+  isBeyondContractYear?: boolean;
+  priceId?: string;
+  unitAmount?: number; // Monthly price in cents
+  currency?: string;
+  pendingContractCancellation?: boolean;
+  contractCancellationDate?: string;
 }
 
 export default function PaymentMethodPage() {
@@ -74,6 +85,8 @@ export default function PaymentMethodPage() {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const [showMonthlyCancelModal, setShowMonthlyCancelModal] = useState(false);
+  const [monthlyCancelLoading, setMonthlyCancelLoading] = useState(false);
   const [showAllInvoicesModal, setShowAllInvoicesModal] = useState(false);
   const [autoRenewal, setAutoRenewal] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -486,6 +499,114 @@ export default function PaymentMethodPage() {
     }
   };
 
+  // Handle monthly cancellation with options A or B
+  const handleMonthlyCancellation = async (option: 'A' | 'B') => {
+    setMonthlyCancelLoading(true);
+    
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) throw new Error('Not authenticated');
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/stripe/cancel-monthly', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ option }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        setShowMonthlyCancelModal(false);
+        
+        if (option === 'A') {
+          toast.success(
+            language === 'ms' 
+              ? `✅ Langganan akan diteruskan sehingga ${new Date(data.contractYearEnd).toLocaleDateString('ms-MY')} dan kemudian dibatalkan.`
+              : `✅ Subscription will continue until ${new Date(data.contractYearEnd).toLocaleDateString()} and then be cancelled.`,
+            {
+              duration: 6000,
+              style: {
+                borderRadius: '12px',
+                background: '#10b981',
+                color: '#fff',
+                padding: '16px',
+                fontSize: '14px',
+                fontWeight: '600',
+              },
+            }
+          );
+        } else {
+          toast.success(
+            language === 'ms' 
+              ? `✅ Pembayaran berjaya. Langganan dibatalkan selepas membayar ${data.remainingMonthsPaid} bulan baki.`
+              : `✅ Payment successful. Subscription cancelled after paying ${data.remainingMonthsPaid} remaining month(s).`,
+            {
+              duration: 6000,
+              style: {
+                borderRadius: '12px',
+                background: '#10b981',
+                color: '#fff',
+                padding: '16px',
+                fontSize: '14px',
+                fontWeight: '600',
+              },
+            }
+          );
+        }
+        
+        // Refresh data
+        await fetchSubscription();
+        if (refreshUser) await refreshUser();
+      } else if (data.invoiceUrl) {
+        // Payment failed, show link to pay invoice
+        setShowMonthlyCancelModal(false);
+        toast.error(
+          language === 'ms' 
+            ? `Pembayaran gagal. Sila bayar invois untuk melengkapkan pembatalan.`
+            : `Payment failed. Please pay the invoice to complete cancellation.`,
+          {
+            duration: 8000,
+            style: {
+              borderRadius: '12px',
+              background: '#f59e0b',
+              color: '#fff',
+              padding: '16px',
+              fontSize: '14px',
+              fontWeight: '600',
+            },
+          }
+        );
+        window.open(data.invoiceUrl, '_blank');
+      } else {
+        throw new Error(data.error || 'Failed to cancel');
+      }
+    } catch (error: any) {
+      console.error('Monthly cancellation error:', error);
+      toast.error(
+        language === 'ms' 
+          ? `❌ Ralat membatalkan langganan: ${error.message}` 
+          : `❌ Error cancelling subscription: ${error.message}`,
+        {
+          duration: 5000,
+          style: {
+            borderRadius: '12px',
+            background: '#ef4444',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        }
+      );
+    } finally {
+      setMonthlyCancelLoading(false);
+    }
+  };
+
   const handleReactivateSubscription = async () => {
     setLoading(true);
     
@@ -821,18 +942,55 @@ export default function PaymentMethodPage() {
                       </motion.div>
                     )}
 
+                    {/* Pending Contract Cancellation Banner (for monthly Option A) */}
+                    {subscription?.pendingContractCancellation && subscription?.contractCancellationDate && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-4 mb-6 text-white"
+                      >
+                        <div className="flex items-start gap-3">
+                          <Calendar className="w-6 h-6 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="font-bold mb-1">
+                              {language === 'ms' 
+                                ? 'Pembatalan Dijadualkan' 
+                                : 'Cancellation Scheduled'}
+                            </p>
+                            <p className="text-sm text-white/90 mb-3">
+                              {language === 'ms' 
+                                ? `Langganan anda akan diteruskan dengan bayaran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir tahun kontrak), kemudian dibatalkan secara automatik.`
+                                : `Your subscription will continue with monthly payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of contract year), then be automatically cancelled.`}
+                            </p>
+                            <Button
+                              onClick={handleReactivateSubscription}
+                              disabled={loading}
+                              className="bg-white text-blue-600 hover:bg-blue-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm"
+                            >
+                              {loading ? (
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              ) : (
+                                <RefreshCw className="w-4 h-4 mr-2" />
+                              )}
+                              {language === 'ms' ? 'Batalkan Pembatalan' : 'Cancel Cancellation'}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+
                     {/* Actions */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Link href="/pricing">
                         <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
                           <TrendingUp className="w-4 h-4 mr-2" />
-                          {subscription?.cancelAtPeriodEnd 
+                          {subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation
                             ? (language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe New Plan')
                             : (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
                           }
                         </Button>
                       </Link>
-                      {subscription?.cancelAtPeriodEnd ? (
+                      {subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation ? (
                         <Button 
                           onClick={handleReactivateSubscription}
                           disabled={loading}
@@ -845,7 +1003,7 @@ export default function PaymentMethodPage() {
                           )}
                           {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
                         </Button>
-                      ) : canSelfCancel ? (
+                      ) : isYearlySubscription ? (
                         <Button 
                           onClick={() => setShowCancelModal(true)}
                           disabled={loading}
@@ -860,15 +1018,16 @@ export default function PaymentMethodPage() {
                         </Button>
                       ) : (
                         <Button 
-                          disabled
-                          className="w-full bg-gray-100 text-gray-500 py-3 font-bold rounded-xl"
-                          title={language === 'ms'
-                            ? 'Pelan bulanan tidak boleh dibatalkan dalam portal. Hubungi sokongan.'
-                            : 'Monthly plans cannot be cancelled in-portal. Contact support.'
-                          }
+                          onClick={() => setShowMonthlyCancelModal(true)}
+                          disabled={loading}
+                          className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
                         >
-                          <Shield className="w-4 h-4 mr-2" />
-                          {language === 'ms' ? 'Hubungi sokongan untuk batal' : 'Contact support to cancel'}
+                          {loading ? (
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          ) : (
+                            <X className="w-4 h-4 mr-2" />
+                          )}
+                          {language === 'ms' ? 'Batalkan' : 'Cancel'}
                         </Button>
                       )}
                     </div>
@@ -1070,24 +1229,30 @@ export default function PaymentMethodPage() {
                             {language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {isMonthlySubscription
+                            {subscription?.pendingContractCancellation
                               ? (language === 'ms'
-                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Pembayaran akan berterusan sehingga akhir kitaran bil (minimum 1 tahun).'
-                                  : 'Cancellation will take effect immediately. Payments will continue until the end of billing cycle (minimum 1 year).')
-                              : (language === 'ms'
-                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir kitaran bil.'
-                                  : 'Cancellation will take effect immediately. Services will continue until the end of billing cycle.')
+                                  ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}.`
+                                  : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}.`)
+                              : isMonthlySubscription
+                                ? (language === 'ms'
+                                    ? 'Pelan bulanan mempunyai komitmen 12 bulan. Pilih cara pembatalan.'
+                                    : 'Monthly plans have a 12-month commitment. Choose cancellation option.')
+                                : (language === 'ms'
+                                    ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir kitaran bil.'
+                                    : 'Cancellation will take effect immediately. Services will continue until the end of billing cycle.')
                             }
                           </p>
                         </div>
                       </div>
                       <Button
-                        onClick={() => setShowCancelModal(true)}
-                        disabled={loading || !subscription || subscription.cancelAtPeriodEnd}
+                        onClick={() => isMonthlySubscription ? setShowMonthlyCancelModal(true) : setShowCancelModal(true)}
+                        disabled={loading || !subscription || subscription.cancelAtPeriodEnd || subscription.pendingContractCancellation}
                         className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {loading ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : subscription?.pendingContractCancellation ? (
+                          language === 'ms' ? 'Dijadualkan' : 'Scheduled'
                         ) : (
                           language === 'ms' ? 'Batal' : 'Cancel'
                         )}
@@ -1353,6 +1518,188 @@ export default function PaymentMethodPage() {
                     )}
                   </Button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Monthly Cancel Modal */}
+        <AnimatePresence>
+          {showMonthlyCancelModal && subscription && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+              onClick={() => !monthlyCancelLoading && setShowMonthlyCancelModal(false)}
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl"
+              >
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-amber-600" />
+                  </div>
+                  <h3 className="text-2xl font-black text-gray-900 mb-2">
+                    {language === 'ms' ? 'Batalkan Langganan Bulanan' : 'Cancel Monthly Subscription'}
+                  </h3>
+                  <p className="text-gray-600 mb-2">
+                    {language === 'ms' 
+                      ? 'Pelan bulanan anda mempunyai komitmen 12 bulan. Sila pilih cara pembatalan:'
+                      : 'Your monthly plan has a 12-month commitment. Please choose how to cancel:'}
+                  </p>
+                  
+                  {/* Contract Info */}
+                  <div className="bg-gray-50 rounded-xl p-4 mt-4 text-left">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500">{language === 'ms' ? 'Mula langganan' : 'Subscription started'}</p>
+                        <p className="font-bold text-gray-900">
+                          {subscription.subscriptionStartDate 
+                            ? new Date(subscription.subscriptionStartDate).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US')
+                            : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">{language === 'ms' ? 'Akhir tahun kontrak' : 'Contract year ends'}</p>
+                        <p className="font-bold text-gray-900">
+                          {subscription.contractYearEnd 
+                            ? new Date(subscription.contractYearEnd).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US')
+                            : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">{language === 'ms' ? 'Bulan digunakan' : 'Months used'}</p>
+                        <p className="font-bold text-gray-900">{subscription.monthsUsed ?? 0} / 12</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">{language === 'ms' ? 'Bulan baki' : 'Months remaining'}</p>
+                        <p className="font-bold text-amber-600">{subscription.remainingMonths ?? 0}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* If beyond contract year, show simple cancel */}
+                {subscription.isBeyondContractYear ? (
+                  <div className="space-y-4">
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                      <p className="text-sm text-green-800">
+                        {language === 'ms'
+                          ? '✅ Anda telah melepasi tahun kontrak 12 bulan. Anda boleh membatalkan pada bila-bila masa.'
+                          : '✅ You have passed your 12-month contract year. You can cancel anytime.'}
+                      </p>
+                    </div>
+                    <div className="flex gap-3">
+                      <Button
+                        onClick={() => setShowMonthlyCancelModal(false)}
+                        disabled={monthlyCancelLoading}
+                        className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl"
+                      >
+                        {language === 'ms' ? 'Kembali' : 'Go Back'}
+                      </Button>
+                      <Button
+                        onClick={handleCancelSubscription}
+                        disabled={monthlyCancelLoading || loading}
+                        className="flex-1 bg-red-600 text-white hover:bg-red-700 py-3 font-bold rounded-xl"
+                      >
+                        {monthlyCancelLoading || loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          language === 'ms' ? 'Batalkan Sekarang' : 'Cancel Now'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Option A */}
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => handleMonthlyCancellation('A')}
+                      disabled={monthlyCancelLoading}
+                      className="w-full p-5 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 hover:border-blue-400 transition-all text-left disabled:opacity-50"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Calendar className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 mb-1">
+                            {language === 'ms' 
+                              ? 'Pilihan A: Teruskan sehingga akhir kontrak'
+                              : 'Option A: Continue until contract end'}
+                          </p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {language === 'ms'
+                              ? `Teruskan bayaran bulanan untuk ${subscription.remainingMonths ?? 0} bulan lagi sehingga ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString('ms-MY') : 'akhir kontrak'}, kemudian batal secara automatik.`
+                              : `Continue monthly payments for ${subscription.remainingMonths ?? 0} more month(s) until ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString() : 'contract end'}, then cancel automatically.`}
+                          </p>
+                          <p className="text-xs text-blue-600 font-semibold">
+                            {language === 'ms' ? 'Tiada bayaran tambahan sekarang' : 'No extra payment now'}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.button>
+
+                    {/* Option B */}
+                    <motion.button
+                      whileHover={{ scale: 1.01 }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => handleMonthlyCancellation('B')}
+                      disabled={monthlyCancelLoading}
+                      className="w-full p-5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200 hover:border-amber-400 transition-all text-left disabled:opacity-50"
+                    >
+                      <div className="flex items-start gap-4">
+                        <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0">
+                          <CreditCard className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-gray-900 mb-1">
+                            {language === 'ms' 
+                              ? 'Pilihan B: Bayar baki sekarang dan berhenti'
+                              : 'Option B: Pay remaining now and stop'}
+                          </p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {language === 'ms'
+                              ? `Bayar ${subscription.remainingMonths ?? 0} bulan baki sekarang (RM${((subscription.unitAmount || 0) / 100 * (subscription.remainingMonths ?? 0)).toFixed(2)}) dan batalkan langganan serta-merta.`
+                              : `Pay ${subscription.remainingMonths ?? 0} remaining month(s) now (RM${((subscription.unitAmount || 0) / 100 * (subscription.remainingMonths ?? 0)).toFixed(2)}) and cancel subscription immediately.`}
+                          </p>
+                          <p className="text-xs text-amber-600 font-semibold">
+                            {language === 'ms' 
+                              ? `Jumlah: RM${((subscription.unitAmount || 0) / 100 * (subscription.remainingMonths ?? 0)).toFixed(2)}`
+                              : `Total: RM${((subscription.unitAmount || 0) / 100 * (subscription.remainingMonths ?? 0)).toFixed(2)}`}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.button>
+
+                    {/* Cancel button */}
+                    <Button
+                      onClick={() => setShowMonthlyCancelModal(false)}
+                      disabled={monthlyCancelLoading}
+                      className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl mt-2"
+                    >
+                      {language === 'ms' ? 'Kembali' : 'Go Back'}
+                    </Button>
+                  </div>
+                )}
+
+                {monthlyCancelLoading && (
+                  <div className="absolute inset-0 bg-white/80 rounded-3xl flex items-center justify-center">
+                    <div className="text-center">
+                      <Loader2 className="w-8 h-8 animate-spin text-green-600 mx-auto mb-2" />
+                      <p className="text-gray-600 font-medium">
+                        {language === 'ms' ? 'Memproses...' : 'Processing...'}
+                      </p>
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </motion.div>
           )}

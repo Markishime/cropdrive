@@ -1,8 +1,9 @@
 {
-  "name": "CropDrive Oil Palm Advisor™",
+  "name": "CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform",
   "short_name": "CropDrive",
   "description": "Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.",
   "start_url": "/",
+  "id": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",
@@ -27,31 +28,19 @@
       "purpose": "any"
     },
     {
-      "src": "/images/Cropdrive Logo.png",
+      "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/images/Cropdrive Logo.png",
+      "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "categories": ["agriculture", "business", "productivity"],
-  "screenshots": [
-    {
-      "src": "/images/screenshot-wide.png",
-      "sizes": "1280x720",
-      "type": "image/png"
-    },
-    {
-      "src": "/images/screenshot-narrow.png",
-      "sizes": "750x1334",
-      "type": "image/png"
-    }
-  ],
   "lang": "en",
   "dir": "ltr",
   "prefer_related_applications": false

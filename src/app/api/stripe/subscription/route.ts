@@ -34,9 +34,9 @@ export async function GET(req: NextRequest) {
       });
     }
 
-    // Fetch subscription from Stripe
+    // Fetch subscription from Stripe with price details
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
-      expand: ['default_payment_method', 'latest_invoice'],
+      expand: ['default_payment_method', 'latest_invoice', 'items.data.price'],
     });
 
     // Get payment method details
@@ -53,6 +53,36 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Get price details for monthly plans
+    const priceItem = subscription.items.data[0]?.price;
+    const priceId = priceItem?.id || null;
+    const unitAmount = priceItem?.unit_amount || 0; // Amount in cents
+    const currency = priceItem?.currency || 'myr';
+    const interval = priceItem?.recurring?.interval || 'month';
+
+    // Calculate subscription start date (first billing cycle start)
+    // For new subscriptions, start_date is available. For existing, use created timestamp
+    const subscriptionStartDate = new Date(subscription.start_date * 1000);
+    
+    // Calculate contract year end (12 months from subscription start)
+    const contractYearEnd = new Date(subscriptionStartDate);
+    contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
+
+    // Calculate months used (number of complete billing periods since start)
+    const now = new Date();
+    const monthsUsed = Math.floor(
+      (now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
+    );
+
+    // Check if we're beyond the first contract year
+    const isBeyondContractYear = now >= contractYearEnd;
+
+    // Check for pending contract cancellation in our database
+    const subscriptionDoc = await adminDb.collection('subscriptions').doc(stripeSubscriptionId).get();
+    const subscriptionData = subscriptionDoc.exists ? subscriptionDoc.data() : null;
+    const pendingContractCancellation = subscriptionData?.pendingContractCancellation || false;
+    const contractCancellationDate = subscriptionData?.contractCancellationDate?.toDate?.() || null;
+
     return NextResponse.json({
       subscription: {
         id: subscription.id,
@@ -61,8 +91,20 @@ export async function GET(req: NextRequest) {
         currentPeriodEnd: new Date(subscription.current_period_end * 1000),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null,
-        billingCycle: subscription.items.data[0]?.price?.recurring?.interval || 'month',
+        billingCycle: interval,
         paymentMethod,
+        // New fields for monthly contract year logic
+        subscriptionStartDate,
+        contractYearEnd,
+        monthsUsed: Math.max(0, monthsUsed),
+        remainingMonths: Math.max(0, 12 - monthsUsed),
+        isBeyondContractYear,
+        priceId,
+        unitAmount, // Monthly price in cents
+        currency,
+        // Pending cancellation info from our database
+        pendingContractCancellation,
+        contractCancellationDate,
       },
     });
 
@@ -258,22 +300,26 @@ export async function POST(req: NextRequest) {
       cancel_at_period_end: false,
     });
 
-    // Update Firestore subscriptions collection
+    // Update Firestore subscriptions collection (also clear pending contract cancellation)
     const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
     const subscriptionDoc = await subscriptionRef.get();
     
     if (subscriptionDoc.exists) {
       await subscriptionRef.update({
         cancelAtPeriodEnd: false,
+        pendingContractCancellation: false,
+        contractCancellationDate: admin.firestore.FieldValue.delete(),
         reactivatedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     }
 
-    // Update user document
+    // Update user document (also clear pending contract cancellation)
     await adminDb.collection('users').doc(userId).update({
       subscriptionStatus: 'active',
       cancelAtPeriodEnd: false,
+      pendingContractCancellation: false,
+      contractCancellationDate: admin.firestore.FieldValue.delete(),
       subscriptionReactivatedAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
