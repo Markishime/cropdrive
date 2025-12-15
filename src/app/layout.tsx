@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
+import Script from 'next/script';
 import { AuthProvider } from '@/lib/auth';
 import { Analytics } from '@vercel/analytics/next';
 import LayoutWrapper from '@/components/LayoutWrapper';
@@ -22,15 +23,15 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   title: {
-    default: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
-    template: '%s | CropDrive Oil Palm Advisor™',
+    default: 'CropDrive OP Advisor™ – AI-Powered Palm Oil Farm Analysis',
+    template: '%s | CropDrive OP Advisor™',
   },
-  description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.',
+  description: 'AI-powered agronomy assistant for palm oil farms. Interprets soil and leaf test results into clear fertilizer and soil-health recommendations in minutes.',
   keywords: ['palm oil', 'AI analysis', 'farm management', 'soil analysis', 'leaf analysis', 'Malaysia', 'agriculture technology', 'oil palm', 'precision agriculture', 'agronomy', 'crop advisor'],
-  authors: [{ name: 'CropDrive Oil Palm Advisor' }],
-  creator: 'CropDrive Oil Palm Advisor',
-  publisher: 'CropDrive Oil Palm Advisor',
-  applicationName: 'CropDrive Oil Palm Advisor™',
+  authors: [{ name: 'CropDrive OP Advisor' }],
+  creator: 'CropDrive OP Advisor',
+  publisher: 'CropDrive OP Advisor',
+  applicationName: 'CropDrive OP Advisor™',
   formatDetection: {
     email: false,
     address: false,
@@ -91,15 +92,15 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://cropdrive.ai',
-    title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
-    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.',
-    siteName: 'CropDrive Oil Palm Advisor™',
+    title: 'CropDrive OP Advisor™ – AI-Powered Palm Oil Farm Analysis',
+    description: 'AI-powered agronomy assistant for palm oil farms. Interprets soil and leaf test results into clear fertilizer and soil-health recommendations in minutes.',
+    siteName: 'CropDrive OP Advisor™',
     images: [
       {
         url: '/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
+        alt: 'CropDrive OP Advisor™ – AI-Powered Palm Oil Farm Analysis',
         type: 'image/png',
       },
       {
@@ -113,8 +114,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
-    description: 'Improve your oil palm yield and profitability with AI-integrated precision agriculture. AI-powered analytics platform for Malaysian oil palm farmers.',
+    title: 'CropDrive OP Advisor™ – AI-Powered Palm Oil Farm Analysis',
+    description: 'AI-powered agronomy assistant for palm oil farms. Interprets soil and leaf test results into clear fertilizer and soil-health recommendations in minutes.',
     images: ['/images/og-image.png'],
     creator: '@cropdrive',
     site: '@cropdrive',
@@ -140,9 +141,27 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'CropDrive OP Advisor',
+    url: 'https://cropdrive.ai',
+    logo: 'https://cropdrive.ai/android-chrome-512x512.png',
+    sameAs: [
+      'https://www.facebook.com/CropDrive',
+      'https://www.linkedin.com/company/cropdrive',
+    ],
+  };
+
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
       <body className={`${inter.className} antialiased`}>
+        <Script
+          id="org-json-ld"
+          type="application/ld+json"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         <AuthProvider>
           <Toaster 
             position="top-center"
