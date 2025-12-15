@@ -4,13 +4,13 @@ import { notFound } from 'next/navigation';
 import SupportPageClient from './SupportPageClient';
 
 interface SupportPageProps {
-  params: {
+  params: Promise<{
     locale: string;
-  };
+  }>;
 }
 
 export async function generateMetadata({ params }: SupportPageProps): Promise<Metadata> {
-  const { locale } = params;
+  const { locale } = await params;
 
   const titles = {
     en: 'Support - CropDrive',
@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: SupportPageProps): Promise<Me
   };
 }
 
-export default function SupportPage({ params }: SupportPageProps) {
-  const { locale } = params;
+export default async function SupportPage({ params }: SupportPageProps) {
+  const { locale } = await params;
 
   // Validate locale
   if (!['en', 'ms'].includes(locale)) {

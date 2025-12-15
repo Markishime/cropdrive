@@ -980,7 +980,7 @@ export default function PaymentMethodPage() {
                     )}
 
                     {/* Actions */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col gap-4">
                       <Link href="/pricing">
                         <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
                           <TrendingUp className="w-4 h-4 mr-2" />
@@ -990,7 +990,7 @@ export default function PaymentMethodPage() {
                           }
                         </Button>
                       </Link>
-                      {subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation ? (
+                      {(subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation) && (
                         <Button 
                           onClick={handleReactivateSubscription}
                           disabled={loading || !subscription}
@@ -1002,36 +1002,6 @@ export default function PaymentMethodPage() {
                             <RefreshCw className="w-4 h-4 mr-2" />
                           )}
                           {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
-                        </Button>
-                      ) : isYearlySubscription ? (
-                        <Button 
-                          onClick={() => {
-                            if (subscription) setShowCancelModal(true);
-                          }}
-                          disabled={loading || loadingSubscription || !subscription}
-                          className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
-                        >
-                          {loading || loadingSubscription ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4 mr-2" />
-                          )}
-                          {language === 'ms' ? 'Batalkan' : 'Cancel'}
-                        </Button>
-                      ) : (
-                        <Button 
-                          onClick={() => {
-                            if (subscription) setShowMonthlyCancelModal(true);
-                          }}
-                          disabled={loading || loadingSubscription || !subscription}
-                          className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
-                        >
-                          {loading || loadingSubscription ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4 mr-2" />
-                          )}
-                          {language === 'ms' ? 'Batalkan' : 'Cancel'}
                         </Button>
                       )}
                     </div>

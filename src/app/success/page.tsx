@@ -136,10 +136,6 @@ function SuccessPageContent() {
     const timer = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
-          // Add refresh param to trigger user data refresh
-          console.log('🔄 Redirecting to dashboard with refresh=true');
-          router.push('/dashboard?refresh=true');
           return 0;
         }
         return prev - 1;
@@ -147,7 +143,19 @@ function SuccessPageContent() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [sessionId, router]);
+  }, [sessionId]);
+
+  // Handle redirect when countdown reaches 0
+  useEffect(() => {
+    if (countdown === 0) {
+      // Add refresh param to trigger user data refresh
+      console.log('🔄 Redirecting to dashboard with refresh=true');
+      // Use setTimeout to ensure this runs after the current render cycle
+      setTimeout(() => {
+        router.push('/dashboard?refresh=true');
+      }, 0);
+    }
+  }, [countdown, router]);
 
   const planNames = {
     start: { en: 'CropDrive Start', ms: 'CropDrive Start' },
