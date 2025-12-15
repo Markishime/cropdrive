@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 
 // Initialize Firebase Admin if not already initialized
@@ -78,6 +78,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Check user's upload limits before saving
+    if (adminDb) {
+      const userDoc = await adminDb.collection('users').doc(userId).get();
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        const uploadsUsed = userData?.uploadsUsed || 0;
+        const uploadsLimit = userData?.uploadsLimit || 10;
+        
+        // Check if user has exceeded their limit (unless unlimited: -1)
+        if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
+          console.log(`❌ User ${userId} has exceeded upload limit: ${uploadsUsed}/${uploadsLimit}`);
+          return NextResponse.json(
+            { 
+              error: 'Upload limit exceeded',
+              message: 'You have reached your upload limit. Please upgrade your plan for more analyses.',
+              uploadsUsed,
+              uploadsLimit 
+            },
+            { status: 403 }
+          );
+        }
+      }
+    }
+
     // Save report to Firestore
     // Note: Firestore security rules will validate that userId matches auth.uid
     const reportData = {
@@ -96,11 +120,27 @@ export async function POST(request: NextRequest) {
 
     // Use Admin SDK if available, otherwise return instructions
     if (adminDb) {
+      // Save the analysis report
       const docRef = await adminDb.collection('analysis_results').add(reportData);
+      
+      // Increment the user's uploadsUsed counter
+      await adminDb.collection('users').doc(userId).update({
+        uploadsUsed: FieldValue.increment(1),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+      
+      // Get updated user data
+      const updatedUserDoc = await adminDb.collection('users').doc(userId).get();
+      const updatedUserData = updatedUserDoc.data();
+      
+      console.log(`✅ Report saved and upload count incremented for user ${userId}: ${updatedUserData?.uploadsUsed}/${updatedUserData?.uploadsLimit}`);
+      
       return NextResponse.json({
         success: true,
         reportId: docRef.id,
         message: 'Report saved successfully',
+        uploadsUsed: updatedUserData?.uploadsUsed || 0,
+        uploadsLimit: updatedUserData?.uploadsLimit || 10,
       });
     } else {
       // If Admin SDK not available, return success but note that client-side will handle it
@@ -109,6 +149,7 @@ export async function POST(request: NextRequest) {
         success: true,
         message: 'Report will be saved client-side',
         note: 'Admin SDK not configured, using client-side save',
+        incrementUsage: true, // Flag to tell client to increment usage
       });
     }
   } catch (error: any) {

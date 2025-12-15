@@ -114,14 +114,28 @@ export default function AIAssistantPage() {
     const url = new URL(baseUrl);
     url.searchParams.set('lang', currentLanguage);
     
-    // Add user ID if available
+    // Add user details (as per HuggingFace Space requirements)
     if (user?.uid) {
       url.searchParams.set('userId', user.uid);
+    }
+    
+    if (user?.email) {
+      url.searchParams.set('userEmail', user.email);
+    }
+    
+    if (user?.displayName) {
+      url.searchParams.set('userName', user.displayName);
     }
     
     // Add plan information
     if (user?.plan) {
       url.searchParams.set('plan', user.plan);
+    }
+    
+    // Add upload usage information
+    if (user) {
+      url.searchParams.set('uploadsUsed', user.uploadsUsed.toString());
+      url.searchParams.set('uploadsLimit', user.uploadsLimit.toString());
     }
     
     return url.toString();
@@ -263,13 +277,17 @@ export default function AIAssistantPage() {
                       loading="lazy"
                       onLoad={() => {
                         // Send initial language configuration when iframe loads
-                        if (iframeRef.current?.contentWindow) {
+                        if (iframeRef.current?.contentWindow && user) {
                           const iframeOrigin = getIframeOrigin();
                           iframeRef.current.contentWindow.postMessage({
                             type: 'CONFIG',
                             language: currentLanguage,
-                            userId: user?.uid || null,
-                            plan: user?.plan || 'none',
+                            userId: user.uid,
+                            userEmail: user.email || '',
+                            userName: user.displayName || '',
+                            plan: user.plan || 'none',
+                            uploadsUsed: user.uploadsUsed || 0,
+                            uploadsLimit: user.uploadsLimit || 10,
                           }, iframeOrigin);
                         }
                       }}

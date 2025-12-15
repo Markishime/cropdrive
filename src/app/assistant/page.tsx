@@ -15,7 +15,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  CreditCard
+  CreditCard,
+  TrendingUp,
+  FileText,
+  BarChart3
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
@@ -26,10 +29,39 @@ export default function AssistantPage() {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [iframeKey, setIframeKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { language } = useTranslation(mounted ? currentLang : 'en');
+
+  // Check if user has exceeded their upload limit
+  const isUploadLimitExceeded = (): boolean => {
+    if (!user) return false;
+    // If no plan, they need to subscribe first
+    if (!user.plan || user.plan === 'none') return false;
+    // If unlimited (-1), never exceeded
+    if (user.uploadsLimit === -1) return false;
+    // Check if used >= limit
+    return user.uploadsUsed >= user.uploadsLimit;
+  };
+
+  const uploadLimitExceeded = user ? isUploadLimitExceeded() : false;
+  const uploadsRemaining = user ? (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - user.uploadsUsed)) : 0;
+
+  // Get iframe origin from environment variable or default
+  const getIframeOrigin = () => {
+    const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
+    const defaultUrl = 'https://markishime-ags.hf.space/';
+    const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
+    
+    try {
+      const url = new URL(baseUrl);
+      return url.origin;
+    } catch (error) {
+      // Fallback to default origin if URL parsing fails
+      return new URL(defaultUrl).origin;
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -48,14 +80,17 @@ export default function AssistantPage() {
         // Reload iframe with new language (updates URL)
         setIframeKey(prev => prev + 1);
         
-        // Also send message to iframe to update language immediately
+        // Send message to iframe after a short delay to ensure it's loaded
         // This allows Streamlit to update without reading URL params
-        if (iframeRef.current?.contentWindow) {
-          iframeRef.current.contentWindow.postMessage({
-            type: 'LANGUAGE_CHANGE',
-            language: lang,
-          }, 'https://markishime-ags.hf.space');
-        }
+        setTimeout(() => {
+          if (iframeRef.current?.contentWindow) {
+            const iframeOrigin = getIframeOrigin();
+            iframeRef.current.contentWindow.postMessage({
+              type: 'LANGUAGE_CHANGE',
+              language: lang,
+            }, iframeOrigin);
+          }
+        }, 500); // Wait 500ms for iframe to reload
       }
     };
     
@@ -131,31 +166,46 @@ export default function AssistantPage() {
 
   // Build iframe URL with parameters
   const buildIframeUrl = () => {
-    const baseUrl = 'https://markishime-ags.hf.space/';
+    const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
+    const defaultUrl = 'https://markishime-ags.hf.space/';
+    const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
     const params = new URLSearchParams();
     
     // Add language parameter
     params.append('lang', currentLang);
     
-    // Add user ID (for tracking)
+    // Add user details (as per HuggingFace Space requirements)
     if (user?.uid) {
       params.append('userId', user.uid);
+    }
+    
+    if (user?.email) {
+      params.append('userEmail', user.email);
+    }
+    
+    if (user?.displayName) {
+      params.append('userName', user.displayName);
     }
     
     // Add plan information
     const userPlan = user?.plan || 'none';
     params.append('plan', userPlan);
     
-    // Add plan limits
-    const planLimits = {
-      start: { uploadLimit: 10, features: ['basic'] },
-      smart: { uploadLimit: 50, features: ['basic', 'priority'] },
-      precision: { uploadLimit: -1, features: ['basic', 'priority', 'premium', 'comparative', 'early_access'] },
+    // Add actual upload usage from user data
+    if (user) {
+      params.append('uploadsUsed', user.uploadsUsed.toString());
+      params.append('uploadsLimit', user.uploadsLimit.toString());
+    }
+    
+    // Add plan-based features
+    const planFeatures = {
+      start: ['basic'],
+      smart: ['basic', 'priority'],
+      precision: ['basic', 'priority', 'premium', 'comparative', 'early_access'],
     };
     
-    const limits = planLimits[userPlan as keyof typeof planLimits] || planLimits.start;
-    params.append('uploadLimit', limits.uploadLimit.toString());
-    params.append('features', limits.features.join(','));
+    const features = planFeatures[userPlan as keyof typeof planFeatures] || planFeatures.start;
+    params.append('features', features.join(','));
     
     return `${baseUrl}?${params.toString()}`;
   };
@@ -166,7 +216,8 @@ export default function AssistantPage() {
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       // Verify origin for security
-      if (event.origin !== 'https://markishime-ags.hf.space') {
+      const iframeOrigin = getIframeOrigin();
+      if (event.origin !== iframeOrigin) {
         return;
       }
 
@@ -205,8 +256,9 @@ export default function AssistantPage() {
               }),
             });
 
+            const result = await response.json();
+            
             if (response.ok) {
-              const result = await response.json();
               toast.success(
                 language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
@@ -217,6 +269,53 @@ export default function AssistantPage() {
                 }
               );
               console.log('Report saved:', result.reportId);
+              
+              // Refresh user data to update upload usage display
+              await refreshUser?.();
+              
+              // Show remaining uploads
+              if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
+                const remaining = result.uploadsLimit === -1 ? 'unlimited' : result.uploadsLimit - result.uploadsUsed;
+                toast(
+                  language === 'ms' 
+                    ? `📊 Baki analisis: ${remaining === 'unlimited' ? '∞' : remaining}`
+                    : `📊 Remaining analyses: ${remaining === 'unlimited' ? '∞' : remaining}`,
+                  { duration: 3000 }
+                );
+              }
+            } else if (response.status === 403 && result.error === 'Upload limit exceeded') {
+              // Upload limit exceeded
+              toast.error(
+                language === 'ms' 
+                  ? `❌ Had muat naik tercapai (${result.uploadsUsed}/${result.uploadsLimit}). Sila naik taraf pelan anda.`
+                  : `❌ Upload limit reached (${result.uploadsUsed}/${result.uploadsLimit}). Please upgrade your plan.`,
+                { duration: 6000 }
+              );
+              
+              // Refresh user data
+              await refreshUser?.();
+              
+              // Show upgrade prompt
+              setTimeout(() => {
+                toast(
+                  (t) => (
+                    <div className="flex items-center gap-3">
+                      <span>{language === 'ms' ? 'Naik taraf untuk terus menganalisis' : 'Upgrade to continue analyzing'}</span>
+                      <button
+                        onClick={() => {
+                          toast.dismiss(t.id);
+                          router.push('/pricing');
+                        }}
+                        className="px-3 py-1 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                      >
+                        {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
+                      </button>
+                    </div>
+                  ),
+                  { duration: 8000, icon: '⬆️' }
+                );
+              }, 500);
+              return;
             } else {
               throw new Error('API save failed');
             }
@@ -224,8 +323,19 @@ export default function AssistantPage() {
             // Fallback: Save directly to Firestore (security rules will validate)
             console.log('API save failed, trying direct Firestore save...');
             try {
-              const { collection, addDoc, serverTimestamp } = await import('firebase/firestore');
+              const { collection, addDoc, serverTimestamp, doc, updateDoc, increment } = await import('firebase/firestore');
               const { db } = await import('@/lib/firebase');
+              
+              // Check upload limit first
+              if (user.uploadsLimit !== -1 && user.uploadsUsed >= user.uploadsLimit) {
+                toast.error(
+                  language === 'ms' 
+                    ? `❌ Had muat naik tercapai (${user.uploadsUsed}/${user.uploadsLimit}). Sila naik taraf pelan anda.`
+                    : `❌ Upload limit reached (${user.uploadsUsed}/${user.uploadsLimit}). Please upgrade your plan.`,
+                  { duration: 6000 }
+                );
+                return;
+              }
               
               const reportData = {
                 userId: user.uid,
@@ -242,6 +352,13 @@ export default function AssistantPage() {
               };
 
               const docRef = await addDoc(collection(db, 'analysis_results'), reportData);
+              
+              // Increment uploads used
+              await updateDoc(doc(db, 'users', user.uid), {
+                uploadsUsed: increment(1),
+                updatedAt: serverTimestamp(),
+              });
+              
               toast.success(
                 language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
@@ -252,6 +369,9 @@ export default function AssistantPage() {
                 }
               );
               console.log('Report saved directly:', docRef.id);
+              
+              // Refresh user data to update upload usage display
+              await refreshUser?.();
             } catch (firestoreError) {
               console.error('Error saving report:', firestoreError);
               toast.error(
@@ -332,22 +452,27 @@ export default function AssistantPage() {
         type: 'CONFIG',
         language: currentLang,
         userId: user.uid,
+        userEmail: user.email || '',
+        userName: user.displayName || '',
         plan: user.plan || 'none',
-        userEmail: user.email,
+        uploadsUsed: user.uploadsUsed || 0,
+        uploadsLimit: user.uploadsLimit || 10,
       };
       
-      iframeRef.current.contentWindow.postMessage(config, 'https://markishime-ags.hf.space');
+      const iframeOrigin = getIframeOrigin();
+      iframeRef.current.contentWindow.postMessage(config, iframeOrigin);
     }
   };
 
-  // Update iframe language when currentLang changes
+  // Update iframe language when currentLang changes (send postMessage)
   useEffect(() => {
     if (mounted && iframeRef.current?.contentWindow && user) {
+      const iframeOrigin = getIframeOrigin();
       // Send language update message to iframe
       iframeRef.current.contentWindow.postMessage({
         type: 'LANGUAGE_CHANGE',
         language: currentLang,
-      }, 'https://markishime-ags.hf.space');
+      }, iframeOrigin);
     }
   }, [currentLang, mounted, user]);
 
@@ -427,6 +552,74 @@ export default function AssistantPage() {
     );
   }
 
+  // Show upload limit exceeded screen
+  if (uploadLimitExceeded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-900 via-orange-800 to-amber-900 px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-lg w-full bg-white rounded-3xl p-8 shadow-2xl text-center"
+        >
+          <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <BarChart3 className="w-10 h-10 text-orange-600" />
+          </div>
+          
+          <h1 className="text-2xl font-black text-gray-900 mb-3">
+            {language === 'ms' ? 'Had Muat Naik Tercapai' : 'Upload Limit Reached'}
+          </h1>
+          
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
+            <div className="flex items-center justify-center gap-4">
+              <div className="text-center">
+                <p className="text-3xl font-black text-orange-600">{user.uploadsUsed}</p>
+                <p className="text-xs text-gray-500">{language === 'ms' ? 'Digunakan' : 'Used'}</p>
+              </div>
+              <div className="text-2xl text-gray-400">/</div>
+              <div className="text-center">
+                <p className="text-3xl font-black text-orange-600">{user.uploadsLimit}</p>
+                <p className="text-xs text-gray-500">{language === 'ms' ? 'Had' : 'Limit'}</p>
+              </div>
+            </div>
+            <div className="w-full bg-orange-200 rounded-full h-3 mt-3 overflow-hidden">
+              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full" style={{ width: '100%' }}></div>
+            </div>
+          </div>
+          
+          <p className="text-gray-600 mb-6">
+            {language === 'ms' 
+              ? `Anda telah mencapai had ${user.uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda. Naik taraf pelan anda untuk terus menganalisis laporan makmal.` 
+              : `You've reached your ${user.uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan. Upgrade your plan to continue analyzing lab reports.`}
+          </p>
+          
+          <div className="space-y-3">
+            <Link href="/pricing" className="block">
+              <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
+                <TrendingUp className="w-5 h-5 mr-2" />
+                {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
+              </Button>
+            </Link>
+            
+            <Link href="/reports" className="block">
+              <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
+                <FileText className="w-4 h-4 mr-2" />
+                {language === 'ms' ? 'Lihat Laporan Lepas' : 'View Past Reports'}
+              </Button>
+            </Link>
+          </div>
+          
+          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+            <p className="text-sm text-green-800 font-medium">
+              {language === 'ms' 
+                ? '💡 Petua: Pelan Smart menawarkan 50 analisis, dan pelan Precision menawarkan analisis tanpa had!' 
+                : '💡 Tip: Smart plan offers 50 analyses, and Precision plan offers unlimited analyses!'}
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Enhanced Header */}
@@ -461,6 +654,31 @@ export default function AssistantPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Upload Usage Display */}
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20">
+                <BarChart3 className="w-4 h-4 text-yellow-400" />
+                <div className="text-sm">
+                  <span className="font-bold">{user.uploadsUsed}</span>
+                  <span className="text-white/60">/</span>
+                  <span className="font-bold">{user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}</span>
+                  <span className="text-white/60 ml-1 hidden md:inline">
+                    {language === 'ms' ? 'analisis' : 'analyses'}
+                  </span>
+                </div>
+                {user.uploadsLimit !== -1 && (
+                  <div className="w-16 h-2 bg-white/20 rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full rounded-full transition-all ${
+                        (user.uploadsUsed / user.uploadsLimit) >= 0.8 
+                          ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                          : 'bg-gradient-to-r from-green-400 to-green-500'
+                      }`}
+                      style={{ width: `${Math.min(100, (user.uploadsUsed / user.uploadsLimit) * 100)}%` }}
+                    />
+                  </div>
+                )}
+              </div>
+
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
