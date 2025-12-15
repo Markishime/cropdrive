@@ -227,7 +227,7 @@ Follow us for farming tips, updates, and special offers:
 We believe that modern technology should help farmers work smarter, not harder. CropDrive brings university-level soil science and AI technology to your fingertips, so you can make better decisions and grow more profitable crops.
 
 **Our Commitment**:
-- MPOB-certified AI analysis based on Malaysian palm oil standards
+- AI analysis based on Malaysian palm oil industry standards
 - Fast results in 10-15 minutes instead of days
 - Clear, actionable recommendations in Bahasa Malaysia or English
 - Support from real agronomy experts

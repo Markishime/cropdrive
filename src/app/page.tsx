@@ -205,8 +205,8 @@ export default function HomePage() {
               style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
             >
               {language === 'ms' 
-                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI dalam masa 10-15 minit. Sertai ribuan pekebun pintar di seluruh Malaysia.'
-                : 'Boost your palm oil yield with AI analysis in 10-15 minutes. Join thousands of smart farmers across Malaysia.'
+                ? 'Agronomi AI untuk kelapa sawit, memberikan keputusan hasil dan keuntungan yang jelas dalam 15 minit.'
+                : 'AI agronomy for oil palm, giving clear yield and profit decisions in 15 minutes.'
               }
             </motion.p>
 
