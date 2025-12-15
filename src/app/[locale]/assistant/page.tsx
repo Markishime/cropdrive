@@ -15,6 +15,21 @@ export default function AIAssistantPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  // Get iframe origin from environment variable or default
+  const getIframeOrigin = () => {
+    const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
+    const defaultUrl = 'https://markishime-ags.hf.space/';
+    const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
+    
+    try {
+      const url = new URL(baseUrl);
+      return url.origin;
+    } catch (error) {
+      // Fallback to default origin if URL parsing fails
+      return new URL(defaultUrl).origin;
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
     const lang = getCurrentLanguage();
@@ -34,7 +49,7 @@ export default function AIAssistantPage() {
         
         // Also send message to iframe to update language immediately
         if (iframeRef.current?.contentWindow) {
-          const iframeOrigin = 'https://markishime-ags.hf.space';
+          const iframeOrigin = getIframeOrigin();
           iframeRef.current.contentWindow.postMessage({
             type: 'LANGUAGE_CHANGE',
             language: lang,
@@ -81,7 +96,7 @@ export default function AIAssistantPage() {
   // Update iframe language when currentLanguage changes (send postMessage)
   useEffect(() => {
     if (mounted && iframeRef.current?.contentWindow) {
-      const iframeOrigin = 'https://markishime-ags.hf.space';
+      const iframeOrigin = getIframeOrigin();
       iframeRef.current.contentWindow.postMessage({
         type: 'LANGUAGE_CHANGE',
         language: currentLanguage,
@@ -249,7 +264,7 @@ export default function AIAssistantPage() {
                       onLoad={() => {
                         // Send initial language configuration when iframe loads
                         if (iframeRef.current?.contentWindow) {
-                          const iframeOrigin = 'https://markishime-ags.hf.space';
+                          const iframeOrigin = getIframeOrigin();
                           iframeRef.current.contentWindow.postMessage({
                             type: 'CONFIG',
                             language: currentLanguage,
