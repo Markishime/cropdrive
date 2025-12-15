@@ -194,12 +194,12 @@ export default function HowItWorksPage() {
               >
                 <div className="text-4xl mb-3">✅</div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  {language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified'}
+                  {language === 'ms' ? 'Cadangan MPOB' : 'MPOB Recommendations'}
                 </h3>
                 <p className="text-white/80">
                   {language === 'ms'
-                    ? 'Cadangan mengikut standard MPOB Malaysia'
-                    : 'Recommendations follow MPOB Malaysia standards'
+                    ? 'Cadangan mengikut standard MPOB terkini'
+                    : 'Recommendations follow latest MPOB standards'
                   }
                 </p>
               </motion.div>

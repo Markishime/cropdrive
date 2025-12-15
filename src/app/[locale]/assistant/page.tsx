@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -9,6 +9,8 @@ import { useTranslation, getCurrentLanguage } from '@/i18n';
 export default function AIAssistantPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [iframeKey, setIframeKey] = useState(0);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const { language } = useTranslation(currentLanguage);
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -18,6 +20,97 @@ export default function AIAssistantPage() {
     const lang = getCurrentLanguage();
     setCurrentLanguage(lang);
   }, []);
+
+  // Listen for language changes and update iframe
+  useEffect(() => {
+    if (!mounted) return;
+    
+    const handleLanguageChange = (newLang?: 'en' | 'ms') => {
+      const lang = newLang || getCurrentLanguage();
+      if (lang !== currentLanguage) {
+        setCurrentLanguage(lang);
+        // Reload iframe with new language (updates URL)
+        setIframeKey(prev => prev + 1);
+        
+        // Also send message to iframe to update language immediately
+        if (iframeRef.current?.contentWindow) {
+          const iframeOrigin = 'https://markishime-ags.hf.space';
+          iframeRef.current.contentWindow.postMessage({
+            type: 'LANGUAGE_CHANGE',
+            language: lang,
+          }, iframeOrigin);
+        }
+      }
+    };
+    
+    // Method 1: Listen for storage events (works across tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cropdrive-language' && e.newValue) {
+        handleLanguageChange(e.newValue as 'en' | 'ms');
+      }
+    };
+    
+    // Method 2: Listen for custom language change events (from Navbar before reload)
+    const handleCustomLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.language) {
+        handleLanguageChange(customEvent.detail.language);
+      } else {
+        handleLanguageChange();
+      }
+    };
+    
+    // Method 3: Poll localStorage periodically to catch changes in same window
+    const pollInterval = setInterval(() => {
+      const lang = getCurrentLanguage();
+      if (lang !== currentLanguage) {
+        handleLanguageChange(lang);
+      }
+    }, 1000); // Check every 1 second
+    
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('languageChanged', handleCustomLanguageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('languageChanged', handleCustomLanguageChange);
+      clearInterval(pollInterval);
+    };
+  }, [currentLanguage, mounted]);
+
+  // Update iframe language when currentLanguage changes (send postMessage)
+  useEffect(() => {
+    if (mounted && iframeRef.current?.contentWindow) {
+      const iframeOrigin = 'https://markishime-ags.hf.space';
+      iframeRef.current.contentWindow.postMessage({
+        type: 'LANGUAGE_CHANGE',
+        language: currentLanguage,
+      }, iframeOrigin);
+    }
+  }, [currentLanguage, mounted]);
+
+  // Build iframe URL with language parameter
+  const buildIframeUrl = () => {
+    const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
+    const defaultUrl = 'https://markishime-ags.hf.space/';
+    const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
+    
+    // Add language parameter to URL
+    const url = new URL(baseUrl);
+    url.searchParams.set('lang', currentLanguage);
+    
+    // Add user ID if available
+    if (user?.uid) {
+      url.searchParams.set('userId', user.uid);
+    }
+    
+    // Add plan information
+    if (user?.plan) {
+      url.searchParams.set('plan', user.plan);
+    }
+    
+    return url.toString();
+  };
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -139,21 +232,32 @@ export default function AIAssistantPage() {
             <div className="relative" style={{ height: 'calc(100vh - 350px)', minHeight: '600px' }}>
               {/* Embedded AI Assistant via iframe */}
               {(() => {
-                // Prefer environment variable if set, otherwise default to hosted AGS AI URL
-                const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
-                const defaultUrl = 'https://markishime-ags.hf.space/';
-                const assistantUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
+                const assistantUrl = buildIframeUrl();
                 const isConfigured = !!assistantUrl;
 
                 if (isConfigured) {
                   return (
                     <iframe
+                      ref={iframeRef}
+                      key={iframeKey}
                       src={assistantUrl}
                       title="CropDrive™ Oil Palm AI Advisor"
                       className="w-full h-full border-0"
                       allow="camera; microphone"
                       sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
                       loading="lazy"
+                      onLoad={() => {
+                        // Send initial language configuration when iframe loads
+                        if (iframeRef.current?.contentWindow) {
+                          const iframeOrigin = 'https://markishime-ags.hf.space';
+                          iframeRef.current.contentWindow.postMessage({
+                            type: 'CONFIG',
+                            language: currentLanguage,
+                            userId: user?.uid || null,
+                            plan: user?.plan || 'none',
+                          }, iframeOrigin);
+                        }
+                      }}
                     />
                   );
                 }

@@ -348,11 +348,11 @@ export default function TutorialsPage() {
                     {language === 'ms' ? 'Hubungi Sokongan' : 'Contact Support'}
                   </button>
                 </Link>
-                <a href={`mailto:contact@agriglobalsolutins.com?subject=${encodeURIComponent(language === 'ms' ? 'Jadualkan Demo - CropDrive' : 'Schedule Demo - CropDrive')}`}>
+                <Link href="/contact">
                   <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors duration-200">
                     {language === 'ms' ? 'Jadualkan Demo' : 'Schedule Demo'}
                   </button>
-                </a>
+                </Link>
               </div>
             </CardContent>
           </Card>

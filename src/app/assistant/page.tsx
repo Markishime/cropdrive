@@ -546,7 +546,7 @@ export default function AssistantPage() {
             </div>
             <div className="flex items-center gap-2 text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
               <CheckCircle2 className="w-4 h-4" />
-              <span>{language === 'ms' ? 'Bertauliah MPOB' : 'MPOB Certified'}</span>
+              <span>{language === 'ms' ? 'Cadangan MPOB' : 'MPOB Recommendations'}</span>
             </div>
           </div>
         </div>

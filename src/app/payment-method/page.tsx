@@ -993,8 +993,8 @@ export default function PaymentMethodPage() {
                       {subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation ? (
                         <Button 
                           onClick={handleReactivateSubscription}
-                          disabled={loading}
-                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-3 font-bold rounded-xl shadow-lg"
+                          disabled={loading || !subscription}
+                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-3 font-bold rounded-xl shadow-lg disabled:opacity-50"
                         >
                           {loading ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1005,11 +1005,13 @@ export default function PaymentMethodPage() {
                         </Button>
                       ) : isYearlySubscription ? (
                         <Button 
-                          onClick={() => setShowCancelModal(true)}
-                          disabled={loading}
+                          onClick={() => {
+                            if (subscription) setShowCancelModal(true);
+                          }}
+                          disabled={loading || loadingSubscription || !subscription}
                           className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
                         >
-                          {loading ? (
+                          {loading || loadingSubscription ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           ) : (
                             <X className="w-4 h-4 mr-2" />
@@ -1018,11 +1020,13 @@ export default function PaymentMethodPage() {
                         </Button>
                       ) : (
                         <Button 
-                          onClick={() => setShowMonthlyCancelModal(true)}
-                          disabled={loading}
+                          onClick={() => {
+                            if (subscription) setShowMonthlyCancelModal(true);
+                          }}
+                          disabled={loading || loadingSubscription || !subscription}
                           className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl disabled:opacity-50"
                         >
-                          {loading ? (
+                          {loading || loadingSubscription ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                           ) : (
                             <X className="w-4 h-4 mr-2" />
@@ -1245,11 +1249,18 @@ export default function PaymentMethodPage() {
                         </div>
                       </div>
                       <Button
-                        onClick={() => isMonthlySubscription ? setShowMonthlyCancelModal(true) : setShowCancelModal(true)}
-                        disabled={loading || !subscription || subscription.cancelAtPeriodEnd || subscription.pendingContractCancellation}
+                        onClick={() => {
+                          if (!subscription) return;
+                          if (isMonthlySubscription) {
+                            setShowMonthlyCancelModal(true);
+                          } else {
+                            setShowCancelModal(true);
+                          }
+                        }}
+                        disabled={loading || loadingSubscription || !subscription || subscription.cancelAtPeriodEnd || subscription.pendingContractCancellation}
                         className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        {loading ? (
+                        {loading || loadingSubscription ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : subscription?.pendingContractCancellation ? (
                           language === 'ms' ? 'Dijadualkan' : 'Scheduled'

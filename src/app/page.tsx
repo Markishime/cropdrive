@@ -122,13 +122,13 @@ export default function HomePage() {
                   500,
                   'Data-Driven Precision Agriculture for Malaysia',
                   3000,
-                  'MPOB Certified',
+                  'AI Analysis',
                   800,
-                  'MPOB Certified AI',
+                  'AI Analysis in',
                   600,
-                  'MPOB Certified AI Analysis',
+                  'AI Analysis in 10-15',
                   500,
-                  'MPOB Certified AI Analysis in 10-15 Minutes',
+                  'AI Analysis in 10-15 Minutes',
                   3000,
                   'Maximize Yield',
                   800,
@@ -163,9 +163,9 @@ export default function HomePage() {
                   3000,
                   'Analisis AI',
                   800,
-                  'Analisis AI Bertauliah MPOB',
+                  'Analisis AI dalam',
                   600,
-                  'Analisis AI Bertauliah MPOB dalam 10-15 Minit',
+                  'Analisis AI dalam 10-15 Minit',
                   3000,
                   'Maksimum Hasil',
                   800,
@@ -205,8 +205,8 @@ export default function HomePage() {
               style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
             >
               {language === 'ms' 
-                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI bertauliah MPOB dalam masa 10-15 minit. Sertai ribuan pekebun pintar di seluruh Malaysia.'
-                : 'Boost your palm oil yield with MPOB-certified AI analysis in 10-15 minutes. Join thousands of smart farmers across Malaysia.'
+                ? 'Tingkatkan hasil kelapa sawit anda dengan analisis AI dalam masa 10-15 minit. Sertai ribuan pekebun pintar di seluruh Malaysia.'
+                : 'Boost your palm oil yield with AI analysis in 10-15 minutes. Join thousands of smart farmers across Malaysia.'
               }
             </motion.p>
 
@@ -568,8 +568,8 @@ export default function HomePage() {
               },
               {
                 image: '/images/why-choose-cropdrive/2. MPOB Standards.webp',
-                title: language === 'ms' ? 'Standard MPOB' : 'MPOB Standards',
-                desc: language === 'ms' ? 'Semua cadangan berdasarkan panduan MPOB' : 'All recommendations based on MPOB guidelines'
+                title: language === 'ms' ? 'Standard Industri' : 'Industry Standards',
+                desc: language === 'ms' ? 'Semua cadangan berdasarkan panduan industri terbaik' : 'All recommendations based on industry best practices'
               },
               {
                 image: '/images/why-choose-cropdrive/3. 150–300 percent ROI.webp',
@@ -675,8 +675,8 @@ export default function HomePage() {
             </p>
             <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-4 xs:mb-5 sm:mb-6 leading-relaxed px-3 xs:px-4">
               {language === 'ms'
-                ? 'Pakar pertanian peribadi anda yang menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan. Ia membaca keputusan makmal anda, membandingkannya dengan piawaian MPOB, dan memberikan cadangan terperinci untuk meningkatkan kesihatan dan produktiviti ladang anda.'
-                : 'Your personal farming expert that analyzes soil and leaf test reports using artificial intelligence. It reads your lab results, compares them to MPOB standards, and provides detailed recommendations to improve your plantation\'s health and productivity.'
+                ? 'Pakar pertanian peribadi anda yang menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan. Ia membaca keputusan makmal anda, membandingkannya dengan piawaian industri, dan memberikan cadangan terperinci untuk meningkatkan kesihatan dan produktiviti ladang anda.'
+                : 'Your personal farming expert that analyzes soil and leaf test reports using artificial intelligence. It reads your lab results, compares them to industry standards, and provides detailed recommendations to improve your plantation\'s health and productivity.'
               }
             </p>
             <div className="flex flex-col md:flex-row items-center justify-center gap-2 xs:gap-3 text-sm xs:text-base sm:text-lg text-green-600 font-semibold bg-green-50 border-2 border-green-200 rounded-xl p-4 xs:p-5 sm:p-6 max-w-2xl mx-auto">
@@ -1110,7 +1110,7 @@ export default function HomePage() {
               },
               {
                 title: language === 'ms' ? 'Sains Tanah' : 'Soil Science',
-                desc: language === 'ms' ? 'Berdasarkan penyelidikan MPOB dan best practices global' : 'Based on MPOB research and global best practices',
+                desc: language === 'ms' ? 'Berdasarkan penyelidikan saintifik dan best practices global' : 'Based on scientific research and global best practices',
                 color: 'from-purple-500 to-pink-500',
                 number: '04'
               }
@@ -1180,11 +1180,11 @@ export default function HomePage() {
               {
                 step: '02',
                 title: language === 'ms' ? 'AI Menganalisis Data' : 'AI Analyzes Data',
-                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 10-15 minit, membandingkan dengan standard MPOB dan membuat analisis mendalam' : 'Our AI technology processes your data in 10-15 minutes, comparing with MPOB standards and performing deep analysis',
+                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 10-15 minit, membandingkan dengan standard industri dan membuat analisis mendalam' : 'Our AI technology processes your data in 10-15 minutes, comparing with industry standards and performing deep analysis',
                 image: '/images/how-it-works/2. AI Analyzes Data (Image 02)_optimized.jpg',
                 features: [
                   language === 'ms' ? 'Analisis 10-15 minit' : '10-15 minute analysis',
-                  language === 'ms' ? 'Standard MPOB' : 'MPOB standards',
+                  language === 'ms' ? 'Standard industri' : 'Industry standards',
                   language === 'ms' ? 'Perbandingan mendalam' : 'Deep comparison'
                 ]
               },
@@ -1700,7 +1700,7 @@ export default function HomePage() {
             className="flex flex-wrap justify-center gap-4 md:gap-5 mb-16"
           >
             {[
-              { icon: '✅', label: language === 'ms' ? 'Disahkan MPOB' : 'MPOB Verified' },
+              { icon: '✅', label: language === 'ms' ? 'Cadangan Tepat' : 'Accurate Recommendations' },
               { icon: '🔐', label: language === 'ms' ? 'Keselamatan Data Tahap Bank' : 'Bank-Level Data Security' },
               { icon: '⚗️', label: language === 'ms' ? 'Disokong Penyelidikan' : 'Research Backed' },
               { icon: '🤖', label: language === 'ms' ? 'Pembantu AI Harian' : 'Daily AI Assistant' },
@@ -1724,12 +1724,12 @@ export default function HomePage() {
                 {
                   image: '/images/why-farmers-trust-us/1. MPOB-Aligned Recommendations_optimized.jpg',
                   title: {
-                    en: 'MPOB-Aligned Recommendations',
-                    ms: 'Cadangan Selari MPOB',
+                    en: 'Science-Based Recommendations',
+                    ms: 'Cadangan Berasaskan Sains',
                   },
                   desc: {
-                    en: 'Our fertilization and soil-improvement plans follow the latest MPOB nutrient standards and international Good Agricultural Practices (GAP) for oil palm. Every recommendation is grounded in verified agronomic science.',
-                    ms: 'Pelan pembajaan dan penambahbaikan tanah kami mengikut piawaian nutrien MPOB terkini serta Amalan Pertanian Baik antarabangsa untuk kelapa sawit. Setiap cadangan berpaksikan sains agronomi yang disahkan.',
+                    en: 'Our fertilization and soil-improvement plans follow the latest nutrient standards and international Good Agricultural Practices (GAP) for oil palm. Every recommendation is grounded in verified agronomic science.',
+                    ms: 'Pelan pembajaan dan penambahbaikan tanah kami mengikut piawaian nutrien terkini serta Amalan Pertanian Baik antarabangsa untuk kelapa sawit. Setiap cadangan berpaksikan sains agronomi yang disahkan.',
                   },
                 },
                 {
@@ -1772,8 +1772,8 @@ export default function HomePage() {
                     ms: 'Pengetahuan Kelapa Sawit Setempat',
                   },
                   desc: {
-                    en: 'All recommendations are built specifically for Malaysian oil palm farmers, designed with local soils, planting conditions, and MPOB standards in mind. Everything is tailored to real Malaysian field needs, not generic global advice.',
-                    ms: 'Semua cadangan dibina khusus untuk petani kelapa sawit Malaysia, direka dengan mengambil kira tanah tempatan, keadaan penanaman dan piawaian MPOB. Segala-galanya disesuaikan dengan keperluan lapangan Malaysia, bukan nasihat generik global.',
+                    en: 'All recommendations are built specifically for Malaysian oil palm farmers, designed with local soils, planting conditions, and industry standards in mind. Everything is tailored to real Malaysian field needs, not generic global advice.',
+                    ms: 'Semua cadangan dibina khusus untuk petani kelapa sawit Malaysia, direka dengan mengambil kira tanah tempatan, keadaan penanaman dan piawaian industri. Segala-galanya disesuaikan dengan keperluan lapangan Malaysia, bukan nasihat generik global.',
                   },
                 },
               ].map((trust, index) => (
@@ -1870,8 +1870,8 @@ export default function HomePage() {
               {
                 title: language === 'ms' ? 'Cadangan Pintar Berdasarkan Sains Kelapa Sawit Sebenar' : 'Smart Recommendations Based on Real Oil Palm Science',
                 desc: language === 'ms'
-                  ? 'Setiap pelan baja dijana menggunakan penyelidikan kelapa sawit terkini, standard nutrien MPOB, dan amalan agronomi terbukti. Anda mendapat keputusan yang jelas dan sesuai dengan keadaan lapangan sebenar.'
-                  : 'Every fertilizer plan is generated using up-to-date oil palm research, MPOB nutrient standards, and proven agronomy practices. You get clear decisions that match real field conditions.',
+                  ? 'Setiap pelan baja dijana menggunakan penyelidikan kelapa sawit terkini, standard nutrien industri, dan amalan agronomi terbukti. Anda mendapat keputusan yang jelas dan sesuai dengan keadaan lapangan sebenar.'
+                  : 'Every fertilizer plan is generated using up-to-date oil palm research, industry nutrient standards, and proven agronomy practices. You get clear decisions that match real field conditions.',
                 icon: '🔬'
               },
               {

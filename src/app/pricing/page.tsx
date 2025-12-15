@@ -475,87 +475,98 @@ export default function PricingPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <span className="inline-block text-yellow-500 text-sm font-bold tracking-widest uppercase mb-4">
-              {language === 'ms' ? 'Kajian Kes Sebenar' : 'Real-World Case Study'}
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 uppercase">
-              {language === 'ms' ? 'Ladang 100 Hektar' : '100-Hectare'} <span className="text-green-700">{language === 'ms' ? 'Kajian Kes' : 'Plantation Case Study'}</span>
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              {language === 'ms' ? 'Keputusan Ladang Kelapa Sawit dengan' : 'Oil Palm Plantation Results with'} <span className="text-green-700">CropDrive™</span>
             </h2>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12 max-w-6xl mx-auto">
-            {/* Before */}
+            {/* Before CropDrive */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-red-50 p-8 rounded-xl border-4 border-red-200 shadow-xl"
+              className="bg-red-50 p-8 rounded-xl border-4 border-red-200 shadow-xl overflow-hidden"
             >
-              <div className="text-center mb-6">
-                <span className="text-5xl mb-4 block">😟</span>
-                <h3 className="text-2xl font-bold text-red-700 uppercase mb-2">
-                  {language === 'ms' ? 'Sebelum AGS AI' : 'Before AGS AI'}
-                </h3>
+              <div className="mb-6">
+                <img 
+                  src="/images/Before-Cropdrive.jpg" 
+                  alt={language === 'ms' ? 'Sebelum CropDrive' : 'Before CropDrive'}
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <div className="text-center">
+                  <span className="text-5xl mb-4 block">😟</span>
+                  <h3 className="text-2xl font-bold text-red-700 uppercase mb-2">
+                    {language === 'ms' ? 'Sebelum CropDrive™' : 'Before CropDrive™'}
+                  </h3>
+                </div>
               </div>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-start">
                   <span className="text-red-600 mr-2">✗</span>
-                  <span>{language === 'ms' ? 'Hasil semasa: 20 tan FFB/ha/tahun' : 'Current yield: 20 tonnes FFB/ha/year'}</span>
+                  <span>{language === 'ms' ? 'Hasil: 20 tan FFB/ha/tahun' : 'Yield: 20 tonnes FFB/ha/year'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-red-600 mr-2">✗</span>
-                  <span>{language === 'ms' ? 'Hasil tahunan: RM 1.3 juta' : 'Annual revenue: RM 1.3 million'}</span>
+                  <span>{language === 'ms' ? 'Yuran perunding: RM 4,000 setahun' : 'Consultant fees: RM 4,000 per year'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-red-600 mr-2">✗</span>
-                  <span>{language === 'ms' ? 'Upah perunding: RM 8,000/tahun' : 'Hiring consultants: RM 8,000/year'}</span>
+                  <span>{language === 'ms' ? 'Masa analisis: 2 hari setiap laporan' : 'Analysis time: 2 days per report'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-red-600 mr-2">✗</span>
-                  <span>{language === 'ms' ? 'Analisis manual: 5 jam per laporan' : 'Manual analysis: 5 hours per report'}</span>
+                  <span>{language === 'ms' ? 'Baja: pembaziran tinggi' : 'Fertilizer: high wastage'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-red-600 mr-2">✗</span>
-                  <span>{language === 'ms' ? 'Pembaziran baja: ~25% lebihan aplikasi' : 'Fertilizer waste: ~25% overapplication'}</span>
+                  <span>{language === 'ms' ? 'Perancangan nutrien: tidak jelas dan manual' : 'Nutrient planning: unclear and manual'}</span>
                 </li>
               </ul>
             </motion.div>
 
-            {/* After */}
+            {/* After CropDrive */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-green-50 p-8 rounded-xl border-4 border-green-400 shadow-xl"
+              className="bg-green-50 p-8 rounded-xl border-4 border-green-400 shadow-xl overflow-hidden"
             >
-              <div className="text-center mb-6">
-                <span className="text-5xl mb-4 block">😊</span>
-                <h3 className="text-2xl font-bold text-green-700 uppercase mb-2">
-                  {language === 'ms' ? 'Selepas AGS AI' : 'After AGS AI'}
-                </h3>
+              <div className="mb-6">
+                <img 
+                  src="/images/After-Cropdrive.jpg" 
+                  alt={language === 'ms' ? 'Selepas CropDrive' : 'After CropDrive'}
+                  className="w-full h-48 object-cover rounded-lg mb-4"
+                />
+                <div className="text-center">
+                  <span className="text-5xl mb-4 block">😊</span>
+                  <h3 className="text-2xl font-bold text-green-700 uppercase mb-2">
+                    {language === 'ms' ? 'Selepas CropDrive™' : 'After CropDrive™'}
+                  </h3>
+                </div>
               </div>
               <ul className="space-y-3 text-gray-700">
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span className="font-semibold">{language === 'ms' ? 'Hasil bertambah baik: 23 tan FFB/ha/tahun (+15%)' : 'Improved yield: 23 tonnes FFB/ha/year (+15%)'}</span>
+                  <span className="font-semibold">{language === 'ms' ? 'Hasil: 28 tan FFB/ha/tahun (+40% berbanding asas)' : 'Yield: 28 tonnes FFB/ha/year (+40% vs baseline)'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span className="font-semibold">{language === 'ms' ? 'Hasil tambahan: RM 195,000/tahun' : 'Additional revenue: RM 195,000/year'}</span>
+                  <span className="font-semibold">{language === 'ms' ? 'Yuran perunding: tiada yuran agronomi rutin' : 'Consultant fees: no routine agronomy fees'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span>{language === 'ms' ? 'Jimat perunding: RM 8,000/tahun' : 'Consultant savings: RM 8,000/year'}</span>
+                  <span>{language === 'ms' ? 'Masa analisis: 10–15 minit setiap laporan' : 'Analysis time: 10–15 minutes per report'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span>{language === 'ms' ? 'Masa analisis: 10-15 minit' : 'Analysis time: 10-15 minutes'}</span>
+                  <span>{language === 'ms' ? 'Pembaziran baja: pengurangan 20%' : 'Fertilizer wastage: 20% reduction'}</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-green-600 mr-2">✓</span>
-                  <span>{language === 'ms' ? 'Baja optimum: 20% pengurangan kos' : 'Optimized fertilizer: 20% cost reduction'}</span>
+                  <span>{language === 'ms' ? 'Perancangan nutrien: tepat, konsisten dan tepat' : 'Nutrient planning: precise, consistent and accurate'}</span>
                 </li>
               </ul>
             </motion.div>
