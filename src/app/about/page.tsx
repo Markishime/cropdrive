@@ -202,8 +202,8 @@ export default function AboutUsPage() {
                 img: '/images/our-values/Precision.png',
                 title: language === 'ms' ? 'Ketepatan' : 'Accuracy',
                 desc: language === 'ms' 
-                  ? 'Menggunakan standard MPOB dan AI terkini untuk analisis yang tepat'
-                  : 'Using MPOB standards and latest AI for accurate analysis'
+                ? 'Menggunakan garis panduan MPOB dan AI terkini, berpandukan Amalan Pertanian Baik (GAP) global untuk analisis yang tepat'
+                : 'Using MPOB guidelines and latest AI, guided by global Good Agricultural Practices (GAP) for accurate analysis'
               },
               {
                 img: '/images/our-values/Accessibility.png',

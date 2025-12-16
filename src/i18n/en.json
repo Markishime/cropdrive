@@ -65,7 +65,7 @@
       },
       "feature2": {
         "title": "Intelligent Nutrient Analysis",
-        "description": "Compares results against MPOB standards. Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient."
+        "description": "Compares results against MPOB guidelines and best global Good Agricultural Practices (GAP). Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient."
       },
       "feature3": {
         "title": "AI-Powered Recommendations",
@@ -113,7 +113,7 @@
     },
     "soil": {
       "title": "Soil Analysis",
-      "description": "Upload soil test PDFs and get AI-powered analysis of pH, nitrogen, phosphorus, and potassium levels with MPOB standard comparisons."
+      "description": "Upload soil test PDFs and get AI-powered analysis of pH, nitrogen, phosphorus, and potassium levels, based on MPOB guidelines and best global Good Agricultural Practices (GAP)."
     },
     "leaf": {
       "title": "Leaf Analysis",

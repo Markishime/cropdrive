@@ -764,7 +764,11 @@ export default function AssistantPage() {
             </div>
             <div className="flex items-center gap-2 text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
               <CheckCircle2 className="w-4 h-4" />
-              <span>{language === 'ms' ? 'Cadangan MPOB' : 'MPOB Recommendations'}</span>
+              <span>
+                {language === 'ms'
+                  ? 'Cadangan berpandukan garis panduan MPOB & Amalan Pertanian Baik (GAP) global'
+                  : 'Recommendations based on MPOB guidelines and best global Good Agricultural Practices (GAP)'}
+              </span>
             </div>
           </div>
         </div>

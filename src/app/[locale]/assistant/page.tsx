@@ -211,8 +211,10 @@ export default function AIAssistantPage() {
                 <p className="text-sm text-white/90">{language === 'ms' ? 'Pilihan Bajet' : 'Budget Options'}</p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl border border-yellow-400">
-                <p className="text-3xl font-black text-yellow-400 mb-1">MPOB</p>
-                <p className="text-sm text-white/90">{language === 'ms' ? 'Standard' : 'Standards'}</p>
+                <p className="text-3xl font-black text-yellow-400 mb-1">MPOB & GAP</p>
+                <p className="text-sm text-white/90">
+                  {language === 'ms' ? 'Garis Panduan & Amalan Pertanian Baik (GAP)' : 'Guidelines & Good Agricultural Practices (GAP)'}
+                </p>
               </div>
             </div>
           </motion.div>
@@ -420,12 +422,12 @@ export default function AIAssistantPage() {
 
             <div className="bg-white rounded-lg p-6 shadow-lg border-l-4 border-yellow-400">
               <h3 className="text-lg font-bold text-gray-900 mb-2 uppercase tracking-wide">
-                {language === 'ms' ? 'Standard MPOB' : 'MPOB Standards'}
+                {language === 'ms' ? 'Garis Panduan MPOB & GAP' : 'MPOB Guidelines & GAP'}
               </h3>
               <p className="text-gray-600 text-sm">
                 {language === 'ms'
-                  ? 'Semua cadangan berdasarkan standard MPOB yang terkini.'
-                  : 'All recommendations based on latest MPOB standards.'
+                  ? 'Semua cadangan berpandukan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global terbaik.'
+                  : 'All recommendations are based on MPOB guidelines and the best global Good Agricultural Practices (GAP).'
                 }
               </p>
             </div>

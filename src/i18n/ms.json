@@ -65,7 +65,7 @@
       },
       "feature2": {
         "title": "Analisis Nutrien Pintar",
-        "description": "Bandingkan keputusan dengan standard MPOB. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien."
+        "description": "Bandingkan keputusan dengan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien."
       },
       "feature3": {
         "title": "Cadangan Berkuasa AI",
@@ -113,7 +113,7 @@
     },
     "soil": {
       "title": "Analisis Tanah",
-      "description": "Muat naik PDF ujian tanah dan dapatkan analisis berkuasa AI tentang tahap pH, nitrogen, fosforus, dan kalium dengan perbandingan standard MPOB."
+      "description": "Muat naik PDF ujian tanah dan dapatkan analisis berkuasa AI tentang tahap pH, nitrogen, fosforus, dan kalium berpandukan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global."
     },
     "leaf": {
       "title": "Analisis Daun",

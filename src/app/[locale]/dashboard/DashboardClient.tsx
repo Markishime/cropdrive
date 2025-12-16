@@ -549,7 +549,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
                     🚀 Upgrade Your Plan
                   </h3>
                   <p className="text-soil-700 mb-4">
-                    Get instant access to AI-powered soil analysis, MPOB standards comparison, and ROI forecasting.
+                    Get instant access to AI-powered soil analysis, recommendations based on MPOB guidelines and global GAP, and ROI forecasting.
                   </p>
                   <Link href={`/${locale}/pricing`}>
                     <motion.button
@@ -608,7 +608,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
                     Upload Leaf Report
                   </h3>
                   <p className="text-sm text-soil-600 mb-3">
-                    Get MPOB-standard leaf tissue analysis with recommendations
+                Get leaf tissue analysis with recommendations based on MPOB guidelines and best global Good Agricultural Practices (GAP)
                   </p>
                   <div className="flex items-center space-x-2 text-aiBlue-600 font-bold text-sm">
                     <span>{hasActivePlan ? 'Start Upload' : 'Subscribe to Upload'}</span>

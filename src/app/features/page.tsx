@@ -47,13 +47,13 @@ export default function FeaturesPage() {
       icon: '🔬',
       title: language === 'ms' ? 'Analisis Nutrien Pintar' : 'Intelligent Nutrient Analysis',
       description: language === 'ms'
-        ? 'Bandingkan keputusan dengan standard MPOB. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien dan utamakan masalah dari paling mendesak.'
-        : 'Compares results against MPOB standards. Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient and prioritizes problems from most to least urgent.',
+        ? 'Bandingkan keputusan dengan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien dan utamakan masalah dari paling mendesak.'
+        : 'Compares results against MPOB guidelines and best global Good Agricultural Practices (GAP). Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient and prioritizes problems from most to least urgent.',
       benefits: [
         language === 'ms' ? 'Tahu apa yang perlu perhatian' : 'Know exactly what needs attention',
         language === 'ms' ? 'Fahami keterukan sekilas pandang' : 'Understand severity at a glance',
         language === 'ms' ? 'Fokus pada isu kritikal dahulu' : 'Focus on critical issues first',
-        language === 'ms' ? 'Perbandingan standard MPOB' : 'MPOB standard comparison',
+        language === 'ms' ? 'Perbandingan dengan garis panduan MPOB & GAP global' : 'Comparison against MPOB guidelines & global GAP',
       ],
     },
     {
@@ -445,7 +445,11 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span className="font-semibold">{language === 'ms' ? 'Standard MPOB' : 'MPOB Standards'}</span>
+                <span className="font-semibold">
+                  {language === 'ms'
+                    ? 'Garis panduan MPOB & Amalan Pertanian Baik (GAP)'
+                    : 'MPOB guidelines & Good Agricultural Practices (GAP)'}
+                </span>
                 </li>
               </ul>
             </motion.div>
@@ -491,8 +495,8 @@ export default function FeaturesPage() {
                   step: '2',
                   title: language === 'ms' ? 'ANALISIS (30s)' : 'ANALYSIS (30s)',
                   description: language === 'ms'
-                    ? 'AI membaca semua data automatik, bandingkan dengan standard MPOB, kenal pasti isu, jana cadangan'
-                    : 'AI reads all data automatically, compares to MPOB standards, identifies issues, generates recommendations',
+                    ? 'AI membaca semua data automatik, bandingkan dengan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global, kenal pasti isu, jana cadangan'
+                    : 'AI reads all data automatically, compares to MPOB guidelines and global Good Agricultural Practices (GAP), identifies issues, generates recommendations',
                   icon: '🤖',
                 },
                 {

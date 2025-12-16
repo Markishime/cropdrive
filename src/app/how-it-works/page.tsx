@@ -194,12 +194,12 @@ export default function HowItWorksPage() {
               >
                 <div className="text-4xl mb-3">✅</div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  {language === 'ms' ? 'Cadangan MPOB' : 'MPOB Recommendations'}
+                  {language === 'ms' ? 'Cadangan Berpandukan MPOB & GAP' : 'MPOB & GAP-Based Recommendations'}
                 </h3>
                 <p className="text-white/80">
                   {language === 'ms'
-                    ? 'Cadangan mengikut standard MPOB terkini'
-                    : 'Recommendations follow latest MPOB standards'
+                    ? 'Cadangan berpandukan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global terkini'
+                    : 'Recommendations are based on MPOB guidelines and the latest global Good Agricultural Practices (GAP)'
                   }
                 </p>
               </motion.div>
