@@ -158,10 +158,10 @@ export default function AssistantPage() {
     if (!authLoading && !user) {
       router.push('/login');
     }
-    // Redirect to pricing if subscription has fully expired
-    // else if (user && isSubscriptionExpired()) {
-    //   router.push('/pricing');
-    // }
+    // Redirect users without plans to pricing
+    if (user && (!user.plan || user.plan === 'none')) {
+      router.push('/pricing');
+    }
   }, [user, authLoading, router]);
 
   // Build iframe URL with parameters
@@ -445,8 +445,11 @@ export default function AssistantPage() {
   // Send initial configuration to iframe when it loads
   const handleIframeLoad = () => {
     setIsLoading(false);
-    
-    // Send configuration to iframe
+    sendConfigToIframe();
+  };
+
+  // Send CONFIG message to iframe (reusable function)
+  const sendConfigToIframe = () => {
     if (iframeRef.current?.contentWindow && user) {
       const config = {
         type: 'CONFIG',
@@ -461,8 +464,20 @@ export default function AssistantPage() {
       
       const iframeOrigin = getIframeOrigin();
       iframeRef.current.contentWindow.postMessage(config, iframeOrigin);
+      console.log('✅ Sent user config to AI Assistant');
     }
   };
+
+  // Send CONFIG when user logs in (if iframe is already loaded)
+  useEffect(() => {
+    if (mounted && user && !isLoading && iframeRef.current?.contentWindow) {
+      // Small delay to ensure iframe is ready
+      const timer = setTimeout(() => {
+        sendConfigToIframe();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [user, mounted, isLoading, currentLang]);
 
   // Update iframe language when currentLang changes (send postMessage)
   useEffect(() => {
@@ -490,7 +505,7 @@ export default function AssistantPage() {
     }
   };
 
-  // For testing: Only check if user is authenticated, not if they have a plan
+  // Check authentication
   if (authLoading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
@@ -498,6 +513,20 @@ export default function AssistantPage() {
           <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">
             {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading/redirect screen for users without plans (redirect handled in useEffect above)
+  if (!user.plan || user.plan === 'none') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-600 font-medium">
+            {language === 'ms' ? 'Mengalihkan ke halaman pelan...' : 'Redirecting to plans...'}
           </p>
         </div>
       </div>

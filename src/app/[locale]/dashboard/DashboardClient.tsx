@@ -287,7 +287,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
               messageMs: `Pelan ${membership.planId} anda kini aktif. Mula muat naik laporan anda!`,
               read: false,
               createdAt: serverTimestamp(),
-              actionUrl: `/${locale}/assistant`,
+              actionUrl: `/assistant`,
             });
             console.log('✅ Plan activation notification created');
           }
@@ -384,7 +384,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
 
   const sidebarLinks = [
     { icon: Home, label: 'Overview', href: `/${locale}/dashboard`, active: true },
-    { icon: Upload, label: 'Upload Reports', href: `/${locale}/assistant`, requiresPlan: true },
+    { icon: Upload, label: 'Upload Reports', href: `/assistant`, requiresPlan: true },
     { icon: BarChart3, label: 'Analysis History', href: '#', requiresPlan: true },
     { icon: FileText, label: 'My Reports', href: '#', requiresPlan: true },
     { icon: MessageSquare, label: 'Support', href: `/${locale}/support`, requiresPlan: true },
@@ -574,7 +574,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
               transition={{ delay: 0.1 }}
               whileHover={{ y: -4 }}
             >
-              <Link href={hasActivePlan ? `/${locale}/assistant` : `/${locale}/pricing`}>
+              <Link href={hasActivePlan ? `/assistant` : `/${locale}/pricing`}>
                 <div className="group h-full bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-earth-200 hover:border-palm-400 hover:shadow-xl transition-all duration-300 cursor-pointer">
                   <div className="w-14 h-14 bg-palm-gradient rounded-xl flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <Upload className="w-7 h-7 text-white" />
@@ -599,7 +599,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
               transition={{ delay: 0.2 }}
               whileHover={{ y: -4 }}
             >
-              <Link href={hasActivePlan ? `/${locale}/assistant` : `/${locale}/pricing`}>
+              <Link href={hasActivePlan ? `/assistant` : `/${locale}/pricing`}>
                 <div className="group h-full bg-white/70 backdrop-blur-xl rounded-2xl p-6 border border-earth-200 hover:border-aiBlue-400 hover:shadow-xl transition-all duration-300 cursor-pointer">
                   <div className="w-14 h-14 bg-gradient-to-br from-aiBlue-500 to-aiBlue-600 rounded-xl flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform">
                     <BarChart3 className="w-7 h-7 text-white" />
@@ -636,7 +636,7 @@ export default function DashboardClient({ locale }: DashboardClientProps) {
                 <p className="text-lg text-brown-700 mb-6">
                   Your {membership?.planId || 'plan'} is active! Upload your first soil or leaf analysis report to get AI-powered insights.
               </p>
-                <Link href={`/${locale}/assistant`}>
+                <Link href={`/assistant`}>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
