@@ -219,6 +219,7 @@ export default function HomePage() {
             >
               <Link href="/pricing" className="w-full sm:w-auto max-w-xs sm:max-w-none">
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation"
@@ -228,6 +229,7 @@ export default function HomePage() {
               </Link>
               <Link href="/how-it-works" className="w-full sm:w-auto max-w-xs sm:max-w-none">
                 <motion.button
+                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation"

@@ -58,43 +58,73 @@ export default function ReportsPage() {
       setLoadingReports(true);
       try {
         const reportsRef = collection(db, 'analysis_results');
-        const q = query(
-          reportsRef,
-          where('userId', '==', user.uid),
-          orderBy('createdAt', 'desc')
-        );
         
-        const querySnapshot = await getDocs(q);
+        // Try query with orderBy first (requires index)
+        let querySnapshot;
+        try {
+          const q = query(
+            reportsRef,
+            where('userId', '==', user.uid),
+            orderBy('createdAt', 'desc')
+          );
+          querySnapshot = await getDocs(q);
+        } catch (orderByError: any) {
+          // If orderBy fails (missing index), try without orderBy
+          if (orderByError.code === 'failed-precondition') {
+            console.log('Index missing, fetching without orderBy...');
+            const q = query(
+              reportsRef,
+              where('userId', '==', user.uid)
+            );
+            querySnapshot = await getDocs(q);
+          } else {
+            throw orderByError;
+          }
+        }
+        
         const fetchedReports: Report[] = [];
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           fetchedReports.push({
             id: doc.id,
-            title: data.title || '',
+            title: data.title || `Report ${doc.id.slice(0, 8)}`,
             type: data.type || 'soil',
-            date: data.date || new Date().toISOString().split('T')[0],
+            date: data.date || (data.createdAt?.toDate ? data.createdAt.toDate().toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
             status: data.status || 'completed',
             recommendations: data.recommendations || 0,
             summary: data.summary || '',
             userId: data.userId,
-            createdAt: data.createdAt,
+            createdAt: data.createdAt || Timestamp.now(),
             fileUrl: data.fileUrl
           });
         });
+        
+        // Sort manually if orderBy wasn't used
+        if (fetchedReports.length > 0 && !fetchedReports[0].createdAt) {
+          fetchedReports.sort((a, b) => {
+            const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
+            const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
+            return dateB - dateA; // Descending
+          });
+        }
         
         setReports(fetchedReports);
         
         // If no reports found, just set empty array (no error)
         if (fetchedReports.length === 0) {
-          console.log('No reports found for user');
+          console.log('No reports found for user:', user.uid);
+        } else {
+          console.log(`✅ Loaded ${fetchedReports.length} reports for user`);
         }
       } catch (error: any) {
         console.error('Error fetching reports:', error);
         
-        // Only show error toast for actual errors, not missing index
+        // Show error toast for actual errors, not missing index
         if (error.code !== 'failed-precondition' && error.code !== 'permission-denied') {
           toast.error(language === 'ms' ? 'Ralat memuatkan laporan' : 'Error loading reports');
+        } else if (error.code === 'permission-denied') {
+          toast.error(language === 'ms' ? 'Tiada kebenaran untuk melihat laporan' : 'Permission denied to view reports');
         }
         
         // Set empty array on error (don't use mock data)

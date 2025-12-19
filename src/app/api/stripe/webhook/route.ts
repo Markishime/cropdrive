@@ -332,9 +332,9 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
 
   // Update user plan and limits
   const planLimits: Record<string, { uploadsLimit: number }> = {
-    start: { uploadsLimit: 10 },
-    smart: { uploadsLimit: 50 },
-    precision: { uploadsLimit: -1 }
+    start: { uploadsLimit: 2 },
+    smart: { uploadsLimit: 5 },
+    precision: { uploadsLimit: 10 }
   };
 
   const limits = planLimits[planId];
@@ -344,7 +344,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     console.log('⚠️ Using default limits for unknown plan');
   }
 
-  const uploadsLimit = limits?.uploadsLimit ?? 10;
+  const uploadsLimit = limits?.uploadsLimit ?? 2;
 
   console.log('📝 Updating user document in Firestore...');
   console.log('User ID:', userId);
@@ -506,8 +506,8 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     if (userId) {
       await firestoreWithRetry(
         () => adminDb.collection('users').doc(userId).update({
-          plan: 'start',
-          uploadsLimit: 10,
+          plan: 'none',
+          uploadsLimit: 0,
           uploadsUsed: 0,
           subscriptionStatus: 'canceled',
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),

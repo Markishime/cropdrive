@@ -417,50 +417,6 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Currency Note */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-center mb-16"
-        >
-          <div className="bg-gradient-to-br from-yellow-50 to-white border-4 border-yellow-200 rounded-xl p-8 max-w-4xl mx-auto shadow-lg">
-            <div className="flex items-start">
-              <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center mr-4 flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-green-900"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="text-left">
-                <h3 className="text-xl font-black text-gray-900 mb-3 uppercase tracking-wide">
-                  {language === 'ms' ? 'Nota Pembayaran' : 'Payment Note'}
-                </h3>
-                <div className="space-y-3">
-                  <p className="text-gray-700 leading-relaxed">
-                    {language === 'ms'
-                      ? '💰 Harga dalam Ringgit Malaysia (RM) adalah TETAP dan tidak akan berubah.'
-                      : '💰 Malaysian Ringgit (RM) prices are FIXED and will not change.'
-                    }
-                  </p>
-                  <p className="text-gray-700 leading-relaxed font-semibold">
-                    {language === 'ms'
-                      ? '✅ Semua pembayaran diproses dengan selamat dalam Ringgit Malaysia (RM) melalui Stripe.'
-                      : '✅ All payments are processed securely in Malaysian Ringgit (RM) through Stripe.'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.div>
 
         </div>
       </section>
@@ -503,24 +459,19 @@ export default function PricingPage() {
                 </div>
               </div>
               <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-red-600 mr-2">✗</span>
+                <li>
                   <span>{language === 'ms' ? 'Hasil: 20 tan FFB/ha/tahun' : 'Yield: 20 tonnes FFB/ha/year'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-red-600 mr-2">✗</span>
+                <li>
                   <span>{language === 'ms' ? 'Yuran perunding: RM 4,000 setahun' : 'Consultant fees: RM 4,000 per year'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-red-600 mr-2">✗</span>
+                <li>
                   <span>{language === 'ms' ? 'Masa analisis: 2 hari setiap laporan' : 'Analysis time: 2 days per report'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-red-600 mr-2">✗</span>
+                <li>
                   <span>{language === 'ms' ? 'Baja: pembaziran tinggi' : 'Fertilizer: high wastage'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-red-600 mr-2">✗</span>
+                <li>
                   <span>{language === 'ms' ? 'Perancangan nutrien: tidak jelas dan manual' : 'Nutrient planning: unclear and manual'}</span>
                 </li>
               </ul>
@@ -548,24 +499,19 @@ export default function PricingPage() {
                 </div>
               </div>
               <ul className="space-y-3 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                <li>
                   <span className="font-semibold">{language === 'ms' ? 'Hasil: 28 tan FFB/ha/tahun (+40% berbanding asas)' : 'Yield: 28 tonnes FFB/ha/year (+40% vs baseline)'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                <li>
                   <span className="font-semibold">{language === 'ms' ? 'Yuran perunding: tiada yuran agronomi rutin' : 'Consultant fees: no routine agronomy fees'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                <li>
                   <span>{language === 'ms' ? 'Masa analisis: 10–15 minit setiap laporan' : 'Analysis time: 10–15 minutes per report'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                <li>
                   <span>{language === 'ms' ? 'Pembaziran baja: pengurangan 20%' : 'Fertilizer wastage: 20% reduction'}</span>
                 </li>
-                <li className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
+                <li>
                   <span>{language === 'ms' ? 'Perancangan nutrien: tepat, konsisten dan tepat' : 'Nutrient planning: precise, consistent and accurate'}</span>
                 </li>
               </ul>

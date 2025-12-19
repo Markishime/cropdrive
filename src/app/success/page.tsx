@@ -53,9 +53,9 @@ function SuccessPageContent() {
 
         // Define plan limits
         const planLimits = {
-          start: { uploadsLimit: 10 },
-          smart: { uploadsLimit: 50 },
-          precision: { uploadsLimit: -1 } // Unlimited
+          start: { uploadsLimit: 2 },
+          smart: { uploadsLimit: 5 },
+          precision: { uploadsLimit: 10 }
         };
 
         const limits = planLimits[plan as keyof typeof planLimits] || planLimits.start;

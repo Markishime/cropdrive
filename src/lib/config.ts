@@ -57,9 +57,9 @@ export const config = {
   limits: {
     maxFileSize: 10 * 1024 * 1024, // 10MB
     maxUploadsPerMonth: {
-      start: 10,
-      smart: 50,
-      precision: -1, // unlimited
+      start: 2,
+      smart: 5,
+      precision: 10,
     },
   },
 
@@ -69,7 +69,7 @@ export const config = {
       nameMs: 'CropDrive Start',
       monthlyPrice: 36,
       yearlyPrice: 350,
-      uploadLimit: 10,
+      uploadLimit: 2,
       features: ['AI Reports', '1 Support Session', 'Standard Response'],
     },
     smart: {
@@ -77,7 +77,7 @@ export const config = {
       nameMs: 'CropDrive Smart',
       monthlyPrice: 47,
       yearlyPrice: 450,
-      uploadLimit: 50,
+      uploadLimit: 5,
       features: ['AI Reports', '3 Support Sessions', '24h Response', '5% Referral Bonus'],
     },
     precision: {
@@ -85,7 +85,7 @@ export const config = {
       nameMs: 'CropDrive Precision',
       monthlyPrice: 65,
       yearlyPrice: 620,
-      uploadLimit: -1, // unlimited
+      uploadLimit: 10,
       features: ['AI Reports', 'Unlimited Support', '12h Response', '10% Referral Bonus', 'Comparative Analysis', 'Partner Discounts'],
     },
   },
