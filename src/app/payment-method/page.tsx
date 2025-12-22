@@ -229,7 +229,13 @@ export default function PaymentMethodPage() {
   const canSelfCancel = isYearlySubscription;
 
   const handleToggleAutoRenewal = async () => {
-    if (!subscription) return;
+    console.log('handleToggleAutoRenewal called', { subscription, isMonthlySubscription });
+    
+    if (!subscription) {
+      toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
+      return;
+    }
+    
     if (isMonthlySubscription) {
       toast.error(
         language === 'ms'
@@ -242,10 +248,15 @@ export default function PaymentMethodPage() {
     setUpdatingAutoRenewal(true);
     try {
       const firebaseUser = auth.currentUser;
-      if (!firebaseUser) return;
+      if (!firebaseUser) {
+        toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+        return;
+      }
       
       const token = await firebaseUser.getIdToken();
       const newCancelAtPeriodEnd = !subscription.cancelAtPeriodEnd;
+      
+      console.log('Sending PATCH request to toggle auto-renewal', { newCancelAtPeriodEnd });
       
       const response = await fetch('/api/stripe/subscription', {
         method: 'PATCH',
@@ -259,8 +270,10 @@ export default function PaymentMethodPage() {
         }),
       });
       
+      const data = await response.json();
+      console.log('API response:', { ok: response.ok, data });
+      
       if (response.ok) {
-        const data = await response.json();
         setAutoRenewal(!data.cancelAtPeriodEnd);
         setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
         
@@ -281,11 +294,15 @@ export default function PaymentMethodPage() {
           }
         );
       } else {
-        throw new Error('Failed to update');
+        throw new Error(data.error || data.details || 'Failed to update');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling auto-renewal:', error);
-      toast.error(language === 'ms' ? 'Ralat mengemas kini' : 'Error updating');
+      toast.error(
+        language === 'ms' 
+          ? `Ralat mengemas kini: ${error.message}` 
+          : `Error updating: ${error.message}`
+      );
     } finally {
       setUpdatingAutoRenewal(false);
     }
@@ -1138,13 +1155,27 @@ export default function PaymentMethodPage() {
                         </div>
                       </div>
                       <button
-                        onClick={handleToggleAutoRenewal}
+                        type="button"
+                        onClick={() => {
+                          console.log('Auto renewal toggle clicked', { 
+                            subscription, 
+                            isMonthlySubscription, 
+                            autoRenewal,
+                            updatingAutoRenewal 
+                          });
+                          handleToggleAutoRenewal();
+                        }}
                         disabled={updatingAutoRenewal || !subscription || isMonthlySubscription}
                         aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                        title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                        className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 ${
-                          autoRenewal ? 'bg-green-600' : 'bg-gray-300'
-                        }`}
+                        title={isMonthlySubscription 
+                          ? (language === 'ms' ? 'Tidak boleh diubah untuk pelan bulanan' : 'Cannot toggle for monthly plans')
+                          : (language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal')
+                        }
+                        className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
+                          updatingAutoRenewal || !subscription || isMonthlySubscription 
+                            ? 'opacity-50 cursor-not-allowed' 
+                            : ''
+                        } ${autoRenewal ? 'bg-green-600' : 'bg-gray-300'}`}
                       >
                         {updatingAutoRenewal ? (
                           <Loader2 className="w-4 h-4 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
@@ -1218,26 +1249,35 @@ export default function PaymentMethodPage() {
                           </p>
                         </div>
                       </div>
-                      <Button
+                      <button
+                        type="button"
                         onClick={() => {
-                          if (!subscription) return;
+                          console.log('Cancel button clicked', { subscription, isMonthlySubscription });
+                          if (!subscription) {
+                            toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
+                            return;
+                          }
                           if (isMonthlySubscription) {
+                            console.log('Opening monthly cancel modal');
                             setShowMonthlyCancelModal(true);
                           } else {
+                            console.log('Opening yearly cancel modal');
                             setShowCancelModal(true);
                           }
                         }}
                         disabled={loading || loadingSubscription || !subscription || subscription.cancelAtPeriodEnd || subscription.pendingContractCancellation}
-                        className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                       >
                         {loading || loadingSubscription ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : subscription?.pendingContractCancellation ? (
                           language === 'ms' ? 'Dijadualkan' : 'Scheduled'
+                        ) : subscription?.cancelAtPeriodEnd ? (
+                          language === 'ms' ? 'Akan Dibatalkan' : 'Will Cancel'
                         ) : (
                           language === 'ms' ? 'Batal' : 'Cancel'
                         )}
-                      </Button>
+                      </button>
                     </div>
                   </div>
                 </motion.div>

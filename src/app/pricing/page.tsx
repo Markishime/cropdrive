@@ -452,7 +452,6 @@ export default function PricingPage() {
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
                 <div className="text-center">
-                  <span className="text-5xl mb-4 block">😟</span>
                   <h3 className="text-2xl font-bold text-red-700 uppercase mb-2">
                     {language === 'ms' ? 'Sebelum CropDrive™' : 'Before CropDrive™'}
                   </h3>
@@ -492,7 +491,6 @@ export default function PricingPage() {
                   className="w-full h-48 object-cover rounded-lg mb-4"
                 />
                 <div className="text-center">
-                  <span className="text-5xl mb-4 block">😊</span>
                   <h3 className="text-2xl font-bold text-green-700 uppercase mb-2">
                     {language === 'ms' ? 'Selepas CropDrive™' : 'After CropDrive™'}
                   </h3>

@@ -36,11 +36,13 @@ export async function GET(req: NextRequest) {
 
     // Fetch subscription from Stripe with price details
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
-      expand: ['default_payment_method', 'latest_invoice', 'items.data.price'],
+      expand: ['default_payment_method', 'latest_invoice', 'items.data.price', 'customer'],
     });
 
-    // Get payment method details
+    // Get payment method details - check subscription first, then customer's default
     let paymentMethod = null;
+    
+    // Try to get payment method from subscription
     if (subscription.default_payment_method && typeof subscription.default_payment_method !== 'string') {
       const pm = subscription.default_payment_method as Stripe.PaymentMethod;
       if (pm.card) {
@@ -50,6 +52,79 @@ export async function GET(req: NextRequest) {
           expMonth: pm.card.exp_month,
           expYear: pm.card.exp_year,
         };
+      }
+    }
+    
+    // If no payment method on subscription, try to get from customer's default payment method
+    if (!paymentMethod && subscription.customer) {
+      try {
+        const customerId = typeof subscription.customer === 'string' 
+          ? subscription.customer 
+          : subscription.customer.id;
+        
+        const customer = await stripe.customers.retrieve(customerId, {
+          expand: ['invoice_settings.default_payment_method'],
+        });
+        
+        if (customer && !customer.deleted) {
+          const customerObj = customer as Stripe.Customer;
+          const defaultPm = customerObj.invoice_settings?.default_payment_method;
+          
+          if (defaultPm && typeof defaultPm !== 'string') {
+            const pm = defaultPm as Stripe.PaymentMethod;
+            if (pm.card) {
+              paymentMethod = {
+                brand: pm.card.brand,
+                last4: pm.card.last4,
+                expMonth: pm.card.exp_month,
+                expYear: pm.card.exp_year,
+              };
+            }
+          } else if (typeof defaultPm === 'string') {
+            // If it's just the ID, fetch the payment method
+            const pm = await stripe.paymentMethods.retrieve(defaultPm);
+            if (pm.card) {
+              paymentMethod = {
+                brand: pm.card.brand,
+                last4: pm.card.last4,
+                expMonth: pm.card.exp_month,
+                expYear: pm.card.exp_year,
+              };
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching customer payment method:', error);
+      }
+    }
+    
+    // Last resort: try to get the payment method from the latest successful invoice
+    if (!paymentMethod && subscription.latest_invoice) {
+      try {
+        const invoiceId = typeof subscription.latest_invoice === 'string'
+          ? subscription.latest_invoice
+          : subscription.latest_invoice.id;
+        
+        const invoice = await stripe.invoices.retrieve(invoiceId, {
+          expand: ['payment_intent.payment_method'],
+        });
+        
+        if (invoice.payment_intent && typeof invoice.payment_intent !== 'string') {
+          const pi = invoice.payment_intent as Stripe.PaymentIntent;
+          if (pi.payment_method && typeof pi.payment_method !== 'string') {
+            const pm = pi.payment_method as Stripe.PaymentMethod;
+            if (pm.card) {
+              paymentMethod = {
+                brand: pm.card.brand,
+                last4: pm.card.last4,
+                expMonth: pm.card.exp_month,
+                expYear: pm.card.exp_year,
+              };
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching invoice payment method:', error);
       }
     }
 

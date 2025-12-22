@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
+const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agricultureglobalsolutions.com';
 const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive <noreply@cropdrive.ai>';
 
 // Contact form submission handler (Resend)

@@ -215,24 +215,22 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.1 }}
-              className="flex flex-col sm:flex-row gap-3 xs:gap-4 sm:gap-6 justify-center items-center px-3 xs:px-4 sm:px-6 w-full max-w-2xl mx-auto mb-20 xs:mb-24 sm:mb-8 md:mb-12"
+              className="flex flex-col sm:flex-row gap-3 xs:gap-4 sm:gap-6 justify-center items-center px-3 xs:px-4 sm:px-6 w-full max-w-2xl mx-auto mb-20 xs:mb-24 sm:mb-8 md:mb-12 relative z-30"
             >
-              <Link href="/pricing" className="w-full sm:w-auto max-w-xs sm:max-w-none">
+              <Link href="/pricing" className="w-full sm:w-auto max-w-xs sm:max-w-none z-30">
                 <motion.button
-                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation"
+                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation cursor-pointer"
                 >
                   {language === 'ms' ? '🚀 Mulakan Sekarang' : '🚀 Get Started Now'}
                 </motion.button>
               </Link>
-              <Link href="/how-it-works" className="w-full sm:w-auto max-w-xs sm:max-w-none">
+              <Link href="/how-it-works" className="w-full sm:w-auto max-w-xs sm:max-w-none z-30">
                 <motion.button
-                  type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation"
+                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation cursor-pointer"
                 >
                   {language === 'ms' ? '▶️ Tonton Demo' : '▶️ Watch Demo'}
                 </motion.button>
@@ -326,7 +324,7 @@ export default function HomePage() {
         </motion.div>
 
         {/* Copyright Footer */}
-        <div className="absolute bottom-2 xs:bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-20 w-full px-3 xs:px-4">
+        <div className="absolute bottom-2 xs:bottom-3 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-10 w-full px-3 xs:px-4 pointer-events-none">
           <p className="text-white/60 text-[9px] xs:text-[10px] sm:text-xs text-center leading-tight">
             © 2025 CROPDRIVE OP ADVISOR™. {language === 'ms' ? 'TANDA DAGANGAN DAN JENAMA ADALAH HAK MILIK PEMILIKNYA' : 'TRADEMARKS AND BRANDS ARE THE PROPERTY OF THEIR RESPECTIVE OWNERS'}
           </p>
