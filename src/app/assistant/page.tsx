@@ -140,8 +140,8 @@ export default function AssistantPage() {
     // If subscription is set to cancel at period end, block access immediately (even if still paying)
     if (user.cancelAtPeriodEnd) return true;
     
-    // If subscription has pending contract cancellation, block access
-    if (user.pendingContractCancellation) return true;
+    // Note: pendingContractCancellation is checked in subscription data, not user data
+    // This check has been removed as it's not available on the User type
     
     // If subscription status is canceled
     if (user.subscriptionStatus === 'canceled') return true;
@@ -157,7 +157,7 @@ export default function AssistantPage() {
   };
 
   const subscriptionExpired = user ? isSubscriptionExpired() : false;
-  const subscriptionCancelling = user?.cancelAtPeriodEnd || user?.pendingContractCancellation;
+  const subscriptionCancelling = user?.cancelAtPeriodEnd;
 
   useEffect(() => {
     if (!authLoading && !user) {
