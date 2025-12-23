@@ -333,7 +333,11 @@ export default function PaymentMethodPage() {
   const hasSubscription = !!subscription;
 
   const currentPlan = getPricingTierById(user.plan);
-  const uploadPercentage = user.uploadsLimit === -1 ? 100 : user.uploadsLimit > 0 ? (user.uploadsUsed / user.uploadsLimit) * 100 : 0;
+  // Ensure uploadsUsed and uploadsLimit are numbers (handle undefined/null)
+  const uploadsUsed = user.uploadsUsed ?? 0;
+  const uploadsLimit = user.uploadsLimit ?? 0;
+  const uploadPercentage = uploadsLimit === -1 ? 100 : uploadsLimit > 0 ? (uploadsUsed / uploadsLimit) * 100 : 0;
+  const isUploadLimitExceeded = uploadsLimit !== -1 && uploadsUsed >= uploadsLimit;
   const billingCycle = user.billingCycle || 'monthly';
   const subscriptionInterval = subscription?.billingCycle || (billingCycle === 'yearly' ? 'year' : 'month');
   const isMonthlySubscription = subscriptionInterval === 'month';
@@ -900,10 +904,10 @@ export default function PaymentMethodPage() {
                           {language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
                         </span>
                         <span className="text-sm font-black text-gray-900">
-                          {user.uploadsUsed} / {user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}
+                          {uploadsUsed} / {uploadsLimit === -1 ? '∞' : uploadsLimit}
                         </span>
                       </div>
-                      {user.uploadsLimit !== -1 && (
+                      {uploadsLimit !== -1 && (
                         <div className="relative">
                           <div className="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
                             <motion.div 
@@ -911,14 +915,26 @@ export default function PaymentMethodPage() {
                               animate={{ width: `${Math.min(uploadPercentage, 100)}%` }}
                               transition={{ duration: 1, ease: "easeOut" }}
                             className={`h-full rounded-full ${
-                                uploadPercentage > 80 ? 'bg-gradient-to-r from-amber-500 to-red-500' : 'bg-gradient-to-r from-green-500 to-green-700'
+                                isUploadLimitExceeded 
+                                  ? 'bg-gradient-to-r from-red-500 to-red-700' 
+                                  : uploadPercentage > 80 
+                                    ? 'bg-gradient-to-r from-amber-500 to-red-500' 
+                                    : 'bg-gradient-to-r from-green-500 to-green-700'
                               }`}
                             />
                           </div>
-                          <p className="text-xs text-gray-500 mt-2">
-                            {uploadPercentage > 80 
-                              ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
-                              : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
+                          <p className={`text-xs mt-2 font-semibold ${
+                            isUploadLimitExceeded 
+                              ? 'text-red-600' 
+                              : uploadPercentage > 80 
+                                ? 'text-amber-600' 
+                                : 'text-gray-500'
+                          }`}>
+                            {isUploadLimitExceeded
+                              ? (language === 'ms' ? '❌ Had tercapai - Naik taraf untuk terus menganalisis' : '❌ Limit reached - Upgrade to continue analyzing')
+                              : uploadPercentage > 80 
+                                ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
+                                : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
                             }
                           </p>
                         </div>

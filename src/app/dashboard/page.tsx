@@ -140,8 +140,12 @@ export default function DashboardPage() {
 
   const userPlan = (user.plan && user.plan !== 'none') ? getPlanById(user.plan) : null;
   const hasPurchasedPlan = user.plan && user.plan !== 'none';
-  const uploadsRemaining = Math.max(0, user.uploadsLimit - user.uploadsUsed);
-  const uploadPercentage = user.uploadsLimit === -1 ? 100 : user.uploadsLimit > 0 ? (user.uploadsUsed / user.uploadsLimit) * 100 : 0;
+  // Ensure uploadsUsed and uploadsLimit are numbers (handle undefined/null)
+  const uploadsUsed = user.uploadsUsed ?? 0;
+  const uploadsLimit = user.uploadsLimit ?? 0;
+  const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
+  const uploadPercentage = uploadsLimit === -1 ? 100 : uploadsLimit > 0 ? (uploadsUsed / uploadsLimit) * 100 : 0;
+  const isUploadLimitExceeded = uploadsLimit !== -1 && uploadsUsed >= uploadsLimit;
   const daysActive = Math.floor((Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24));
   
   // Real-time activity based on user data
@@ -459,20 +463,24 @@ export default function DashboardPage() {
                       {language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
                     </span>
                     <span className="text-sm font-bold">
-                      {user.uploadsUsed} / {user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}
+                      {uploadsUsed} / {uploadsLimit === -1 ? '∞' : uploadsLimit}
                     </span>
                   </div>
-                  {user.uploadsLimit !== -1 && (
+                  {uploadsLimit !== -1 && (
                     <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
                       <div 
-                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 h-full rounded-full transition-all duration-500"
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          uploadPercentage >= 80 
+                            ? 'bg-gradient-to-r from-orange-400 to-red-500' 
+                            : 'bg-gradient-to-r from-yellow-400 to-yellow-500'
+                        }`}
                         style={{ width: `${Math.min(uploadPercentage, 100)}%` }}
                       />
                     </div>
                   )}
                 </div>
 
-                {user.uploadsLimit === -1 || uploadsRemaining > 0 ? (
+                {!isUploadLimitExceeded ? (
                   <Button 
                     onClick={() => router.push('/assistant')}
                     className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg"

@@ -39,14 +39,21 @@ export default function AssistantPage() {
     if (!user) return false;
     // If no plan, they need to subscribe first
     if (!user.plan || user.plan === 'none') return false;
+    
+    // Ensure uploadsUsed and uploadsLimit are numbers (handle undefined/null)
+    const uploadsUsed = user.uploadsUsed ?? 0;
+    const uploadsLimit = user.uploadsLimit ?? 0;
+    
     // If unlimited (-1), never exceeded
-    if (user.uploadsLimit === -1) return false;
+    if (uploadsLimit === -1) return false;
     // Check if used >= limit
-    return user.uploadsUsed >= user.uploadsLimit;
+    return uploadsUsed >= uploadsLimit;
   };
 
   const uploadLimitExceeded = user ? isUploadLimitExceeded() : false;
-  const uploadsRemaining = user ? (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - user.uploadsUsed)) : 0;
+  const uploadsUsed = user?.uploadsUsed ?? 0;
+  const uploadsLimit = user?.uploadsLimit ?? 0;
+  const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
 
   // Get iframe origin from the iframe src if available, otherwise from env/default
   const getIframeOrigin = () => {
@@ -214,8 +221,8 @@ export default function AssistantPage() {
     
     // Add actual upload usage from user data
     if (user) {
-      params.append('uploadsUsed', user.uploadsUsed.toString());
-      params.append('uploadsLimit', user.uploadsLimit.toString());
+      params.append('uploadsUsed', uploadsUsed.toString());
+      params.append('uploadsLimit', uploadsLimit.toString());
     }
     
     // Add plan-based features
@@ -633,9 +640,10 @@ export default function AssistantPage() {
       iframeRef.current.contentWindow.postMessage(config, '*');
       console.log('✅ Sent user config to AI Assistant:', {
         userId: user.uid,
-        uploadsUsed: user.uploadsUsed,
-        uploadsLimit: user.uploadsLimit,
+        uploadsUsed: uploadsUsed,
+        uploadsLimit: uploadsLimit,
         uploadLimitExceeded,
+        uploadsRemaining,
       });
     }
   };
@@ -795,12 +803,12 @@ export default function AssistantPage() {
           <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
             <div className="flex items-center justify-center gap-4">
               <div className="text-center">
-                <p className="text-3xl font-black text-orange-600">{user.uploadsUsed}</p>
+                <p className="text-3xl font-black text-orange-600">{uploadsUsed}</p>
                 <p className="text-xs text-gray-500">{language === 'ms' ? 'Digunakan' : 'Used'}</p>
               </div>
               <div className="text-2xl text-gray-400">/</div>
               <div className="text-center">
-                <p className="text-3xl font-black text-orange-600">{user.uploadsLimit}</p>
+                <p className="text-3xl font-black text-orange-600">{uploadsLimit === -1 ? '∞' : uploadsLimit}</p>
                 <p className="text-xs text-gray-500">{language === 'ms' ? 'Had' : 'Limit'}</p>
               </div>
             </div>
@@ -811,8 +819,8 @@ export default function AssistantPage() {
           
           <p className="text-gray-600 mb-6">
             {language === 'ms' 
-              ? `Anda telah mencapai had ${user.uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda. Naik taraf pelan anda untuk terus menganalisis laporan makmal.` 
-              : `You've reached your ${user.uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan. Upgrade your plan to continue analyzing lab reports.`}
+              ? `Anda telah mencapai had ${uploadsLimit === -1 ? '∞' : uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda. Naik taraf pelan anda untuk terus menganalisis laporan makmal.` 
+              : `You've reached your ${uploadsLimit === -1 ? 'unlimited' : uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan. Upgrade your plan to continue analyzing lab reports.`}
           </p>
           
           <div className="space-y-3">
