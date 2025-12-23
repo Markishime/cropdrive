@@ -48,17 +48,33 @@ export default function AssistantPage() {
   const uploadLimitExceeded = user ? isUploadLimitExceeded() : false;
   const uploadsRemaining = user ? (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - user.uploadsUsed)) : 0;
 
-  // Get iframe origin from environment variable or default
+  // Get iframe origin from the iframe src if available, otherwise from env/default
   const getIframeOrigin = () => {
     const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
     const defaultUrl = 'https://markishime-ags.hf.space/';
     const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
-    
+
+    // Prefer the actual iframe src to avoid origin mismatches
+    const currentSrc =
+      (typeof window !== 'undefined'
+        ? document.getElementById('ags-iframe')?.getAttribute('src')
+        : null) || iframeRef.current?.src;
+
+    const originFromSrc = (() => {
+      if (!currentSrc) return null;
+      try {
+        return new URL(currentSrc).origin;
+      } catch {
+        return null;
+      }
+    })();
+
+    if (originFromSrc) return originFromSrc;
+
+    // Fallback to configured base URL
     try {
-      const url = new URL(baseUrl);
-      return url.origin;
-    } catch (error) {
-      // Fallback to default origin if URL parsing fails
+      return new URL(baseUrl).origin;
+    } catch {
       return new URL(defaultUrl).origin;
     }
   };
@@ -220,9 +236,9 @@ export default function AssistantPage() {
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      // Verify origin for security
-      const iframeOrigin = getIframeOrigin();
-      if (event.origin !== iframeOrigin) {
+      // Verify origin for security (allow both configured origin and current iframe src origin)
+      const expectedOrigin = getIframeOrigin();
+      if (event.origin !== expectedOrigin) {
         return;
       }
 
@@ -487,6 +503,7 @@ export default function AssistantPage() {
         uploadsUsed: user.uploadsUsed,
         uploadsLimit: user.uploadsLimit,
         uploadLimitExceeded,
+        targetOrigin: iframeOrigin,
       });
     }
   };
