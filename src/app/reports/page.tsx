@@ -59,26 +59,38 @@ export default function ReportsPage() {
       try {
         const reportsRef = collection(db, 'analysis_results');
         
-        // Try query with orderBy first (requires index)
+        // Fetch all reports and filter by user_id/userId (since we need to support both formats)
+        // This approach works even if indexes don't exist for both field names
         let querySnapshot;
         try {
+          // Try with 'userId' first (website format) with orderBy
           const q = query(
             reportsRef,
             where('userId', '==', user.uid),
             orderBy('createdAt', 'desc')
           );
           querySnapshot = await getDocs(q);
+          console.log(`✅ Found ${querySnapshot.size} reports with userId field`);
         } catch (orderByError: any) {
-          // If orderBy fails (missing index), try without orderBy
           if (orderByError.code === 'failed-precondition') {
+            // Index missing, try without orderBy
             console.log('Index missing, fetching without orderBy...');
-            const q = query(
-              reportsRef,
-              where('userId', '==', user.uid)
-            );
-            querySnapshot = await getDocs(q);
+            try {
+              const q = query(
+                reportsRef,
+                where('userId', '==', user.uid)
+              );
+              querySnapshot = await getDocs(q);
+              console.log(`✅ Found ${querySnapshot.size} reports with userId field (no orderBy)`);
+            } catch (userIdError: any) {
+              // If 'userId' query fails, fetch all and filter client-side
+              console.log('Fetching all reports and filtering by user_id...');
+              querySnapshot = await getDocs(reportsRef);
+            }
           } else {
-            throw orderByError;
+            // Other error, try fetching all
+            console.log('Error with userId query, fetching all reports...');
+            querySnapshot = await getDocs(reportsRef);
           }
         }
         
@@ -86,17 +98,70 @@ export default function ReportsPage() {
         
         querySnapshot.forEach((doc) => {
           const data = doc.data();
+          
+          // Support both field name formats: 'userId' (website) or 'user_id' (AI assistant)
+          const userId = data.userId || data.user_id;
+          
+          // Only include reports for current user
+          if (!userId || userId !== user.uid) {
+            if (userId) {
+              console.log('Skipping report - user ID mismatch:', { 
+                reportUserId: userId, 
+                currentUserId: user.uid,
+                docId: doc.id 
+              });
+            }
+            return;
+          }
+          
+          console.log('✅ Processing report for user:', { userId, docId: doc.id, dataKeys: Object.keys(data) });
+          
+          // Handle report_types array (AI assistant format) vs type string (website format)
+          let reportType: 'soil' | 'leaf' = 'soil';
+          if (data.type) {
+            reportType = data.type as 'soil' | 'leaf';
+          } else if (data.report_types && Array.isArray(data.report_types) && data.report_types.length > 0) {
+            // Use first type from array
+            reportType = data.report_types[0] as 'soil' | 'leaf';
+          }
+          
+          // Handle timestamp formats: createdAt (Timestamp), timestamp (string), or date (string)
+          let reportDate: string;
+          let createdAt: Timestamp;
+          
+          if (data.createdAt?.toDate) {
+            // Firestore Timestamp
+            createdAt = data.createdAt;
+            reportDate = data.createdAt.toDate().toISOString().split('T')[0];
+          } else if (data.timestamp) {
+            // String timestamp from AI assistant
+            const timestampDate = new Date(data.timestamp);
+            if (!isNaN(timestampDate.getTime())) {
+              reportDate = timestampDate.toISOString().split('T')[0];
+              createdAt = Timestamp.fromDate(timestampDate);
+            } else {
+              reportDate = data.date || new Date().toISOString().split('T')[0];
+              createdAt = Timestamp.now();
+            }
+          } else if (data.date) {
+            reportDate = data.date;
+            createdAt = Timestamp.fromDate(new Date(data.date));
+          } else {
+            reportDate = new Date().toISOString().split('T')[0];
+            createdAt = Timestamp.now();
+          }
+          
           fetchedReports.push({
             id: doc.id,
             title: data.title || `Report ${doc.id.slice(0, 8)}`,
-            type: data.type || 'soil',
-            date: data.date || (data.createdAt?.toDate ? data.createdAt.toDate().toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
+            type: reportType,
+            date: reportDate,
             status: data.status || 'completed',
-            recommendations: data.recommendations || 0,
+            recommendations: data.recommendations || data.recommendationsCount || 0,
             summary: data.summary || '',
-            userId: data.userId,
-            createdAt: data.createdAt || Timestamp.now(),
-            fileUrl: data.fileUrl
+            userId: userId || user.uid,
+            createdAt: createdAt,
+            fileUrl: data.fileUrl || data.file_url
           });
         });
         
