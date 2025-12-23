@@ -166,7 +166,7 @@ export default function PaymentMethodPage() {
   // Fetch subscription details from Stripe
   const fetchSubscription = useCallback(async (showErrorToast = true) => {
     if (!user) return;
-
+    
     try {
       setLoadingSubscription(true);
       const firebaseUser = auth.currentUser;
@@ -174,16 +174,16 @@ export default function PaymentMethodPage() {
         console.warn('No Firebase user found');
         return;
       }
-
+      
       const token = await firebaseUser.getIdToken();
       console.log('💳 Fetching subscription details...');
-
+      
       const response = await fetch('/api/stripe/subscription', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
-
+      
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Subscription fetched:', data.subscription);
@@ -212,21 +212,21 @@ export default function PaymentMethodPage() {
         }
         
         if (showErrorToast) {
-          toast.error(
-            language === 'ms'
-              ? 'Gagal memuatkan butiran langganan'
-              : 'Failed to load subscription details'
-          );
+        toast.error(
+          language === 'ms' 
+            ? 'Gagal memuatkan butiran langganan' 
+            : 'Failed to load subscription details'
+        );
         }
       }
     } catch (error) {
       console.error('❌ Error fetching subscription:', error);
       if (showErrorToast) {
-        toast.error(
-          language === 'ms'
-            ? 'Ralat memuatkan butiran langganan'
-            : 'Error loading subscription details'
-        );
+      toast.error(
+        language === 'ms' 
+          ? 'Ralat memuatkan butiran langganan' 
+          : 'Error loading subscription details'
+      );
       }
     } finally {
       setLoadingSubscription(false);
@@ -933,8 +933,8 @@ export default function PaymentMethodPage() {
                             {isUploadLimitExceeded
                               ? (language === 'ms' ? '❌ Had tercapai - Naik taraf untuk terus menganalisis' : '❌ Limit reached - Upgrade to continue analyzing')
                               : uploadPercentage > 80 
-                                ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
-                                : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
+                              ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
+                              : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
                             }
                           </p>
                         </div>
@@ -1118,54 +1118,54 @@ export default function PaymentMethodPage() {
                     }
                     
                     return (
-                      <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
-
-                        <div className="relative">
-                          <div className="flex items-center justify-between mb-6">
-                            <div className="flex items-center gap-3">
-                              <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
-                                <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
-                              </div>
-                              <span className="text-sm font-semibold opacity-90 capitalize">
+                    <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+                      
+                      <div className="relative">
+                        <div className="flex items-center justify-between mb-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
+                              <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
+                            </div>
+                            <span className="text-sm font-semibold opacity-90 capitalize">
                                 {paymentMethod.brand}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
-                              <CheckCircle className="w-3 h-3" />
-                              {language === 'ms' ? 'Disahkan' : 'Verified'}
-                            </div>
+                            </span>
                           </div>
-
-                          <p className="text-xl font-mono mb-4 tracking-wider">
-                            {showCardDetails
+                          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
+                            <CheckCircle className="w-3 h-3" />
+                            {language === 'ms' ? 'Disahkan' : 'Verified'}
+                          </div>
+                        </div>
+                        
+                        <p className="text-xl font-mono mb-4 tracking-wider">
+                          {showCardDetails 
                               ? `•••• •••• •••• ${paymentMethod.last4}`
-                              : '•••• •••• •••• ••••'
-                            }
-                          </p>
-
-                          <div className="flex justify-between items-end">
-                            <div>
-                              <p className="text-xs opacity-70 mb-1">
-                                {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                              </p>
-                              <p className="font-bold">{user.displayName || user.email}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-xs opacity-70 mb-1">
-                                {language === 'ms' ? 'Tamat' : 'Expires'}
-                              </p>
-                              <p className="font-bold">
-                                {showCardDetails
+                            : '•••• •••• •••• ••••'
+                          }
+                        </p>
+                        
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-xs opacity-70 mb-1">
+                              {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                            </p>
+                            <p className="font-bold">{user.displayName || user.email}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs opacity-70 mb-1">
+                              {language === 'ms' ? 'Tamat' : 'Expires'}
+                            </p>
+                            <p className="font-bold">
+                              {showCardDetails 
                                   ? `${String(paymentMethod.expMonth).padStart(2, '0')}/${paymentMethod.expYear}`
-                                  : '••/••'
-                                }
-                              </p>
-                            </div>
+                                : '••/••'
+                              }
+                            </p>
                           </div>
                         </div>
                       </div>
+                    </div>
                     );
                   })()}
                   
@@ -1201,9 +1201,9 @@ export default function PaymentMethodPage() {
                           </p>
                           <p className="text-sm text-gray-500">
                             {autoRenewal
-                              ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
-                              : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh. Anda masih perlu membayar sehingga akhir tahun tetapi tidak boleh menggunakan pembantu AI.' : 'Subscription will end at period end. You will still pay until end of year but cannot use AI assistant.')
-                            }
+                                ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
+                                : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh. Anda masih perlu membayar sehingga akhir tahun tetapi tidak boleh menggunakan pembantu AI.' : 'Subscription will end at period end. You will still pay until end of year but cannot use AI assistant.')
+                              }
                           </p>
                         </div>
                       </div>
@@ -1279,7 +1279,7 @@ export default function PaymentMethodPage() {
                               ? (language === 'ms'
                                   ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar setiap bulan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
                                   : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly until contract end but cannot use AI assistant.`)
-                              : (language === 'ms'
+                                : (language === 'ms'
                                   ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
                                   : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.')
                             }
@@ -1289,7 +1289,7 @@ export default function PaymentMethodPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          setShowCancelModal(true);
+                            setShowCancelModal(true);
                         }}
                         className={`bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md flex items-center gap-2 transition-colors ${
                           loading || loadingSubscription || subscription?.pendingContractCancellation
@@ -1529,10 +1529,10 @@ export default function PaymentMethodPage() {
                   </h3>
                   <p className="text-gray-600 mb-4">
                     {language === 'ms'
-                      ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
+                          ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
                       : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.'
-                    }
-                  </p>
+                        }
+                      </p>
                 </div>
                 
                 <div className="flex gap-3">

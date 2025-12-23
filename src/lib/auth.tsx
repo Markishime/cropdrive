@@ -266,7 +266,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             uploadsUsed: convertedUser.uploadsUsed,
             uploadsLimit: convertedUser.uploadsLimit
           });
-          setUser(convertedUser);
+        setUser(convertedUser);
         } else {
           console.error('❌ Failed to convert user data');
         }
