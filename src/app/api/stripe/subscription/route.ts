@@ -50,8 +50,14 @@ export async function GET(req: NextRequest) {
       const subscriptionData = subscriptionDoc.data();
       if (subscriptionData?.paymentMethod) {
         paymentMethod = subscriptionData.paymentMethod;
-        console.log('✅ Found payment method in Firestore:', paymentMethod);
+        console.log('✅ Found payment method in Firestore subscription document:', paymentMethod);
       }
+    }
+    
+    // If not in subscription document, check user document
+    if (!paymentMethod && userData?.paymentMethod) {
+      paymentMethod = userData.paymentMethod;
+      console.log('✅ Found payment method in user document:', paymentMethod);
     }
     
     // If not in Firestore, fetch from Stripe
@@ -198,24 +204,37 @@ export async function GET(req: NextRequest) {
     }
     
     // If we fetched payment method from Stripe and it's not in Firestore, save it
-    if (paymentMethod && subscriptionDoc.exists) {
-      const subscriptionData = subscriptionDoc.data();
-      if (!subscriptionData?.paymentMethod) {
-        console.log('💾 Saving payment method to Firestore for future use');
-        await adminDb.collection('subscriptions').doc(stripeSubscriptionId).update({
-          paymentMethod: paymentMethod,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-        
-        // Also update user document with payment method
-        const userDoc = await adminDb.collection('users').doc(userId).get();
-        if (userDoc.exists) {
-          await adminDb.collection('users').doc(userId).update({
+    if (paymentMethod) {
+      const subscriptionData = subscriptionDoc.exists ? subscriptionDoc.data() : null;
+      
+      // Save to subscription document if it doesn't exist or is different
+      if (!subscriptionData?.paymentMethod || JSON.stringify(subscriptionData.paymentMethod) !== JSON.stringify(paymentMethod)) {
+        console.log('💾 Saving payment method to Firestore subscription document');
+        if (subscriptionDoc.exists) {
+          await adminDb.collection('subscriptions').doc(stripeSubscriptionId).update({
             paymentMethod: paymentMethod,
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           });
-          console.log('💾 Payment method also saved to user document');
+        } else {
+          await adminDb.collection('subscriptions').doc(stripeSubscriptionId).set({
+            userId,
+            stripeSubscriptionId,
+            paymentMethod: paymentMethod,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          }, { merge: true });
         }
+      }
+      
+      // Always update user document with payment method (ensures it's always stored)
+      const userPaymentMethod = userData?.paymentMethod;
+      if (!userPaymentMethod || JSON.stringify(userPaymentMethod) !== JSON.stringify(paymentMethod)) {
+        console.log('💾 Saving payment method to user document');
+        await adminDb.collection('users').doc(userId).update({
+          paymentMethod: paymentMethod,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        console.log('✅ Payment method saved to user document');
       }
     }
     

@@ -15,6 +15,12 @@ export interface User {
   cancelAtPeriodEnd?: boolean; // Whether subscription will cancel at period end
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
+  paymentMethod?: {
+    brand: string;
+    last4: string;
+    expMonth: number;
+    expYear: number;
+  };
   uploadsUsed: number;
   uploadsLimit: number;
   lastLogin: Date;

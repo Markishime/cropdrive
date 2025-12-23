@@ -1057,70 +1057,70 @@ export default function PaymentMethodPage() {
                     <div className="flex items-center justify-center py-8">
                       <Loader2 className="w-8 h-8 animate-spin text-violet-600" />
                     </div>
-                  ) : subscription?.paymentMethod ? (
-                    <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
-
-                      <div className="relative">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
-                              <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
-                            </div>
-                            <span className="text-sm font-semibold opacity-90 capitalize">
-                              {subscription.paymentMethod.brand}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
-                            <CheckCircle className="w-3 h-3" />
-                            {language === 'ms' ? 'Disahkan' : 'Verified'}
-                          </div>
+                  ) : (() => {
+                    const paymentMethod = subscription?.paymentMethod || user?.paymentMethod;
+                    if (!paymentMethod) {
+                      return (
+                        <div className="bg-gray-50 rounded-xl p-6 text-center">
+                          <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                          <p className="text-gray-500">
+                            {language === 'ms' ? 'Tiada kaedah bayaran' : 'No payment method on file'}
+                          </p>
                         </div>
+                      );
+                    }
+                    
+                    return (
+                      <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
 
-                        <p className="text-xl font-mono mb-4 tracking-wider">
-                          {showCardDetails
-                            ? `•••• •••• •••• ${subscription.paymentMethod.last4}`
-                            : '•••• •••• •••• ••••'
-                          }
-                        </p>
-
-                        <div className="flex justify-between items-end">
-                          <div>
-                            <p className="text-xs opacity-70 mb-1">
-                              {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
-                            </p>
-                            <p className="font-bold">{user.displayName || user.email}</p>
+                        <div className="relative">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                              <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
+                                <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
+                              </div>
+                              <span className="text-sm font-semibold opacity-90 capitalize">
+                                {paymentMethod.brand}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
+                              <CheckCircle className="w-3 h-3" />
+                              {language === 'ms' ? 'Disahkan' : 'Verified'}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-xs opacity-70 mb-1">
-                              {language === 'ms' ? 'Tamat' : 'Expires'}
-                            </p>
-                            <p className="font-bold">
-                              {showCardDetails
-                                ? `${String(subscription.paymentMethod.expMonth).padStart(2, '0')}/${subscription.paymentMethod.expYear}`
-                                : '••/••'
-                              }
-                            </p>
+
+                          <p className="text-xl font-mono mb-4 tracking-wider">
+                            {showCardDetails
+                              ? `•••• •••• •••• ${paymentMethod.last4}`
+                              : '•••• •••• •••• ••••'
+                            }
+                          </p>
+
+                          <div className="flex justify-between items-end">
+                            <div>
+                              <p className="text-xs opacity-70 mb-1">
+                                {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                              </p>
+                              <p className="font-bold">{user.displayName || user.email}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-xs opacity-70 mb-1">
+                                {language === 'ms' ? 'Tamat' : 'Expires'}
+                              </p>
+                              <p className="font-bold">
+                                {showCardDetails
+                                  ? `${String(paymentMethod.expMonth).padStart(2, '0')}/${paymentMethod.expYear}`
+                                  : '••/••'
+                                }
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ) : loadingSubscription ? (
-                    <div className="bg-gray-50 rounded-xl p-6 text-center">
-                      <Loader2 className="w-8 h-8 animate-spin text-violet-600 mx-auto mb-3" />
-                      <p className="text-gray-500">
-                        {language === 'ms' ? 'Memuatkan kaedah bayaran...' : 'Loading payment method...'}
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 rounded-xl p-6 text-center">
-                      <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500">
-                        {language === 'ms' ? 'Tiada kaedah bayaran' : 'No payment method on file'}
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })()}
                   
                   <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
                     <Shield className="w-4 h-4 text-green-600" />
