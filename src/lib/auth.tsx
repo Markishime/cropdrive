@@ -257,13 +257,24 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
-        console.log('Refreshing user data from Firestore...');
+        console.log('🔄 Refreshing user data from Firestore for user:', currentUser.uid);
         const convertedUser = await convertFirebaseUser(currentUser);
-        setUser(convertedUser);
-        console.log('User data refreshed:', convertedUser?.plan);
+        if (convertedUser) {
+          console.log('✅ User data refreshed:', {
+            uid: convertedUser.uid,
+            plan: convertedUser.plan,
+            uploadsUsed: convertedUser.uploadsUsed,
+            uploadsLimit: convertedUser.uploadsLimit
+          });
+          setUser(convertedUser);
+        } else {
+          console.error('❌ Failed to convert user data');
+        }
+      } else {
+        console.warn('⚠️ No current user found when refreshing');
       }
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      console.error('❌ Error refreshing user:', error);
     }
   };
 

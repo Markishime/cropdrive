@@ -256,8 +256,6 @@ export default function AssistantPage() {
       } else if (event.data?.scriptRunState === 'notRunning' && event.data?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
         console.log('⚠️ Script stopped running - but no ANALYSIS_COMPLETE message received. AI assistant may need to send ANALYSIS_COMPLETE message.');
-        console.log('💡 Tip: The AI assistant should send ANALYSIS_COMPLETE message immediately after analysis completes.');
-        console.log('💡 Check AI_ASSISTANT_ANALYSIS_COMPLETE_FIX.md for implementation details.');
       }
       
       // Check for any error messages from AI assistant
@@ -331,10 +329,24 @@ export default function AssistantPage() {
             });
 
             const result = await response.json();
-            console.log('📡 API response:', { status: response.status, ok: response.ok, result });
+            console.log('📡 API response:', { 
+              status: response.status, 
+              ok: response.ok, 
+              result,
+              hasReportId: !!result.reportId,
+              uploadsUsed: result.uploadsUsed,
+              uploadsLimit: result.uploadsLimit
+            });
             
-            if (response.ok) {
+            if (response.ok && result.success) {
               console.log('✅ Report saved successfully:', result.reportId);
+              
+              // Verify we got the expected data
+              if (!result.reportId) {
+                console.error('❌ API returned success but no reportId:', result);
+                toast.error(language === 'ms' ? 'Ralat: ID laporan tidak ditemui.' : 'Error: Report ID not found.');
+              }
+              
               toast.success(
                 language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
@@ -345,33 +357,54 @@ export default function AssistantPage() {
                 }
               );
               
-              // Refresh user data to update upload usage display
-              console.log('🔄 Refreshing user data...');
+              // Refresh user data to update upload usage display - CRITICAL
+              console.log('🔄 Refreshing user data from Firestore...');
               if (refreshUser) {
-                await refreshUser();
-                console.log('✅ User data refreshed');
+                try {
+                  await refreshUser();
+                  console.log('✅ User data refreshed from Firestore');
+                  
+                  // Double-check by fetching user data directly
+                  const { doc: docFn, getDoc } = await import('firebase/firestore');
+                  const { db: firestoreDb } = await import('@/lib/firebase');
+                  const userDocRef = docFn(firestoreDb, 'users', currentUserId);
+                  const userDocSnap = await getDoc(userDocRef);
+                  if (userDocSnap.exists()) {
+                    const latestUserData = userDocSnap.data();
+                    console.log('✅ Verified user data from Firestore:', {
+                      uploadsUsed: latestUserData?.uploadsUsed,
+                      uploadsLimit: latestUserData?.uploadsLimit,
+                      reportId: result.reportId
+                    });
+                  }
+                } catch (refreshError: any) {
+                  console.error('❌ Error refreshing user data:', refreshError);
+                  toast.error(language === 'ms' ? 'Ralat menyegar data pengguna' : 'Error refreshing user data');
+                }
               } else {
                 console.warn('⚠️ refreshUser function not available');
               }
               
               // Dispatch custom event to notify other pages (dashboard, reports, etc.)
               if (typeof window !== 'undefined') {
+                const eventDetail = {
+                  userId: currentUserId,
+                  reportId: result.reportId,
+                  uploadsUsed: result.uploadsUsed ?? 0,
+                  uploadsLimit: result.uploadsLimit ?? 10,
+                };
+                console.log('📢 Dispatching analysisReportSaved event:', eventDetail);
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
-                  detail: {
-                    userId: currentUserId, // Include userId in event
-                    reportId: result.reportId,
-                    uploadsUsed: result.uploadsUsed,
-                    uploadsLimit: result.uploadsLimit,
-                  }
+                  detail: eventDetail
                 }));
-                console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
+                console.log('✅ analysisReportSaved event dispatched');
               }
               
               // Update iframe config with new upload counts
               setTimeout(() => {
                 console.log('📤 Sending updated config to iframe...');
                 sendConfigToIframe();
-              }, 500);
+              }, 1000); // Increased delay to ensure user data is refreshed first
               
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
@@ -383,6 +416,8 @@ export default function AssistantPage() {
                     : `📊 Remaining analyses: ${remaining === 'unlimited' ? '∞' : remaining}`,
                   { duration: 3000 }
                 );
+              } else {
+                console.warn('⚠️ API response missing uploadsUsed/uploadsLimit:', result);
               }
             } else if (response.status === 403 && result.error === 'Upload limit exceeded') {
               console.log('❌ Upload limit exceeded:', result);

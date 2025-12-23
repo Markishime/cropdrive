@@ -208,17 +208,23 @@ export default function ReportsPage() {
       const customEvent = event as CustomEvent;
       const eventUserId = customEvent.detail?.userId;
       const currentUserId = user?.uid;
+      const reportId = customEvent.detail?.reportId;
       
       console.log('📢 Reports page: Received analysisReportSaved event', {
         eventUserId,
         currentUserId,
-        reportId: customEvent.detail?.reportId
+        reportId,
+        uploadsUsed: customEvent.detail?.uploadsUsed,
+        uploadsLimit: customEvent.detail?.uploadsLimit
       });
       
       // Only refresh if the event is for the current user
       if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
         console.log('✅ Refreshing reports for current user:', currentUserId);
-        fetchReports();
+        // Add a small delay to ensure Firestore has updated
+        setTimeout(() => {
+          fetchReports();
+        }, 500);
       } else {
         console.log('⚠️ Ignoring event - user ID mismatch or no current user');
       }

@@ -86,6 +86,8 @@ export async function POST(request: NextRequest) {
         const uploadsUsed = userData?.uploadsUsed || 0;
         const uploadsLimit = userData?.uploadsLimit || 10;
         
+        console.log(`📊 Checking upload limits for user ${userId}: ${uploadsUsed}/${uploadsLimit}`);
+        
         // Check if user has exceeded their limit (unless unlimited: -1)
         if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
           console.log(`❌ User ${userId} has exceeded upload limit: ${uploadsUsed}/${uploadsLimit}`);
@@ -99,6 +101,8 @@ export async function POST(request: NextRequest) {
             { status: 403 }
           );
         }
+      } else {
+        console.warn(`⚠️ User document not found for ${userId}`);
       }
     }
 
@@ -120,27 +124,42 @@ export async function POST(request: NextRequest) {
 
     // Use Admin SDK if available, otherwise return instructions
     if (adminDb) {
+      console.log(`💾 Saving report to Firestore for user ${userId}...`);
+      
       // Save the analysis report
       const docRef = await adminDb.collection('analysis_results').add(reportData);
+      console.log(`✅ Report saved with ID: ${docRef.id}`);
+      
+      // Get current user data before incrementing
+      const userDocBefore = await adminDb.collection('users').doc(userId).get();
+      const userDataBefore = userDocBefore.exists ? userDocBefore.data() : null;
+      const uploadsUsedBefore = userDataBefore?.uploadsUsed || 0;
+      
+      console.log(`📊 Current uploadsUsed before increment: ${uploadsUsedBefore}`);
       
       // Increment the user's uploadsUsed counter
       await adminDb.collection('users').doc(userId).update({
         uploadsUsed: FieldValue.increment(1),
         updatedAt: FieldValue.serverTimestamp(),
       });
+      console.log(`✅ Incremented uploadsUsed for user ${userId}`);
       
       // Get updated user data
       const updatedUserDoc = await adminDb.collection('users').doc(userId).get();
-      const updatedUserData = updatedUserDoc.data();
+      const updatedUserData = updatedUserDoc.exists ? updatedUserDoc.data() : null;
       
-      console.log(`✅ Report saved and upload count incremented for user ${userId}: ${updatedUserData?.uploadsUsed}/${updatedUserData?.uploadsLimit}`);
+      const finalUploadsUsed = updatedUserData?.uploadsUsed || (uploadsUsedBefore + 1);
+      const finalUploadsLimit = updatedUserData?.uploadsLimit || 10;
+      
+      console.log(`✅ Report saved and upload count incremented for user ${userId}: ${finalUploadsUsed}/${finalUploadsLimit}`);
+      console.log(`📄 Report ID: ${docRef.id}`);
       
       return NextResponse.json({
         success: true,
         reportId: docRef.id,
         message: 'Report saved successfully',
-        uploadsUsed: updatedUserData?.uploadsUsed || 0,
-        uploadsLimit: updatedUserData?.uploadsLimit || 10,
+        uploadsUsed: finalUploadsUsed,
+        uploadsLimit: finalUploadsLimit,
       });
     } else {
       // If Admin SDK not available, return success but note that client-side will handle it
