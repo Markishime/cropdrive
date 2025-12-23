@@ -243,25 +243,50 @@ export default function AssistantPage() {
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      // Log all messages for debugging
+      // Log all messages for debugging - VERY DETAILED
       console.log('📨 Message received from iframe:', {
         origin: event.origin,
         type: event.data?.type,
-        data: event.data
+        hasType: !!event.data?.type,
+        typeValue: event.data?.type,
+        dataKeys: event.data ? Object.keys(event.data) : [],
+        fullData: event.data,
+        stringified: JSON.stringify(event.data)
       });
       
       // CRITICAL: Check for ANALYSIS_COMPLETE FIRST before any origin checks
       // The message might come from a different origin but we need to process it
-      const isAnalysisComplete = event.data?.type === 'ANALYSIS_COMPLETE' || 
-                                  event.data?.message?.type === 'ANALYSIS_COMPLETE' ||
-                                  (typeof event.data === 'object' && event.data !== null && 'type' in event.data && event.data.type === 'ANALYSIS_COMPLETE');
+      // Check multiple possible formats and locations
+      const rawData = event.data;
+      const isAnalysisComplete = 
+        rawData?.type === 'ANALYSIS_COMPLETE' || 
+        rawData?.message?.type === 'ANALYSIS_COMPLETE' ||
+        (typeof rawData === 'object' && rawData !== null && 'type' in rawData && rawData.type === 'ANALYSIS_COMPLETE') ||
+        (rawData && typeof rawData === 'string' && rawData.includes('ANALYSIS_COMPLETE')) ||
+        (rawData?.data?.type === 'ANALYSIS_COMPLETE');
       
       if (isAnalysisComplete) {
-        console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', event.data);
+        console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', {
+          rawData,
+          type: rawData?.type,
+          origin: event.origin
+        });
         // Process immediately - don't let origin checks block this critical message
-      } else if (event.data?.scriptRunState === 'notRunning' && event.data?.type === 'SCRIPT_RUN_STATE_CHANGED') {
+      } else if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
-        console.log('⚠️ Script stopped running - but no ANALYSIS_COMPLETE message received. AI assistant may need to send ANALYSIS_COMPLETE message.');
+        console.log('⚠️ Script stopped running - checking if ANALYSIS_COMPLETE was missed...', {
+          receivedType: rawData?.type,
+          scriptState: rawData?.scriptRunState,
+          allKeys: rawData ? Object.keys(rawData) : []
+        });
+        
+        // Check if ANALYSIS_COMPLETE data might be nested or in a different format
+        if (rawData && typeof rawData === 'object') {
+          const allValues = JSON.stringify(rawData);
+          if (allValues.includes('ANALYSIS_COMPLETE') || allValues.includes('analysisType')) {
+            console.log('🔍 Found ANALYSIS_COMPLETE indicators in message, attempting to extract...', rawData);
+          }
+        }
       }
       
       // Check for any error messages from AI assistant
