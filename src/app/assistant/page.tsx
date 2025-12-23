@@ -250,9 +250,15 @@ export default function AssistantPage() {
         data: event.data
       });
       
-      // Special logging for ANALYSIS_COMPLETE to help debug
-      if (event.data?.type === 'ANALYSIS_COMPLETE') {
-        console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing...', event.data);
+      // CRITICAL: Check for ANALYSIS_COMPLETE FIRST before any origin checks
+      // The message might come from a different origin but we need to process it
+      const isAnalysisComplete = event.data?.type === 'ANALYSIS_COMPLETE' || 
+                                  event.data?.message?.type === 'ANALYSIS_COMPLETE' ||
+                                  (typeof event.data === 'object' && event.data !== null && 'type' in event.data && event.data.type === 'ANALYSIS_COMPLETE');
+      
+      if (isAnalysisComplete) {
+        console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', event.data);
+        // Process immediately - don't let origin checks block this critical message
       } else if (event.data?.scriptRunState === 'notRunning' && event.data?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
         console.log('⚠️ Script stopped running - but no ANALYSIS_COMPLETE message received. AI assistant may need to send ANALYSIS_COMPLETE message.');
@@ -269,7 +275,8 @@ export default function AssistantPage() {
       
       // Accept messages from iframe origin OR if the message is coming from the iframe itself
       // (The AI assistant might send messages with target origin '*', which is fine)
-      if (event.origin !== expectedOrigin && event.origin !== currentWindowOrigin) {
+      // BUT: Always accept ANALYSIS_COMPLETE messages regardless of origin
+      if (event.origin !== expectedOrigin && event.origin !== currentWindowOrigin && !isAnalysisComplete) {
         // Log for debugging but don't block - the AI assistant might be using '*'
         console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
         // Still process the message if it's from a known iframe origin pattern
@@ -278,14 +285,20 @@ export default function AssistantPage() {
           return;
         }
         console.log('✅ Accepting message from known iframe origin:', event.origin);
+      } else if (isAnalysisComplete) {
+        console.log('✅ Accepting ANALYSIS_COMPLETE message from origin:', event.origin);
       }
 
       try {
         const data = event.data;
         
-        // Handle analysis completion
-        if (data.type === 'ANALYSIS_COMPLETE') {
+        // Handle analysis completion - check multiple possible formats
+        if (data?.type === 'ANALYSIS_COMPLETE' || data?.message?.type === 'ANALYSIS_COMPLETE') {
           console.log('📊 ANALYSIS_COMPLETE message received:', data);
+          
+          // Normalize the data - handle nested message format
+          const analysisData = (data?.type === 'ANALYSIS_COMPLETE' ? data : data?.message) || data;
+          console.log('📊 Normalized analysis data:', analysisData);
           
           // Always get the current authenticated user from Firebase Auth (most reliable)
           const firebaseUser = auth.currentUser;
@@ -319,12 +332,12 @@ export default function AssistantPage() {
               },
               body: JSON.stringify({
                 userId: currentUserId, // Always use authenticated user's ID
-                title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
-                type: data.analysisType || 'soil', // 'soil' or 'leaf'
-                summary: data.summary || '',
-                recommendations: data.recommendationsCount || 0,
-                fileUrl: data.fileUrl || null,
-                analysisData: data.analysisData || null,
+                title: analysisData?.title || data?.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
+                type: analysisData?.analysisType || data?.analysisType || 'soil', // 'soil', 'leaf', or 'both'
+                summary: analysisData?.summary || data?.summary || '',
+                recommendations: analysisData?.recommendationsCount || data?.recommendationsCount || 0,
+                fileUrl: analysisData?.fileUrl || data?.fileUrl || null,
+                analysisData: analysisData?.analysisData || data?.analysisData || null,
               }),
             });
 
@@ -513,14 +526,14 @@ export default function AssistantPage() {
               
               const reportData = {
                 userId: currentUserId, // Always use authenticated user's ID
-                title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
-                type: data.analysisType || 'soil',
-                summary: data.summary || '',
-                recommendations: data.recommendationsCount || 0,
+                title: analysisData?.title || data?.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
+                type: analysisData?.analysisType || data?.analysisType || 'soil',
+                summary: analysisData?.summary || data?.summary || '',
+                recommendations: analysisData?.recommendationsCount || data?.recommendationsCount || 0,
                 status: 'completed' as const,
                 date: new Date().toISOString().split('T')[0],
-                fileUrl: data.fileUrl || null,
-                analysisData: data.analysisData || null,
+                fileUrl: analysisData?.fileUrl || data?.fileUrl || null,
+                analysisData: analysisData?.analysisData || data?.analysisData || null,
                 createdAt: serverTimestamp(),
                 updatedAt: serverTimestamp(),
               };
