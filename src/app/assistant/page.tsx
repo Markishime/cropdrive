@@ -242,6 +242,11 @@ export default function AssistantPage() {
         type: event.data?.type,
         data: event.data
       });
+      
+      // Special logging for ANALYSIS_COMPLETE to help debug
+      if (event.data?.type === 'ANALYSIS_COMPLETE') {
+        console.log('🎯 ANALYSIS_COMPLETE DETECTED! Processing...', event.data);
+      }
 
       // Verify origin for security (allow both configured origin and current iframe src origin)
       const expectedOrigin = getIframeOrigin();
