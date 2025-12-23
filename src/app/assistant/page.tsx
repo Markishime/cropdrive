@@ -268,7 +268,10 @@ export default function AssistantPage() {
         (rawData && typeof rawData === 'object' && (
           rawData.analysisType || rawData.summary || rawData.analysisData ||
           rawData.title?.includes('Analysis') || rawData.userId
-        ));
+        )) ||
+        // More aggressive detection: check for multiple analysis-related fields
+        (rawData && typeof rawData === 'object' && rawData.type && typeof rawData.type === 'string' &&
+         rawData.type.toUpperCase().includes('ANALYSIS') && rawData.userId && rawData.analysisType);
 
       if (isAnalysisComplete) {
         console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', {
@@ -278,7 +281,28 @@ export default function AssistantPage() {
           hasAnalysisFields: !!(rawData?.analysisType || rawData?.summary || rawData?.analysisData)
         });
         // Process immediately - don't let origin checks block this critical message
-      } else if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
+      } else {
+        // DEBUG: Log why ANALYSIS_COMPLETE was not detected for messages that might be it
+        const dataString = JSON.stringify(rawData);
+        const mightBeAnalysisComplete =
+          dataString.includes('ANALYSIS_COMPLETE') ||
+          dataString.includes('analysisType') ||
+          dataString.includes('summary') ||
+          rawData?.title?.includes('Analysis') ||
+          (rawData?.userId && rawData?.analysisType);
+
+        if (mightBeAnalysisComplete) {
+          console.log('⚠️ POTENTIAL ANALYSIS_COMPLETE MESSAGE NOT DETECTED:', {
+            rawData,
+            type: rawData?.type,
+            dataKeys: Object.keys(rawData || {}),
+            dataString,
+            isAnalysisComplete,
+            origin: event.origin
+          });
+        }
+
+        if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
         console.log('⚠️ Script stopped running - checking if ANALYSIS_COMPLETE was missed...', {
           receivedType: rawData?.type,
@@ -427,15 +451,20 @@ export default function AssistantPage() {
       // Verify origin for security (allow both configured origin and current iframe src origin)
       const expectedOrigin = getIframeOrigin();
       const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-      
+
       // Accept messages from iframe origin OR if the message is coming from the iframe itself
       // (The AI assistant might send messages with target origin '*', which is fine)
-      // BUT: Always accept ANALYSIS_COMPLETE messages regardless of origin
-      if (event.origin !== expectedOrigin && event.origin !== currentWindowOrigin && !isAnalysisComplete) {
+      // Also accept messages from 'about:srcdoc' (Gradio iframe internal origin)
+      const isValidOrigin = event.origin === expectedOrigin ||
+                           event.origin === currentWindowOrigin ||
+                           event.origin === 'about:srcdoc' ||
+                           isAnalysisComplete;
+
+      if (!isValidOrigin) {
         // Log for debugging but don't block - the AI assistant might be using '*'
         console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
         // Still process the message if it's from a known iframe origin pattern
-        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive')) {
+        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive') && event.origin !== 'about:srcdoc') {
           console.log('❌ Blocking message from unknown origin:', event.origin);
           return;
         }
@@ -454,7 +483,15 @@ export default function AssistantPage() {
           // Normalize the data - handle nested message format
           const analysisData = (data?.type === 'ANALYSIS_COMPLETE' ? data : data?.message) || data;
           console.log('📊 Normalized analysis data:', analysisData);
-          
+
+          // Store as backup in parent's sessionStorage in case processing fails
+          try {
+            sessionStorage.setItem('pending_analysis_results', JSON.stringify(analysisData));
+            console.log('💾 Stored analysis data as backup in parent sessionStorage');
+          } catch (e) {
+            console.log('⚠️ Could not store backup in sessionStorage');
+          }
+
           // Always get the current authenticated user from Firebase Auth (most reliable)
           const firebaseUser = auth.currentUser;
           if (!firebaseUser || !firebaseUser.uid) {
@@ -844,17 +881,28 @@ export default function AssistantPage() {
           }
         }
 
+        // Handle config update requests from AI assistant
+        if (data.type === 'REQUEST_CONFIG_UPDATE') {
+          console.log('📤 AI assistant requested config update, sending current config...');
+          // Refresh user data first to ensure we have latest counts
+          if (refreshUser) {
+            await refreshUser();
+          }
+          // Send updated config
+          sendConfigToIframe();
+        }
+
         // Handle feature restriction notifications
         if (data.type === 'FEATURE_RESTRICTED') {
           const message = language === 'ms'
             ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
             : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`;
-          
+
           toast.error(message, {
             duration: 5000,
             icon: '🔒',
           });
-          
+
           // Show a follow-up toast with action after a short delay
           setTimeout(() => {
             toast(
