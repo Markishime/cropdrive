@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Download, Eye, Calendar, Search, Trash2, CheckCircle2, Clock, Share2, Plus } from 'lucide-react';
+import { FileText, Download, Eye, Calendar, Search, Trash2, Plus } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
@@ -28,7 +28,6 @@ export default function ReportsPage() {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'soil' | 'leaf'>('all');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'completed' | 'processing'>('all');
   const [reports, setReports] = useState<Report[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -63,14 +62,15 @@ export default function ReportsPage() {
         // This approach works even if indexes don't exist for both field names
         let querySnapshot;
         try {
-          // Try with 'userId' first (website format) with orderBy
+          // Try with 'userId' and 'status' filters (website format) with orderBy
           const q = query(
             reportsRef,
             where('userId', '==', user.uid),
+            where('status', '==', 'completed'),
             orderBy('createdAt', 'desc')
           );
           querySnapshot = await getDocs(q);
-          console.log(`✅ Found ${querySnapshot.size} reports with userId field`);
+          console.log(`✅ Found ${querySnapshot.size} completed reports with userId field`);
         } catch (orderByError: any) {
           if (orderByError.code === 'failed-precondition') {
             // Index missing, try without orderBy
@@ -78,13 +78,14 @@ export default function ReportsPage() {
             try {
               const q = query(
                 reportsRef,
-                where('userId', '==', user.uid)
+                where('userId', '==', user.uid),
+                where('status', '==', 'completed')
               );
               querySnapshot = await getDocs(q);
-              console.log(`✅ Found ${querySnapshot.size} reports with userId field (no orderBy)`);
+              console.log(`✅ Found ${querySnapshot.size} completed reports with userId field (no orderBy)`);
             } catch (userIdError: any) {
               // If 'userId' query fails, fetch all and filter client-side
-              console.log('Fetching all reports and filtering by user_id...');
+              console.log('Fetching all reports and filtering by user_id and status...');
               querySnapshot = await getDocs(reportsRef);
             }
           } else {
@@ -101,20 +102,21 @@ export default function ReportsPage() {
           
           // Support both field name formats: 'userId' (website) or 'user_id' (AI assistant)
           const userId = data.userId || data.user_id;
+          const reportStatus = data.status || 'completed';
           
-          // Only include reports for current user
-          if (!userId || userId !== user.uid) {
-            if (userId) {
-              console.log('Skipping report - user ID mismatch:', { 
+          // Only include completed reports for current user
+          if (!userId || userId !== user.uid || reportStatus !== 'completed') {
+            if (userId && userId === user.uid && reportStatus !== 'completed') {
+              console.log('Skipping report - not completed:', { 
                 reportUserId: userId, 
-                currentUserId: user.uid,
+                status: reportStatus,
                 docId: doc.id 
               });
             }
             return;
           }
           
-          console.log('✅ Processing report for user:', { userId, docId: doc.id, dataKeys: Object.keys(data) });
+          console.log('✅ Processing completed report for user:', { userId, docId: doc.id, status: reportStatus });
           
           // Handle report_types array (AI assistant format) vs type string (website format)
           let reportType: 'soil' | 'leaf' = 'soil';
@@ -240,17 +242,9 @@ export default function ReportsPage() {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.summary.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = filterType === 'all' || report.type === filterType;
-    const matchesStatus = filterStatus === 'all' || report.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
+    // Only show completed reports (already filtered in fetch, but double-check)
+    return matchesSearch && matchesType && report.status === 'completed';
   });
-
-  const completedReports = reports.filter(r => r.status === 'completed').length;
-  const processingReports = reports.filter(r => r.status === 'processing').length;
-  const thisMonthReports = reports.filter(r => {
-    const reportDate = new Date(r.date);
-    const now = new Date();
-    return reportDate.getMonth() === now.getMonth() && reportDate.getFullYear() === now.getFullYear();
-  }).length;
 
   const handleDeleteReport = async (reportId: string) => {
     if (!confirm(language === 'ms' ? 'Adakah anda pasti mahu memadam laporan ini?' : 'Are you sure you want to delete this report?')) {
@@ -299,72 +293,49 @@ export default function ReportsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-      {/* Enhanced Header with Quick Stats */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
-        
+      {/* Simple Header */}
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-8 sm:py-12 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center sm:text-left"
+            transition={{ duration: 0.5 }}
+            className="flex items-center justify-between flex-wrap gap-4"
           >
-            <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
-              <div>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
-                  {language === 'ms' ? 'Sejarah' : 'Reports'} <span className="text-yellow-400">{language === 'ms' ? 'Laporan' : 'History'}</span>
-                </h1>
-                <p className="text-lg sm:text-xl text-white/90 flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  {language === 'ms' 
-                    ? 'Lihat dan urus laporan analisis AI anda'
-                    : 'View and manage your AI analysis reports'
-                  }
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => toast.success(language === 'ms' ? 'Eksport akan tersedia tidak lama lagi' : 'Export coming soon')}
-                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
-                >
-                  <Share2 className="w-4 h-4" />
-                  {language === 'ms' ? 'Eksport' : 'Export'}
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => router.push('/assistant')}
-                  className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 transition"
-                >
-                  <Plus className="w-4 h-4" />
-                  {language === 'ms' ? 'Baharu' : 'New Report'}
-                </motion.button>
-              </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
+                {language === 'ms' ? 'Sejarah Analisis' : 'Analysis History'}
+              </h1>
+              <p className="text-sm sm:text-base text-white/80">
+                {language === 'ms' 
+                  ? 'Laporan analisis yang telah selesai'
+                  : 'Completed analysis reports'
+                }
+              </p>
             </div>
-
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => router.push('/assistant')}
+              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+            >
+              <Plus className="w-4 h-4" />
+              {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
+            </motion.button>
           </motion.div>
         </div>
       </section>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Search and Filters */}
+        {/* Search and Type Filter */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <div className="flex flex-col lg:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
               <label htmlFor="reports-search" className="sr-only">
@@ -378,7 +349,7 @@ export default function ReportsPage() {
                 placeholder={language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition"
               />
             </div>
 
@@ -388,7 +359,7 @@ export default function ReportsPage() {
                 <button
                   key={type}
                   onClick={() => setFilterType(type as any)}
-                  className={`px-4 py-2.5 rounded-lg font-medium transition ${
+                  className={`px-4 py-2 rounded-lg font-medium transition ${
                     filterType === type
                       ? 'bg-green-600 text-white'
                       : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
@@ -397,25 +368,6 @@ export default function ReportsPage() {
                   {type === 'all' ? (language === 'ms' ? 'Semua' : 'All') :
                    type === 'soil' ? (language === 'ms' ? 'Tanah' : 'Soil') :
                    (language === 'ms' ? 'Daun' : 'Leaf')}
-                </button>
-              ))}
-            </div>
-
-            {/* Status Filter */}
-            <div className="flex gap-2">
-              {['all', 'completed', 'processing'].map((status) => (
-                <button
-                  key={status}
-                  onClick={() => setFilterStatus(status as any)}
-                  className={`px-4 py-2.5 rounded-lg font-medium transition ${
-                    filterStatus === status
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {status === 'all' ? (language === 'ms' ? 'Semua' : 'All') :
-                   status === 'completed' ? (language === 'ms' ? 'Selesai' : 'Completed') :
-                   (language === 'ms' ? 'Diproses' : 'Processing')}
                 </button>
               ))}
             </div>
@@ -498,16 +450,6 @@ export default function ReportsPage() {
                             </span>
                             <span>
                               {report.recommendations} {language === 'ms' ? 'cadangan' : 'recommendations'}
-                            </span>
-                            <span className={`px-2 py-0.5 rounded-full ${
-                              report.status === 'completed'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {report.status === 'completed'
-                                ? (language === 'ms' ? 'Selesai' : 'Completed')
-                                : (language === 'ms' ? 'Sedang Diproses' : 'Processing')
-                              }
                             </span>
                           </div>
                         </div>
