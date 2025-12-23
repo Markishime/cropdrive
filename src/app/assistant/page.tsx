@@ -100,11 +100,11 @@ export default function AssistantPage() {
         // This allows Streamlit to update without reading URL params
         setTimeout(() => {
           if (iframeRef.current?.contentWindow) {
-            const iframeOrigin = getIframeOrigin();
+            // Use '*' as target origin to avoid origin mismatch errors
             iframeRef.current.contentWindow.postMessage({
               type: 'LANGUAGE_CHANGE',
               language: lang,
-            }, iframeOrigin);
+            }, '*');
           }
         }, 500); // Wait 500ms for iframe to reload
       }
@@ -505,14 +505,14 @@ export default function AssistantPage() {
         uploadsRemaining: uploadLimitExceeded ? 0 : (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - (user.uploadsUsed || 0))),
       };
       
-      const iframeOrigin = getIframeOrigin();
-      iframeRef.current.contentWindow.postMessage(config, iframeOrigin);
+      // Use '*' as target origin to avoid origin mismatch errors
+      // The iframe will validate messages on its side if needed
+      iframeRef.current.contentWindow.postMessage(config, '*');
       console.log('✅ Sent user config to AI Assistant:', {
         userId: user.uid,
         uploadsUsed: user.uploadsUsed,
         uploadsLimit: user.uploadsLimit,
         uploadLimitExceeded,
-        targetOrigin: iframeOrigin,
       });
     }
   };
@@ -532,12 +532,11 @@ export default function AssistantPage() {
   // Update iframe language when currentLang changes (send postMessage)
   useEffect(() => {
     if (mounted && iframeRef.current?.contentWindow && user) {
-      const iframeOrigin = getIframeOrigin();
-      // Send language update message to iframe
+      // Use '*' as target origin to avoid origin mismatch errors
       iframeRef.current.contentWindow.postMessage({
         type: 'LANGUAGE_CHANGE',
         language: currentLang,
-      }, iframeOrigin);
+      }, '*');
     }
   }, [currentLang, mounted, user]);
 
