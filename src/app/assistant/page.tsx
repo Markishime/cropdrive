@@ -287,6 +287,22 @@ export default function AssistantPage() {
             console.log('🔍 Found ANALYSIS_COMPLETE indicators in message, attempting to extract...', rawData);
           }
         }
+        
+        // FALLBACK: Request analysis results from iframe when script stops
+        // This handles cases where ANALYSIS_COMPLETE message was sent but not received
+        console.log('📤 Requesting analysis results from iframe as fallback...');
+        setTimeout(() => {
+          if (iframeRef.current?.contentWindow) {
+            try {
+              iframeRef.current.contentWindow.postMessage({
+                type: 'REQUEST_ANALYSIS_RESULTS'
+              }, '*');
+              console.log('✅ Sent REQUEST_ANALYSIS_RESULTS message to iframe');
+            } catch (error) {
+              console.error('❌ Error sending REQUEST_ANALYSIS_RESULTS:', error);
+            }
+          }
+        }, 1000); // Wait 1 second for any pending ANALYSIS_COMPLETE messages
       }
       
       // Check for any error messages from AI assistant
