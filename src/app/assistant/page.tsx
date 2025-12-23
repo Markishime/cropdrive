@@ -253,7 +253,7 @@ export default function AssistantPage() {
         fullData: event.data,
         stringified: JSON.stringify(event.data)
       });
-
+      
       // CRITICAL: Check for ANALYSIS_COMPLETE FIRST before any origin checks
       // The message might come from a different origin but we need to process it
       // Check multiple possible formats and locations
@@ -264,166 +264,31 @@ export default function AssistantPage() {
         (typeof rawData === 'object' && rawData !== null && 'type' in rawData && rawData.type === 'ANALYSIS_COMPLETE') ||
         (rawData && typeof rawData === 'string' && rawData.includes('ANALYSIS_COMPLETE')) ||
         (rawData?.data?.type === 'ANALYSIS_COMPLETE') ||
-        // Check if the data itself contains analysis fields (fallback detection)
-        (rawData && typeof rawData === 'object' && (
-          rawData.analysisType || rawData.summary || rawData.analysisData ||
-          rawData.title?.includes('Analysis') || rawData.userId
-        )) ||
-        // More aggressive detection: check for multiple analysis-related fields
-        (rawData && typeof rawData === 'object' && rawData.type && typeof rawData.type === 'string' &&
-         rawData.type.toUpperCase().includes('ANALYSIS') && rawData.userId && rawData.analysisType);
-
+        // Check if message contains analysis data fields (fallback for messages that should be ANALYSIS_COMPLETE)
+        (rawData && typeof rawData === 'object' && (rawData.analysisType || rawData.summary || rawData.userId) &&
+         (rawData.title?.includes('Analysis') || rawData.type?.includes('ANALYSIS')));
+      
       if (isAnalysisComplete) {
         console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', {
           rawData,
           type: rawData?.type,
-          origin: event.origin,
-          hasAnalysisFields: !!(rawData?.analysisType || rawData?.summary || rawData?.analysisData)
+          origin: event.origin
         });
         // Process immediately - don't let origin checks block this critical message
-      } else {
-        // DEBUG: Log why ANALYSIS_COMPLETE was not detected for messages that might be it
-        const dataString = JSON.stringify(rawData);
-        const mightBeAnalysisComplete =
-          dataString.includes('ANALYSIS_COMPLETE') ||
-          dataString.includes('analysisType') ||
-          dataString.includes('summary') ||
-          rawData?.title?.includes('Analysis') ||
-          (rawData?.userId && rawData?.analysisType);
-
-        if (mightBeAnalysisComplete) {
-          console.log('⚠️ POTENTIAL ANALYSIS_COMPLETE MESSAGE NOT DETECTED:', {
-            rawData,
-            type: rawData?.type,
-            dataKeys: Object.keys(rawData || {}),
-            dataString,
-            isAnalysisComplete,
-            origin: event.origin
-          });
-        }
-
-        if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
+      } else if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
         console.log('⚠️ Script stopped running - checking if ANALYSIS_COMPLETE was missed...', {
           receivedType: rawData?.type,
           scriptState: rawData?.scriptRunState,
           allKeys: rawData ? Object.keys(rawData) : []
         });
-
-        // Fallback: Check if analysis results were stored in parent window's sessionStorage
-        // The AI assistant might have sent the message but it wasn't received due to timing
-        try {
-          const storedResults = sessionStorage.getItem('pending_analysis_results');
-          if (storedResults) {
-            console.log('🔍 Found stored analysis results in sessionStorage, processing...');
-            const parsedResults = JSON.parse(storedResults);
-            if (parsedResults.type === 'ANALYSIS_COMPLETE' || parsedResults.analysisType) {
-              console.log('✅ Processing stored ANALYSIS_COMPLETE results');
-              // Process the stored results
-              const syntheticEvent = {
-                data: parsedResults,
-                origin: event.origin
-              };
-              // Remove from storage and process
-              sessionStorage.removeItem('pending_analysis_results');
-              // Process analysis completion directly inline
-              const currentFirebaseUser = auth.currentUser;
-              if (!currentFirebaseUser || !currentFirebaseUser.uid) {
-                console.error('❌ No authenticated user found for stored results');
-                return;
-              }
-              const token = await currentFirebaseUser.getIdToken();
-
-              try {
-                const response = await fetch('/api/save-analysis-report', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    userId: currentFirebaseUser.uid,
-                    title: parsedResults?.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
-                    type: parsedResults?.analysisType || 'soil',
-                    summary: parsedResults?.summary || '',
-                    recommendations: parsedResults?.recommendationsCount || 0,
-                    fileUrl: parsedResults?.fileUrl || null,
-                    analysisData: parsedResults?.analysisData || null,
-                  }),
-                });
-
-                const result = await response.json();
-                console.log('📡 Stored analysis API response:', { status: response.status, ok: response.ok, result });
-
-                if (response.ok && result.success) {
-                  console.log('✅ Stored analysis report saved successfully:', result.reportId);
-
-                  toast.success(
-                    language === 'ms'
-                      ? '✅ Laporan analisis telah disimpan!'
-                      : '✅ Analysis report saved!',
-                    {
-                      duration: 4000,
-                      icon: '📊',
-                    }
-                  );
-
-                  // Refresh user data to update upload usage display
-                  console.log('🔄 Refreshing user data from Firestore after stored analysis...');
-                  if (refreshUser) {
-                    await refreshUser();
-                    console.log('✅ User data refreshed from Firestore');
-                  }
-
-                  // Dispatch custom event to notify other pages
-                  if (typeof window !== 'undefined') {
-                    window.dispatchEvent(new CustomEvent('analysisReportSaved', {
-                      detail: {
-                        userId: currentFirebaseUser.uid,
-                        reportId: result.reportId,
-                        uploadsUsed: result.uploadsUsed ?? 0,
-                        uploadsLimit: result.uploadsLimit ?? 10,
-                      }
-                    }));
-                    console.log('📢 Dispatched analysisReportSaved event for stored analysis');
-                  }
-
-                  // Send updated CONFIG with values from stored analysis save
-                  setTimeout(() => {
-                    if (iframeRef.current?.contentWindow) {
-                      const uploadLimitExceeded = (result.uploadsLimit !== -1) && (result.uploadsUsed >= result.uploadsLimit);
-                      const config = {
-                        type: 'CONFIG',
-                        language: currentLang,
-                        userId: currentFirebaseUser.uid,
-                        userEmail: currentFirebaseUser.email || '',
-                        userName: currentFirebaseUser.displayName || '',
-                        plan: user?.plan || 'none',
-                        uploadsUsed: result.uploadsUsed ?? 0,
-                        uploadsLimit: result.uploadsLimit ?? 10,
-                        uploadLimitExceeded: uploadLimitExceeded,
-                        uploadsRemaining: uploadLimitExceeded ? 0 : (result.uploadsLimit === -1 ? Infinity : Math.max(0, result.uploadsLimit - result.uploadsUsed)),
-                      };
-
-                      iframeRef.current.contentWindow.postMessage(config, '*');
-                      console.log('✅ Sent UPDATED user config to AI Assistant after stored analysis:', {
-                        userId: currentFirebaseUser.uid,
-                        uploadsUsed: result.uploadsUsed,
-                        uploadsLimit: result.uploadsLimit,
-                        uploadLimitExceeded,
-                        uploadsRemaining: config.uploadsRemaining,
-                      });
-                    }
-                  }, 1000);
-                }
-              } catch (apiError) {
-                console.error('❌ Error saving stored analysis:', apiError);
-              }
-              return;
-            }
+        
+        // Check if ANALYSIS_COMPLETE data might be nested or in a different format
+        if (rawData && typeof rawData === 'object') {
+          const allValues = JSON.stringify(rawData);
+          if (allValues.includes('ANALYSIS_COMPLETE') || allValues.includes('analysisType')) {
+            console.log('🔍 Found ANALYSIS_COMPLETE indicators in message, attempting to extract...', rawData);
           }
-        } catch (storageError) {
-          console.log('ℹ️ No stored analysis results found');
         }
         
         // FALLBACK: Request analysis results from iframe when script stops
@@ -451,10 +316,11 @@ export default function AssistantPage() {
       // Verify origin for security (allow both configured origin and current iframe src origin)
       const expectedOrigin = getIframeOrigin();
       const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-
+      
       // Accept messages from iframe origin OR if the message is coming from the iframe itself
       // (The AI assistant might send messages with target origin '*', which is fine)
       // Also accept messages from 'about:srcdoc' (Gradio iframe internal origin)
+      // BUT: Always accept ANALYSIS_COMPLETE messages regardless of origin
       const isValidOrigin = event.origin === expectedOrigin ||
                            event.origin === currentWindowOrigin ||
                            event.origin === 'about:srcdoc' ||
@@ -464,7 +330,7 @@ export default function AssistantPage() {
         // Log for debugging but don't block - the AI assistant might be using '*'
         console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
         // Still process the message if it's from a known iframe origin pattern
-        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive') && event.origin !== 'about:srcdoc') {
+        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive')) {
           console.log('❌ Blocking message from unknown origin:', event.origin);
           return;
         }
@@ -605,36 +471,11 @@ export default function AssistantPage() {
                 console.log('✅ analysisReportSaved event dispatched');
               }
               
-              // CRITICAL FIX: Send updated CONFIG immediately with the correct values from API response
-              // Don't wait for user state to update - use the API response values directly
-              console.log('📤 Sending UPDATED config to iframe with API response values...');
+              // Update iframe config with new upload counts
               setTimeout(() => {
-                if (iframeRef.current?.contentWindow) {
-                  const uploadLimitExceeded = (result.uploadsLimit !== -1) && (result.uploadsUsed >= result.uploadsLimit);
-                  const config = {
-                    type: 'CONFIG',
-                    language: currentLang,
-                    userId: currentUserId,
-                    userEmail: firebaseUser.email || '',
-                    userName: firebaseUser.displayName || '',
-                    plan: user?.plan || 'none',
-                    uploadsUsed: result.uploadsUsed ?? 0,
-                    uploadsLimit: result.uploadsLimit ?? 10,
-                    uploadLimitExceeded: uploadLimitExceeded,
-                    uploadsRemaining: uploadLimitExceeded ? 0 : (result.uploadsLimit === -1 ? Infinity : Math.max(0, result.uploadsLimit - result.uploadsUsed)),
-                  };
-
-                  // Use '*' as target origin to avoid origin mismatch errors
-                  iframeRef.current.contentWindow.postMessage(config, '*');
-                  console.log('✅ Sent UPDATED user config to AI Assistant after analysis:', {
-                    userId: currentUserId,
-                    uploadsUsed: result.uploadsUsed,
-                    uploadsLimit: result.uploadsLimit,
-                    uploadLimitExceeded,
-                    uploadsRemaining: config.uploadsRemaining,
-                  });
-                }
-              }, 500); // Shorter delay since we don't need to wait for user state update
+                console.log('📤 Sending updated config to iframe...');
+                sendConfigToIframe();
+              }, 1000); // Increased delay to ensure user data is refreshed first
               
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
@@ -828,32 +669,10 @@ export default function AssistantPage() {
                 console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
               }
               
-              // Send updated CONFIG with calculated values from direct save
+              // Update iframe config with new upload counts
               setTimeout(() => {
-                if (iframeRef.current?.contentWindow) {
-                  const uploadLimitExceeded = (finalUploadsLimit !== -1) && (finalUploadsUsed >= finalUploadsLimit);
-                  const config = {
-                    type: 'CONFIG',
-                    language: currentLang,
-                    userId: currentUserId,
-                    userEmail: firebaseUser.email || '',
-                    userName: firebaseUser.displayName || '',
-                    plan: user?.plan || 'none',
-                    uploadsUsed: finalUploadsUsed,
-                    uploadsLimit: finalUploadsLimit,
-                    uploadLimitExceeded: uploadLimitExceeded,
-                    uploadsRemaining: uploadLimitExceeded ? 0 : (finalUploadsLimit === -1 ? Infinity : Math.max(0, finalUploadsLimit - finalUploadsUsed)),
-                  };
-
-                  iframeRef.current.contentWindow.postMessage(config, '*');
-                  console.log('✅ Sent UPDATED user config to AI Assistant after direct save:', {
-                    userId: currentUserId,
-                    uploadsUsed: finalUploadsUsed,
-                    uploadsLimit: finalUploadsLimit,
-                    uploadLimitExceeded,
-                    uploadsRemaining: config.uploadsRemaining,
-                  });
-                }
+                console.log('📤 Sending updated config to iframe after direct save...');
+                sendConfigToIframe();
               }, 500);
             } catch (firestoreError: any) {
               console.error('❌ Error saving report directly to Firestore:', firestoreError);
@@ -866,6 +685,17 @@ export default function AssistantPage() {
           }
         } else {
           console.log('📨 Received message type:', data.type, 'but not ANALYSIS_COMPLETE');
+        }
+
+        // Handle config update requests from AI assistant
+        if (data.type === 'REQUEST_CONFIG_UPDATE') {
+          console.log('📤 AI assistant requested config update, sending current config...');
+          // Refresh user data first to ensure we have latest counts
+          if (refreshUser) {
+            await refreshUser();
+          }
+          // Send updated config
+          sendConfigToIframe();
         }
 
         // Handle language change request from iframe
@@ -881,28 +711,17 @@ export default function AssistantPage() {
           }
         }
 
-        // Handle config update requests from AI assistant
-        if (data.type === 'REQUEST_CONFIG_UPDATE') {
-          console.log('📤 AI assistant requested config update, sending current config...');
-          // Refresh user data first to ensure we have latest counts
-          if (refreshUser) {
-            await refreshUser();
-          }
-          // Send updated config
-          sendConfigToIframe();
-        }
-
         // Handle feature restriction notifications
         if (data.type === 'FEATURE_RESTRICTED') {
           const message = language === 'ms'
             ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
             : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`;
-
+          
           toast.error(message, {
             duration: 5000,
             icon: '🔒',
           });
-
+          
           // Show a follow-up toast with action after a short delay
           setTimeout(() => {
             toast(
@@ -964,13 +783,12 @@ export default function AssistantPage() {
       // Use '*' as target origin to avoid origin mismatch errors
       // The iframe will validate messages on its side if needed
       iframeRef.current.contentWindow.postMessage(config, '*');
-      console.log('✅ Sent user config to AI Assistant (from user state):', {
+      console.log('✅ Sent user config to AI Assistant:', {
         userId: user.uid,
-        uploadsUsed: user.uploadsUsed || 0,
-        uploadsLimit: user.uploadsLimit || 10,
+        uploadsUsed: uploadsUsed,
+        uploadsLimit: uploadsLimit,
         uploadLimitExceeded,
         uploadsRemaining,
-        source: 'user_state'
       });
     }
   };
