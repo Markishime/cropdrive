@@ -278,6 +278,11 @@ export default function AssistantPage() {
               // Refresh user data to update upload usage display
               await refreshUser?.();
               
+              // Update iframe config with new upload counts
+              setTimeout(() => {
+                sendConfigToIframe();
+              }, 500);
+              
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
                 const remaining = result.uploadsLimit === -1 ? 'unlimited' : result.uploadsLimit - result.uploadsUsed;
@@ -377,6 +382,11 @@ export default function AssistantPage() {
               
               // Refresh user data to update upload usage display
               await refreshUser?.();
+              
+              // Update iframe config with new upload counts
+              setTimeout(() => {
+                sendConfigToIframe();
+              }, 500);
             } catch (firestoreError) {
               console.error('Error saving report:', firestoreError);
               toast.error(
@@ -456,6 +466,7 @@ export default function AssistantPage() {
   // Send CONFIG message to iframe (reusable function)
   const sendConfigToIframe = () => {
     if (iframeRef.current?.contentWindow && user) {
+      const uploadLimitExceeded = isUploadLimitExceeded();
       const config = {
         type: 'CONFIG',
         language: currentLang,
@@ -465,15 +476,23 @@ export default function AssistantPage() {
         plan: user.plan || 'none',
         uploadsUsed: user.uploadsUsed || 0,
         uploadsLimit: user.uploadsLimit || 10,
+        uploadLimitExceeded: uploadLimitExceeded,
+        uploadsRemaining: uploadLimitExceeded ? 0 : (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - (user.uploadsUsed || 0))),
       };
       
       const iframeOrigin = getIframeOrigin();
       iframeRef.current.contentWindow.postMessage(config, iframeOrigin);
-      console.log('✅ Sent user config to AI Assistant');
+      console.log('✅ Sent user config to AI Assistant:', {
+        userId: user.uid,
+        uploadsUsed: user.uploadsUsed,
+        uploadsLimit: user.uploadsLimit,
+        uploadLimitExceeded,
+      });
     }
   };
 
   // Send CONFIG when user logs in (if iframe is already loaded)
+  // Also send when uploadsUsed changes to keep AI assistant updated
   useEffect(() => {
     if (mounted && user && !isLoading && iframeRef.current?.contentWindow) {
       // Small delay to ensure iframe is ready
@@ -482,7 +501,7 @@ export default function AssistantPage() {
       }, 500);
       return () => clearTimeout(timer);
     }
-  }, [user, mounted, isLoading, currentLang]);
+  }, [user, mounted, isLoading, currentLang, user?.uploadsUsed, user?.uploadsLimit]);
 
   // Update iframe language when currentLang changes (send postMessage)
   useEffect(() => {
