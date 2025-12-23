@@ -364,10 +364,32 @@ export default function AssistantPage() {
                     console.log('📢 Dispatched analysisReportSaved event for stored analysis');
                   }
 
-                  // Update iframe config with new upload counts
+                  // Send updated CONFIG with values from stored analysis save
                   setTimeout(() => {
-                    console.log('📤 Sending updated config to iframe after stored analysis...');
-                    sendConfigToIframe();
+                    if (iframeRef.current?.contentWindow) {
+                      const uploadLimitExceeded = (result.uploadsLimit !== -1) && (result.uploadsUsed >= result.uploadsLimit);
+                      const config = {
+                        type: 'CONFIG',
+                        language: currentLang,
+                        userId: currentFirebaseUser.uid,
+                        userEmail: currentFirebaseUser.email || '',
+                        userName: currentFirebaseUser.displayName || '',
+                        plan: user?.plan || 'none',
+                        uploadsUsed: result.uploadsUsed ?? 0,
+                        uploadsLimit: result.uploadsLimit ?? 10,
+                        uploadLimitExceeded: uploadLimitExceeded,
+                        uploadsRemaining: uploadLimitExceeded ? 0 : (result.uploadsLimit === -1 ? Infinity : Math.max(0, result.uploadsLimit - result.uploadsUsed)),
+                      };
+
+                      iframeRef.current.contentWindow.postMessage(config, '*');
+                      console.log('✅ Sent UPDATED user config to AI Assistant after stored analysis:', {
+                        userId: currentFirebaseUser.uid,
+                        uploadsUsed: result.uploadsUsed,
+                        uploadsLimit: result.uploadsLimit,
+                        uploadLimitExceeded,
+                        uploadsRemaining: config.uploadsRemaining,
+                      });
+                    }
                   }, 1000);
                 }
               } catch (apiError) {
@@ -546,11 +568,36 @@ export default function AssistantPage() {
                 console.log('✅ analysisReportSaved event dispatched');
               }
               
-              // Update iframe config with new upload counts
+              // CRITICAL FIX: Send updated CONFIG immediately with the correct values from API response
+              // Don't wait for user state to update - use the API response values directly
+              console.log('📤 Sending UPDATED config to iframe with API response values...');
               setTimeout(() => {
-                console.log('📤 Sending updated config to iframe...');
-                sendConfigToIframe();
-              }, 1000); // Increased delay to ensure user data is refreshed first
+                if (iframeRef.current?.contentWindow) {
+                  const uploadLimitExceeded = (result.uploadsLimit !== -1) && (result.uploadsUsed >= result.uploadsLimit);
+                  const config = {
+                    type: 'CONFIG',
+                    language: currentLang,
+                    userId: currentUserId,
+                    userEmail: firebaseUser.email || '',
+                    userName: firebaseUser.displayName || '',
+                    plan: user?.plan || 'none',
+                    uploadsUsed: result.uploadsUsed ?? 0,
+                    uploadsLimit: result.uploadsLimit ?? 10,
+                    uploadLimitExceeded: uploadLimitExceeded,
+                    uploadsRemaining: uploadLimitExceeded ? 0 : (result.uploadsLimit === -1 ? Infinity : Math.max(0, result.uploadsLimit - result.uploadsUsed)),
+                  };
+
+                  // Use '*' as target origin to avoid origin mismatch errors
+                  iframeRef.current.contentWindow.postMessage(config, '*');
+                  console.log('✅ Sent UPDATED user config to AI Assistant after analysis:', {
+                    userId: currentUserId,
+                    uploadsUsed: result.uploadsUsed,
+                    uploadsLimit: result.uploadsLimit,
+                    uploadLimitExceeded,
+                    uploadsRemaining: config.uploadsRemaining,
+                  });
+                }
+              }, 500); // Shorter delay since we don't need to wait for user state update
               
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
@@ -744,10 +791,32 @@ export default function AssistantPage() {
                 console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
               }
               
-              // Update iframe config with new upload counts
+              // Send updated CONFIG with calculated values from direct save
               setTimeout(() => {
-                console.log('📤 Sending updated config to iframe after direct save...');
-                sendConfigToIframe();
+                if (iframeRef.current?.contentWindow) {
+                  const uploadLimitExceeded = (finalUploadsLimit !== -1) && (finalUploadsUsed >= finalUploadsLimit);
+                  const config = {
+                    type: 'CONFIG',
+                    language: currentLang,
+                    userId: currentUserId,
+                    userEmail: firebaseUser.email || '',
+                    userName: firebaseUser.displayName || '',
+                    plan: user?.plan || 'none',
+                    uploadsUsed: finalUploadsUsed,
+                    uploadsLimit: finalUploadsLimit,
+                    uploadLimitExceeded: uploadLimitExceeded,
+                    uploadsRemaining: uploadLimitExceeded ? 0 : (finalUploadsLimit === -1 ? Infinity : Math.max(0, finalUploadsLimit - finalUploadsUsed)),
+                  };
+
+                  iframeRef.current.contentWindow.postMessage(config, '*');
+                  console.log('✅ Sent UPDATED user config to AI Assistant after direct save:', {
+                    userId: currentUserId,
+                    uploadsUsed: finalUploadsUsed,
+                    uploadsLimit: finalUploadsLimit,
+                    uploadLimitExceeded,
+                    uploadsRemaining: config.uploadsRemaining,
+                  });
+                }
               }, 500);
             } catch (firestoreError: any) {
               console.error('❌ Error saving report directly to Firestore:', firestoreError);
@@ -847,12 +916,13 @@ export default function AssistantPage() {
       // Use '*' as target origin to avoid origin mismatch errors
       // The iframe will validate messages on its side if needed
       iframeRef.current.contentWindow.postMessage(config, '*');
-      console.log('✅ Sent user config to AI Assistant:', {
+      console.log('✅ Sent user config to AI Assistant (from user state):', {
         userId: user.uid,
-        uploadsUsed: uploadsUsed,
-        uploadsLimit: uploadsLimit,
+        uploadsUsed: user.uploadsUsed || 0,
+        uploadsLimit: user.uploadsLimit || 10,
         uploadLimitExceeded,
         uploadsRemaining,
+        source: 'user_state'
       });
     }
   };
