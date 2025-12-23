@@ -256,6 +256,18 @@ export default function PaymentMethodPage() {
     }
   }, [user, fetchInvoices, fetchSubscription, fetchBillingSettings]);
 
+  // Auto-refresh subscription data periodically
+  useEffect(() => {
+    if (!user || !user.plan || user.plan === 'none') return;
+
+    // Refresh every 30 seconds to keep data up to date
+    const refreshInterval = setInterval(() => {
+      fetchSubscription(false); // Silent refresh
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(refreshInterval);
+  }, [user, fetchSubscription]);
+
   if (authLoading || !user || user.plan === 'none' || !user.plan) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
@@ -1058,32 +1070,16 @@ export default function PaymentMethodPage() {
                   ) : loadingSubscription ? (
                     <div className="bg-gray-50 rounded-xl p-6 text-center">
                       <Loader2 className="w-8 h-8 animate-spin text-violet-600 mx-auto mb-3" />
-                      <p className="text-gray-500 mb-3">
+                      <p className="text-gray-500">
                         {language === 'ms' ? 'Memuatkan kaedah bayaran...' : 'Loading payment method...'}
                       </p>
-                      <Button
-                        onClick={() => fetchSubscription(false)}
-                        disabled={loadingSubscription}
-                        className="bg-violet-600 hover:bg-violet-700 text-white py-2 px-4 font-bold rounded-lg text-sm"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        {language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                      </Button>
                     </div>
                   ) : (
                     <div className="bg-gray-50 rounded-xl p-6 text-center">
                       <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500 mb-3">
+                      <p className="text-gray-500">
                         {language === 'ms' ? 'Tiada kaedah bayaran' : 'No payment method on file'}
                       </p>
-                      <Button
-                        onClick={() => fetchSubscription(false)}
-                        disabled={loadingSubscription}
-                        className="bg-violet-600 hover:bg-violet-700 text-white py-2 px-4 font-bold rounded-lg text-sm"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        {language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                      </Button>
                     </div>
                   )}
                   
@@ -1100,40 +1096,11 @@ export default function PaymentMethodPage() {
                   transition={{ delay: 0.15 }}
                   className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
                 >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                      <Settings className="w-6 h-6 text-gray-700" />
-                      {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
-                    </h2>
-                    {!hasSubscription && !loadingSubscription && (
-                      <Button
-                        onClick={() => fetchSubscription(false)}
-                        disabled={loadingSubscription}
-                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 font-bold rounded-lg text-sm"
-                      >
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        {language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                      </Button>
-                    )}
-                  </div>
+                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 mb-6">
+                    <Settings className="w-6 h-6 text-gray-700" />
+                    {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
+                  </h2>
 
-                  {!hasSubscription && !loadingSubscription && (
-                    <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
-                      <div className="flex items-center gap-3">
-                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
-                        <div>
-                          <p className="text-sm font-bold text-amber-800">
-                            {language === 'ms' ? 'Data Langganan Tidak Dijumpai' : 'Subscription Data Not Found'}
-                          </p>
-                          <p className="text-sm text-amber-700">
-                            {language === 'ms'
-                              ? 'Data langganan anda tidak dapat dimuatkan. Sila cuba muat semula atau hubungi sokongan jika masalah berterusan.'
-                              : 'Your subscription data could not be loaded. Please try refreshing or contact support if the issue persists.'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
 
                   <div className="space-y-4">
                     {/* Auto Renewal Toggle */}
@@ -1147,29 +1114,21 @@ export default function PaymentMethodPage() {
                             {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {!hasSubscription
-                              ? (language === 'ms' ? 'Sila muat semula untuk mengakses tetapan pembaharuan automatik' : 'Please refresh to access auto-renewal settings')
-                              : autoRenewal
-                                ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
-                                : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh. Anda masih perlu membayar sehingga akhir tahun tetapi tidak boleh menggunakan pembantu AI.' : 'Subscription will end at period end. You will still pay until end of year but cannot use AI assistant.')
+                            {autoRenewal
+                              ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
+                              : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh. Anda masih perlu membayar sehingga akhir tahun tetapi tidak boleh menggunakan pembantu AI.' : 'Subscription will end at period end. You will still pay until end of year but cannot use AI assistant.')
                             }
                           </p>
                         </div>
                       </div>
                       <button
                         type="button"
-                        onClick={!hasSubscription ? () => fetchSubscription(false) : handleToggleAutoRenewal}
+                        onClick={handleToggleAutoRenewal}
                         disabled={updatingAutoRenewal || !subscription}
-                        aria-label={!hasSubscription
-                          ? (language === 'ms' ? 'Muat semula untuk togol pembaharuan automatik' : 'Refresh to toggle auto renewal')
-                          : (language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal')
-                        }
-                        title={!hasSubscription
-                          ? (language === 'ms' ? 'Muat semula untuk togol pembaharuan automatik' : 'Refresh to toggle auto renewal')
-                          : (language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal')
-                        }
+                        aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                        title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
-                          updatingAutoRenewal || !subscription || isMonthlySubscription 
+                          updatingAutoRenewal || !subscription
                             ? 'opacity-50 cursor-not-allowed' 
                             : ''
                         } ${autoRenewal ? 'bg-green-600' : 'bg-gray-300'}`}
@@ -1231,15 +1190,13 @@ export default function PaymentMethodPage() {
                             {language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription'}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {!hasSubscription
-                              ? (language === 'ms' ? 'Sila muat semula untuk mengakses pilihan pembatalan' : 'Please refresh to access cancellation options')
-                              : subscription?.pendingContractCancellation
-                                ? (language === 'ms'
-                                    ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar setiap bulan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
-                                    : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly until contract end but cannot use AI assistant.`)
-                                : (language === 'ms'
-                                    ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
-                                    : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.')
+                            {subscription?.pendingContractCancellation
+                              ? (language === 'ms'
+                                  ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar setiap bulan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
+                                  : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly until contract end but cannot use AI assistant.`)
+                              : (language === 'ms'
+                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
+                                  : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.')
                             }
                           </p>
                         </div>
@@ -1247,10 +1204,6 @@ export default function PaymentMethodPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (!hasSubscription) {
-                            fetchSubscription(false);
-                            return;
-                          }
                           if (!subscription) {
                             toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
                             return;
@@ -1262,8 +1215,6 @@ export default function PaymentMethodPage() {
                       >
                         {loading || loadingSubscription ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : !hasSubscription ? (
-                          language === 'ms' ? 'Muat Semula' : 'Refresh'
                         ) : subscription?.pendingContractCancellation ? (
                           language === 'ms' ? 'Dijadualkan' : 'Scheduled'
                         ) : subscription?.cancelAtPeriodEnd ? (
