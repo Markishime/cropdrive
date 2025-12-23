@@ -1002,31 +1002,6 @@ export default function AssistantPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Upload Usage Display */}
-              <div className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm text-white rounded-xl border border-white/20">
-                <BarChart3 className="w-4 h-4 text-yellow-400" />
-                <div className="text-sm">
-                  <span className="font-bold">{user.uploadsUsed}</span>
-                  <span className="text-white/60">/</span>
-                  <span className="font-bold">{user.uploadsLimit === -1 ? '∞' : user.uploadsLimit}</span>
-                  <span className="text-white/60 ml-1 hidden md:inline">
-                    {language === 'ms' ? 'analisis' : 'analyses'}
-                  </span>
-                </div>
-                {user.uploadsLimit !== -1 && (
-                  <div className="w-16 h-2 bg-white/20 rounded-full overflow-hidden">
-                    <div 
-                      className={`h-full rounded-full transition-all ${
-                        (user.uploadsUsed / user.uploadsLimit) >= 0.8 
-                          ? 'bg-gradient-to-r from-orange-400 to-red-500' 
-                          : 'bg-gradient-to-r from-green-400 to-green-500'
-                      }`}
-                      style={{ width: `${Math.min(100, (user.uploadsUsed / user.uploadsLimit) * 100)}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
