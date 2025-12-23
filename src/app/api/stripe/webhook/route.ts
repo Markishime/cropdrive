@@ -370,9 +370,79 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
                 console.log('✅ Payment method found from customer and will be stored:', paymentMethodData);
               }
             }
+            
+            // If still no payment method, try to get from all customer payment methods
+            if (!paymentMethodData) {
+              console.log('🔍 Checking all customer payment methods...');
+              const paymentMethods = await stripe.paymentMethods.list({
+                customer: customerId,
+                type: 'card',
+              });
+              
+              if (paymentMethods.data.length > 0) {
+                const pm = paymentMethods.data[0];
+                if (pm.card) {
+                  paymentMethodData = {
+                    brand: pm.card.brand,
+                    last4: pm.card.last4,
+                    expMonth: pm.card.exp_month,
+                    expYear: pm.card.exp_year,
+                  };
+                  console.log('✅ Payment method found from customer payment methods list:', paymentMethodData);
+                }
+              }
+            }
           }
         } catch (error) {
           console.error('Error fetching customer payment method:', error);
+        }
+      }
+      
+      // Last resort: try to get payment method from the latest invoice
+      if (!paymentMethodData && subscriptionId) {
+        try {
+          console.log('🔍 Checking latest invoice for payment method...');
+          const invoices = await stripe.invoices.list({
+            subscription: subscriptionId,
+            limit: 1,
+          });
+          
+          if (invoices.data.length > 0) {
+            const invoice = invoices.data[0];
+            if (invoice.payment_intent) {
+              let pi: Stripe.PaymentIntent;
+              
+              if (typeof invoice.payment_intent === 'string') {
+                pi = await stripe.paymentIntents.retrieve(invoice.payment_intent, {
+                  expand: ['payment_method'],
+                });
+              } else {
+                pi = invoice.payment_intent as Stripe.PaymentIntent;
+              }
+              
+              if (pi.payment_method) {
+                let pm: Stripe.PaymentMethod;
+                
+                if (typeof pi.payment_method === 'string') {
+                  pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+                } else {
+                  pm = pi.payment_method as Stripe.PaymentMethod;
+                }
+                
+                if (pm.card) {
+                  paymentMethodData = {
+                    brand: pm.card.brand,
+                    last4: pm.card.last4,
+                    expMonth: pm.card.exp_month,
+                    expYear: pm.card.exp_year,
+                  };
+                  console.log('✅ Payment method found from invoice payment intent:', paymentMethodData);
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching payment method from invoice:', error);
         }
       }
     } catch (error) {
