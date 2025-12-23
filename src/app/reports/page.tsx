@@ -139,10 +139,23 @@ export default function ReportsPage() {
     }
     
     // Listen for new report saved events
-    const handleReportSaved = () => {
-      console.log('📢 Received analysisReportSaved event, refreshing reports...');
-      if (user?.uid) {
+    const handleReportSaved = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const eventUserId = customEvent.detail?.userId;
+      const currentUserId = user?.uid;
+      
+      console.log('📢 Reports page: Received analysisReportSaved event', {
+        eventUserId,
+        currentUserId,
+        reportId: customEvent.detail?.reportId
+      });
+      
+      // Only refresh if the event is for the current user
+      if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
+        console.log('✅ Refreshing reports for current user:', currentUserId);
         fetchReports();
+      } else {
+        console.log('⚠️ Ignoring event - user ID mismatch or no current user');
       }
     };
     

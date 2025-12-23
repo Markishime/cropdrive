@@ -267,18 +267,24 @@ export default function AssistantPage() {
         if (data.type === 'ANALYSIS_COMPLETE') {
           console.log('📊 ANALYSIS_COMPLETE message received:', data);
           
-          if (!user?.uid) {
-            console.error('❌ No user ID available:', { user });
-            toast.error(language === 'ms' ? 'Pengguna tidak ditemui. Sila log masuk semula.' : 'User not found. Please login again.');
-            return;
-          }
-          console.log('📊 Analysis completed:', data);
-          
-          // Get Firebase auth token
+          // Always get the current authenticated user from Firebase Auth (most reliable)
           const firebaseUser = auth.currentUser;
-          if (!firebaseUser) {
+          if (!firebaseUser || !firebaseUser.uid) {
+            console.error('❌ No authenticated user found:', { firebaseUser });
             toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
             return;
+          }
+
+          // Use the authenticated user's ID (always current and reliable)
+          const currentUserId = firebaseUser.uid;
+          console.log('✅ Using authenticated user ID:', currentUserId);
+          
+          // Verify user context matches authenticated user
+          if (user?.uid && user.uid !== currentUserId) {
+            console.warn('⚠️ User context mismatch, using authenticated user ID:', {
+              contextUserId: user.uid,
+              authenticatedUserId: currentUserId
+            });
           }
 
           const token = await firebaseUser.getIdToken();
@@ -292,7 +298,7 @@ export default function AssistantPage() {
                 'Authorization': `Bearer ${token}`,
               },
               body: JSON.stringify({
-                userId: user.uid,
+                userId: currentUserId, // Always use authenticated user's ID
                 title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
                 type: data.analysisType || 'soil', // 'soil' or 'leaf'
                 summary: data.summary || '',
@@ -400,19 +406,35 @@ export default function AssistantPage() {
               const { collection, addDoc, serverTimestamp, doc, updateDoc, increment } = await import('firebase/firestore');
               const { db } = await import('@/lib/firebase');
               
+              // Fetch current user data from Firestore to check limits
+              const { doc: docFn, getDoc } = await import('firebase/firestore');
+              const { db: firestoreDb } = await import('@/lib/firebase');
+              const userDocRef = docFn(firestoreDb, 'users', currentUserId);
+              const userDocSnap = await getDoc(userDocRef);
+              
+              if (!userDocSnap.exists()) {
+                console.error('❌ User document not found in Firestore:', currentUserId);
+                toast.error(language === 'ms' ? 'Profil pengguna tidak ditemui.' : 'User profile not found.');
+                return;
+              }
+              
+              const currentUserData = userDocSnap.data();
+              const uploadsUsed = currentUserData?.uploadsUsed || 0;
+              const uploadsLimit = currentUserData?.uploadsLimit || 0;
+              
               // Check upload limit first
-              if (user.uploadsLimit !== -1 && user.uploadsUsed >= user.uploadsLimit) {
+              if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
                 toast.error(
                   language === 'ms' 
-                    ? `❌ Had muat naik tercapai (${user.uploadsUsed}/${user.uploadsLimit}). Sila naik taraf pelan anda.`
-                    : `❌ Upload limit reached (${user.uploadsUsed}/${user.uploadsLimit}). Please upgrade your plan.`,
+                    ? `❌ Had muat naik tercapai (${uploadsUsed}/${uploadsLimit}). Sila naik taraf pelan anda.`
+                    : `❌ Upload limit reached (${uploadsUsed}/${uploadsLimit}). Please upgrade your plan.`,
                   { duration: 6000 }
                 );
                 return;
               }
               
               const reportData = {
-                userId: user.uid,
+                userId: currentUserId, // Always use authenticated user's ID
                 title: data.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
                 type: data.analysisType || 'soil',
                 summary: data.summary || '',
@@ -429,13 +451,23 @@ export default function AssistantPage() {
               const docRef = await addDoc(collection(db, 'analysis_results'), reportData);
               console.log('✅ Report saved to Firestore:', docRef.id);
               
-              // Increment uploads used
-              console.log('📈 Incrementing uploadsUsed...');
-              await updateDoc(doc(db, 'users', user.uid), {
+              // Increment uploads used for the authenticated user
+              console.log('📈 Incrementing uploadsUsed for user:', currentUserId);
+              await updateDoc(docFn(db, 'users', currentUserId), {
                 uploadsUsed: increment(1),
                 updatedAt: serverTimestamp(),
               });
               console.log('✅ uploadsUsed incremented');
+              
+              // Fetch updated user data from Firestore to ensure sync
+              const updatedUserDocSnap = await getDoc(userDocRef);
+              if (updatedUserDocSnap.exists()) {
+                const updatedUserData = updatedUserDocSnap.data();
+                console.log('✅ Updated user data from Firestore:', {
+                  uploadsUsed: updatedUserData?.uploadsUsed,
+                  uploadsLimit: updatedUserData?.uploadsLimit
+                });
+              }
               
               toast.success(
                 language === 'ms' 
@@ -448,24 +480,44 @@ export default function AssistantPage() {
               );
               
               // Refresh user data to update upload usage display
-              console.log('🔄 Refreshing user data after direct save...');
+              console.log('🔄 Refreshing user data from Firestore after direct save...');
               if (refreshUser) {
                 await refreshUser();
-                console.log('✅ User data refreshed after direct save');
+                console.log('✅ User data refreshed from Firestore after direct save');
               } else {
                 console.warn('⚠️ refreshUser function not available');
+              }
+              
+              // Fetch updated user data from Firestore to get accurate counts
+              let finalUploadsUsed = uploadsUsed + 1;
+              let finalUploadsLimit = uploadsLimit;
+              try {
+                const updatedUserDocSnap = await getDoc(userDocRef);
+                if (updatedUserDocSnap.exists()) {
+                  const finalUserData = updatedUserDocSnap.data();
+                  finalUploadsUsed = finalUserData?.uploadsUsed || finalUploadsUsed;
+                  finalUploadsLimit = finalUserData?.uploadsLimit || finalUploadsLimit;
+                  console.log('✅ Final user data from Firestore:', {
+                    userId: currentUserId,
+                    uploadsUsed: finalUploadsUsed,
+                    uploadsLimit: finalUploadsLimit
+                  });
+                }
+              } catch (fetchError) {
+                console.error('❌ Error fetching final user data:', fetchError);
               }
               
               // Dispatch custom event to notify other pages (dashboard, reports, etc.)
               if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
                   detail: {
+                    userId: currentUserId, // Include userId in event
                     reportId: docRef.id,
-                    uploadsUsed: (user.uploadsUsed || 0) + 1,
-                    uploadsLimit: user.uploadsLimit || 10,
+                    uploadsUsed: finalUploadsUsed,
+                    uploadsLimit: finalUploadsLimit,
                   }
                 }));
-                console.log('📢 Dispatched analysisReportSaved event');
+                console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
               }
               
               // Update iframe config with new upload counts

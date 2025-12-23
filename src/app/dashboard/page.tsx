@@ -103,19 +103,34 @@ export default function DashboardPage() {
 
   // Listen for analysis report saved events to refresh user data
   useEffect(() => {
-    if (!mounted || !refreshUser) return;
+    if (!mounted || !refreshUser || !user?.uid) return;
     
-    const handleReportSaved = async () => {
-      console.log('📢 Dashboard: Received analysisReportSaved event, refreshing user data...');
-      await refreshUser();
-      console.log('✅ Dashboard: User data refreshed');
+    const handleReportSaved = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const eventUserId = customEvent.detail?.userId;
+      const currentUserId = user.uid;
+      
+      console.log('📢 Dashboard: Received analysisReportSaved event', {
+        eventUserId,
+        currentUserId,
+        reportId: customEvent.detail?.reportId
+      });
+      
+      // Only refresh if the event is for the current user
+      if (!eventUserId || eventUserId === currentUserId) {
+        console.log('✅ Dashboard: Refreshing user data from Firestore for user:', currentUserId);
+        await refreshUser();
+        console.log('✅ Dashboard: User data refreshed from Firestore');
+      } else {
+        console.log('⚠️ Dashboard: Ignoring event - user ID mismatch');
+      }
     };
     
     window.addEventListener('analysisReportSaved', handleReportSaved);
     return () => {
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
-  }, [mounted, refreshUser]);
+  }, [mounted, refreshUser, user?.uid]);
 
   // Handler functions - Notifications moved to AuthenticatedNavbar
 

@@ -275,19 +275,34 @@ export default function PaymentMethodPage() {
 
   // Listen for analysis report saved events to refresh user data
   useEffect(() => {
-    if (!mounted || !refreshUser) return;
+    if (!mounted || !refreshUser || !user?.uid) return;
     
-    const handleReportSaved = async () => {
-      console.log('📢 Payment Method: Received analysisReportSaved event, refreshing user data...');
-      await refreshUser();
-      console.log('✅ Payment Method: User data refreshed');
+    const handleReportSaved = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const eventUserId = customEvent.detail?.userId;
+      const currentUserId = user.uid;
+      
+      console.log('📢 Payment Method: Received analysisReportSaved event', {
+        eventUserId,
+        currentUserId,
+        reportId: customEvent.detail?.reportId
+      });
+      
+      // Only refresh if the event is for the current user
+      if (!eventUserId || eventUserId === currentUserId) {
+        console.log('✅ Payment Method: Refreshing user data from Firestore for user:', currentUserId);
+        await refreshUser();
+        console.log('✅ Payment Method: User data refreshed from Firestore');
+      } else {
+        console.log('⚠️ Payment Method: Ignoring event - user ID mismatch');
+      }
     };
     
     window.addEventListener('analysisReportSaved', handleReportSaved);
     return () => {
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
-  }, [mounted, refreshUser]);
+  }, [mounted, refreshUser, user?.uid]);
 
   // Auto-refresh subscription data periodically
   useEffect(() => {
