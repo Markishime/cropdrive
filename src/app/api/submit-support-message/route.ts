@@ -272,6 +272,8 @@ export async function POST(request: NextRequest) {
       console.error('❌ Email send error:', error);
       // Don't fail the request if email fails, but log it
       console.warn('Support message saved but email failed to send');
+    } else {
+      console.log('✅ Support email sent successfully:', data);
     }
 
     console.log('✅ Support message submitted successfully:', docRef.id);

@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
 const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
-const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive <noreply@cropdrive.ai>';
+const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive Support <support@agriglobalsolutions.com>';
 
 // Contact form submission handler (Resend)
 export async function POST(req: NextRequest) {
@@ -109,7 +109,7 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
     // Send email to team / CEO
     console.log('📧 Attempting to send contact form email to:', contactToEmail);
     console.log('📧 From email:', contactFromEmail);
-    
+
     const emailResult = await resend.emails.send({
       from: contactFromEmail,
       to: contactToEmail,
@@ -118,13 +118,24 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
       html: htmlBody,
       text: textBody,
     });
-    
-    console.log('✅ Contact form email sent result:', emailResult);
+
+    console.log('📧 Contact form email result:', emailResult);
+
+    if (emailResult.error) {
+      console.error('❌ Contact form email failed:', emailResult.error);
+      return NextResponse.json(
+        { error: 'Failed to send email. Please try again.' },
+        { status: 500 }
+      );
+    }
+
+    console.log('✅ Contact form email sent successfully');
 
     // Send confirmation email to the user
     const confirmationResult = await resend.emails.send({
       from: contactFromEmail,
       to: email,
+      replyTo: contactToEmail,
       subject: 'Thank you for contacting CropDrive',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -163,8 +174,15 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
       `,
     });
     
-    console.log('✅ Confirmation email sent result:', confirmationResult);
-    console.log('✅ Contact form emails sent via Resend');
+    if (confirmationResult.error) {
+      console.error('❌ Confirmation email failed:', confirmationResult.error);
+      // Don't fail the request if confirmation email fails, but log it
+      console.warn('Contact form processed but confirmation email failed to send');
+    } else {
+      console.log('✅ Confirmation email sent result:', confirmationResult);
+    }
+
+    console.log('✅ Contact form processed successfully');
 
     return NextResponse.json({
       success: true,
