@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
@@ -137,6 +137,19 @@ export default function ReportsPage() {
     if (user && mounted) {
       fetchReports();
     }
+    
+    // Listen for new report saved events
+    const handleReportSaved = () => {
+      console.log('📢 Received analysisReportSaved event, refreshing reports...');
+      if (user?.uid) {
+        fetchReports();
+      }
+    };
+    
+    window.addEventListener('analysisReportSaved', handleReportSaved);
+    return () => {
+      window.removeEventListener('analysisReportSaved', handleReportSaved);
+    };
   }, [user, mounted, language]);
 
   const filteredReports = reports.filter(report => {

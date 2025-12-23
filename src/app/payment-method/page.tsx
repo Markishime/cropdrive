@@ -273,6 +273,22 @@ export default function PaymentMethodPage() {
     }
   }, [user, fetchInvoices, fetchSubscription, fetchBillingSettings]);
 
+  // Listen for analysis report saved events to refresh user data
+  useEffect(() => {
+    if (!mounted || !refreshUser) return;
+    
+    const handleReportSaved = async () => {
+      console.log('📢 Payment Method: Received analysisReportSaved event, refreshing user data...');
+      await refreshUser();
+      console.log('✅ Payment Method: User data refreshed');
+    };
+    
+    window.addEventListener('analysisReportSaved', handleReportSaved);
+    return () => {
+      window.removeEventListener('analysisReportSaved', handleReportSaved);
+    };
+  }, [mounted, refreshUser]);
+
   // Auto-refresh subscription data periodically
   useEffect(() => {
     if (!user || !user.plan || user.plan === 'none') return;

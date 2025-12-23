@@ -101,6 +101,22 @@ export default function DashboardPage() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // Listen for analysis report saved events to refresh user data
+  useEffect(() => {
+    if (!mounted || !refreshUser) return;
+    
+    const handleReportSaved = async () => {
+      console.log('📢 Dashboard: Received analysisReportSaved event, refreshing user data...');
+      await refreshUser();
+      console.log('✅ Dashboard: User data refreshed');
+    };
+    
+    window.addEventListener('analysisReportSaved', handleReportSaved);
+    return () => {
+      window.removeEventListener('analysisReportSaved', handleReportSaved);
+    };
+  }, [mounted, refreshUser]);
+
   // Handler functions - Notifications moved to AuthenticatedNavbar
 
   if (authLoading || loading || !user) {

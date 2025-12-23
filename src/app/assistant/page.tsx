@@ -236,6 +236,13 @@ export default function AssistantPage() {
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
+      // Log all messages for debugging
+      console.log('📨 Message received from iframe:', {
+        origin: event.origin,
+        type: event.data?.type,
+        data: event.data
+      });
+
       // Verify origin for security (allow both configured origin and current iframe src origin)
       const expectedOrigin = getIframeOrigin();
       const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -247,15 +254,24 @@ export default function AssistantPage() {
         console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
         // Still process the message if it's from a known iframe origin pattern
         if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive')) {
+          console.log('❌ Blocking message from unknown origin:', event.origin);
           return;
         }
+        console.log('✅ Accepting message from known iframe origin:', event.origin);
       }
 
       try {
         const data = event.data;
         
         // Handle analysis completion
-        if (data.type === 'ANALYSIS_COMPLETE' && user?.uid) {
+        if (data.type === 'ANALYSIS_COMPLETE') {
+          console.log('📊 ANALYSIS_COMPLETE message received:', data);
+          
+          if (!user?.uid) {
+            console.error('❌ No user ID available:', { user });
+            toast.error(language === 'ms' ? 'Pengguna tidak ditemui. Sila log masuk semula.' : 'User not found. Please login again.');
+            return;
+          }
           console.log('📊 Analysis completed:', data);
           
           // Get Firebase auth token
@@ -287,8 +303,10 @@ export default function AssistantPage() {
             });
 
             const result = await response.json();
+            console.log('📡 API response:', { status: response.status, ok: response.ok, result });
             
             if (response.ok) {
+              console.log('✅ Report saved successfully:', result.reportId);
               toast.success(
                 language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
@@ -298,19 +316,38 @@ export default function AssistantPage() {
                   icon: '📊',
                 }
               );
-              console.log('Report saved:', result.reportId);
               
               // Refresh user data to update upload usage display
-              await refreshUser?.();
+              console.log('🔄 Refreshing user data...');
+              if (refreshUser) {
+                await refreshUser();
+                console.log('✅ User data refreshed');
+              } else {
+                console.warn('⚠️ refreshUser function not available');
+              }
+              
+              // Dispatch custom event to notify other pages (dashboard, reports, etc.)
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('analysisReportSaved', {
+                  detail: {
+                    reportId: result.reportId,
+                    uploadsUsed: result.uploadsUsed,
+                    uploadsLimit: result.uploadsLimit,
+                  }
+                }));
+                console.log('📢 Dispatched analysisReportSaved event');
+              }
               
               // Update iframe config with new upload counts
               setTimeout(() => {
+                console.log('📤 Sending updated config to iframe...');
                 sendConfigToIframe();
               }, 500);
               
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
                 const remaining = result.uploadsLimit === -1 ? 'unlimited' : result.uploadsLimit - result.uploadsUsed;
+                console.log(`📊 Upload status: ${result.uploadsUsed}/${result.uploadsLimit}, Remaining: ${remaining}`);
                 toast(
                   language === 'ms' 
                     ? `📊 Baki analisis: ${remaining === 'unlimited' ? '∞' : remaining}`
@@ -319,6 +356,7 @@ export default function AssistantPage() {
                 );
               }
             } else if (response.status === 403 && result.error === 'Upload limit exceeded') {
+              console.log('❌ Upload limit exceeded:', result);
               // Upload limit exceeded
               toast.error(
                 language === 'ms' 
@@ -352,11 +390,12 @@ export default function AssistantPage() {
               }, 500);
               return;
             } else {
-              throw new Error('API save failed');
+              console.error('❌ API save failed:', { status: response.status, result });
+              throw new Error(result.error || result.details || 'API save failed');
             }
-          } catch (apiError) {
+          } catch (apiError: any) {
             // Fallback: Save directly to Firestore (security rules will validate)
-            console.log('API save failed, trying direct Firestore save...');
+            console.error('❌ API save failed, trying direct Firestore save...', apiError);
             try {
               const { collection, addDoc, serverTimestamp, doc, updateDoc, increment } = await import('firebase/firestore');
               const { db } = await import('@/lib/firebase');
@@ -386,13 +425,17 @@ export default function AssistantPage() {
                 updatedAt: serverTimestamp(),
               };
 
+              console.log('💾 Saving report directly to Firestore...');
               const docRef = await addDoc(collection(db, 'analysis_results'), reportData);
+              console.log('✅ Report saved to Firestore:', docRef.id);
               
               // Increment uploads used
+              console.log('📈 Incrementing uploadsUsed...');
               await updateDoc(doc(db, 'users', user.uid), {
                 uploadsUsed: increment(1),
                 updatedAt: serverTimestamp(),
               });
+              console.log('✅ uploadsUsed incremented');
               
               toast.success(
                 language === 'ms' 
@@ -403,24 +446,44 @@ export default function AssistantPage() {
                   icon: '📊',
                 }
               );
-              console.log('Report saved directly:', docRef.id);
               
               // Refresh user data to update upload usage display
-              await refreshUser?.();
+              console.log('🔄 Refreshing user data after direct save...');
+              if (refreshUser) {
+                await refreshUser();
+                console.log('✅ User data refreshed after direct save');
+              } else {
+                console.warn('⚠️ refreshUser function not available');
+              }
+              
+              // Dispatch custom event to notify other pages (dashboard, reports, etc.)
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('analysisReportSaved', {
+                  detail: {
+                    reportId: docRef.id,
+                    uploadsUsed: (user.uploadsUsed || 0) + 1,
+                    uploadsLimit: user.uploadsLimit || 10,
+                  }
+                }));
+                console.log('📢 Dispatched analysisReportSaved event');
+              }
               
               // Update iframe config with new upload counts
               setTimeout(() => {
+                console.log('📤 Sending updated config to iframe after direct save...');
                 sendConfigToIframe();
               }, 500);
-            } catch (firestoreError) {
-              console.error('Error saving report:', firestoreError);
+            } catch (firestoreError: any) {
+              console.error('❌ Error saving report directly to Firestore:', firestoreError);
               toast.error(
                 language === 'ms' 
-                  ? 'Ralat menyimpan laporan' 
-                  : 'Error saving report'
+                  ? `Ralat menyimpan laporan: ${firestoreError.message || 'Unknown error'}` 
+                  : `Error saving report: ${firestoreError.message || 'Unknown error'}`
               );
             }
           }
+        } else {
+          console.log('📨 Received message type:', data.type, 'but not ANALYSIS_COMPLETE');
         }
 
         // Handle language change request from iframe
