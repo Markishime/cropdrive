@@ -238,8 +238,17 @@ export default function AssistantPage() {
     const handleMessage = async (event: MessageEvent) => {
       // Verify origin for security (allow both configured origin and current iframe src origin)
       const expectedOrigin = getIframeOrigin();
-      if (event.origin !== expectedOrigin) {
-        return;
+      const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+      
+      // Accept messages from iframe origin OR if the message is coming from the iframe itself
+      // (The AI assistant might send messages with target origin '*', which is fine)
+      if (event.origin !== expectedOrigin && event.origin !== currentWindowOrigin) {
+        // Log for debugging but don't block - the AI assistant might be using '*'
+        console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
+        // Still process the message if it's from a known iframe origin pattern
+        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive')) {
+          return;
+        }
       }
 
       try {

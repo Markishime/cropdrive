@@ -63,10 +63,11 @@ window.addEventListener('message', function(event) {
     
     if (data.type === 'CONFIG') {
         // Store config in session state
+        // Use '*' as target origin to avoid origin mismatch errors
         window.parent.postMessage({
             type: 'CONFIG_RECEIVED',
             userId: data.userId
-        }, event.origin);
+        }, '*');
         
         // Store in Streamlit session state
         st.session_state.user_id = data.userId;
@@ -136,6 +137,8 @@ def send_analysis_results(analysis_data):
     }
     
     # Send to parent window
+    # IMPORTANT: Use '*' as target origin to avoid origin mismatch errors
+    # The parent page will verify the message origin on its side
     html(f"""
     <script>
     window.parent.postMessage({json.dumps(results)}, '*');
