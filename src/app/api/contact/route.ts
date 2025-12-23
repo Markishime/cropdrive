@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
 const resendApiKey = process.env.RESEND_API_KEY;
-const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agricultureglobalsolutions.com';
+const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
 const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive <noreply@cropdrive.ai>';
 
 // Contact form submission handler (Resend)
@@ -107,7 +107,10 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
       `;
 
     // Send email to team / CEO
-    await resend.emails.send({
+    console.log('📧 Attempting to send contact form email to:', contactToEmail);
+    console.log('📧 From email:', contactFromEmail);
+    
+    const emailResult = await resend.emails.send({
       from: contactFromEmail,
       to: contactToEmail,
       replyTo: email,
@@ -115,9 +118,11 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
       html: htmlBody,
       text: textBody,
     });
+    
+    console.log('✅ Contact form email sent result:', emailResult);
 
     // Send confirmation email to the user
-    await resend.emails.send({
+    const confirmationResult = await resend.emails.send({
       from: contactFromEmail,
       to: email,
       subject: 'Thank you for contacting CropDrive',
@@ -157,7 +162,8 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
         </div>
       `,
     });
-
+    
+    console.log('✅ Confirmation email sent result:', confirmationResult);
     console.log('✅ Contact form emails sent via Resend');
 
     return NextResponse.json({

@@ -41,21 +41,25 @@ export async function GET(req: NextRequest) {
       expand: ['data.subscription'],
     });
 
-    // Format invoices for frontend
-    const formattedInvoices = invoices.data.map((invoice) => ({
-      id: invoice.id,
-      number: invoice.number,
-      amount: invoice.amount_paid / 100,
-      currency: invoice.currency.toUpperCase(),
-      status: invoice.status,
-      date: new Date(invoice.created * 1000),
-      periodStart: invoice.period_start ? new Date(invoice.period_start * 1000) : null,
-      periodEnd: invoice.period_end ? new Date(invoice.period_end * 1000) : null,
-      pdfUrl: invoice.invoice_pdf,
-      hostedUrl: invoice.hosted_invoice_url,
-      description: invoice.lines.data[0]?.description || 'Subscription',
-      planName: invoice.lines.data[0]?.description || 'CropDrive Subscription',
-    }));
+    // Format invoices for frontend - sort by date (newest first)
+    const formattedInvoices = invoices.data
+      .map((invoice) => ({
+        id: invoice.id,
+        number: invoice.number,
+        amount: (invoice.amount_paid || invoice.amount_due || invoice.total) / 100, // Use amount_paid if available, else amount_due, else total
+        currency: invoice.currency.toUpperCase(),
+        status: invoice.status,
+        date: new Date(invoice.created * 1000).toISOString(), // Convert to ISO string for proper serialization
+        periodStart: invoice.period_start ? new Date(invoice.period_start * 1000).toISOString() : null,
+        periodEnd: invoice.period_end ? new Date(invoice.period_end * 1000).toISOString() : null,
+        pdfUrl: invoice.invoice_pdf,
+        hostedUrl: invoice.hosted_invoice_url,
+        description: invoice.lines.data[0]?.description || 'Subscription',
+        planName: invoice.lines.data[0]?.description || 'CropDrive Subscription',
+      }))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort by date, newest first
+
+    console.log(`✅ Fetched ${formattedInvoices.length} invoices for customer ${stripeCustomerId}`);
 
     return NextResponse.json({ 
       invoices: formattedInvoices,

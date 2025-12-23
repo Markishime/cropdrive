@@ -1652,18 +1652,19 @@ export default function HomePage() {
                 whileHover={{ scale: 1.05, y: -10 }}
                 className="bg-white rounded-3xl text-center shadow-xl border-2 border-green-200 hover:border-yellow-400 transition-all overflow-hidden group"
               >
-                <div className="relative h-48 overflow-hidden">
+                <div className="relative h-32 sm:h-36 md:h-40 overflow-hidden flex items-center justify-center bg-green-50/30">
                   <Image
                     src={stat.image}
                     alt={stat.label}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 20vw"
-                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                    width={120}
+                    height={120}
+                    sizes="(max-width: 768px) 100px, (max-width: 1280px) 120px, 120px"
+                    className="object-contain group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
                 <div className="p-6">
-                  <div className="text-4xl font-black text-green-700 mb-2">{stat.number}</div>
-                  <div className="text-lg font-semibold text-gray-700">{stat.label}</div>
+                  <div className="text-2xl font-bold text-green-700 mb-2">{stat.number}</div>
+                  <div className="text-base font-medium text-gray-700">{stat.label}</div>
                 </div>
               </motion.div>
             ))}

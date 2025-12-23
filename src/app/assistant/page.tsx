@@ -130,29 +130,34 @@ export default function AssistantPage() {
     };
   }, [currentLang, mounted]);
 
-  // Check if subscription has expired (cancelled and past period end)
+  // Check if subscription has expired or is cancelled (block access immediately upon cancellation)
   const isSubscriptionExpired = (): boolean => {
     if (!user) return false;
     
     // If user has no plan or plan is 'none', they need to subscribe
     if (!user.plan || user.plan === 'none') return true;
     
-    // If subscription is set to cancel at period end
-    if (user.cancelAtPeriodEnd && user.currentPeriodEnd) {
-      const periodEnd = new Date(user.currentPeriodEnd);
-      const now = new Date();
-      // If current period has ended, subscription is expired
-      if (now >= periodEnd) return true;
-    }
+    // If subscription is set to cancel at period end, block access immediately (even if still paying)
+    if (user.cancelAtPeriodEnd) return true;
+    
+    // If subscription has pending contract cancellation, block access
+    if (user.pendingContractCancellation) return true;
     
     // If subscription status is canceled
     if (user.subscriptionStatus === 'canceled') return true;
+    
+    // Check if current period has ended
+    if (user.currentPeriodEnd) {
+      const periodEnd = new Date(user.currentPeriodEnd);
+      const now = new Date();
+      if (now >= periodEnd) return true;
+    }
     
     return false;
   };
 
   const subscriptionExpired = user ? isSubscriptionExpired() : false;
-  const subscriptionCancelling = user?.cancelAtPeriodEnd && !subscriptionExpired;
+  const subscriptionCancelling = user?.cancelAtPeriodEnd || user?.pendingContractCancellation;
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -551,24 +556,46 @@ export default function AssistantPage() {
           </h1>
           
           <p className="text-gray-600 mb-6">
-            {language === 'ms' 
-              ? 'Langganan anda telah tamat. Sila langgan pelan baru untuk terus menggunakan Pembantu AI CropDrive.' 
-              : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.'}
+            {subscriptionCancelling
+              ? (language === 'ms' 
+                  ? 'Langganan anda telah dibatalkan. Anda masih perlu membayar sehingga akhir tempoh tetapi tidak boleh menggunakan Pembantu AI. Anda boleh memilih untuk membuka semula pelan yang dibatalkan.' 
+                  : 'Your subscription has been cancelled. You will still pay until end of period but cannot use AI Assistant. You can choose to re-open the cancelled plan.')
+              : (language === 'ms' 
+                  ? 'Langganan anda telah tamat. Sila langgan pelan baru untuk terus menggunakan Pembantu AI CropDrive.' 
+                  : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.')
+            }
           </p>
           
           <div className="space-y-3">
-            <Link href="/pricing" className="block">
-              <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
-                <CreditCard className="w-5 h-5 mr-2" />
-                {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
-              </Button>
-            </Link>
-            
-            <Link href="/payment-method" className="block">
-              <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
-                {language === 'ms' ? 'Urus Langganan' : 'Manage Subscription'}
-              </Button>
-            </Link>
+            {subscriptionCancelling ? (
+              <>
+                <Link href="/payment-method" className="block">
+                  <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-4 font-bold rounded-xl shadow-lg text-lg">
+                    <RefreshCw className="w-5 h-5 mr-2" />
+                    {language === 'ms' ? 'Buka Semula Langganan' : 'Re-open Subscription'}
+                  </Button>
+                </Link>
+                <Link href="/pricing" className="block">
+                  <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
+                    {language === 'ms' ? 'Lihat Pelan Lain' : 'View Other Plans'}
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/pricing" className="block">
+                  <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
+                  </Button>
+                </Link>
+                <Link href="/payment-method" className="block">
+                  <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
+                    {language === 'ms' ? 'Urus Langganan' : 'Manage Subscription'}
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
           
           <p className="text-xs text-gray-400 mt-6">
