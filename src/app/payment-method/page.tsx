@@ -187,13 +187,30 @@ export default function PaymentMethodPage() {
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Subscription fetched:', data.subscription);
+        console.log('📊 User stripeSubscriptionId:', user?.stripeSubscriptionId);
+        
+        // Set subscription even if null (to indicate we've checked)
         setSubscription(data.subscription);
+        
         if (data.subscription) {
           setAutoRenewal(!data.subscription.cancelAtPeriodEnd);
+          console.log('✅ Auto-renewal state set to:', !data.subscription.cancelAtPeriodEnd);
+        } else if (user?.stripeSubscriptionId) {
+          // User has subscription ID but API returned null - might be a timing issue
+          console.warn('⚠️ User has stripeSubscriptionId but API returned null subscription');
+          // Don't set autoRenewal state if no subscription data
         }
       } else {
         const errorData = await response.json();
         console.error('❌ Error fetching subscription:', errorData);
+        console.error('📊 Response status:', response.status);
+        
+        // If user has subscription ID but API failed, don't clear subscription state
+        // This allows buttons to remain enabled if subscription was previously loaded
+        if (!user?.stripeSubscriptionId) {
+          setSubscription(null);
+        }
+        
         if (showErrorToast) {
           toast.error(
             language === 'ms'
@@ -295,23 +312,36 @@ export default function PaymentMethodPage() {
 
 
   const handleToggleAutoRenewal = async () => {
-    
-    if (!subscription) {
-      toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
-      return;
-    }
-    
-    
     setUpdatingAutoRenewal(true);
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
         toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+        setUpdatingAutoRenewal(false);
+        return;
+      }
+      
+      // If subscription data is not loaded but user has subscription ID, fetch it first
+      let subscriptionToUse = subscription;
+      if (!subscriptionToUse && user?.stripeSubscriptionId) {
+        await fetchSubscription(false);
+        // Wait a bit for state to update
+        await new Promise(resolve => setTimeout(resolve, 500));
+        subscriptionToUse = subscription;
+      }
+      
+      // Determine the new state - if we don't have subscription data, toggle based on current autoRenewal state
+      const newCancelAtPeriodEnd = subscriptionToUse 
+        ? !subscriptionToUse.cancelAtPeriodEnd 
+        : autoRenewal; // If no subscription data, toggle current state
+      
+      if (!user?.stripeSubscriptionId && !subscriptionToUse) {
+        toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
+        setUpdatingAutoRenewal(false);
         return;
       }
       
       const token = await firebaseUser.getIdToken();
-      const newCancelAtPeriodEnd = !subscription.cancelAtPeriodEnd;
       
       console.log('Sending PATCH request to toggle auto-renewal', { newCancelAtPeriodEnd });
       
@@ -332,7 +362,7 @@ export default function PaymentMethodPage() {
       
       if (response.ok) {
         setAutoRenewal(!data.cancelAtPeriodEnd);
-        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
+        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : subscriptionToUse ? { ...subscriptionToUse, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
         
         // Refresh subscription data to get updated payment method and status
         await fetchSubscription();
@@ -523,6 +553,18 @@ export default function PaymentMethodPage() {
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) throw new Error('Not authenticated');
+      
+      // If subscription data is not loaded but user has subscription ID, fetch it first
+      if (!subscription && user?.stripeSubscriptionId) {
+        await fetchSubscription(false);
+        // Wait a bit for state to update
+        await new Promise(resolve => setTimeout(resolve, 500));
+        // If still no subscription after fetch, that's okay - we can still cancel using the subscription ID
+      }
+      
+      if (!subscription && !user?.stripeSubscriptionId) {
+        throw new Error('No active subscription found');
+      }
       
       const token = await firebaseUser.getIdToken();
       const response = await fetch('/api/stripe/subscription', {
@@ -973,7 +1015,6 @@ export default function PaymentMethodPage() {
                       {(subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation) && (
                         <Button 
                           onClick={handleReactivateSubscription}
-                          disabled={loading || !subscription}
                           className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-3 font-bold rounded-xl shadow-lg disabled:opacity-50"
                         >
                           {loading ? (
@@ -1124,12 +1165,11 @@ export default function PaymentMethodPage() {
                       <button
                         type="button"
                         onClick={handleToggleAutoRenewal}
-                        disabled={updatingAutoRenewal || !subscription}
                         aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
-                          updatingAutoRenewal || !subscription
-                            ? 'opacity-50 cursor-not-allowed' 
+                          updatingAutoRenewal
+                            ? 'opacity-70' 
                             : ''
                         } ${autoRenewal ? 'bg-green-600' : 'bg-gray-300'}`}
                       >
@@ -1204,14 +1244,13 @@ export default function PaymentMethodPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          if (!subscription) {
-                            toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
-                            return;
-                          }
                           setShowCancelModal(true);
                         }}
-                        disabled={loading || loadingSubscription || !subscription || subscription.pendingContractCancellation}
-                        className="bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+                        className={`bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md flex items-center gap-2 transition-colors ${
+                          loading || loadingSubscription || subscription?.pendingContractCancellation
+                            ? 'opacity-70'
+                            : ''
+                        }`}
                       >
                         {loading || loadingSubscription ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
