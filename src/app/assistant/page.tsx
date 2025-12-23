@@ -253,23 +253,29 @@ export default function AssistantPage() {
         fullData: event.data,
         stringified: JSON.stringify(event.data)
       });
-      
+
       // CRITICAL: Check for ANALYSIS_COMPLETE FIRST before any origin checks
       // The message might come from a different origin but we need to process it
       // Check multiple possible formats and locations
       const rawData = event.data;
-      const isAnalysisComplete = 
-        rawData?.type === 'ANALYSIS_COMPLETE' || 
+      const isAnalysisComplete =
+        rawData?.type === 'ANALYSIS_COMPLETE' ||
         rawData?.message?.type === 'ANALYSIS_COMPLETE' ||
         (typeof rawData === 'object' && rawData !== null && 'type' in rawData && rawData.type === 'ANALYSIS_COMPLETE') ||
         (rawData && typeof rawData === 'string' && rawData.includes('ANALYSIS_COMPLETE')) ||
-        (rawData?.data?.type === 'ANALYSIS_COMPLETE');
-      
+        (rawData?.data?.type === 'ANALYSIS_COMPLETE') ||
+        // Check if the data itself contains analysis fields (fallback detection)
+        (rawData && typeof rawData === 'object' && (
+          rawData.analysisType || rawData.summary || rawData.analysisData ||
+          rawData.title?.includes('Analysis') || rawData.userId
+        ));
+
       if (isAnalysisComplete) {
         console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', {
           rawData,
           type: rawData?.type,
-          origin: event.origin
+          origin: event.origin,
+          hasAnalysisFields: !!(rawData?.analysisType || rawData?.summary || rawData?.analysisData)
         });
         // Process immediately - don't let origin checks block this critical message
       } else if (rawData?.scriptRunState === 'notRunning' && rawData?.type === 'SCRIPT_RUN_STATE_CHANGED') {
@@ -279,13 +285,99 @@ export default function AssistantPage() {
           scriptState: rawData?.scriptRunState,
           allKeys: rawData ? Object.keys(rawData) : []
         });
-        
-        // Check if ANALYSIS_COMPLETE data might be nested or in a different format
-        if (rawData && typeof rawData === 'object') {
-          const allValues = JSON.stringify(rawData);
-          if (allValues.includes('ANALYSIS_COMPLETE') || allValues.includes('analysisType')) {
-            console.log('🔍 Found ANALYSIS_COMPLETE indicators in message, attempting to extract...', rawData);
+
+        // Fallback: Check if analysis results were stored in parent window's sessionStorage
+        // The AI assistant might have sent the message but it wasn't received due to timing
+        try {
+          const storedResults = sessionStorage.getItem('pending_analysis_results');
+          if (storedResults) {
+            console.log('🔍 Found stored analysis results in sessionStorage, processing...');
+            const parsedResults = JSON.parse(storedResults);
+            if (parsedResults.type === 'ANALYSIS_COMPLETE' || parsedResults.analysisType) {
+              console.log('✅ Processing stored ANALYSIS_COMPLETE results');
+              // Process the stored results
+              const syntheticEvent = {
+                data: parsedResults,
+                origin: event.origin
+              };
+              // Remove from storage and process
+              sessionStorage.removeItem('pending_analysis_results');
+              // Process analysis completion directly inline
+              const currentFirebaseUser = auth.currentUser;
+              if (!currentFirebaseUser || !currentFirebaseUser.uid) {
+                console.error('❌ No authenticated user found for stored results');
+                return;
+              }
+              const token = await currentFirebaseUser.getIdToken();
+
+              try {
+                const response = await fetch('/api/save-analysis-report', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    userId: currentFirebaseUser.uid,
+                    title: parsedResults?.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
+                    type: parsedResults?.analysisType || 'soil',
+                    summary: parsedResults?.summary || '',
+                    recommendations: parsedResults?.recommendationsCount || 0,
+                    fileUrl: parsedResults?.fileUrl || null,
+                    analysisData: parsedResults?.analysisData || null,
+                  }),
+                });
+
+                const result = await response.json();
+                console.log('📡 Stored analysis API response:', { status: response.status, ok: response.ok, result });
+
+                if (response.ok && result.success) {
+                  console.log('✅ Stored analysis report saved successfully:', result.reportId);
+
+                  toast.success(
+                    language === 'ms'
+                      ? '✅ Laporan analisis telah disimpan!'
+                      : '✅ Analysis report saved!',
+                    {
+                      duration: 4000,
+                      icon: '📊',
+                    }
+                  );
+
+                  // Refresh user data to update upload usage display
+                  console.log('🔄 Refreshing user data from Firestore after stored analysis...');
+                  if (refreshUser) {
+                    await refreshUser();
+                    console.log('✅ User data refreshed from Firestore');
+                  }
+
+                  // Dispatch custom event to notify other pages
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('analysisReportSaved', {
+                      detail: {
+                        userId: currentFirebaseUser.uid,
+                        reportId: result.reportId,
+                        uploadsUsed: result.uploadsUsed ?? 0,
+                        uploadsLimit: result.uploadsLimit ?? 10,
+                      }
+                    }));
+                    console.log('📢 Dispatched analysisReportSaved event for stored analysis');
+                  }
+
+                  // Update iframe config with new upload counts
+                  setTimeout(() => {
+                    console.log('📤 Sending updated config to iframe after stored analysis...');
+                    sendConfigToIframe();
+                  }, 1000);
+                }
+              } catch (apiError) {
+                console.error('❌ Error saving stored analysis:', apiError);
+              }
+              return;
+            }
           }
+        } catch (storageError) {
+          console.log('ℹ️ No stored analysis results found');
         }
         
         // FALLBACK: Request analysis results from iframe when script stops
