@@ -256,6 +256,13 @@ export default function AssistantPage() {
       } else if (event.data?.scriptRunState === 'notRunning' && event.data?.type === 'SCRIPT_RUN_STATE_CHANGED') {
         // Log when script stops running - this might indicate analysis completion
         console.log('⚠️ Script stopped running - but no ANALYSIS_COMPLETE message received. AI assistant may need to send ANALYSIS_COMPLETE message.');
+        console.log('💡 Tip: The AI assistant should send ANALYSIS_COMPLETE message immediately after analysis completes.');
+        console.log('💡 Check AI_ASSISTANT_ANALYSIS_COMPLETE_FIX.md for implementation details.');
+      }
+      
+      // Check for any error messages from AI assistant
+      if (event.data?.error || event.data?.message?.includes('error') || event.data?.message?.includes('Error')) {
+        console.error('❌ Error message from AI assistant:', event.data);
       }
 
       // Verify origin for security (allow both configured origin and current iframe src origin)
