@@ -33,8 +33,8 @@ export default function FeaturesPage() {
       icon: '📄',
       title: language === 'ms' ? 'Pembacaan Dokumen Pintar (OCR & AI)' : 'Smart Document Reading (OCR & AI)',
       description: language === 'ms'
-        ? 'Membaca laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~10-15 minit.'
-        : 'Automatically reads lab reports (Image/PDF/Excel - SPLAB, farm_test_data), extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~10-15 minutes.',
+        ? 'Membaca laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~5-8 minit.'
+        : 'Automatically reads lab reports (Image/PDF/Excel - SPLAB, farm_test_data), extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~5-8 minutes.',
       benefits: [
         language === 'ms' ? 'Jimat berjam-jam kemasukan data manual' : 'Saves hours of manual data entry',
         language === 'ms' ? 'Hapuskan kesilapan taipan' : 'Eliminates typing errors',

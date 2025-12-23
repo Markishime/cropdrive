@@ -80,8 +80,8 @@ export default function FAQ({ language }: FAQProps) {
     {
       q: language === 'ms' ? 'Berapa cepat saya akan mendapat laporan saya?' : 'How fast will I get my report?',
       a: language === 'ms'
-        ? 'Pelan pembajaan dan kesihatan tanah dijana dalam masa lima belas hingga dua puluh minit selepas anda memuat naik keputusan ujian anda, jadi anda boleh bertindak dengan cepat untuk meningkatkan hasil dan pendapatan.'
-        : 'Fertilization and soil-health plans are generated within fifteen to twenty minutes after you upload your test results, so you can act quickly to improve yields and income.'
+        ? 'Pelan pembajaan dan kesihatan tanah dijana dalam masa 5-8 minit selepas anda memuat naik keputusan ujian anda, jadi anda boleh bertindak dengan cepat untuk meningkatkan hasil dan pendapatan.'
+        : 'Fertilization and soil-health plans are generated within 5-8 minutes after you upload your test results, so you can act quickly to improve yields and income.'
     },
     {
       q: language === 'ms' ? 'Bagaimana saya mula menggunakan CropDrive™?' : 'How do I start using CropDrive™?',

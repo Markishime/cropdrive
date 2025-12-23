@@ -69,8 +69,8 @@ export default function TutorialsPage() {
       step: 4,
       title: language === 'ms' ? 'Dapatkan Analisis AI' : 'Get AI Analysis',
       description: language === 'ms'
-        ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 10-15 minit'
-        : 'Our AI will analyze your report and provide recommendations within 10-15 minutes',
+        ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 5-8 minit'
+        : 'Our AI will analyze your report and provide recommendations within 5-8 minutes',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
       icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
     }
@@ -86,8 +86,8 @@ export default function TutorialsPage() {
     {
       question: language === 'ms' ? 'Berapa lama masa pemprosesan AI?' : 'How long does AI processing take?',
       answer: language === 'ms'
-        ? 'Kebanyakan analisis selesai dalam 10-15 minit. Untuk fail yang lebih kompleks atau besar, ia mungkin mengambil masa lebih lama.'
-        : 'Most analyses complete in 10-15 minutes. For more complex or larger files, it may take longer.'
+        ? 'Kebanyakan analisis selesai dalam 5-8 minit. Untuk fail yang lebih kompleks atau besar, ia mungkin mengambil masa lebih lama.'
+        : 'Most analyses complete in 5-8 minutes. For more complex or larger files, it may take longer.'
     },
     {
       question: language === 'ms' ? 'Adakah data saya selamat dan sulit?' : 'Is my data secure and confidential?',
@@ -191,7 +191,7 @@ export default function TutorialsPage() {
                         <div className="flex items-center space-x-2 text-green-700">
                           <CheckCircle2 className="w-5 h-5" />
                           <span className="font-semibold">
-                            {language === 'ms' ? 'Analisis 10-15 minit' : '10-15 min analysis'}
+                            {language === 'ms' ? 'Analisis 5-8 minit' : '5-8 min analysis'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-green-700">

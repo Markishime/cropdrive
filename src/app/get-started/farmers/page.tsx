@@ -190,8 +190,8 @@ export default function GetStartedFarmersPage() {
       number: '5',
       title: language === 'ms' ? 'Dapatkan Laporan Anda' : 'Get your report',
       desc: language === 'ms'
-        ? 'Klik Analisis untuk memulakan pemprosesan. Sistem akan menghasilkan laporan anda dalam kira-kira 10–15 minit. Anda boleh membacanya dalam talian atau memuat turun versi PDF untuk rekod anda.'
-        : 'Click Analyze to start processing. The system will generate your report in about 10–15 minutes. You can read it online or download the PDF version for your records.'
+        ? 'Klik Analisis untuk memulakan pemprosesan. Sistem akan menghasilkan laporan anda dalam kira-kira 5-8 minit. Anda boleh membacanya dalam talian atau memuat turun versi PDF untuk rekod anda.'
+        : 'Click Analyze to start processing. The system will generate your report in about 5-8 minutes. You can read it online or download the PDF version for your records.'
     },
     {
       number: '6',

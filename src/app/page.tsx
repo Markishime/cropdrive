@@ -126,9 +126,9 @@ export default function HomePage() {
                   800,
                   'AI Analysis in',
                   600,
-                  'AI Analysis in 10-15',
+                  'AI Analysis in 5-8',
                   500,
-                  'AI Analysis in 10-15 Minutes',
+                  'AI Analysis in 5-8 Minutes',
                   3000,
                   'Maximize Yield',
                   800,
@@ -165,7 +165,7 @@ export default function HomePage() {
                   800,
                   'Analisis AI dalam',
                   600,
-                  'Analisis AI dalam 10-15 Minit',
+                  'Analisis AI dalam 5-8 Minit',
                   3000,
                   'Maksimum Hasil',
                   800,
@@ -205,8 +205,8 @@ export default function HomePage() {
               style={{ textShadow: '0 4px 16px rgba(0,0,0,0.5)' }}
             >
               {language === 'ms' 
-                ? 'Agronomi AI untuk kelapa sawit, memberikan keputusan hasil dan keuntungan yang jelas dalam 15 minit.'
-                : 'AI agronomy for oil palm, giving clear yield and profit decisions in 15 minutes.'
+                ? 'Agronomi AI untuk kelapa sawit, memberikan keputusan hasil dan keuntungan yang jelas dalam 5-8 minit.'
+                : 'AI agronomy for oil palm, giving clear yield and profit decisions in 5-8 minutes.'
               }
             </motion.p>
 
@@ -422,8 +422,8 @@ export default function HomePage() {
                   </svg>
                   <p className="text-xs xs:text-sm sm:text-base text-gray-800 leading-relaxed">
                     {language === 'ms' 
-                      ? '🤖 Analisis AI dalam 10-15 minit'
-                      : '🤖 AI analysis in 10-15 minutes'
+                      ? '🤖 Analisis AI dalam 5-8 minit'
+                      : '🤖 AI analysis in 5-8 minutes'
                     }
                   </p>
                 </div>
@@ -563,7 +563,7 @@ export default function HomePage() {
             {[
               {
                 image: '/images/why-choose-cropdrive/1.  10–15 Minute Analysis.webp',
-                title: language === 'ms' ? 'Analisis 10-15 Minit' : '10–15 Minute Analysis',
+                title: language === 'ms' ? 'Analisis 5-8 Minit' : '5-8 Minute Analysis',
                 desc: language === 'ms' ? 'AI menganalisis laporan makmal anda dalam masa nyata' : 'AI analyzes your lab reports in real-time'
               },
               {
@@ -1010,7 +1010,7 @@ export default function HomePage() {
                 { 
                   img: '/images/key-benefits-and-value/optimized_1_ICON_Time_Savings_png.png', 
                   title: language === 'ms' ? 'Penjimatan Masa' : 'Time Savings',
-                  desc: language === 'ms' ? '10-15 minit analisis vs berjam-jam kerja manual' : '10-15 minutes analysis vs hours of manual work'
+                  desc: language === 'ms' ? '5-8 minit analisis vs berjam-jam kerja manual' : '5-8 minutes analysis vs hours of manual work'
                 },
                 { 
                   img: '/images/key-benefits-and-value/optimized_2_ICON__Cost_Savings_png.png', 
@@ -1180,10 +1180,10 @@ export default function HomePage() {
               {
                 step: '02',
                 title: language === 'ms' ? 'AI Menganalisis Data' : 'AI Analyzes Data',
-                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 10-15 minit, membandingkan dengan standard industri dan membuat analisis mendalam' : 'Our AI technology processes your data in 10-15 minutes, comparing with industry standards and performing deep analysis',
+                desc: language === 'ms' ? 'Teknologi AI kami memproses data anda dalam 5-8 minit, membandingkan dengan standard industri dan membuat analisis mendalam' : 'Our AI technology processes your data in 5-8 minutes, comparing with industry standards and performing deep analysis',
                 image: '/images/how-it-works/2. AI Analyzes Data (Image 02)_optimized.jpg',
                 features: [
-                  language === 'ms' ? 'Analisis 10-15 minit' : '10-15 minute analysis',
+                  language === 'ms' ? 'Analisis 5-8 minit' : '5-8 minute analysis',
                   language === 'ms' ? 'Standard industri' : 'Industry standards',
                   language === 'ms' ? 'Perbandingan mendalam' : 'Deep comparison'
                 ]
@@ -1985,8 +1985,8 @@ export default function HomePage() {
 
             <p className="text-lg text-yellow-300 mb-10 font-semibold">
               {language === 'ms'
-                ? '✓ Mula dalam 5 minit • ✓ Laporan dalam 10-15 minit • ✓ Jaminan wang dikembalikan'
-                : '✓ Start in 5 minutes • ✓ Reports in 10-15 minutes • ✓ Money-back guarantee'
+                ? '✓ Mula dalam 5 minit • ✓ Laporan dalam 5-8 minit • ✓ Jaminan wang dikembalikan'
+                : '✓ Start in 5 minutes • ✓ Reports in 5-8 minutes • ✓ Money-back guarantee'
               }
             </p>
 

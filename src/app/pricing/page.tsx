@@ -504,7 +504,7 @@ export default function PricingPage() {
                   <span className="font-semibold">{language === 'ms' ? 'Yuran perunding: tiada yuran agronomi rutin' : 'Consultant fees: no routine agronomy fees'}</span>
                 </li>
                 <li>
-                  <span>{language === 'ms' ? 'Masa analisis: 10–15 minit setiap laporan' : 'Analysis time: 10–15 minutes per report'}</span>
+                  <span>{language === 'ms' ? 'Masa analisis: 5-8 minit setiap laporan' : 'Analysis time: 5-8 minutes per report'}</span>
                 </li>
                 <li>
                   <span>{language === 'ms' ? 'Pembaziran baja: pengurangan 20%' : 'Fertilizer wastage: 20% reduction'}</span>

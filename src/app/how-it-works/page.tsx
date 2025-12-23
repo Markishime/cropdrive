@@ -106,8 +106,8 @@ export default function HowItWorksPage() {
             </h2>
             <p className="text-xl text-white/90 max-w-3xl mx-auto">
               {language === 'ms'
-                ? 'Tonton bagaimana CropDrive™ Oil Palm AI Advisor menganalisis laporan makmal anda dalam masa 10-15 minit'
-                : 'Watch how CropDrive™ Oil Palm AI Advisor analyzes your lab reports in 10-15 minutes'
+                ? 'Tonton bagaimana CropDrive™ Oil Palm AI Advisor menganalisis laporan makmal anda dalam masa 5-8 minit'
+                : 'Watch how CropDrive™ Oil Palm AI Advisor analyzes your lab reports in 5-8 minutes'
               }
             </p>
           </motion.div>
@@ -179,8 +179,8 @@ export default function HowItWorksPage() {
                 </h3>
                 <p className="text-white/80">
                   {language === 'ms'
-                    ? 'Dapatkan hasil analisis dalam masa 10-15 minit'
-                    : 'Get analysis results in 10-15 minutes'
+                    ? 'Dapatkan hasil analisis dalam masa 5-8 minit'
+                    : 'Get analysis results in 5-8 minutes'
                   }
                 </p>
               </motion.div>

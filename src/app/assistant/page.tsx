@@ -832,8 +832,8 @@ export default function AssistantPage() {
               <Info className="w-5 h-5 text-blue-200 flex-shrink-0" />
               <p className="text-sm font-semibold">
                 {language === 'ms' 
-                  ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) → Tunggu 10-15 minit → Dapatkan analisis terperinci!'
-                  : '💡 Quick Guide: Upload lab report (Image/PDF/Excel - SPLAB, farm_test_data) → Wait 10-15 minutes → Get detailed analysis!'
+                  ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) → Tunggu 5-8 minit → Dapatkan analisis terperinci!'
+                  : '💡 Quick Guide: Upload lab report (Image/PDF/Excel - SPLAB, farm_test_data) → Wait 5-8 minutes → Get detailed analysis!'
                 }
               </p>
             </div>
