@@ -306,10 +306,82 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const customerId = session.customer as string;
   const periodEnd = new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000);
 
-  // Note: Payment method should already be attached during subscription creation
-  // No need to manually attach it here as Stripe handles this automatically
+  // Fetch payment method details from Stripe and store in Firestore
+  let paymentMethodData = null;
+  const stripe = getStripe();
+  
+  if (stripe && subscriptionId) {
+    try {
+      console.log('🔍 Fetching payment method for subscription:', subscriptionId);
+      
+      // Retrieve subscription with payment method expanded
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+        expand: ['default_payment_method'],
+      });
 
-  // Create subscription record
+      // Try to get payment method from subscription
+      if (subscription.default_payment_method) {
+        let pm: Stripe.PaymentMethod;
+        
+        if (typeof subscription.default_payment_method === 'string') {
+          pm = await stripe.paymentMethods.retrieve(subscription.default_payment_method);
+        } else {
+          pm = subscription.default_payment_method as Stripe.PaymentMethod;
+        }
+        
+        if (pm.card) {
+          paymentMethodData = {
+            brand: pm.card.brand,
+            last4: pm.card.last4,
+            expMonth: pm.card.exp_month,
+            expYear: pm.card.exp_year,
+          };
+          console.log('✅ Payment method found and will be stored:', paymentMethodData);
+        }
+      }
+      
+      // If no payment method on subscription, try customer's default
+      if (!paymentMethodData && customerId) {
+        try {
+          const customer = await stripe.customers.retrieve(customerId, {
+            expand: ['invoice_settings.default_payment_method'],
+          });
+          
+          if (customer && !customer.deleted) {
+            const customerObj = customer as Stripe.Customer;
+            const defaultPm = customerObj.invoice_settings?.default_payment_method;
+            
+            if (defaultPm) {
+              let pm: Stripe.PaymentMethod;
+              
+              if (typeof defaultPm === 'string') {
+                pm = await stripe.paymentMethods.retrieve(defaultPm);
+              } else {
+                pm = defaultPm as Stripe.PaymentMethod;
+              }
+              
+              if (pm.card) {
+                paymentMethodData = {
+                  brand: pm.card.brand,
+                  last4: pm.card.last4,
+                  expMonth: pm.card.exp_month,
+                  expYear: pm.card.exp_year,
+                };
+                console.log('✅ Payment method found from customer and will be stored:', paymentMethodData);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching customer payment method:', error);
+        }
+      }
+    } catch (error) {
+      console.error('❌ Error fetching payment method from Stripe:', error);
+      // Continue without payment method - it can be fetched later
+    }
+  }
+
+  // Create subscription record with payment method
   const subscriptionData = {
     id: subscriptionId,
     userId: userId,
@@ -323,6 +395,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     createdAt: admin.firestore.Timestamp.fromDate(new Date()),
     updatedAt: admin.firestore.Timestamp.fromDate(new Date()),
     stripePriceId: session.line_items?.data?.[0]?.price?.id || '',
+    paymentMethod: paymentMethodData, // Store payment method in subscription document
   };
 
   // Save subscription to Firestore with retry
@@ -354,20 +427,28 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   console.log('Plan:', planId);
   console.log('Uploads limit:', uploadsLimit);
 
-  // Update user with retry
+  // Update user with retry (including payment method)
+  const userUpdateData: any = {
+    plan: planId,
+    billingCycle: isYearly ? 'yearly' : 'monthly',
+    uploadsLimit: uploadsLimit,
+    uploadsUsed: 0,
+    stripeCustomerId: customerId,
+    stripeSubscriptionId: subscriptionId,
+    currentPeriodEnd: admin.firestore.Timestamp.fromDate(periodEnd),
+    subscriptionStatus: 'active',
+    cancelAtPeriodEnd: false,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  // Add payment method to user document if available
+  if (paymentMethodData) {
+    userUpdateData.paymentMethod = paymentMethodData;
+    console.log('💳 Storing payment method in user document');
+  }
+
   const userUpdateResult = await firestoreWithRetry(
-    () => userRef.update({
-      plan: planId,
-      billingCycle: isYearly ? 'yearly' : 'monthly',
-      uploadsLimit: uploadsLimit,
-      uploadsUsed: 0,
-      stripeCustomerId: customerId,
-      stripeSubscriptionId: subscriptionId,
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(periodEnd),
-      subscriptionStatus: 'active',
-      cancelAtPeriodEnd: false,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }),
+    () => userRef.update(userUpdateData),
     'Update user document'
   );
 

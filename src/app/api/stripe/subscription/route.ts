@@ -39,36 +39,50 @@ export async function GET(req: NextRequest) {
       expand: ['default_payment_method', 'latest_invoice', 'items.data.price', 'customer'],
     });
 
-    // Get payment method details - check subscription first, then customer's default
+    // Get payment method details - check Firestore first, then Stripe
     let paymentMethod = null;
     
     console.log('🔍 Fetching payment method for subscription:', stripeSubscriptionId);
     
-    // Try to get payment method from subscription
-    if (subscription.default_payment_method) {
-      try {
-        let pm: Stripe.PaymentMethod;
-        
-        if (typeof subscription.default_payment_method === 'string') {
-          // If it's just the ID, fetch the payment method
-          pm = await stripe.paymentMethods.retrieve(subscription.default_payment_method);
-        } else {
-          pm = subscription.default_payment_method as Stripe.PaymentMethod;
-        }
-        
-        if (pm.card) {
-          paymentMethod = {
-            brand: pm.card.brand,
-            last4: pm.card.last4,
-            expMonth: pm.card.exp_month,
-            expYear: pm.card.exp_year,
-          };
-          console.log('✅ Found payment method from subscription:', paymentMethod);
-        }
-      } catch (error) {
-        console.error('Error fetching subscription payment method:', error);
+    // First, check if payment method is stored in Firestore subscription document
+    const subscriptionDoc = await adminDb.collection('subscriptions').doc(stripeSubscriptionId).get();
+    if (subscriptionDoc.exists) {
+      const subscriptionData = subscriptionDoc.data();
+      if (subscriptionData?.paymentMethod) {
+        paymentMethod = subscriptionData.paymentMethod;
+        console.log('✅ Found payment method in Firestore:', paymentMethod);
       }
     }
+    
+    // If not in Firestore, fetch from Stripe
+    if (!paymentMethod) {
+      console.log('🔍 Payment method not in Firestore, fetching from Stripe...');
+      
+      // Try to get payment method from subscription
+      if (subscription.default_payment_method) {
+        try {
+          let pm: Stripe.PaymentMethod;
+          
+          if (typeof subscription.default_payment_method === 'string') {
+            // If it's just the ID, fetch the payment method
+            pm = await stripe.paymentMethods.retrieve(subscription.default_payment_method);
+          } else {
+            pm = subscription.default_payment_method as Stripe.PaymentMethod;
+          }
+          
+          if (pm.card) {
+            paymentMethod = {
+              brand: pm.card.brand,
+              last4: pm.card.last4,
+              expMonth: pm.card.exp_month,
+              expYear: pm.card.exp_year,
+            };
+            console.log('✅ Found payment method from subscription:', paymentMethod);
+          }
+        } catch (error) {
+          console.error('Error fetching subscription payment method:', error);
+        }
+      }
     
     // If no payment method on subscription, try to get from customer's default payment method
     if (!paymentMethod && subscription.customer) {
@@ -181,6 +195,29 @@ export async function GET(req: NextRequest) {
         console.error('Error fetching invoice payment method:', error);
       }
     }
+    }
+    
+    // If we fetched payment method from Stripe and it's not in Firestore, save it
+    if (paymentMethod && subscriptionDoc.exists) {
+      const subscriptionData = subscriptionDoc.data();
+      if (!subscriptionData?.paymentMethod) {
+        console.log('💾 Saving payment method to Firestore for future use');
+        await adminDb.collection('subscriptions').doc(stripeSubscriptionId).update({
+          paymentMethod: paymentMethod,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        
+        // Also update user document with payment method
+        const userDoc = await adminDb.collection('users').doc(userId).get();
+        if (userDoc.exists) {
+          await adminDb.collection('users').doc(userId).update({
+            paymentMethod: paymentMethod,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+          console.log('💾 Payment method also saved to user document');
+        }
+      }
+    }
     
     if (!paymentMethod) {
       console.warn('⚠️ No payment method found for subscription:', stripeSubscriptionId);
@@ -210,8 +247,7 @@ export async function GET(req: NextRequest) {
     // Check if we're beyond the first contract year
     const isBeyondContractYear = now >= contractYearEnd;
 
-    // Check for pending contract cancellation in our database
-    const subscriptionDoc = await adminDb.collection('subscriptions').doc(stripeSubscriptionId).get();
+    // Check for pending contract cancellation in our database (reuse subscriptionDoc from earlier)
     const subscriptionData = subscriptionDoc.exists ? subscriptionDoc.data() : null;
     const pendingContractCancellation = subscriptionData?.pendingContractCancellation || false;
     const contractCancellationDate = subscriptionData?.contractCancellationDate?.toDate?.() || null;
