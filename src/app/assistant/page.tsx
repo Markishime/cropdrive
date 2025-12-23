@@ -336,12 +336,13 @@ export default function AssistantPage() {
               if (typeof window !== 'undefined') {
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
                   detail: {
+                    userId: currentUserId, // Include userId in event
                     reportId: result.reportId,
                     uploadsUsed: result.uploadsUsed,
                     uploadsLimit: result.uploadsLimit,
                   }
                 }));
-                console.log('📢 Dispatched analysisReportSaved event');
+                console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
               }
               
               // Update iframe config with new upload counts
@@ -403,12 +404,11 @@ export default function AssistantPage() {
             // Fallback: Save directly to Firestore (security rules will validate)
             console.error('❌ API save failed, trying direct Firestore save...', apiError);
             try {
-              const { collection, addDoc, serverTimestamp, doc, updateDoc, increment } = await import('firebase/firestore');
-              const { db } = await import('@/lib/firebase');
+              const { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } = await import('firebase/firestore');
+              const { db: firestoreDb } = await import('@/lib/firebase');
               
               // Fetch current user data from Firestore to check limits
-              const { doc: docFn, getDoc } = await import('firebase/firestore');
-              const { db: firestoreDb } = await import('@/lib/firebase');
+              const docFn = doc;
               const userDocRef = docFn(firestoreDb, 'users', currentUserId);
               const userDocSnap = await getDoc(userDocRef);
               
@@ -448,12 +448,12 @@ export default function AssistantPage() {
               };
 
               console.log('💾 Saving report directly to Firestore...');
-              const docRef = await addDoc(collection(db, 'analysis_results'), reportData);
+              const docRef = await addDoc(collection(firestoreDb, 'analysis_results'), reportData);
               console.log('✅ Report saved to Firestore:', docRef.id);
               
               // Increment uploads used for the authenticated user
               console.log('📈 Incrementing uploadsUsed for user:', currentUserId);
-              await updateDoc(docFn(db, 'users', currentUserId), {
+              await updateDoc(docFn(firestoreDb, 'users', currentUserId), {
                 uploadsUsed: increment(1),
                 updatedAt: serverTimestamp(),
               });
