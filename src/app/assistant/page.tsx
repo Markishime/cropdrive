@@ -454,8 +454,29 @@ export default function AssistantPage() {
               }, 500);
               return;
             } else {
-              console.error('❌ API save failed:', { status: response.status, result });
-              throw new Error(result.error || result.details || 'API save failed');
+              // API returned non-200 or success=false
+              console.error('❌ API save failed:', { 
+                status: response.status, 
+                ok: response.ok,
+                result,
+                hasSuccess: result?.success,
+                hasReportId: !!result?.reportId,
+                error: result?.error,
+                details: result?.details
+              });
+              
+              // If response is ok but success is false, or if we got an error message
+              if (response.ok && !result.success) {
+                console.error('❌ API returned ok but success=false:', result);
+                toast.error(
+                  language === 'ms' 
+                    ? `❌ Ralat menyimpan laporan: ${result.error || result.details || 'Unknown error'}`
+                    : `❌ Error saving report: ${result.error || result.details || 'Unknown error'}`,
+                  { duration: 5000 }
+                );
+              } else {
+                throw new Error(result?.error || result?.details || `API save failed (status: ${response.status})`);
+              }
             }
           } catch (apiError: any) {
             // Fallback: Save directly to Firestore (security rules will validate)
