@@ -42,47 +42,60 @@ export async function GET(req: NextRequest) {
     // Get payment method details - check subscription first, then customer's default
     let paymentMethod = null;
     
+    console.log('🔍 Fetching payment method for subscription:', stripeSubscriptionId);
+    
     // Try to get payment method from subscription
-    if (subscription.default_payment_method && typeof subscription.default_payment_method !== 'string') {
-      const pm = subscription.default_payment_method as Stripe.PaymentMethod;
-      if (pm.card) {
-        paymentMethod = {
-          brand: pm.card.brand,
-          last4: pm.card.last4,
-          expMonth: pm.card.exp_month,
-          expYear: pm.card.exp_year,
-        };
+    if (subscription.default_payment_method) {
+      try {
+        let pm: Stripe.PaymentMethod;
+        
+        if (typeof subscription.default_payment_method === 'string') {
+          // If it's just the ID, fetch the payment method
+          pm = await stripe.paymentMethods.retrieve(subscription.default_payment_method);
+        } else {
+          pm = subscription.default_payment_method as Stripe.PaymentMethod;
+        }
+        
+        if (pm.card) {
+          paymentMethod = {
+            brand: pm.card.brand,
+            last4: pm.card.last4,
+            expMonth: pm.card.exp_month,
+            expYear: pm.card.exp_year,
+          };
+          console.log('✅ Found payment method from subscription:', paymentMethod);
+        }
+      } catch (error) {
+        console.error('Error fetching subscription payment method:', error);
       }
     }
     
     // If no payment method on subscription, try to get from customer's default payment method
     if (!paymentMethod && subscription.customer) {
       try {
-        const customerId = typeof subscription.customer === 'string' 
-          ? subscription.customer 
+        const customerId = typeof subscription.customer === 'string'
+          ? subscription.customer
           : subscription.customer.id;
-        
+
+        console.log('🔍 Checking customer default payment method:', customerId);
+
         const customer = await stripe.customers.retrieve(customerId, {
           expand: ['invoice_settings.default_payment_method'],
         });
-        
+
         if (customer && !customer.deleted) {
           const customerObj = customer as Stripe.Customer;
           const defaultPm = customerObj.invoice_settings?.default_payment_method;
-          
-          if (defaultPm && typeof defaultPm !== 'string') {
-            const pm = defaultPm as Stripe.PaymentMethod;
-            if (pm.card) {
-              paymentMethod = {
-                brand: pm.card.brand,
-                last4: pm.card.last4,
-                expMonth: pm.card.exp_month,
-                expYear: pm.card.exp_year,
-              };
+
+          if (defaultPm) {
+            let pm: Stripe.PaymentMethod;
+
+            if (typeof defaultPm === 'string') {
+              pm = await stripe.paymentMethods.retrieve(defaultPm);
+            } else {
+              pm = defaultPm as Stripe.PaymentMethod;
             }
-          } else if (typeof defaultPm === 'string') {
-            // If it's just the ID, fetch the payment method
-            const pm = await stripe.paymentMethods.retrieve(defaultPm);
+
             if (pm.card) {
               paymentMethod = {
                 brand: pm.card.brand,
@@ -90,6 +103,28 @@ export async function GET(req: NextRequest) {
                 expMonth: pm.card.exp_month,
                 expYear: pm.card.exp_year,
               };
+              console.log('✅ Found payment method from customer:', paymentMethod);
+            }
+          } else {
+            // If no default payment method set, check all customer's payment methods
+            console.log('🔍 No default payment method, checking all customer payment methods');
+            const paymentMethods = await stripe.paymentMethods.list({
+              customer: customerId,
+              type: 'card',
+            });
+
+            if (paymentMethods.data.length > 0) {
+              // Use the most recent payment method
+              const pm = paymentMethods.data[0];
+              if (pm.card) {
+                paymentMethod = {
+                  brand: pm.card.brand,
+                  last4: pm.card.last4,
+                  expMonth: pm.card.exp_month,
+                  expYear: pm.card.exp_year,
+                };
+                console.log('✅ Found payment method from customer payment methods:', paymentMethod);
+              }
             }
           }
         }
@@ -105,14 +140,32 @@ export async function GET(req: NextRequest) {
           ? subscription.latest_invoice
           : subscription.latest_invoice.id;
         
+        console.log('🔍 Checking latest invoice for payment method:', invoiceId);
+        
         const invoice = await stripe.invoices.retrieve(invoiceId, {
           expand: ['payment_intent.payment_method'],
         });
         
-        if (invoice.payment_intent && typeof invoice.payment_intent !== 'string') {
-          const pi = invoice.payment_intent as Stripe.PaymentIntent;
-          if (pi.payment_method && typeof pi.payment_method !== 'string') {
-            const pm = pi.payment_method as Stripe.PaymentMethod;
+        if (invoice.payment_intent) {
+          let pi: Stripe.PaymentIntent;
+          
+          if (typeof invoice.payment_intent === 'string') {
+            pi = await stripe.paymentIntents.retrieve(invoice.payment_intent, {
+              expand: ['payment_method'],
+            });
+          } else {
+            pi = invoice.payment_intent as Stripe.PaymentIntent;
+          }
+          
+          if (pi.payment_method) {
+            let pm: Stripe.PaymentMethod;
+            
+            if (typeof pi.payment_method === 'string') {
+              pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+            } else {
+              pm = pi.payment_method as Stripe.PaymentMethod;
+            }
+            
             if (pm.card) {
               paymentMethod = {
                 brand: pm.card.brand,
@@ -120,12 +173,17 @@ export async function GET(req: NextRequest) {
                 expMonth: pm.card.exp_month,
                 expYear: pm.card.exp_year,
               };
+              console.log('✅ Found payment method from invoice:', paymentMethod);
             }
           }
         }
       } catch (error) {
         console.error('Error fetching invoice payment method:', error);
       }
+    }
+    
+    if (!paymentMethod) {
+      console.warn('⚠️ No payment method found for subscription:', stripeSubscriptionId);
     }
 
     // Get price details for monthly plans
@@ -162,15 +220,15 @@ export async function GET(req: NextRequest) {
       subscription: {
         id: subscription.id,
         status: subscription.status,
-        currentPeriodStart: new Date(subscription.current_period_start * 1000),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
+        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000) : null,
+        cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
         billingCycle: interval,
         paymentMethod,
         // New fields for monthly contract year logic
-        subscriptionStartDate,
-        contractYearEnd,
+        subscriptionStartDate: subscriptionStartDate.toISOString(),
+        contractYearEnd: contractYearEnd.toISOString(),
         monthsUsed: Math.max(0, monthsUsed),
         remainingMonths: Math.max(0, 12 - monthsUsed),
         isBeyondContractYear,
@@ -179,7 +237,7 @@ export async function GET(req: NextRequest) {
         currency,
         // Pending cancellation info from our database
         pendingContractCancellation,
-        contractCancellationDate,
+        contractCancellationDate: contractCancellationDate ? contractCancellationDate.toISOString() : null,
       },
     });
 
@@ -225,10 +283,35 @@ export async function PATCH(req: NextRequest) {
         cancel_at_period_end: cancelAtPeriodEnd,
       });
 
-      // Update Firestore
-      await adminDb.collection('subscriptions').doc(stripeSubscriptionId).update({
+      // Update Firestore subscriptions collection
+      const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
+      const subscriptionDoc = await subscriptionRef.get();
+      
+      if (subscriptionDoc.exists) {
+        await subscriptionRef.update({
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      } else {
+        await subscriptionRef.set({
+          userId,
+          stripeSubscriptionId,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Update user document
+      await adminDb.collection('users').doc(userId).update({
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        subscriptionStatus: subscription.cancel_at_period_end ? 'canceling' : 'active',
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+
+      console.log('✅ Auto-renewal toggled:', { 
+        subscriptionId: stripeSubscriptionId, 
+        cancelAtPeriodEnd: subscription.cancel_at_period_end 
       });
 
       return NextResponse.json({
@@ -309,6 +392,8 @@ export async function DELETE(req: NextRequest) {
       subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp(),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
+    
+    console.log('✅ Subscription cancellation set for user:', userId);
 
     return NextResponse.json({
       success: true,

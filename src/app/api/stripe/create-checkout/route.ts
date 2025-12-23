@@ -180,6 +180,16 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       billing_address_collection: 'auto',
       allow_promotion_codes: true,
+      // Ensure payment method is saved for future use
+      payment_method_options: {
+        card: {
+          setup_future_usage: 'off_session'
+        }
+      },
+      customer_creation: 'always',
+      customer_update: {
+        address: 'auto'
+      },
     };
 
     // Try to use existing price IDs, fallback to creating inline prices for testing

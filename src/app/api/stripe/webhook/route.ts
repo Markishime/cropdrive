@@ -306,6 +306,19 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const customerId = session.customer as string;
   const periodEnd = new Date(Date.now() + (isYearly ? 365 : 30) * 24 * 60 * 60 * 1000);
 
+  // Ensure payment method is attached to the subscription
+  if (subscriptionId && session.payment_method) {
+    try {
+      console.log('🔗 Attaching payment method to subscription:', subscriptionId);
+      await stripe.subscriptions.update(subscriptionId, {
+        default_payment_method: session.payment_method as string,
+      });
+      console.log('✅ Payment method attached to subscription');
+    } catch (error) {
+      console.error('❌ Failed to attach payment method to subscription:', error);
+    }
+  }
+
   // Create subscription record
   const subscriptionData = {
     id: subscriptionId,
