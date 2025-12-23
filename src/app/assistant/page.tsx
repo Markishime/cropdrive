@@ -245,7 +245,10 @@ export default function AssistantPage() {
       
       // Special logging for ANALYSIS_COMPLETE to help debug
       if (event.data?.type === 'ANALYSIS_COMPLETE') {
-        console.log('🎯 ANALYSIS_COMPLETE DETECTED! Processing...', event.data);
+        console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing...', event.data);
+      } else if (event.data?.scriptRunState === 'notRunning' && event.data?.type === 'SCRIPT_RUN_STATE_CHANGED') {
+        // Log when script stops running - this might indicate analysis completion
+        console.log('⚠️ Script stopped running - but no ANALYSIS_COMPLETE message received. AI assistant may need to send ANALYSIS_COMPLETE message.');
       }
 
       // Verify origin for security (allow both configured origin and current iframe src origin)
