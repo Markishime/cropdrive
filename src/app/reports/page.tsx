@@ -270,8 +270,13 @@ export default function ReportsPage() {
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1 relative">
+              <label htmlFor="reports-search" className="sr-only">
+                {language === 'ms' ? 'Cari laporan' : 'Search reports'}
+              </label>
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
+                id="reports-search"
+                name="reports-search"
                 type="text"
                 placeholder={language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
                 value={searchQuery}
