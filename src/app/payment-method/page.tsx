@@ -321,29 +321,36 @@ export default function PaymentMethodPage() {
         return;
       }
       
-      // If subscription data is not loaded but user has subscription ID, fetch it first
-      let subscriptionToUse = subscription;
-      if (!subscriptionToUse && user?.stripeSubscriptionId) {
-        await fetchSubscription(false);
-        // Wait a bit for state to update
-        await new Promise(resolve => setTimeout(resolve, 500));
-        subscriptionToUse = subscription;
-      }
-      
-      // Determine the new state - if we don't have subscription data, toggle based on current autoRenewal state
-      const newCancelAtPeriodEnd = subscriptionToUse 
-        ? !subscriptionToUse.cancelAtPeriodEnd 
-        : autoRenewal; // If no subscription data, toggle current state
-      
-      if (!user?.stripeSubscriptionId && !subscriptionToUse) {
-        toast.error(language === 'ms' ? 'Tiada langganan aktif' : 'No active subscription');
-        setUpdatingAutoRenewal(false);
-        return;
-      }
-      
       const token = await firebaseUser.getIdToken();
       
-      console.log('Sending PATCH request to toggle auto-renewal', { newCancelAtPeriodEnd });
+      // First, try to get current subscription state from API
+      let currentCancelAtPeriodEnd = false;
+      try {
+        const subscriptionResponse = await fetch('/api/stripe/subscription', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (subscriptionResponse.ok) {
+          const subscriptionData = await subscriptionResponse.json();
+          if (subscriptionData.subscription) {
+            currentCancelAtPeriodEnd = subscriptionData.subscription.cancelAtPeriodEnd || false;
+            // Update local state
+            setSubscription(subscriptionData.subscription);
+            setAutoRenewal(!currentCancelAtPeriodEnd);
+          }
+        }
+      } catch (error) {
+        console.warn('Could not fetch current subscription state, using local state:', error);
+        // Use local subscription state if available, otherwise use autoRenewal state
+        currentCancelAtPeriodEnd = subscription?.cancelAtPeriodEnd ?? !autoRenewal;
+      }
+      
+      // Toggle the state
+      const newCancelAtPeriodEnd = !currentCancelAtPeriodEnd;
+      
+      console.log('Sending PATCH request to toggle auto-renewal', { 
+        newCancelAtPeriodEnd,
+        currentState: currentCancelAtPeriodEnd
+      });
       
       const response = await fetch('/api/stripe/subscription', {
         method: 'PATCH',
@@ -362,7 +369,7 @@ export default function PaymentMethodPage() {
       
       if (response.ok) {
         setAutoRenewal(!data.cancelAtPeriodEnd);
-        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : subscriptionToUse ? { ...subscriptionToUse, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
+        setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : subscription ? { ...subscription, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
         
         // Refresh subscription data to get updated payment method and status
         await fetchSubscription();
@@ -554,19 +561,10 @@ export default function PaymentMethodPage() {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) throw new Error('Not authenticated');
       
-      // If subscription data is not loaded but user has subscription ID, fetch it first
-      if (!subscription && user?.stripeSubscriptionId) {
-        await fetchSubscription(false);
-        // Wait a bit for state to update
-        await new Promise(resolve => setTimeout(resolve, 500));
-        // If still no subscription after fetch, that's okay - we can still cancel using the subscription ID
-      }
-      
-      if (!subscription && !user?.stripeSubscriptionId) {
-        throw new Error('No active subscription found');
-      }
-      
       const token = await firebaseUser.getIdToken();
+      
+      // The API will check for subscription ID from Firestore, so we don't need to check user state here
+      // Just proceed with the cancellation request
       const response = await fetch('/api/stripe/subscription', {
         method: 'DELETE',
         headers: {
