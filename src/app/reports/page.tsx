@@ -57,6 +57,8 @@ export default function ReportsPage() {
       setLoadingReports(true);
       try {
         const reportsRef = collection(db, 'analysis_results');
+
+        console.log('🔍 Starting to fetch reports for user:', user.uid);
         
         // Fetch all reports and filter by user_id/userId (since we need to support both formats)
         // This approach works even if indexes don't exist for both field names
@@ -70,39 +72,43 @@ export default function ReportsPage() {
             orderBy('createdAt', 'desc')
           );
           querySnapshot = await getDocs(q);
-          console.log(`✅ Found ${querySnapshot.size} completed reports with userId field`);
+          console.log(`✅ Found ${querySnapshot.size} completed reports with userId field and orderBy`);
         } catch (orderByError: any) {
-          if (orderByError.code === 'failed-precondition') {
-            // Index missing, try without orderBy
-            console.log('Index missing, fetching without orderBy...');
+          console.error('❌ OrderBy query failed:', orderByError.code, orderByError.message);
+          console.log('🔄 Trying without orderBy...');
+
+          try {
+            const q = query(
+              reportsRef,
+              where('userId', '==', user.uid),
+              where('status', '==', 'completed')
+            );
+            querySnapshot = await getDocs(q);
+            console.log(`✅ Found ${querySnapshot.size} completed reports with userId field (no orderBy)`);
+          } catch (userIdError: any) {
+            console.error('❌ userId query also failed:', userIdError.code, userIdError.message);
+            // If 'userId' query fails, fetch all and filter client-side
+            console.log('🔄 Fetching all reports and filtering client-side...');
             try {
-              const q = query(
-                reportsRef,
-                where('userId', '==', user.uid),
-                where('status', '==', 'completed')
-              );
-              querySnapshot = await getDocs(q);
-              console.log(`✅ Found ${querySnapshot.size} completed reports with userId field (no orderBy)`);
-            } catch (userIdError: any) {
-              // If 'userId' query fails, fetch all and filter client-side
-              console.log('Fetching all reports and filtering by user_id and status...');
               querySnapshot = await getDocs(reportsRef);
+              console.log(`✅ Fetched all ${querySnapshot.size} documents from analysis_results`);
+            } catch (allDocsError: any) {
+              console.error('❌ Even fetching all documents failed:', allDocsError);
+              querySnapshot = { forEach: () => {}, size: 0, empty: true } as any;
             }
-          } else {
-            // Other error, try fetching all
-            console.log('Error with userId query, fetching all reports...');
-            querySnapshot = await getDocs(reportsRef);
           }
         }
         
         const fetchedReports: Report[] = [];
         
-        querySnapshot.forEach((doc) => {
+        querySnapshot.forEach((doc: any) => {
           const data = doc.data();
-          
+          console.log('🔍 Processing document:', doc.id, 'data keys:', Object.keys(data));
+
           // Support both field name formats: 'userId' (website) or 'user_id' (AI assistant)
           const userId = data.userId || data.user_id;
           const reportStatus = data.status || 'completed';
+          console.log('📋 Document userId:', userId, 'status:', reportStatus, 'current user:', user.uid);
           
           // Only include completed reports for current user
           if (!userId || userId !== user.uid || reportStatus !== 'completed') {
@@ -176,8 +182,42 @@ export default function ReportsPage() {
           });
         }
         
+        // If no reports found in analysis_results, try the old 'reports' collection
+        if (fetchedReports.length === 0) {
+          console.log('No reports found in analysis_results, trying old reports collection...');
+          try {
+            const oldReportsRef = collection(db, 'reports');
+            const oldQuerySnapshot = await getDocs(oldReportsRef);
+
+            oldQuerySnapshot.forEach((doc) => {
+              const data = doc.data();
+              const userId = data.userId || data.user_id;
+
+              if (!userId || userId !== user.uid || data.status !== 'completed') {
+                return;
+              }
+
+              console.log('✅ Found report in old collection:', doc.id);
+              fetchedReports.push({
+                id: doc.id,
+                title: data.title || `Report ${doc.id.slice(0, 8)}`,
+                type: (data.type as 'soil' | 'leaf') || 'soil',
+                date: data.date || new Date().toISOString().split('T')[0],
+                status: 'completed',
+                recommendations: data.recommendations || 0,
+                summary: data.summary || '',
+                userId: userId,
+                createdAt: data.createdAt || null,
+                fileUrl: data.fileUrl || data.file_url
+              });
+            });
+          } catch (oldCollectionError) {
+            console.log('Error checking old reports collection:', oldCollectionError);
+          }
+        }
+
         setReports(fetchedReports);
-        
+
         // If no reports found, just set empty array (no error)
         if (fetchedReports.length === 0) {
           console.log('No reports found for user:', user.uid);
@@ -211,7 +251,7 @@ export default function ReportsPage() {
       const eventUserId = customEvent.detail?.userId;
       const currentUserId = user?.uid;
       const reportId = customEvent.detail?.reportId;
-      
+
       console.log('📢 Reports page: Received analysisReportSaved event', {
         eventUserId,
         currentUserId,
@@ -219,14 +259,15 @@ export default function ReportsPage() {
         uploadsUsed: customEvent.detail?.uploadsUsed,
         uploadsLimit: customEvent.detail?.uploadsLimit
       });
-      
+
       // Only refresh if the event is for the current user
       if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
         console.log('✅ Refreshing reports for current user:', currentUserId);
         // Add a small delay to ensure Firestore has updated
         setTimeout(() => {
+          console.log('🔄 Fetching reports after event...');
           fetchReports();
-        }, 500);
+        }, 1000); // Increased delay
       } else {
         console.log('⚠️ Ignoring event - user ID mismatch or no current user');
       }

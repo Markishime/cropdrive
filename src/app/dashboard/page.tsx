@@ -109,18 +109,28 @@ export default function DashboardPage() {
       const customEvent = event as CustomEvent;
       const eventUserId = customEvent.detail?.userId;
       const currentUserId = user.uid;
-      
+
       console.log('📢 Dashboard: Received analysisReportSaved event', {
         eventUserId,
         currentUserId,
-        reportId: customEvent.detail?.reportId
+        reportId: customEvent.detail?.reportId,
+        uploadsUsed: customEvent.detail?.uploadsUsed,
+        uploadsLimit: customEvent.detail?.uploadsLimit
       });
-      
+
       // Only refresh if the event is for the current user
       if (!eventUserId || eventUserId === currentUserId) {
         console.log('✅ Dashboard: Refreshing user data from Firestore for user:', currentUserId);
+        console.log('📊 Current user data before refresh:', {
+          uploadsUsed: user.uploadsUsed,
+          uploadsLimit: user.uploadsLimit
+        });
         await refreshUser();
         console.log('✅ Dashboard: User data refreshed from Firestore');
+        console.log('📊 Updated user data:', {
+          uploadsUsed: user.uploadsUsed,
+          uploadsLimit: user.uploadsLimit
+        });
       } else {
         console.log('⚠️ Dashboard: Ignoring event - user ID mismatch');
       }
@@ -146,6 +156,17 @@ export default function DashboardPage() {
   const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
   const uploadPercentage = uploadsLimit === -1 ? 100 : uploadsLimit > 0 ? (uploadsUsed / uploadsLimit) * 100 : 0;
   const isUploadLimitExceeded = uploadsLimit !== -1 && uploadsUsed >= uploadsLimit;
+
+  // Debug logging for uploads data
+  console.log('📊 Dashboard uploads data:', {
+    uploadsUsed,
+    uploadsLimit,
+    uploadsRemaining,
+    uploadPercentage,
+    isUploadLimitExceeded,
+    userPlan: user.plan,
+    hasPurchasedPlan
+  });
   const daysActive = Math.floor((Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24));
   
   // Real-time activity based on user data
