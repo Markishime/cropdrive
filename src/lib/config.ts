@@ -37,6 +37,10 @@ export const config = {
     checkoutBaseUrl: process.env.NEXT_PUBLIC_STRIPE_CHECKOUT_BASE_URL || 'https://buy.stripe.com',
   },
 
+  resend: {
+    apiKey: process.env.RESEND_API_KEY,
+  },
+
   google: {
     documentAI: {
       projectId: process.env.GOOGLE_DOCUMENT_AI_PROJECT_ID,
@@ -114,6 +118,11 @@ export const validateConfig = (): string[] => {
   // Required Stripe config
   if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     errors.push('Missing required environment variable: NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
+  }
+
+  // Optional but recommended Resend config
+  if (!process.env.RESEND_API_KEY) {
+    errors.push('Missing Resend API key: RESEND_API_KEY (required for email functionality)');
   }
 
   return errors;
