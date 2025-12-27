@@ -4,7 +4,6 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
 });
 
 /**
@@ -95,7 +94,7 @@ export async function POST(req: NextRequest) {
         success: true,
         message: 'Subscription will be cancelled at the end of the current billing period.',
         cancellationType: 'beyond_contract_year',
-        cancelAt: new Date(updatedSubscription.current_period_end * 1000),
+        cancelAt: new Date((updatedSubscription as any).current_period_end * 1000),
       });
     }
 

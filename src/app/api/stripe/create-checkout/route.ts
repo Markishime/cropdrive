@@ -10,7 +10,6 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2023-10-16',
   });
 }
 

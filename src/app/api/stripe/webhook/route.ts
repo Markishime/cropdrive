@@ -11,7 +11,6 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2023-10-16',
     maxNetworkRetries: 2, // Retry on network failures
     timeout: 10000, // 10 second timeout for Stripe API calls
   });
@@ -409,15 +408,15 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
           
           if (invoices.data.length > 0) {
             const invoice = invoices.data[0];
-            if (invoice.payment_intent) {
+            if ((invoice as any).payment_intent) {
               let pi: Stripe.PaymentIntent;
-              
-              if (typeof invoice.payment_intent === 'string') {
-                pi = await stripe.paymentIntents.retrieve(invoice.payment_intent, {
+
+              if (typeof (invoice as any).payment_intent === 'string') {
+                pi = await stripe.paymentIntents.retrieve((invoice as any).payment_intent, {
                   expand: ['payment_method'],
                 });
               } else {
-                pi = invoice.payment_intent as Stripe.PaymentIntent;
+                pi = (invoice as any).payment_intent as Stripe.PaymentIntent;
               }
               
               if (pi.payment_method) {
@@ -569,9 +568,9 @@ async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
   await firestoreWithRetry(
     () => adminDb.collection('subscriptions').doc(subscription.id).set({
       status: subscription.status,
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_start * 1000)),
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true }),
     'Update subscription (created)'
@@ -589,9 +588,9 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   await firestoreWithRetry(
     () => subscriptionRef.set({
       status: subscription.status,
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_start * 1000)),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date(subscription.current_period_end * 1000)),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
+      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_start * 1000)),
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true }),
     'Update subscription record'
@@ -689,7 +688,7 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
     return;
   }
 
-  const subscriptionId = invoice.subscription as string;
+  const subscriptionId = (invoice as any).subscription as string;
   if (!subscriptionId) {
     console.log('ℹ️ Invoice has no subscription, skipping');
     return;
@@ -804,7 +803,7 @@ async function handleContractBuyoutPaid(invoice: Stripe.Invoice) {
 async function handlePaymentFailed(invoice: Stripe.Invoice) {
   console.log('📥 Payment failed:', invoice.id);
 
-  const subscriptionId = invoice.subscription as string;
+  const subscriptionId = (invoice as any).subscription as string;
   if (!subscriptionId) {
     console.log('ℹ️ Invoice has no subscription, skipping');
     return;

@@ -3,9 +3,7 @@ import Stripe from 'stripe';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 // GET - Fetch subscription details
 export async function GET(req: NextRequest) {
@@ -65,15 +63,15 @@ export async function GET(req: NextRequest) {
       console.log('🔍 Payment method not in Firestore, fetching from Stripe...');
       
       // Try to get payment method from subscription
-      if (subscription.default_payment_method) {
+      if ((subscription as any).default_payment_method) {
         try {
           let pm: Stripe.PaymentMethod;
           
-          if (typeof subscription.default_payment_method === 'string') {
+          if (typeof (subscription as any).default_payment_method === 'string') {
             // If it's just the ID, fetch the payment method
-            pm = await stripe.paymentMethods.retrieve(subscription.default_payment_method);
+            pm = await stripe.paymentMethods.retrieve((subscription as any).default_payment_method);
           } else {
-            pm = subscription.default_payment_method as Stripe.PaymentMethod;
+            pm = (subscription as any).default_payment_method as Stripe.PaymentMethod;
           }
           
           if (pm.card) {
@@ -166,15 +164,15 @@ export async function GET(req: NextRequest) {
           expand: ['payment_intent.payment_method'],
         });
         
-        if (invoice.payment_intent) {
+        if ((invoice as any).payment_intent) {
           let pi: Stripe.PaymentIntent;
-          
-          if (typeof invoice.payment_intent === 'string') {
-            pi = await stripe.paymentIntents.retrieve(invoice.payment_intent, {
+
+          if (typeof (invoice as any).payment_intent === 'string') {
+            pi = await stripe.paymentIntents.retrieve((invoice as any).payment_intent, {
               expand: ['payment_method'],
             });
           } else {
-            pi = invoice.payment_intent as Stripe.PaymentIntent;
+            pi = (invoice as any).payment_intent as Stripe.PaymentIntent;
           }
           
           if (pi.payment_method) {
@@ -251,7 +249,7 @@ export async function GET(req: NextRequest) {
 
     // Calculate subscription start date (first billing cycle start)
     // For new subscriptions, start_date is available. For existing, use created timestamp
-    const subscriptionStartDate = new Date(subscription.start_date * 1000);
+    const subscriptionStartDate = new Date((subscription as any).start_date * 1000);
     
     // Calculate contract year end (12 months from subscription start)
     const contractYearEnd = new Date(subscriptionStartDate);
@@ -275,10 +273,10 @@ export async function GET(req: NextRequest) {
       subscription: {
         id: subscription.id,
         status: subscription.status,
-        currentPeriodStart: new Date(subscription.current_period_start * 1000).toISOString(),
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        cancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+        currentPeriodStart: new Date((subscription as any).current_period_start * 1000).toISOString(),
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+        cancelAt: (subscription as any).cancel_at ? new Date((subscription as any).cancel_at * 1000).toISOString() : null,
         billingCycle: interval,
         paymentMethod,
         // New fields for monthly contract year logic
@@ -344,14 +342,14 @@ export async function PATCH(req: NextRequest) {
       
       if (subscriptionDoc.exists) {
         await subscriptionRef.update({
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
       } else {
         await subscriptionRef.set({
           userId,
           stripeSubscriptionId,
-          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
           createdAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         });
@@ -453,8 +451,8 @@ export async function DELETE(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Subscription will be cancelled at the end of the current billing period.',
-      cancelAt: new Date(subscription.current_period_end * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+      cancelAt: new Date((subscription as any).current_period_end * 1000),
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
     });
 
   } catch (error: any) {
@@ -503,7 +501,7 @@ export async function POST(req: NextRequest) {
 
     // Check if the current period has ended
     const now = Math.floor(Date.now() / 1000);
-    if (now >= currentSubscription.current_period_end) {
+    if (now >= (currentSubscription as any).current_period_end) {
       return NextResponse.json({ 
         error: 'Subscription period has ended. Please subscribe to a new plan.',
         expired: true
@@ -545,7 +543,7 @@ export async function POST(req: NextRequest) {
       subscription: {
         id: subscription.id,
         status: subscription.status,
-        currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
       },
     });
