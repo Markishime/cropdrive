@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!resendApiKey) {
+    if (!resendApiKey || resendApiKey.trim() === '') {
+      console.error('❌ RESEND_API_KEY is not configured in environment variables');
       console.warn('⚠️ RESEND_API_KEY not configured. Logging contact submission instead of sending email.');
       console.log('Name:', name);
       console.log('Email:', email);
@@ -37,11 +38,19 @@ export async function POST(req: NextRequest) {
       console.log('Message:', message);
 
       return NextResponse.json({
-        success: true,
-        message: 'Your message has been received. We will get back to you soon!',
-      });
+        success: false,
+        error: 'Email service not configured. Please contact support directly.',
+        message: 'Your message has been logged but could not be sent via email.',
+      }, { status: 500 });
     }
 
+    // Validate API key format (Resend API keys typically start with 're_')
+    if (!resendApiKey.startsWith('re_')) {
+      console.warn('⚠️ RESEND_API_KEY format may be incorrect (should start with "re_")');
+    }
+
+    // Initialize Resend with API key
+    console.log('📧 Initializing Resend with API key (length:', resendApiKey.length, 'chars)...');
     const resend = new Resend(resendApiKey);
 
     const htmlBody = `
@@ -123,13 +132,32 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
 
     if (emailResult.error) {
       console.error('❌ Contact form email failed:', emailResult.error);
+      console.error('❌ Error details:', JSON.stringify(emailResult.error, null, 2));
+      
+      // Provide more specific error message
+      const errorMessage = emailResult.error.message || 'Failed to send email';
       return NextResponse.json(
-        { error: 'Failed to send email. Please try again.' },
+        { 
+          success: false,
+          error: `Failed to send email: ${errorMessage}. Please try again or contact us directly.`,
+          details: emailResult.error
+        },
         { status: 500 }
       );
     }
 
-    console.log('✅ Contact form email sent successfully');
+    if (!emailResult.data || !emailResult.data.id) {
+      console.error('❌ Contact form email sent but no email ID returned:', emailResult);
+      return NextResponse.json(
+        { 
+          success: false,
+          error: 'Email may not have been sent. Please try again or contact us directly.',
+        },
+        { status: 500 }
+      );
+    }
+
+    console.log('✅ Contact form email sent successfully. Email ID:', emailResult.data.id);
 
     // Send confirmation email to the user
     const confirmationResult = await resend.emails.send({
@@ -186,13 +214,28 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
 
     return NextResponse.json({
       success: true,
+      status: 200,
       message: 'Your message has been received. We will get back to you soon!',
-    });
+      emailId: emailResult.data?.id,
+    }, { status: 200 });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Contact form error:', error);
+    console.error('❌ Error stack:', error.stack);
+    console.error('❌ Error details:', JSON.stringify(error, null, 2));
+    
+    // Provide more specific error message
+    const errorMessage = error?.message || 'An unexpected error occurred';
+    const isResendError = error?.name === 'ResendError' || error?.message?.includes('Resend');
+    
     return NextResponse.json(
-      { error: 'Failed to process your request. Please try again.' },
+      { 
+        success: false,
+        error: isResendError 
+          ? `Email service error: ${errorMessage}. Please try again or contact us directly.`
+          : `Failed to process your request: ${errorMessage}. Please try again.`,
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   }

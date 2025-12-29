@@ -71,8 +71,9 @@ export default function ContactUsPage() {
       });
 
       const data = await response.json();
+      console.log('📧 Contact form response:', { ok: response.ok, status: response.status, success: data.success, error: data.error });
 
-      if (response.ok) {
+      if (response.ok && data.success !== false) {
         toast.success(language === 'ms' 
           ? 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.' 
           : 'Your message has been sent! We\'ll get back to you soon.',
@@ -87,7 +88,9 @@ export default function ContactUsPage() {
           message: '',
         });
       } else {
-        throw new Error(data.error || 'Failed to send message');
+        const errorMessage = data.error || data.message || 'Failed to send message';
+        console.error('❌ Contact form error:', errorMessage, data);
+        throw new Error(errorMessage);
       }
     } catch (error) {
       console.error('Contact form error:', error);
