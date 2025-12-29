@@ -9,7 +9,10 @@ if (!stripeSecretKey) {
 }
 
 const stripe = stripeSecretKey
-  ? new Stripe(stripeSecretKey)
+  ? new Stripe(stripeSecretKey, {
+      maxNetworkRetries: 2,
+      timeout: 10000,
+    })
   : null;
 
 // Stripe Billing Portal configurations

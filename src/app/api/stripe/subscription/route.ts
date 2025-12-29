@@ -3,7 +3,10 @@ import Stripe from 'stripe';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  maxNetworkRetries: 2,
+  timeout: 10000,
+});
 
 // GET - Fetch subscription details
 export async function GET(req: NextRequest) {

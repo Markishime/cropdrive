@@ -10,6 +10,8 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
+    maxNetworkRetries: 2,
+    timeout: 10000,
   });
 }
 

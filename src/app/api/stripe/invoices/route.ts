@@ -3,6 +3,8 @@ import Stripe from 'stripe';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  maxNetworkRetries: 2,
+  timeout: 10000,
 });
 
 // GET - Fetch user's invoices from Stripe
