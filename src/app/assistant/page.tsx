@@ -22,8 +22,8 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
-import UploadProgressBar from '@/components/UploadProgressBar';
 import Button from '@/components/ui/Button';
+import '@/utils/test-ai-integration'; // Load test utilities in development
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);
@@ -55,6 +55,7 @@ export default function AssistantPage() {
   const uploadsUsed = user?.uploadsUsed ?? 0;
   const uploadsLimit = user?.uploadsLimit ?? 0;
   const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'unknown'>('unknown');
 
   // Get iframe origin from the iframe src if available, otherwise from env/default
   const getIframeOrigin = () => {
@@ -241,9 +242,37 @@ export default function AssistantPage() {
 
   const AGS_AI_URL = buildIframeUrl();
 
+  // Monitor connection status
+  useEffect(() => {
+    if (!mounted || !iframeRef.current) return;
+    
+    const checkConnection = () => {
+      try {
+        // Try to send a ping message
+        if (iframeRef.current?.contentWindow) {
+          iframeRef.current.contentWindow.postMessage({ type: 'PING' }, '*');
+          setConnectionStatus('connected');
+        }
+      } catch (error) {
+        setConnectionStatus('disconnected');
+      }
+    };
+
+    // Check connection periodically
+    const interval = setInterval(checkConnection, 5000);
+    checkConnection(); // Initial check
+
+    return () => clearInterval(interval);
+  }, [mounted, iframeKey]);
+
   // Listen for messages from iframe
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
+      // Update connection status when we receive any message
+      if (event.origin.includes('hf.space') || event.origin.includes('cropdrive') || event.origin === 'null') {
+        setConnectionStatus('connected');
+      }
+      
       // Log all messages for debugging - VERY DETAILED
       console.log('📨 Message received from iframe:', {
         origin: event.origin,
@@ -764,41 +793,6 @@ export default function AssistantPage() {
     };
   }, [user, language, router]);
 
-  // Listen for analysis report saved events to update progress bar
-  useEffect(() => {
-    if (!mounted || !refreshUser || !user?.uid) return;
-    
-    const handleReportSaved = async (event: Event) => {
-      const customEvent = event as CustomEvent;
-      const eventUserId = customEvent.detail?.userId;
-      const currentUserId = user.uid;
-
-      console.log('📢 Assistant: Received analysisReportSaved event', {
-        eventUserId,
-        currentUserId,
-        reportId: customEvent.detail?.reportId,
-        uploadsUsed: customEvent.detail?.uploadsUsed,
-        uploadsLimit: customEvent.detail?.uploadsLimit
-      });
-
-      // Only refresh if the event is for the current user
-      if (!eventUserId || eventUserId === currentUserId) {
-        console.log('✅ Assistant: Refreshing user data from Firestore for user:', currentUserId);
-        if (refreshUser) {
-          await refreshUser();
-          console.log('✅ Assistant: User data refreshed from Firestore');
-        }
-      } else {
-        console.log('⚠️ Assistant: Ignoring event - user ID mismatch');
-      }
-    };
-    
-    window.addEventListener('analysisReportSaved', handleReportSaved);
-    return () => {
-      window.removeEventListener('analysisReportSaved', handleReportSaved);
-    };
-  }, [mounted, refreshUser, user?.uid]);
-
   // Send initial configuration to iframe when it loads
   const handleIframeLoad = () => {
     setIsLoading(false);
@@ -1071,46 +1065,52 @@ export default function AssistantPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-              {/* Upload Progress Bar */}
-              <div className="hidden md:block w-48">
-                <UploadProgressBar
-                  uploadsUsed={uploadsUsed}
-                  uploadsLimit={uploadsLimit}
-                  language={currentLang}
-                  showLabel={false}
-                  size="sm"
-                  className="text-white"
-                />
+            <div className="flex items-center gap-3">
+              {/* Connection Status Indicator */}
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+                <div className={`w-2 h-2 rounded-full ${
+                  connectionStatus === 'connected' 
+                    ? 'bg-green-400 animate-pulse' 
+                    : connectionStatus === 'disconnected'
+                    ? 'bg-red-400'
+                    : 'bg-yellow-400'
+                }`} />
+                <span className="text-xs font-medium text-white">
+                  {connectionStatus === 'connected' 
+                    ? (language === 'ms' ? 'Disambung' : 'Connected')
+                    : connectionStatus === 'disconnected'
+                    ? (language === 'ms' ? 'Terputus' : 'Disconnected')
+                    : (language === 'ms' ? 'Menyambung...' : 'Connecting...')
+                  }
+                </span>
               </div>
 
-              <div className="flex items-center gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleRefresh}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                  title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  <span className="hidden sm:inline text-sm">
-                    {language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                  </span>
-                </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleRefresh}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
+                title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">
+                  {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                </span>
+              </motion.button>
 
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleFullscreen}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                  title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
-                >
-                  <Maximize2 className="w-4 h-4" />
-                  <span className="hidden sm:inline text-sm">
-                    {language === 'ms' ? 'Penuh' : 'Full'}
-                  </span>
-                </motion.button>
-              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleFullscreen}
+                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
+                title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
+              >
+                <Maximize2 className="w-4 h-4" />
+                <span className="hidden sm:inline text-sm">
+                  {language === 'ms' ? 'Penuh' : 'Full'}
+                </span>
+              </motion.button>
+
             </div>
           </div>
         </div>
