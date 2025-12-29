@@ -57,54 +57,119 @@ export default function ReportsPage() {
     const userId = data.userId || data.user_id;
     const reportStatus = data.status || 'completed';
     
+    // Debug logging for troubleshooting
+    if (userId === currentUserId) {
+      console.log(`📄 Processing report ${doc.id}:`, {
+        userId,
+        status: reportStatus,
+        title: data.title,
+        hasCreatedAt: !!data.createdAt,
+        hasTimestamp: !!data.timestamp,
+        createdAtType: data.createdAt ? typeof data.createdAt : 'missing',
+        timestampType: data.timestamp ? typeof data.timestamp : 'missing',
+        reportTypes: data.report_types,
+        type: data.type
+      });
+    }
+    
     // Only include completed reports for current user
-    if (!userId || userId !== currentUserId || reportStatus !== 'completed') {
+    if (!userId || userId !== currentUserId) {
+      if (userId) {
+        console.log(`⏭️ Skipping report ${doc.id}: userId mismatch (${userId} !== ${currentUserId})`);
+      }
+      return null;
+    }
+    
+    if (reportStatus !== 'completed') {
+      console.log(`⏭️ Skipping report ${doc.id}: status is "${reportStatus}", not "completed"`);
       return null;
     }
     
     // Handle report_types array (AI assistant format) vs type string (website format)
+    // AI assistant sends: report_types: ["soil", "leaf"] (array)
+    // Website format: type: "soil" (string)
     let reportType: 'soil' | 'leaf' = 'soil';
     if (data.type) {
+      // Website format: single type string
       reportType = data.type as 'soil' | 'leaf';
-    } else if (data.report_types && Array.isArray(data.report_types) && data.report_types.length > 0) {
-      reportType = data.report_types[0] as 'soil' | 'leaf';
+    } else if (data.report_types && Array.isArray(data.report_types)) {
+      // AI assistant format: array of types
+      // Use first type, or default to 'soil' if array is empty
+      if (data.report_types.length > 0) {
+        reportType = data.report_types[0] as 'soil' | 'leaf';
+      }
+      // If array has both soil and leaf, prefer soil for display
+      if (data.report_types.includes('soil')) {
+        reportType = 'soil';
+      } else if (data.report_types.includes('leaf')) {
+        reportType = 'leaf';
+      }
     }
     
-    // Handle timestamp formats
+    // Handle timestamp formats - AI assistant uses string timestamp
     let reportDate: string;
     let createdAt: Timestamp;
     
     if (data.createdAt?.toDate) {
+      // Firestore Timestamp format (website)
       createdAt = data.createdAt;
       reportDate = data.createdAt.toDate().toISOString().split('T')[0];
+    } else if (data.createdAt?.seconds) {
+      // Firestore Timestamp with seconds property
+      createdAt = Timestamp.fromMillis(data.createdAt.seconds * 1000);
+      reportDate = new Date(data.createdAt.seconds * 1000).toISOString().split('T')[0];
     } else if (data.timestamp) {
+      // AI assistant format: ISO string timestamp
       const timestampDate = new Date(data.timestamp);
       if (!isNaN(timestampDate.getTime())) {
         reportDate = timestampDate.toISOString().split('T')[0];
         createdAt = Timestamp.fromDate(timestampDate);
       } else {
+        // Fallback if timestamp is invalid
         reportDate = data.date || new Date().toISOString().split('T')[0];
         createdAt = Timestamp.now();
       }
     } else if (data.date) {
+      // Date string format
       reportDate = data.date;
-      createdAt = Timestamp.fromDate(new Date(data.date));
+      const dateObj = new Date(data.date);
+      createdAt = !isNaN(dateObj.getTime()) ? Timestamp.fromDate(dateObj) : Timestamp.now();
     } else {
+      // No date found, use current date
       reportDate = new Date().toISOString().split('T')[0];
       createdAt = Timestamp.now();
     }
     
+    // Extract title - AI assistant might use different field names
+    const reportTitle = data.title || 
+                       data.reportTitle || 
+                       data.report_title ||
+                       `Analysis Report - ${reportDate}`;
+    
+    // Extract summary - AI assistant might use different field names
+    const reportSummary = data.summary || 
+                         data.description || 
+                         data.report_summary ||
+                         '';
+    
+    // Extract recommendations count
+    const recommendationsCount = data.recommendations || 
+                                data.recommendationsCount || 
+                                data.recommendations_count ||
+                                (data.recommendations && Array.isArray(data.recommendations) ? data.recommendations.length : 0) ||
+                                0;
+    
     return {
       id: doc.id,
-      title: data.title || `Report ${doc.id.slice(0, 8)}`,
+      title: reportTitle,
       type: reportType,
       date: reportDate,
       status: data.status || 'completed',
-      recommendations: data.recommendations || data.recommendationsCount || 0,
-      summary: data.summary || '',
+      recommendations: recommendationsCount,
+      summary: reportSummary,
       userId: userId || currentUserId,
       createdAt: createdAt,
-      fileUrl: data.fileUrl || data.file_url
+      fileUrl: data.fileUrl || data.file_url || data.fileURL
     };
   }, []);
 
@@ -120,96 +185,117 @@ export default function ReportsPage() {
     // Try to set up real-time listener with orderBy
     let unsubscribe: (() => void) | null = null;
     
+    // Set up listeners for both userId (website format) and user_id (AI assistant format)
+    // We'll merge results from both queries
+    let unsubscribe1: (() => void) | null = null;
+    let unsubscribe2: (() => void) | null = null;
+    const allReports = new Map<string, Report>();
+    
+    const updateReportsFromMap = () => {
+      const reportsArray = Array.from(allReports.values());
+      reportsArray.sort((a, b) => {
+        const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
+        const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
+        return dateB - dateA;
+      });
+      setReports(reportsArray);
+      setLoadingReports(false);
+      console.log(`✅ Merged reports: ${reportsArray.length} total reports for user ${user.uid}`);
+    };
+    
     try {
-      // Try with orderBy first (most efficient)
-      const q = query(
+      // Query 1: userId (website format) with status and createdAt
+      const q1 = query(
         reportsRef,
         where('userId', '==', user.uid),
         where('status', '==', 'completed'),
         orderBy('createdAt', 'desc')
       );
       
-      unsubscribe = onSnapshot(
-        q,
+      unsubscribe1 = onSnapshot(
+        q1,
         (snapshot) => {
-          console.log(`📊 Real-time update: ${snapshot.size} reports found`);
-          
-          const fetchedReports: Report[] = [];
+          console.log(`📊 Query 1 (userId): ${snapshot.size} reports found`);
           snapshot.forEach((doc) => {
             const report = processReportDoc(doc, user.uid);
             if (report) {
-              fetchedReports.push(report);
+              allReports.set(doc.id, report);
             }
           });
-          
-          // Sort by createdAt descending (newest first)
-          fetchedReports.sort((a, b) => {
-            const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
-            const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
-            return dateB - dateA;
-          });
-          
-          setReports(fetchedReports);
-          setLoadingReports(false);
-          
-          if (fetchedReports.length > 0) {
-            console.log(`✅ Real-time listener: Loaded ${fetchedReports.length} reports`);
-          }
+          updateReportsFromMap();
         },
         (error: any) => {
-          console.error('❌ Real-time listener error:', error);
-          
-          // If orderBy fails, try without orderBy
-          if (error.code === 'failed-precondition') {
-            console.log('🔄 OrderBy failed, trying without orderBy...');
-            try {
-              const q2 = query(
-                reportsRef,
-                where('userId', '==', user.uid),
-                where('status', '==', 'completed')
-              );
-              
-              unsubscribe = onSnapshot(
-                q2,
-                (snapshot) => {
-                  const fetchedReports: Report[] = [];
-                  snapshot.forEach((doc) => {
-                    const report = processReportDoc(doc, user.uid);
-                    if (report) {
-                      fetchedReports.push(report);
-                    }
-                  });
-                  
-                  // Sort manually
-                  fetchedReports.sort((a, b) => {
-                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
-                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
-                    return dateB - dateA;
-                  });
-                  
-                  setReports(fetchedReports);
-                  setLoadingReports(false);
-                  console.log(`✅ Real-time listener (no orderBy): Loaded ${fetchedReports.length} reports`);
-                },
-                (error2: any) => {
-                  console.error('❌ Real-time listener error (no orderBy):', error2);
-                  setLoadingReports(false);
-                  setReports([]);
-                }
-              );
-            } catch (err) {
-              console.error('❌ Error setting up fallback listener:', err);
-              setLoadingReports(false);
-              setReports([]);
-            }
-          } else {
-            setLoadingReports(false);
-            setReports([]);
-          }
+          console.warn('⚠️ Query 1 (userId) error:', error.code, error.message);
+          // Continue with query 2 even if query 1 fails
         }
       );
-    } catch (error: any) {
-      console.error('❌ Error setting up real-time listener:', error);
+      
+      // Query 2: user_id (AI assistant format) with status
+      // Try with timestamp first (AI assistant uses string timestamp)
+      try {
+        const q2a = query(
+          reportsRef,
+          where('user_id', '==', user.uid),
+          where('status', '==', 'completed')
+        );
+        
+        unsubscribe2 = onSnapshot(
+          q2a,
+          (snapshot) => {
+            console.log(`📊 Query 2 (user_id): ${snapshot.size} reports found`);
+            snapshot.forEach((doc) => {
+              const report = processReportDoc(doc, user.uid);
+              if (report) {
+                allReports.set(doc.id, report);
+              }
+            });
+            updateReportsFromMap();
+          },
+          (error: any) => {
+            console.warn('⚠️ Query 2 (user_id) error:', error.code, error.message);
+            // If timestamp orderBy fails, try without orderBy
+            if (error.code === 'failed-precondition' || error.code === 'unavailable') {
+              try {
+                const q2b = query(
+                  reportsRef,
+                  where('user_id', '==', user.uid),
+                  where('status', '==', 'completed')
+                );
+                
+                unsubscribe2 = onSnapshot(
+                  q2b,
+                  (snapshot) => {
+                    console.log(`📊 Query 2b (user_id, no orderBy): ${snapshot.size} reports found`);
+                    snapshot.forEach((doc) => {
+                      const report = processReportDoc(doc, user.uid);
+                      if (report) {
+                        allReports.set(doc.id, report);
+                      }
+                    });
+                    updateReportsFromMap();
+                  },
+                  (error2: any) => {
+                    console.error('❌ Query 2b (user_id) error:', error2);
+                  }
+                );
+              } catch (err) {
+                console.error('❌ Error setting up query 2b:', err);
+              }
+            }
+          }
+        );
+      } catch (err) {
+        console.error('❌ Error setting up query 2:', err);
+      }
+      
+      // Set up cleanup function
+      unsubscribe = () => {
+        if (unsubscribe1) unsubscribe1();
+        if (unsubscribe2) unsubscribe2();
+      };
+      
+    } catch (err) {
+      console.error('❌ Error setting up queries:', err);
       setLoadingReports(false);
       setReports([]);
     }
@@ -223,12 +309,20 @@ export default function ReportsPage() {
       console.log('📢 Reports page: Received analysisReportSaved event', {
         eventUserId,
         currentUserId,
-        reportId: customEvent.detail?.reportId
+        reportId: customEvent.detail?.reportId,
+        timestamp: new Date().toISOString()
       });
 
-      // Real-time listener should handle this, but this is a backup
+      // Real-time listener should handle this automatically, but log for debugging
       if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
         console.log('✅ Event received for current user - real-time listener should update automatically');
+        console.log('⏳ Waiting for real-time listener to update...');
+        
+        // The onSnapshot listener should automatically pick up the new document
+        // If it doesn't appear after a few seconds, there might be an issue with:
+        // 1. The document not being saved correctly
+        // 2. The query filters not matching
+        // 3. The real-time listener not working
       }
     };
     

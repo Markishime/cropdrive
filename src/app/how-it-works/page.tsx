@@ -81,6 +81,18 @@ export default function HowItWorksPage() {
       // Update video source
       video.src = videoSrc;
       video.load(); // Reload the video with new source
+      
+      // Handle video loading errors (for public access verification)
+      const handleError = (e: Event) => {
+        console.warn('Video loading error:', e);
+        // Video will still attempt to load, but we log for debugging
+      };
+      
+      video.addEventListener('error', handleError);
+      
+      return () => {
+        video.removeEventListener('error', handleError);
+      };
     }
   }, [currentLanguage, mounted]);
 
@@ -187,14 +199,17 @@ export default function HowItWorksPage() {
             className="max-w-5xl mx-auto"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black">
-              {/* Demo Video Player */}
+              {/* Demo Video Player - Publicly accessible to all users */}
               <div className="aspect-video relative">
                 <video
                   key={`video-${currentLanguage}`}
                   ref={videoRef}
                   className="w-full h-full object-cover"
                   controls
+                  playsInline
                   preload="metadata"
+                  crossOrigin="anonymous"
+                  controlsList="nodownload"
                   poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
                 >
                   <source 
