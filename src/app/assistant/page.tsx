@@ -313,30 +313,36 @@ export default function AssistantPage() {
         console.error('❌ Error message from AI assistant:', event.data);
       }
 
-      // Verify origin for security (allow both configured origin and current iframe src origin)
-      const expectedOrigin = getIframeOrigin();
-      const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-      
-      // Accept messages from iframe origin OR if the message is coming from the iframe itself
-      // (The AI assistant might send messages with target origin '*', which is fine)
-      // Also accept messages from 'about:srcdoc' (Gradio iframe internal origin)
-      // BUT: Always accept ANALYSIS_COMPLETE messages regardless of origin
-      const isValidOrigin = event.origin === expectedOrigin ||
-                           event.origin === currentWindowOrigin ||
-                           event.origin === 'about:srcdoc' ||
-                           isAnalysisComplete;
-
-      if (!isValidOrigin) {
-        // Log for debugging but don't block - the AI assistant might be using '*'
-        console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
-        // Still process the message if it's from a known iframe origin pattern
-        if (!event.origin.includes('hf.space') && !event.origin.includes('cropdrive')) {
-          console.log('❌ Blocking message from unknown origin:', event.origin);
-          return;
-        }
-        console.log('✅ Accepting message from known iframe origin:', event.origin);
-      } else if (isAnalysisComplete) {
+      // CRITICAL: Process ANALYSIS_COMPLETE messages FIRST, regardless of origin
+      // This ensures analysis results are never blocked by origin validation
+      if (isAnalysisComplete) {
         console.log('✅ Accepting ANALYSIS_COMPLETE message from origin:', event.origin);
+        // Continue processing - don't return here
+      } else {
+        // For non-ANALYSIS_COMPLETE messages, verify origin for security
+        const expectedOrigin = getIframeOrigin();
+        const currentWindowOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+        
+        // Accept messages from iframe origin OR if the message is coming from the iframe itself
+        // (The AI assistant might send messages with target origin '*', which is fine)
+        // Also accept messages from 'about:srcdoc' (Gradio iframe internal origin)
+        const isValidOrigin = event.origin === expectedOrigin ||
+                             event.origin === currentWindowOrigin ||
+                             event.origin === 'about:srcdoc' ||
+                             event.origin.includes('hf.space') ||
+                             event.origin.includes('cropdrive') ||
+                             event.origin === 'null'; // Some iframes use 'null' origin
+
+        if (!isValidOrigin) {
+          // Log for debugging but don't block - the AI assistant might be using '*'
+          console.log('⚠️ Message from unexpected origin:', event.origin, 'Expected:', expectedOrigin);
+          // Only block if it's clearly not from the iframe
+          if (!event.origin || (event.origin !== 'null' && !event.origin.includes('http'))) {
+            console.log('❌ Blocking message from invalid origin:', event.origin);
+            return;
+          }
+          console.log('✅ Accepting message from iframe origin:', event.origin);
+        }
       }
 
       try {
