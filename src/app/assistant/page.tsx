@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import UploadProgressBar from '@/components/UploadProgressBar';
 import Button from '@/components/ui/Button';
 
 export default function AssistantPage() {
@@ -763,6 +764,41 @@ export default function AssistantPage() {
     };
   }, [user, language, router]);
 
+  // Listen for analysis report saved events to update progress bar
+  useEffect(() => {
+    if (!mounted || !refreshUser || !user?.uid) return;
+    
+    const handleReportSaved = async (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const eventUserId = customEvent.detail?.userId;
+      const currentUserId = user.uid;
+
+      console.log('📢 Assistant: Received analysisReportSaved event', {
+        eventUserId,
+        currentUserId,
+        reportId: customEvent.detail?.reportId,
+        uploadsUsed: customEvent.detail?.uploadsUsed,
+        uploadsLimit: customEvent.detail?.uploadsLimit
+      });
+
+      // Only refresh if the event is for the current user
+      if (!eventUserId || eventUserId === currentUserId) {
+        console.log('✅ Assistant: Refreshing user data from Firestore for user:', currentUserId);
+        if (refreshUser) {
+          await refreshUser();
+          console.log('✅ Assistant: User data refreshed from Firestore');
+        }
+      } else {
+        console.log('⚠️ Assistant: Ignoring event - user ID mismatch');
+      }
+    };
+    
+    window.addEventListener('analysisReportSaved', handleReportSaved);
+    return () => {
+      window.removeEventListener('analysisReportSaved', handleReportSaved);
+    };
+  }, [mounted, refreshUser, user?.uid]);
+
   // Send initial configuration to iframe when it loads
   const handleIframeLoad = () => {
     setIsLoading(false);
@@ -1035,33 +1071,46 @@ export default function AssistantPage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleRefresh}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
-              >
-                <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm">
-                  {language === 'ms' ? 'Muat Semula' : 'Refresh'}
-                </span>
-              </motion.button>
+            <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+              {/* Upload Progress Bar */}
+              <div className="hidden md:block w-48">
+                <UploadProgressBar
+                  uploadsUsed={uploadsUsed}
+                  uploadsLimit={uploadsLimit}
+                  language={currentLang}
+                  showLabel={false}
+                  size="sm"
+                  className="text-white"
+                />
+              </div>
 
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={handleFullscreen}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
-              >
-                <Maximize2 className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm">
-                  {language === 'ms' ? 'Penuh' : 'Full'}
-                </span>
-              </motion.button>
+              <div className="flex items-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleRefresh}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
+                  title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">
+                    {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                  </span>
+                </motion.button>
 
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleFullscreen}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
+                  title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
+                >
+                  <Maximize2 className="w-4 h-4" />
+                  <span className="hidden sm:inline text-sm">
+                    {language === 'ms' ? 'Penuh' : 'Full'}
+                  </span>
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
