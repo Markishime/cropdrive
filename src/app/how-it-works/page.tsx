@@ -65,33 +65,69 @@ export default function HowItWorksPage() {
   }, [mounted, currentLanguage]);
 
   // Get video URLs from environment variables or fallback to local paths
+  // These videos are publicly accessible to all users (no authentication required)
   const getVideoUrl = (language: 'en' | 'ms') => {
     if (language === 'ms') {
-      return process.env.NEXT_PUBLIC_VIDEO_MALAYSIAN_URL || '/videos/CropDrive Intro Malaysian.mp4';
+      const url = process.env.NEXT_PUBLIC_VIDEO_MALAYSIAN_URL || '/videos/CropDrive Intro Malaysian.mp4';
+      // Ensure URL is absolute if it's a Firebase Storage URL
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+      }
+      // Relative path - will work for public files
+      return url;
     }
-    return process.env.NEXT_PUBLIC_VIDEO_ENGLISH_URL || '/videos/Cropdrive Intro English.mp4';
+    const url = process.env.NEXT_PUBLIC_VIDEO_ENGLISH_URL || '/videos/Cropdrive Intro English.mp4';
+    // Ensure URL is absolute if it's a Firebase Storage URL
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    // Relative path - will work for public files
+    return url;
   };
 
-  // Update video source when language changes
+  // Handle video loading and errors
+  // Note: Video source is set via the <source> tag in JSX
   useEffect(() => {
     if (videoRef.current && mounted) {
       const video = videoRef.current;
-      const videoSrc = getVideoUrl(currentLanguage);
       
-      // Update video source
-      video.src = videoSrc;
-      video.load(); // Reload the video with new source
+      // Force video to load (helps with public access)
+      if (video.readyState === 0) {
+        video.load();
+      }
       
-      // Handle video loading errors (for public access verification)
+      // Handle video loading errors (for debugging)
       const handleError = (e: Event) => {
-        console.warn('Video loading error:', e);
-        // Video will still attempt to load, but we log for debugging
+        console.error('Video loading error:', e);
+        const videoError = videoRef.current?.error;
+        if (videoError) {
+          console.error('Video error code:', videoError.code);
+          console.error('Video error message:', videoError.message);
+          console.error('Video source:', videoRef.current?.src || videoRef.current?.currentSrc);
+          console.error('Video network state:', videoRef.current?.networkState);
+          // Error code 4 = MEDIA_ERR_SRC_NOT_SUPPORTED
+          // Error code 3 = MEDIA_ERR_DECODE
+          // Error code 2 = MEDIA_ERR_NETWORK
+          // Error code 1 = MEDIA_ERR_ABORTED
+        }
+      };
+      
+      const handleLoadedData = () => {
+        console.log('Video loaded successfully:', videoRef.current?.src || videoRef.current?.currentSrc);
+      };
+      
+      const handleCanPlay = () => {
+        console.log('Video can play:', videoRef.current?.src || videoRef.current?.currentSrc);
       };
       
       video.addEventListener('error', handleError);
+      video.addEventListener('loadeddata', handleLoadedData);
+      video.addEventListener('canplay', handleCanPlay);
       
       return () => {
         video.removeEventListener('error', handleError);
+        video.removeEventListener('loadeddata', handleLoadedData);
+        video.removeEventListener('canplay', handleCanPlay);
       };
     }
   }, [currentLanguage, mounted]);
@@ -199,7 +235,7 @@ export default function HowItWorksPage() {
             className="max-w-5xl mx-auto"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black">
-              {/* Demo Video Player - Publicly accessible to all users */}
+              {/* Demo Video Player - Publicly accessible to all users (no authentication required) */}
               <div className="aspect-video relative">
                 <video
                   key={`video-${currentLanguage}`}
@@ -207,12 +243,12 @@ export default function HowItWorksPage() {
                   className="w-full h-full object-cover"
                   controls
                   playsInline
-                  preload="metadata"
-                  crossOrigin="anonymous"
+                  preload="auto"
                   controlsList="nodownload"
                   poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
                 >
                   <source 
+                    key={`source-${currentLanguage}-${getVideoUrl(currentLanguage)}`}
                     src={getVideoUrl(currentLanguage)} 
                     type="video/mp4" 
                   />
