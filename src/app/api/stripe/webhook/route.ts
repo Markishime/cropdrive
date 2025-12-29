@@ -126,86 +126,117 @@ export async function POST(req: NextRequest) {
   const requestStart = Date.now();
   console.log('🔔 Stripe webhook received at:', new Date().toISOString());
 
-  // Initialize Stripe
-  const stripe = getStripe();
-  if (!stripe) {
-    return jsonResponse({ error: 'Stripe not configured' }, 500);
-  }
-
-  // Get webhook secret
-  const webhookSecret = getWebhookSecret();
-  if (!webhookSecret) {
-    return jsonResponse({ error: 'Webhook secret not configured' }, 500);
-  }
-
-  // Read raw body - MUST be done before any other body parsing
-  let rawBody: string;
+  // Wrap entire handler in try-catch to ensure we always return a valid response
   try {
-    rawBody = await req.text();
-    if (!rawBody || rawBody.length === 0) {
-      console.error('❌ Empty request body');
-      return jsonResponse({ error: 'Empty body' }, 400);
+    // Initialize Stripe
+    const stripe = getStripe();
+    if (!stripe) {
+      console.error('❌ Stripe not configured - returning 200 to acknowledge receipt');
+      // Return 200 instead of 500 - Stripe needs acknowledgment even if we can't process
+      return jsonResponse({ 
+        received: true, 
+        error: 'Stripe not configured',
+        note: 'Webhook received but cannot process due to missing configuration'
+      }, 200);
     }
-    console.log('📦 Body received, length:', rawBody.length);
-  } catch (err) {
-    console.error('❌ Failed to read request body:', err);
-    return jsonResponse({ error: 'Failed to read body' }, 400);
-  }
 
-  // Get signature header
-  const signature = req.headers.get('stripe-signature');
-  if (!signature) {
-    console.error('❌ Missing stripe-signature header');
-    return jsonResponse({ error: 'Missing signature' }, 400);
-  }
-  console.log('🔑 Signature header present');
+    // Get webhook secret
+    const webhookSecret = getWebhookSecret();
+    if (!webhookSecret) {
+      console.error('❌ Webhook secret not configured - returning 200 to acknowledge receipt');
+      // Return 200 instead of 500 - Stripe needs acknowledgment even if we can't process
+      return jsonResponse({ 
+        received: true, 
+        error: 'Webhook secret not configured',
+        note: 'Webhook received but cannot verify due to missing secret'
+      }, 200);
+    }
 
-  // Verify webhook signature
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-    console.log('✅ Signature verified successfully');
-    console.log('📋 Event type:', event.type);
-    console.log('📋 Event ID:', event.id);
-  } catch (err) {
-    const errorMsg = err instanceof Error ? err.message : 'Unknown verification error';
-    console.error('❌ Signature verification failed:', errorMsg);
+    // Read raw body - MUST be done before any other body parsing
+    let rawBody: string;
+    try {
+      rawBody = await req.text();
+      if (!rawBody || rawBody.length === 0) {
+        console.error('❌ Empty request body');
+        return jsonResponse({ received: true, error: 'Empty body' }, 200);
+      }
+      console.log('📦 Body received, length:', rawBody.length);
+    } catch (err) {
+      console.error('❌ Failed to read request body:', err);
+      return jsonResponse({ received: true, error: 'Failed to read body' }, 200);
+    }
+
+    // Get signature header
+    const signature = req.headers.get('stripe-signature');
+    if (!signature) {
+      console.error('❌ Missing stripe-signature header');
+      return jsonResponse({ received: true, error: 'Missing signature' }, 200);
+    }
+    console.log('🔑 Signature header present');
+
+    // Verify webhook signature
+    let event: Stripe.Event;
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+      console.log('✅ Signature verified successfully');
+      console.log('📋 Event type:', event.type);
+      console.log('📋 Event ID:', event.id);
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown verification error';
+      console.error('❌ Signature verification failed:', errorMsg);
+      
+      // Log additional debug info
+      console.error('Debug - Signature length:', signature.length);
+      console.error('Debug - Body starts with:', rawBody.substring(0, 100));
+      console.error('Debug - Secret starts with:', webhookSecret.substring(0, 10) + '...');
+      
+      // Signature verification failure is a security issue - return 400
+      // This tells Stripe the request is invalid and shouldn't be retried
+      return jsonResponse({ 
+        error: `Signature verification failed: ${errorMsg}`
+      }, 400);
+    }
+
+    // Process the event with a hard timeout to ensure we respond to Stripe in time
+    // Vercel has a 10s default timeout, Stripe expects response within 5-20s
+    const processingTimeout = 8000; // 8 seconds max for processing
     
-    // Log additional debug info
-    console.error('Debug - Signature length:', signature.length);
-    console.error('Debug - Body starts with:', rawBody.substring(0, 100));
-    console.error('Debug - Secret starts with:', webhookSecret.substring(0, 10) + '...');
+    try {
+      await Promise.race([
+        processEvent(event, stripe),
+        new Promise<never>((_, reject) => 
+          setTimeout(() => reject(new Error('Processing timeout - will retry')), processingTimeout)
+        )
+      ]);
+    } catch (timeoutError) {
+      // Log timeout but still return 200 - Stripe will retry if needed
+      console.warn('⚠️ Processing timed out, but returning 200 to prevent Stripe retry storm');
+    }
+
+    const totalDuration = Date.now() - requestStart;
+    console.log(`📊 Total webhook processing time: ${totalDuration}ms`);
+
+    // ALWAYS return 200 after successful signature verification
+    // This tells Stripe we received the webhook, even if processing had issues
+    return jsonResponse({ 
+      received: true,
+      eventType: event.type,
+      eventId: event.id,
+      processingTime: totalDuration
+    }, 200);
+  } catch (unexpectedError) {
+    // Catch any unexpected errors and still return 200 to Stripe
+    // This prevents Stripe from marking the webhook as failed
+    const errorMsg = unexpectedError instanceof Error ? unexpectedError.message : 'Unknown error';
+    console.error('❌ Unexpected error in webhook handler:', errorMsg);
+    console.error('Stack:', unexpectedError instanceof Error ? unexpectedError.stack : 'No stack');
     
-    return jsonResponse({ error: `Signature verification failed: ${errorMsg}` }, 400);
+    return jsonResponse({ 
+      received: true,
+      error: 'Unexpected error during processing',
+      message: errorMsg
+    }, 200);
   }
-
-  // Process the event with a hard timeout to ensure we respond to Stripe in time
-  // Vercel has a 10s default timeout, Stripe expects response within 5-20s
-  const processingTimeout = 8000; // 8 seconds max for processing
-  
-  try {
-    await Promise.race([
-      processEvent(event, stripe),
-      new Promise<never>((_, reject) => 
-        setTimeout(() => reject(new Error('Processing timeout - will retry')), processingTimeout)
-      )
-    ]);
-  } catch (timeoutError) {
-    // Log timeout but still return 200 - Stripe will retry if needed
-    console.warn('⚠️ Processing timed out, but returning 200 to prevent Stripe retry storm');
-  }
-
-  const totalDuration = Date.now() - requestStart;
-  console.log(`📊 Total webhook processing time: ${totalDuration}ms`);
-
-  // ALWAYS return 200 after successful signature verification
-  // This tells Stripe we received the webhook, even if processing had issues
-  return jsonResponse({ 
-    received: true,
-    eventType: event.type,
-    eventId: event.id,
-    processingTime: totalDuration
-  }, 200);
 }
 
 // Helper function for Firestore operations with retry

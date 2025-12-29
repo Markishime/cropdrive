@@ -185,7 +185,8 @@ export async function POST(req: NextRequest) {
           setup_future_usage: 'off_session'
         }
       },
-      customer_creation: 'always',
+      // Note: customer_creation is only valid in 'payment' mode, not 'subscription' mode
+      // In subscription mode, Stripe automatically creates customers
       customer_update: {
         address: 'auto'
       },
