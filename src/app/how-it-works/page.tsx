@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { safeGetLocalStorage, isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
 
 export default function HowItWorksPage() {
   const [mounted, setMounted] = useState(false);
@@ -46,21 +47,26 @@ export default function HowItWorksPage() {
       }
     };
 
-    // Poll localStorage periodically to catch changes in same window
-    const pollInterval = setInterval(() => {
-      const lang = getCurrentLanguage();
-      if (lang !== currentLanguage) {
-        handleLanguageChange(lang);
-      }
-    }, 1000);
+    // Poll localStorage periodically to catch changes in same window (only if localStorage is available)
+    let pollInterval: NodeJS.Timeout | null = null;
+    if (typeof window !== 'undefined') {
+      pollInterval = setInterval(() => {
+        const lang = getCurrentLanguage();
+        if (lang !== currentLanguage) {
+          handleLanguageChange(lang);
+        }
+      }, 1000);
 
-    window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('languageChanged', handleCustomLanguageChange);
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('languageChanged', handleCustomLanguageChange);
+    }
 
     return () => {
-      clearInterval(pollInterval);
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('languageChanged', handleCustomLanguageChange);
+      if (pollInterval) clearInterval(pollInterval);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('languageChanged', handleCustomLanguageChange);
+      }
     };
   }, [mounted, currentLanguage]);
 
@@ -88,12 +94,24 @@ export default function HowItWorksPage() {
   // Handle video loading and errors
   // Note: Video source is set via the <source> tag in JSX
   useEffect(() => {
-    if (videoRef.current && mounted) {
+    if (!mounted) return;
+    
+    // Check if video is supported
+    if (!isVideoSupported()) {
+      console.warn('Video playback is not supported in this browser');
+      return;
+    }
+    
+    if (videoRef.current) {
       const video = videoRef.current;
       
       // Force video to load (helps with public access)
       if (video.readyState === 0) {
-        video.load();
+        try {
+          video.load();
+        } catch (error) {
+          console.warn('Failed to load video:', error);
+        }
       }
       
       // Handle video loading errors (for debugging)
@@ -211,9 +229,11 @@ export default function HowItWorksPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            {...(isIntersectionObserverSupported() 
+              ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+              : { animate: { opacity: 1, y: 0 } }
+            )}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-6xl font-black text-white mb-6 font-heading">
@@ -229,34 +249,55 @@ export default function HowItWorksPage() {
 
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            {...(isIntersectionObserverSupported() 
+              ? { whileInView: { opacity: 1, scale: 1 }, viewport: { once: true } }
+              : { animate: { opacity: 1, scale: 1 } }
+            )}
             transition={{ duration: 0.8, delay: 0.2 }}
-            viewport={{ once: true }}
             className="max-w-5xl mx-auto"
           >
             <div className="relative rounded-2xl overflow-hidden shadow-2xl bg-black">
               {/* Demo Video Player - Publicly accessible to all users (no authentication required) */}
               <div className="aspect-video relative">
-                <video
-                  key={`video-${currentLanguage}`}
-                  ref={videoRef}
-                  className="w-full h-full object-cover"
-                  controls
-                  playsInline
-                  preload="auto"
-                  controlsList="nodownload"
-                  poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
-                >
-                  <source 
-                    key={`source-${currentLanguage}-${getVideoUrl(currentLanguage)}`}
-                    src={getVideoUrl(currentLanguage)} 
-                    type="video/mp4" 
-                  />
-                  {language === 'ms' 
-                    ? 'Pelayar anda tidak menyokong tag video.'
-                    : 'Your browser does not support the video tag.'
-                  }
-                </video>
+                {isVideoSupported() ? (
+                  <video
+                    key={`video-${currentLanguage}`}
+                    ref={videoRef}
+                    className="w-full h-full object-cover"
+                    controls
+                    playsInline
+                    preload="auto"
+                    controlsList="nodownload"
+                    poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
+                  >
+                    <source 
+                      key={`source-${currentLanguage}-${getVideoUrl(currentLanguage)}`}
+                      src={getVideoUrl(currentLanguage)} 
+                      type="video/mp4" 
+                    />
+                    {language === 'ms' 
+                      ? 'Pelayar anda tidak menyokong tag video.'
+                      : 'Your browser does not support the video tag.'
+                    }
+                  </video>
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white p-8 text-center">
+                    <div>
+                      <p className="text-xl mb-4">
+                        {language === 'ms' 
+                          ? 'Pelayar anda tidak menyokong pemutaran video.'
+                          : 'Your browser does not support video playback.'
+                        }
+                      </p>
+                      <p className="text-sm opacity-75">
+                        {language === 'ms'
+                          ? 'Sila gunakan pelayar moden seperti Chrome, Firefox, Safari, atau Edge.'
+                          : 'Please use a modern browser like Chrome, Firefox, Safari, or Edge.'
+                        }
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -264,9 +305,11 @@ export default function HowItWorksPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                {...(isIntersectionObserverSupported() 
+                  ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+                  : { animate: { opacity: 1, y: 0 } }
+                )}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                viewport={{ once: true }}
                 className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
               >
                 <div className="text-4xl mb-3">📤</div>
@@ -283,9 +326,11 @@ export default function HowItWorksPage() {
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                {...(isIntersectionObserverSupported() 
+                  ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+                  : { animate: { opacity: 1, y: 0 } }
+                )}
                 transition={{ duration: 0.6, delay: 0.4 }}
-                viewport={{ once: true }}
                 className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
               >
                 <div className="text-4xl mb-3">⚡</div>
@@ -302,9 +347,11 @@ export default function HowItWorksPage() {
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                {...(isIntersectionObserverSupported() 
+                  ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+                  : { animate: { opacity: 1, y: 0 } }
+                )}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                viewport={{ once: true }}
                 className="bg-white/10 backdrop-blur-sm p-6 rounded-xl border border-white/20"
               >
                 <div className="text-4xl mb-3">✅</div>
@@ -323,9 +370,11 @@ export default function HowItWorksPage() {
             {/* CTA Button */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              {...(isIntersectionObserverSupported() 
+                ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+                : { animate: { opacity: 1, y: 0 } }
+              )}
               transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
               className="text-center mt-12"
             >
               <Link href="/assistant">
@@ -345,9 +394,11 @@ export default function HowItWorksPage() {
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              {...(isIntersectionObserverSupported() 
+                ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+                : { animate: { opacity: 1, y: 0 } }
+              )}
               transition={{ duration: 0.6, delay: index * 0.1 }}
-              viewport={{ once: true }}
               className={`mb-24 last:mb-0 ${index % 2 === 0 ? '' : 'flex-row-reverse'}`}
             >
               <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
@@ -395,9 +446,11 @@ export default function HowItWorksPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            {...(isIntersectionObserverSupported() 
+              ? { whileInView: { opacity: 1, y: 0 }, viewport: { once: true } }
+              : { animate: { opacity: 1, y: 0 } }
+            )}
             transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-black text-white mb-6 font-heading">
               {language === 'ms' ? 'Sedia untuk Transformasi?' : 'Ready to Transform?'}

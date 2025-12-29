@@ -1,6 +1,7 @@
 import en from './en.json';
 import ms from './ms.json';
 import { LanguageStrings } from '@/types';
+import { safeGetLocalStorage, safeSetLocalStorage } from '@/utils/browser-compat';
 
 export const translations = {
   en,
@@ -36,7 +37,8 @@ export const useTranslation = (language: Language = 'en') => {
 export const getCurrentLanguage = (): Language => {
   if (typeof window === 'undefined') return 'en'; // Default to English on server
 
-  const savedLanguage = localStorage.getItem('cropdrive-language');
+  // Use safe localStorage access
+  const savedLanguage = safeGetLocalStorage('cropdrive-language', 'en');
   if (savedLanguage === 'en' || savedLanguage === 'ms') {
     return savedLanguage;
   }
@@ -47,7 +49,8 @@ export const getCurrentLanguage = (): Language => {
 
 export const setLanguage = (language: Language): void => {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('cropdrive-language', language);
+    // Use safe localStorage access
+    safeSetLocalStorage('cropdrive-language', language);
     window.location.reload(); // Reload to apply language change
   }
 };
