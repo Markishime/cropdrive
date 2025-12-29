@@ -288,20 +288,32 @@ export default function AssistantPage() {
       // The message might come from a different origin but we need to process it
       // Check multiple possible formats and locations
       const rawData = event.data;
+      
+      // Normalize the data - handle nested structures
+      let normalizedData = rawData;
+      if (rawData?.message && typeof rawData.message === 'object') {
+        normalizedData = rawData.message;
+      } else if (rawData?.data && typeof rawData.data === 'object') {
+        normalizedData = rawData.data;
+      }
+      
+      // Check for ANALYSIS_COMPLETE in multiple ways
       const isAnalysisComplete =
         rawData?.type === 'ANALYSIS_COMPLETE' ||
+        normalizedData?.type === 'ANALYSIS_COMPLETE' ||
         rawData?.message?.type === 'ANALYSIS_COMPLETE' ||
-        (typeof rawData === 'object' && rawData !== null && 'type' in rawData && rawData.type === 'ANALYSIS_COMPLETE') ||
-        (rawData && typeof rawData === 'string' && rawData.includes('ANALYSIS_COMPLETE')) ||
-        (rawData?.data?.type === 'ANALYSIS_COMPLETE') ||
-        // Check if message contains analysis data fields (fallback for messages that should be ANALYSIS_COMPLETE)
-        (rawData && typeof rawData === 'object' && (rawData.analysisType || rawData.summary || rawData.userId) &&
-         (rawData.title?.includes('Analysis') || rawData.type?.includes('ANALYSIS')));
+        rawData?.data?.type === 'ANALYSIS_COMPLETE' ||
+        // Check if message contains analysis data fields (fallback detection)
+        (normalizedData && typeof normalizedData === 'object' && 
+         (normalizedData.analysisType || normalizedData.summary || normalizedData.title) &&
+         (normalizedData.title?.includes('Analysis') || normalizedData.title?.includes('Report') || 
+          normalizedData.type?.includes('ANALYSIS') || normalizedData.type === 'soil' || normalizedData.type === 'leaf'));
       
       if (isAnalysisComplete) {
         console.log('🎯🎯🎯 ANALYSIS_COMPLETE DETECTED! Processing immediately...', {
           rawData,
-          type: rawData?.type,
+          normalizedData,
+          type: rawData?.type || normalizedData?.type,
           origin: event.origin
         });
         // Process immediately - don't let origin checks block this critical message
@@ -379,12 +391,27 @@ export default function AssistantPage() {
         const data = event.data;
         
         // Handle analysis completion - check multiple possible formats
-        if (data?.type === 'ANALYSIS_COMPLETE' || data?.message?.type === 'ANALYSIS_COMPLETE') {
-          console.log('📊 ANALYSIS_COMPLETE message received:', data);
-          
-          // Normalize the data - handle nested message format
-          const analysisData = (data?.type === 'ANALYSIS_COMPLETE' ? data : data?.message) || data;
-          console.log('📊 Normalized analysis data:', analysisData);
+        // Use the normalized data we already extracted
+        let analysisData = normalizedData;
+        if (data?.type === 'ANALYSIS_COMPLETE') {
+          analysisData = data;
+        } else if (data?.message?.type === 'ANALYSIS_COMPLETE') {
+          analysisData = data.message;
+        } else if (data?.data?.type === 'ANALYSIS_COMPLETE') {
+          analysisData = data.data;
+        } else if (isAnalysisComplete && normalizedData) {
+          // Use normalized data if it has analysis fields
+          analysisData = normalizedData;
+        }
+        
+        if (isAnalysisComplete && analysisData) {
+          console.log('📊 ANALYSIS_COMPLETE message received:', {
+            original: data,
+            normalized: analysisData,
+            hasType: !!analysisData.type,
+            hasTitle: !!analysisData.title,
+            hasSummary: !!analysisData.summary
+          });
 
           // Store as backup in parent's sessionStorage in case processing fails
           try {
@@ -416,6 +443,51 @@ export default function AssistantPage() {
 
           const token = await firebaseUser.getIdToken();
 
+          // Extract analysis data with fallbacks for various formats
+          const reportTitle = analysisData?.title || 
+                             data?.title || 
+                             analysisData?.reportTitle ||
+                             `Analysis Report - ${new Date().toLocaleDateString()}`;
+          
+          const reportType = analysisData?.analysisType || 
+                            analysisData?.type || 
+                            data?.analysisType || 
+                            data?.type || 
+                            'soil';
+          
+          const reportSummary = analysisData?.summary || 
+                               data?.summary || 
+                               analysisData?.description ||
+                               '';
+          
+          const recommendationsCount = analysisData?.recommendationsCount || 
+                                     analysisData?.recommendations?.length || 
+                                     data?.recommendationsCount || 
+                                     data?.recommendations?.length || 
+                                     0;
+          
+          const fileUrl = analysisData?.fileUrl || 
+                         analysisData?.file_url || 
+                         data?.fileUrl || 
+                         data?.file_url || 
+                         null;
+          
+          const fullAnalysisData = analysisData?.analysisData || 
+                                  analysisData?.data || 
+                                  data?.analysisData || 
+                                  data?.data || 
+                                  analysisData || 
+                                  null;
+
+          console.log('📦 Prepared report data:', {
+            title: reportTitle,
+            type: reportType,
+            summary: reportSummary?.substring(0, 50) + '...',
+            recommendationsCount,
+            hasFileUrl: !!fileUrl,
+            hasAnalysisData: !!fullAnalysisData
+          });
+
           // Try API first, fallback to direct Firestore save
           try {
             const response = await fetch('/api/save-analysis-report', {
@@ -426,12 +498,12 @@ export default function AssistantPage() {
               },
               body: JSON.stringify({
                 userId: currentUserId, // Always use authenticated user's ID
-                title: analysisData?.title || data?.title || `Analysis Report - ${new Date().toLocaleDateString()}`,
-                type: analysisData?.analysisType || data?.analysisType || 'soil', // 'soil', 'leaf', or 'both'
-                summary: analysisData?.summary || data?.summary || '',
-                recommendations: analysisData?.recommendationsCount || data?.recommendationsCount || 0,
-                fileUrl: analysisData?.fileUrl || data?.fileUrl || null,
-                analysisData: analysisData?.analysisData || data?.analysisData || null,
+                title: reportTitle,
+                type: reportType,
+                summary: reportSummary,
+                recommendations: recommendationsCount,
+                fileUrl: fileUrl,
+                analysisData: fullAnalysisData,
               }),
             });
 
@@ -504,14 +576,30 @@ export default function AssistantPage() {
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
                   detail: eventDetail
                 }));
-                console.log('✅ analysisReportSaved event dispatched');
+                
+                // Also dispatch a user data updated event for progress bars
+                window.dispatchEvent(new CustomEvent('userDataUpdated', {
+                  detail: {
+                    userId: currentUserId,
+                    uploadsUsed: result.uploadsUsed ?? 0,
+                    uploadsLimit: result.uploadsLimit ?? 10,
+                  }
+                }));
+                console.log('✅ Events dispatched: analysisReportSaved and userDataUpdated');
               }
               
               // Update iframe config with new upload counts
+              // Wait a bit longer to ensure Firestore has updated
               setTimeout(() => {
-                console.log('📤 Sending updated config to iframe...');
+                console.log('📤 Sending updated config to iframe after analysis save...');
                 sendConfigToIframe();
-              }, 1000); // Increased delay to ensure user data is refreshed first
+              }, 2000); // Increased delay to ensure user data is refreshed first
+              
+              // Also send a second update after a longer delay to catch any late updates
+              setTimeout(() => {
+                console.log('📤 Sending second config update to iframe...');
+                sendConfigToIframe();
+              }, 5000);
               
               // Show remaining uploads
               if (result.uploadsUsed !== undefined && result.uploadsLimit !== undefined) {
@@ -694,22 +782,38 @@ export default function AssistantPage() {
               
               // Dispatch custom event to notify other pages (dashboard, reports, etc.)
               if (typeof window !== 'undefined') {
+                const eventDetail = {
+                  userId: currentUserId,
+                  reportId: docRef.id,
+                  uploadsUsed: finalUploadsUsed,
+                  uploadsLimit: finalUploadsLimit,
+                };
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
+                  detail: eventDetail
+                }));
+                
+                // Also dispatch a user data updated event for progress bars
+                window.dispatchEvent(new CustomEvent('userDataUpdated', {
                   detail: {
-                    userId: currentUserId, // Include userId in event
-                    reportId: docRef.id,
+                    userId: currentUserId,
                     uploadsUsed: finalUploadsUsed,
                     uploadsLimit: finalUploadsLimit,
                   }
                 }));
-                console.log('📢 Dispatched analysisReportSaved event with userId:', currentUserId);
+                console.log('📢 Dispatched events: analysisReportSaved and userDataUpdated with userId:', currentUserId);
               }
               
               // Update iframe config with new upload counts
               setTimeout(() => {
                 console.log('📤 Sending updated config to iframe after direct save...');
                 sendConfigToIframe();
-              }, 500);
+              }, 2000);
+              
+              // Also send a second update after a longer delay
+              setTimeout(() => {
+                console.log('📤 Sending second config update to iframe after direct save...');
+                sendConfigToIframe();
+              }, 5000);
             } catch (firestoreError: any) {
               console.error('❌ Error saving report directly to Firestore:', firestoreError);
               toast.error(

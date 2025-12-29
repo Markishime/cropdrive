@@ -6,7 +6,7 @@ import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { FileText, Download, Eye, Calendar, Search, Trash2, Plus } from 'lucide-react';
-import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
@@ -49,235 +49,198 @@ export default function ReportsPage() {
     }
   }, [user, authLoading, router]);
 
-  // Fetch reports from Firestore
+  // Process report data from Firestore document
+  const processReportDoc = useCallback((doc: any, currentUserId: string): Report | null => {
+    const data = doc.data();
+    
+    // Support both field name formats: 'userId' (website) or 'user_id' (AI assistant)
+    const userId = data.userId || data.user_id;
+    const reportStatus = data.status || 'completed';
+    
+    // Only include completed reports for current user
+    if (!userId || userId !== currentUserId || reportStatus !== 'completed') {
+      return null;
+    }
+    
+    // Handle report_types array (AI assistant format) vs type string (website format)
+    let reportType: 'soil' | 'leaf' = 'soil';
+    if (data.type) {
+      reportType = data.type as 'soil' | 'leaf';
+    } else if (data.report_types && Array.isArray(data.report_types) && data.report_types.length > 0) {
+      reportType = data.report_types[0] as 'soil' | 'leaf';
+    }
+    
+    // Handle timestamp formats
+    let reportDate: string;
+    let createdAt: Timestamp;
+    
+    if (data.createdAt?.toDate) {
+      createdAt = data.createdAt;
+      reportDate = data.createdAt.toDate().toISOString().split('T')[0];
+    } else if (data.timestamp) {
+      const timestampDate = new Date(data.timestamp);
+      if (!isNaN(timestampDate.getTime())) {
+        reportDate = timestampDate.toISOString().split('T')[0];
+        createdAt = Timestamp.fromDate(timestampDate);
+      } else {
+        reportDate = data.date || new Date().toISOString().split('T')[0];
+        createdAt = Timestamp.now();
+      }
+    } else if (data.date) {
+      reportDate = data.date;
+      createdAt = Timestamp.fromDate(new Date(data.date));
+    } else {
+      reportDate = new Date().toISOString().split('T')[0];
+      createdAt = Timestamp.now();
+    }
+    
+    return {
+      id: doc.id,
+      title: data.title || `Report ${doc.id.slice(0, 8)}`,
+      type: reportType,
+      date: reportDate,
+      status: data.status || 'completed',
+      recommendations: data.recommendations || data.recommendationsCount || 0,
+      summary: data.summary || '',
+      userId: userId || currentUserId,
+      createdAt: createdAt,
+      fileUrl: data.fileUrl || data.file_url
+    };
+  }, []);
+
+  // Fetch reports from Firestore with real-time listener
   useEffect(() => {
-    const fetchReports = async () => {
-      if (!user?.uid) return;
+    if (!user?.uid || !mounted) return;
 
-      setLoadingReports(true);
-      try {
-        const reportsRef = collection(db, 'analysis_results');
+    setLoadingReports(true);
+    console.log('🔍 Setting up real-time reports listener for user:', user.uid);
 
-        console.log('🔍 Starting to fetch reports for user:', user.uid);
-        
-        // Fetch all reports and filter by user_id/userId (since we need to support both formats)
-        // This approach works even if indexes don't exist for both field names
-        let querySnapshot;
-        try {
-          // Try with 'userId' and 'status' filters (website format) with orderBy
-          const q = query(
-            reportsRef,
-            where('userId', '==', user.uid),
-            where('status', '==', 'completed'),
-            orderBy('createdAt', 'desc')
-          );
-          querySnapshot = await getDocs(q);
-          console.log(`✅ Found ${querySnapshot.size} completed reports with userId field and orderBy`);
-        } catch (orderByError: any) {
-          console.error('❌ OrderBy query failed:', orderByError.code, orderByError.message);
-          console.log('🔄 Trying without orderBy...');
-
-          try {
-            const q = query(
-              reportsRef,
-              where('userId', '==', user.uid),
-              where('status', '==', 'completed')
-            );
-            querySnapshot = await getDocs(q);
-            console.log(`✅ Found ${querySnapshot.size} completed reports with userId field (no orderBy)`);
-          } catch (userIdError: any) {
-            console.error('❌ userId query also failed:', userIdError.code, userIdError.message);
-            // If 'userId' query fails, fetch all and filter client-side
-            console.log('🔄 Fetching all reports and filtering client-side...');
-            try {
-              querySnapshot = await getDocs(reportsRef);
-              console.log(`✅ Fetched all ${querySnapshot.size} documents from analysis_results`);
-            } catch (allDocsError: any) {
-              console.error('❌ Even fetching all documents failed:', allDocsError);
-              querySnapshot = { forEach: () => {}, size: 0, empty: true } as any;
+    const reportsRef = collection(db, 'analysis_results');
+    
+    // Try to set up real-time listener with orderBy
+    let unsubscribe: (() => void) | null = null;
+    
+    try {
+      // Try with orderBy first (most efficient)
+      const q = query(
+        reportsRef,
+        where('userId', '==', user.uid),
+        where('status', '==', 'completed'),
+        orderBy('createdAt', 'desc')
+      );
+      
+      unsubscribe = onSnapshot(
+        q,
+        (snapshot) => {
+          console.log(`📊 Real-time update: ${snapshot.size} reports found`);
+          
+          const fetchedReports: Report[] = [];
+          snapshot.forEach((doc) => {
+            const report = processReportDoc(doc, user.uid);
+            if (report) {
+              fetchedReports.push(report);
             }
-          }
-        }
-        
-        const fetchedReports: Report[] = [];
-        
-        querySnapshot.forEach((doc: any) => {
-          const data = doc.data();
-          console.log('🔍 Processing document:', doc.id, 'data keys:', Object.keys(data));
-
-          // Support both field name formats: 'userId' (website) or 'user_id' (AI assistant)
-          const userId = data.userId || data.user_id;
-          const reportStatus = data.status || 'completed';
-          console.log('📋 Document userId:', userId, 'status:', reportStatus, 'current user:', user.uid);
-          
-          // Only include completed reports for current user
-          if (!userId || userId !== user.uid || reportStatus !== 'completed') {
-            if (userId && userId === user.uid && reportStatus !== 'completed') {
-              console.log('Skipping report - not completed:', { 
-                reportUserId: userId, 
-                status: reportStatus,
-                docId: doc.id 
-              });
-            }
-            return;
-          }
-          
-          console.log('✅ Processing completed report for user:', { userId, docId: doc.id, status: reportStatus });
-          
-          // Handle report_types array (AI assistant format) vs type string (website format)
-          let reportType: 'soil' | 'leaf' = 'soil';
-          if (data.type) {
-            reportType = data.type as 'soil' | 'leaf';
-          } else if (data.report_types && Array.isArray(data.report_types) && data.report_types.length > 0) {
-            // Use first type from array
-            reportType = data.report_types[0] as 'soil' | 'leaf';
-          }
-          
-          // Handle timestamp formats: createdAt (Timestamp), timestamp (string), or date (string)
-          let reportDate: string;
-          let createdAt: Timestamp;
-          
-          if (data.createdAt?.toDate) {
-            // Firestore Timestamp
-            createdAt = data.createdAt;
-            reportDate = data.createdAt.toDate().toISOString().split('T')[0];
-          } else if (data.timestamp) {
-            // String timestamp from AI assistant
-            const timestampDate = new Date(data.timestamp);
-            if (!isNaN(timestampDate.getTime())) {
-              reportDate = timestampDate.toISOString().split('T')[0];
-              createdAt = Timestamp.fromDate(timestampDate);
-            } else {
-              reportDate = data.date || new Date().toISOString().split('T')[0];
-              createdAt = Timestamp.now();
-            }
-          } else if (data.date) {
-            reportDate = data.date;
-            createdAt = Timestamp.fromDate(new Date(data.date));
-          } else {
-            reportDate = new Date().toISOString().split('T')[0];
-            createdAt = Timestamp.now();
-          }
-          
-          fetchedReports.push({
-            id: doc.id,
-            title: data.title || `Report ${doc.id.slice(0, 8)}`,
-            type: reportType,
-            date: reportDate,
-            status: data.status || 'completed',
-            recommendations: data.recommendations || data.recommendationsCount || 0,
-            summary: data.summary || '',
-            userId: userId || user.uid,
-            createdAt: createdAt,
-            fileUrl: data.fileUrl || data.file_url
           });
-        });
-        
-        // Sort manually if orderBy wasn't used
-        if (fetchedReports.length > 0 && !fetchedReports[0].createdAt) {
+          
+          // Sort by createdAt descending (newest first)
           fetchedReports.sort((a, b) => {
             const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
             const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
-            return dateB - dateA; // Descending
+            return dateB - dateA;
           });
-        }
-        
-        // If no reports found in analysis_results, try the old 'reports' collection
-        if (fetchedReports.length === 0) {
-          console.log('No reports found in analysis_results, trying old reports collection...');
-          try {
-            const oldReportsRef = collection(db, 'reports');
-            const oldQuerySnapshot = await getDocs(oldReportsRef);
-
-            oldQuerySnapshot.forEach((doc) => {
-              const data = doc.data();
-              const userId = data.userId || data.user_id;
-
-              if (!userId || userId !== user.uid || data.status !== 'completed') {
-                return;
-              }
-
-              console.log('✅ Found report in old collection:', doc.id);
-              fetchedReports.push({
-                id: doc.id,
-                title: data.title || `Report ${doc.id.slice(0, 8)}`,
-                type: (data.type as 'soil' | 'leaf') || 'soil',
-                date: data.date || new Date().toISOString().split('T')[0],
-                status: 'completed',
-                recommendations: data.recommendations || 0,
-                summary: data.summary || '',
-                userId: userId,
-                createdAt: data.createdAt || null,
-                fileUrl: data.fileUrl || data.file_url
-              });
-            });
-          } catch (oldCollectionError) {
-            console.log('Error checking old reports collection:', oldCollectionError);
+          
+          setReports(fetchedReports);
+          setLoadingReports(false);
+          
+          if (fetchedReports.length > 0) {
+            console.log(`✅ Real-time listener: Loaded ${fetchedReports.length} reports`);
+          }
+        },
+        (error: any) => {
+          console.error('❌ Real-time listener error:', error);
+          
+          // If orderBy fails, try without orderBy
+          if (error.code === 'failed-precondition') {
+            console.log('🔄 OrderBy failed, trying without orderBy...');
+            try {
+              const q2 = query(
+                reportsRef,
+                where('userId', '==', user.uid),
+                where('status', '==', 'completed')
+              );
+              
+              unsubscribe = onSnapshot(
+                q2,
+                (snapshot) => {
+                  const fetchedReports: Report[] = [];
+                  snapshot.forEach((doc) => {
+                    const report = processReportDoc(doc, user.uid);
+                    if (report) {
+                      fetchedReports.push(report);
+                    }
+                  });
+                  
+                  // Sort manually
+                  fetchedReports.sort((a, b) => {
+                    const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
+                    const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
+                    return dateB - dateA;
+                  });
+                  
+                  setReports(fetchedReports);
+                  setLoadingReports(false);
+                  console.log(`✅ Real-time listener (no orderBy): Loaded ${fetchedReports.length} reports`);
+                },
+                (error2: any) => {
+                  console.error('❌ Real-time listener error (no orderBy):', error2);
+                  setLoadingReports(false);
+                  setReports([]);
+                }
+              );
+            } catch (err) {
+              console.error('❌ Error setting up fallback listener:', err);
+              setLoadingReports(false);
+              setReports([]);
+            }
+          } else {
+            setLoadingReports(false);
+            setReports([]);
           }
         }
-
-        setReports(fetchedReports);
-
-        // If no reports found, just set empty array (no error)
-        if (fetchedReports.length === 0) {
-          console.log('No reports found for user:', user.uid);
-        } else {
-          console.log(`✅ Loaded ${fetchedReports.length} reports for user`);
-        }
-      } catch (error: any) {
-        console.error('Error fetching reports:', error);
-        
-        // Show error toast for actual errors, not missing index
-        if (error.code !== 'failed-precondition' && error.code !== 'permission-denied') {
-          toast.error(language === 'ms' ? 'Ralat memuatkan laporan' : 'Error loading reports');
-        } else if (error.code === 'permission-denied') {
-          toast.error(language === 'ms' ? 'Tiada kebenaran untuk melihat laporan' : 'Permission denied to view reports');
-        }
-        
-        // Set empty array on error (don't use mock data)
-        setReports([]);
-      } finally {
-        setLoadingReports(false);
-      }
-    };
-
-    if (user && mounted) {
-      fetchReports();
+      );
+    } catch (error: any) {
+      console.error('❌ Error setting up real-time listener:', error);
+      setLoadingReports(false);
+      setReports([]);
     }
     
-    // Listen for new report saved events
+    // Also listen for custom events as backup
     const handleReportSaved = (event: Event) => {
       const customEvent = event as CustomEvent;
       const eventUserId = customEvent.detail?.userId;
       const currentUserId = user?.uid;
-      const reportId = customEvent.detail?.reportId;
-
+      
       console.log('📢 Reports page: Received analysisReportSaved event', {
         eventUserId,
         currentUserId,
-        reportId,
-        uploadsUsed: customEvent.detail?.uploadsUsed,
-        uploadsLimit: customEvent.detail?.uploadsLimit
+        reportId: customEvent.detail?.reportId
       });
 
-      // Only refresh if the event is for the current user
+      // Real-time listener should handle this, but this is a backup
       if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
-        console.log('✅ Refreshing reports for current user:', currentUserId);
-        // Add a small delay to ensure Firestore has updated
-        setTimeout(() => {
-          console.log('🔄 Fetching reports after event...');
-          fetchReports();
-        }, 1000); // Increased delay
-      } else {
-        console.log('⚠️ Ignoring event - user ID mismatch or no current user');
+        console.log('✅ Event received for current user - real-time listener should update automatically');
       }
     };
     
     window.addEventListener('analysisReportSaved', handleReportSaved);
+    
     return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
-  }, [user, mounted, language]);
+  }, [user?.uid, mounted, processReportDoc]);
 
   const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
