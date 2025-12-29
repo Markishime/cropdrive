@@ -132,6 +132,7 @@ export default function PaymentMethodPage() {
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Invoices fetched:', data.invoices?.length || 0, 'invoices');
+        console.log('📊 Response status:', response.status, 'Success:', data.success);
         
         // Convert ISO date strings to Date objects for proper handling
         const processedInvoices = (data.invoices || []).map((invoice: any) => ({
@@ -187,6 +188,7 @@ export default function PaymentMethodPage() {
       if (response.ok) {
         const data = await response.json();
         console.log('✅ Subscription fetched:', data.subscription);
+        console.log('📊 Response status:', response.status, 'Success:', data.success);
         console.log('📊 User stripeSubscriptionId:', user?.stripeSubscriptionId);
         
         // Set subscription even if null (to indicate we've checked)
@@ -195,6 +197,7 @@ export default function PaymentMethodPage() {
         if (data.subscription) {
           setAutoRenewal(!data.subscription.cancelAtPeriodEnd);
           console.log('✅ Auto-renewal state set to:', !data.subscription.cancelAtPeriodEnd);
+          console.log('💳 Payment method:', data.subscription.paymentMethod);
         } else if (user?.stripeSubscriptionId) {
           // User has subscription ID but API returned null - might be a timing issue
           console.warn('⚠️ User has stripeSubscriptionId but API returned null subscription');
@@ -400,9 +403,9 @@ export default function PaymentMethodPage() {
       });
       
       const data = await response.json();
-      console.log('API response:', { ok: response.ok, data });
+      console.log('API response:', { ok: response.ok, status: response.status, success: data.success, data });
       
-      if (response.ok) {
+      if (response.ok && data.success !== false) {
         setAutoRenewal(!data.cancelAtPeriodEnd);
         setSubscription(prev => prev ? { ...prev, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : subscription ? { ...subscription, cancelAtPeriodEnd: data.cancelAtPeriodEnd } : null);
         
@@ -465,7 +468,10 @@ export default function PaymentMethodPage() {
         }),
       });
       
-      if (response.ok) {
+      const data = await response.json();
+      console.log('📊 Billing settings response:', { ok: response.ok, status: response.status, success: data.success });
+      
+      if (response.ok && data.success !== false) {
         setEmailNotifications(newValue);
         toast.success(
           newValue
@@ -520,6 +526,8 @@ export default function PaymentMethodPage() {
       });
 
       const data = await response.json();
+      console.log('📊 Billing portal response:', { ok: response.ok, status: response.status, success: data.success, hasUrl: !!data.url });
+      
       if (!response.ok || !data.url) {
         throw new Error(data.error || 'Failed to create portal session');
       }
@@ -608,8 +616,9 @@ export default function PaymentMethodPage() {
       });
       
       const data = await response.json();
+      console.log('📊 Cancel subscription response:', { ok: response.ok, status: response.status, success: data.success });
       
-      if (response.ok) {
+      if (response.ok && data.success !== false) {
         toast.success(
           language === 'ms' 
             ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
@@ -674,8 +683,9 @@ export default function PaymentMethodPage() {
       });
       
       const data = await response.json();
+      console.log('📊 Reactivate subscription response:', { ok: response.ok, status: response.status, success: data.success });
       
-      if (response.ok) {
+      if (response.ok && data.success !== false) {
         toast.success(
           language === 'ms' 
             ? '🎉 Langganan telah diaktifkan semula!' 

@@ -29,10 +29,12 @@ export async function GET(req: NextRequest) {
     const stripeSubscriptionId = userData?.stripeSubscriptionId;
 
     if (!stripeSubscriptionId) {
-      return NextResponse.json({ 
-        subscription: null, 
-        message: 'No active subscription' 
-      });
+    return NextResponse.json({ 
+      success: true,
+      status: 200,
+      subscription: null, 
+      message: 'No active subscription' 
+    }, { status: 200 });
     }
 
     // Fetch subscription from Stripe with price details
@@ -372,11 +374,12 @@ export async function PATCH(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
+        status: 200,
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         message: subscription.cancel_at_period_end 
           ? 'Auto-renewal disabled. Your subscription will end at the current period.'
           : 'Auto-renewal enabled. Your subscription will renew automatically.',
-      });
+      }, { status: 200 });
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
@@ -453,10 +456,11 @@ export async function DELETE(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      status: 200,
       message: 'Subscription will be cancelled at the end of the current billing period.',
       cancelAt: new Date((subscription as any).current_period_end * 1000),
       currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error cancelling subscription:', error);
@@ -542,6 +546,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      status: 200,
       message: 'Subscription has been reactivated successfully!',
       subscription: {
         id: subscription.id,
@@ -549,7 +554,7 @@ export async function POST(req: NextRequest) {
         currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
       },
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error reactivating subscription:', error);

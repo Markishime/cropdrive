@@ -112,6 +112,32 @@ function SuccessPageContent() {
             : `🎉 ${plan} plan activated!`
         );
 
+        // Send postMessage to parent window (if in iframe) or to window itself
+        // This allows other pages/tabs to know that checkout was successful
+        if (typeof window !== 'undefined') {
+          const message = {
+            type: 'CHECKOUT_SUCCESS',
+            status: 200,
+            success: true,
+            planId: plan,
+            sessionId: sessionId,
+            userId: user.uid,
+            timestamp: new Date().toISOString(),
+          };
+          
+          // Send to parent window if in iframe
+          if (window.parent && window.parent !== window) {
+            window.parent.postMessage(message, '*');
+            console.log('✅ Sent CHECKOUT_SUCCESS postMessage to parent window');
+          }
+          
+          // Also dispatch custom event for same-window listeners
+          window.dispatchEvent(new CustomEvent('checkoutSuccess', {
+            detail: message
+          }));
+          console.log('✅ Dispatched checkoutSuccess event');
+        }
+
       } catch (error) {
         console.error('❌ Error activating plan:', error);
         toast.error(

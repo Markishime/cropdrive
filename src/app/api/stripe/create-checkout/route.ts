@@ -256,9 +256,11 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
+      success: true,
+      status: 200,
       sessionId: session.id,
       url: session.url,
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('=== Checkout Error ===');

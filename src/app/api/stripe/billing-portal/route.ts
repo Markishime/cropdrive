@@ -118,7 +118,11 @@ export async function POST(req: NextRequest) {
       return_url: `${baseUrl}/payment-method`,
     });
 
-    return NextResponse.json({ url: session.url });
+    return NextResponse.json({ 
+      success: true,
+      status: 200,
+      url: session.url 
+    }, { status: 200 });
   } catch (error: any) {
     console.error('Error creating billing portal session:', error);
     return NextResponse.json(

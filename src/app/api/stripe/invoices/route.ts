@@ -32,7 +32,12 @@ export async function GET(req: NextRequest) {
     const stripeCustomerId = userData?.stripeCustomerId;
 
     if (!stripeCustomerId) {
-      return NextResponse.json({ invoices: [], message: 'No Stripe customer found' });
+      return NextResponse.json({ 
+        success: true,
+        status: 200,
+        invoices: [], 
+        message: 'No Stripe customer found' 
+      }, { status: 200 });
     }
 
     // Fetch invoices from Stripe
@@ -63,9 +68,11 @@ export async function GET(req: NextRequest) {
     console.log(`✅ Fetched ${formattedInvoices.length} invoices for customer ${stripeCustomerId}`);
 
     return NextResponse.json({ 
+      success: true,
+      status: 200,
       invoices: formattedInvoices,
       hasMore: invoices.has_more 
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error fetching invoices:', error);

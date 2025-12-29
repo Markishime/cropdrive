@@ -22,11 +22,13 @@ export async function GET(req: NextRequest) {
     const userData = userDoc.data();
     
     return NextResponse.json({
+      success: true,
+      status: 200,
       settings: {
         emailNotifications: userData?.billingSettings?.emailNotifications ?? true,
         autoRenewal: !(userData?.subscriptionCancelAtPeriodEnd ?? false),
       },
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error fetching billing settings:', error);
@@ -65,11 +67,12 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      status: 200,
       message: 'Billing settings updated successfully',
       settings: {
         emailNotifications,
       },
-    });
+    }, { status: 200 });
 
   } catch (error: any) {
     console.error('Error updating billing settings:', error);
