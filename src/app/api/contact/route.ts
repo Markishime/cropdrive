@@ -1,11 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-const resendApiKey = process.env.RESEND_API_KEY;
+/**
+ * Contact Form API Route - Uses Gmail SMTP (nodemailer) for email delivery
+ * 
+ * NO DOMAIN VERIFICATION REQUIRED!
+ * 
+ * REQUIRED ENVIRONMENT VARIABLES:
+ * - SMTP_HOST: SMTP server (default: 'smtp.gmail.com')
+ * - SMTP_PORT: SMTP port (default: 587)
+ * - SMTP_USER: Your Gmail address (e.g., 'yourname@gmail.com')
+ * - SMTP_PASS: Gmail App Password (NOT your regular password - see setup guide)
+ * - CONTACT_TO_EMAIL: Email address to receive contact form submissions
+ * 
+ * SETUP INSTRUCTIONS:
+ * 1. Go to your Google Account: https://myaccount.google.com
+ * 2. Enable 2-Step Verification
+ * 3. Go to App Passwords: https://myaccount.google.com/apppasswords
+ * 4. Generate an App Password for "Mail"
+ * 5. Use that 16-character password as SMTP_PASS
+ * 
+ * The email will be sent FROM your Gmail account TO the CONTACT_TO_EMAIL address
+ */
+
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+const smtpUser = process.env.SMTP_USER; // Your Gmail address
+const smtpPass = process.env.SMTP_PASS; // Gmail App Password
 const contactToEmail = process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
-const contactFromEmail = process.env.CONTACT_FROM_EMAIL || 'CropDrive Support <support@agriglobalsolutions.com>';
 
-// Contact form submission handler (Resend)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -28,9 +51,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!resendApiKey || resendApiKey.trim() === '') {
-      console.error('❌ RESEND_API_KEY is not configured in environment variables');
-      console.warn('⚠️ RESEND_API_KEY not configured. Logging contact submission instead of sending email.');
+    // Check if SMTP is configured
+    if (!smtpUser || !smtpPass) {
+      console.error('❌ SMTP credentials not configured');
+      console.warn('⚠️ SMTP_USER and SMTP_PASS must be set in environment variables');
       console.log('Name:', name);
       console.log('Email:', email);
       console.log('Organization:', organization || 'N/A');
@@ -44,62 +68,54 @@ export async function POST(req: NextRequest) {
       }, { status: 500 });
     }
 
-    // Validate API key format (Resend API keys typically start with 're_')
-    if (!resendApiKey.startsWith('re_')) {
-      console.warn('⚠️ RESEND_API_KEY format may be incorrect (should start with "re_")');
-    }
-
-    // Initialize Resend with API key
-    console.log('📧 Initializing Resend with API key (length:', resendApiKey.length, 'chars)...');
-    const resend = new Resend(resendApiKey);
-
+    // Create email content
     const htmlBody = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); padding: 20px; text-align: center;">
-            <h1 style="color: white; margin: 0;">New Contact Form Submission</h1>
-          </div>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); padding: 20px; text-align: center;">
+          <h1 style="color: white; margin: 0;">New Contact Form Submission</h1>
+        </div>
+        
+        <div style="padding: 30px; background: #f9fafb;">
+          <h2 style="color: #166534; margin-top: 0;">Contact Details</h2>
           
-          <div style="padding: 30px; background: #f9fafb;">
-            <h2 style="color: #166534; margin-top: 0;">Contact Details</h2>
-            
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; width: 150px;">Name:</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${name}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Email:</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
-                  <a href="mailto:${email}" style="color: #166534;">${email}</a>
-                </td>
-              </tr>
-              ${organization ? `
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Organization:</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${organization}</td>
-              </tr>
-              ` : ''}
-              ${role ? `
-              <tr>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Role:</td>
-                <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${role}</td>
-              </tr>
-              ` : ''}
-            </table>
-            
-            <h2 style="color: #166534; margin-top: 30px;">Message</h2>
-            <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
-              <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${message}</p>
-            </div>
-          </div>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold; width: 150px;">Name:</td>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${name}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Email:</td>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">
+                <a href="mailto:${email}" style="color: #166534;">${email}</a>
+              </td>
+            </tr>
+            ${organization ? `
+            <tr>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Organization:</td>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${organization}</td>
+            </tr>
+            ` : ''}
+            ${role ? `
+            <tr>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; font-weight: bold;">Role:</td>
+              <td style="padding: 10px 0; border-bottom: 1px solid #e5e7eb;">${role}</td>
+            </tr>
+            ` : ''}
+          </table>
           
-          <div style="background: #166534; padding: 15px; text-align: center;">
-            <p style="color: white; margin: 0; font-size: 12px;">
-              This message was sent from the CropDrive contact form at ${new Date().toISOString()}
-            </p>
+          <h2 style="color: #166534; margin-top: 30px;">Message</h2>
+          <div style="background: white; padding: 20px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <p style="margin: 0; white-space: pre-wrap; line-height: 1.6;">${message}</p>
           </div>
         </div>
-      `;
+        
+        <div style="background: #166534; padding: 15px; text-align: center;">
+          <p style="color: white; margin: 0; font-size: 12px;">
+            This message was sent from the CropDrive contact form at ${new Date().toISOString()}
+          </p>
+        </div>
+      </div>
+    `;
 
     const textBody = `
 New Contact Form Submission
@@ -113,59 +129,43 @@ ${message}
 
 ---
 Sent from CropDrive contact form at ${new Date().toISOString()}
-      `;
+    `;
 
-    // Send email to team / CEO
-    console.log('📧 Attempting to send contact form email to:', contactToEmail);
-    console.log('📧 From email:', contactFromEmail);
+    // Create transporter
+    console.log('📧 Configuring SMTP transporter...');
+    console.log('📧 SMTP Host:', smtpHost);
+    console.log('📧 SMTP Port:', smtpPort);
+    console.log('📧 SMTP User:', smtpUser);
+    console.log('📧 To Email:', contactToEmail);
 
-    const emailResult = await resend.emails.send({
-      from: contactFromEmail,
-      to: contactToEmail,
-      replyTo: email,
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465, // true for 465, false for other ports
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+
+    // Send email
+    console.log('📧 Attempting to send contact form email...');
+    const info = await transporter.sendMail({
+      from: `CropDrive Contact Form <${smtpUser}>`, // From your Gmail
+      to: contactToEmail, // To the recipient email
+      replyTo: email, // Reply to the form submitter
       subject: `[CropDrive Contact Form] New message from ${name}`,
       html: htmlBody,
       text: textBody,
     });
 
-    console.log('📧 Contact form email result:', emailResult);
+    console.log('✅ Contact form email sent successfully!');
+    console.log('📧 Message ID:', info.messageId);
+    console.log('📧 Response:', info.response);
 
-    if (emailResult.error) {
-      console.error('❌ Contact form email failed:', emailResult.error);
-      console.error('❌ Error details:', JSON.stringify(emailResult.error, null, 2));
-      
-      // Provide more specific error message
-      const errorMessage = emailResult.error.message || 'Failed to send email';
-      return NextResponse.json(
-        { 
-          success: false,
-          error: `Failed to send email: ${errorMessage}. Please try again or contact us directly.`,
-          details: emailResult.error
-        },
-        { status: 500 }
-      );
-    }
-
-    if (!emailResult.data || !emailResult.data.id) {
-      console.error('❌ Contact form email sent but no email ID returned:', emailResult);
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Email may not have been sent. Please try again or contact us directly.',
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log('✅ Contact form email sent successfully. Email ID:', emailResult.data.id);
-
-    // Send confirmation email to the user
-    const confirmationResult = await resend.emails.send({
-      from: contactFromEmail,
-      to: email,
-      replyTo: contactToEmail,
-      subject: 'Thank you for contacting CropDrive',
-      html: `
+    // Send confirmation email to the user (optional)
+    try {
+      const confirmationHtml = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <div style="background: linear-gradient(135deg, #166534 0%, #15803d 100%); padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Thank You for Reaching Out!</h1>
@@ -199,40 +199,40 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
             </p>
           </div>
         </div>
-      `,
-    });
-    
-    if (confirmationResult.error) {
-      console.error('❌ Confirmation email failed:', confirmationResult.error);
-      // Don't fail the request if confirmation email fails, but log it
-      console.warn('Contact form processed but confirmation email failed to send');
-    } else {
-      console.log('✅ Confirmation email sent result:', confirmationResult);
-    }
+      `;
 
-    console.log('✅ Contact form processed successfully');
+      await transporter.sendMail({
+        from: `CropDrive Support <${smtpUser}>`,
+        to: email,
+        replyTo: contactToEmail,
+        subject: 'Thank you for contacting CropDrive',
+        html: confirmationHtml,
+      });
+      console.log('✅ Confirmation email sent to user');
+    } catch (confirmationError) {
+      console.warn('⚠️ Failed to send confirmation email (non-critical):', confirmationError);
+    }
 
     return NextResponse.json({
       success: true,
       status: 200,
       message: 'Your message has been received. We will get back to you soon!',
-      emailId: emailResult.data?.id,
+      messageId: info.messageId,
     }, { status: 200 });
 
   } catch (error: any) {
     console.error('❌ Contact form error:', error);
-    console.error('❌ Error stack:', error.stack);
     console.error('❌ Error details:', JSON.stringify(error, null, 2));
     
     // Provide more specific error message
     const errorMessage = error?.message || 'An unexpected error occurred';
-    const isResendError = error?.name === 'ResendError' || error?.message?.includes('Resend');
+    const isAuthError = errorMessage.includes('Invalid login') || errorMessage.includes('authentication');
     
     return NextResponse.json(
       { 
         success: false,
-        error: isResendError 
-          ? `Email service error: ${errorMessage}. Please try again or contact us directly.`
+        error: isAuthError 
+          ? 'Email service authentication failed. Please check SMTP credentials.'
           : `Failed to process your request: ${errorMessage}. Please try again.`,
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
@@ -245,7 +245,7 @@ Sent from CropDrive contact form at ${new Date().toISOString()}
 export async function GET() {
   return NextResponse.json({
     status: 'ok',
-    message: 'Contact form API is active',
+    message: 'Contact form API (SMTP) is active',
+    smtpConfigured: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
   });
 }
-

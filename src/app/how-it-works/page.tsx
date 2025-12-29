@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -10,12 +10,73 @@ export default function HowItWorksPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const { language } = useTranslation(currentLanguage);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     setMounted(true);
     const lang = getCurrentLanguage();
     setCurrentLanguage(lang);
   }, []);
+
+  // Listen for language changes
+  useEffect(() => {
+    if (!mounted) return;
+
+    const handleLanguageChange = (newLang?: 'en' | 'ms') => {
+      const lang = newLang || getCurrentLanguage();
+      if (lang !== currentLanguage) {
+        setCurrentLanguage(lang);
+      }
+    };
+
+    // Listen for storage events (works across tabs/windows)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cropdrive-language' && e.newValue) {
+        handleLanguageChange(e.newValue as 'en' | 'ms');
+      }
+    };
+
+    // Listen for custom language change events
+    const handleCustomLanguageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.language) {
+        handleLanguageChange(customEvent.detail.language);
+      } else {
+        handleLanguageChange();
+      }
+    };
+
+    // Poll localStorage periodically to catch changes in same window
+    const pollInterval = setInterval(() => {
+      const lang = getCurrentLanguage();
+      if (lang !== currentLanguage) {
+        handleLanguageChange(lang);
+      }
+    }, 1000);
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('languageChanged', handleCustomLanguageChange);
+
+    return () => {
+      clearInterval(pollInterval);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('languageChanged', handleCustomLanguageChange);
+    };
+  }, [mounted, currentLanguage]);
+
+  // Update video source when language changes
+  useEffect(() => {
+    if (videoRef.current && mounted) {
+      const video = videoRef.current;
+      const videoSrc = currentLanguage === 'ms' 
+        ? '/videos/CropDrive Intro Malaysian.mp4'
+        : '/videos/Cropdrive Intro English.mp4';
+      
+      // Update video source
+      video.src = videoSrc;
+      video.load(); // Reload the video with new source
+    }
+  }, [currentLanguage, mounted]);
 
   if (!mounted) {
     return null;
@@ -123,25 +184,25 @@ export default function HowItWorksPage() {
               {/* Demo Video Player */}
               <div className="aspect-video relative">
                 <video
+                  key={`video-${currentLanguage}`}
+                  ref={videoRef}
                   className="w-full h-full object-cover"
                   controls
+                  preload="metadata"
                   poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
                 >
-                  <source src="/videos/demo-video.mp4" type="video/mp4" />
+                  <source 
+                    src={currentLanguage === 'ms' 
+                      ? '/videos/CropDrive Intro Malaysian.mp4'
+                      : '/videos/Cropdrive Intro English.mp4'
+                    } 
+                    type="video/mp4" 
+                  />
                   {language === 'ms' 
                     ? 'Pelayar anda tidak menyokong tag video.'
                     : 'Your browser does not support the video tag.'
                   }
                 </video>
-                {/* Placeholder overlay - remove once you have the actual video */}
-                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-green-900/90 to-gray-900/90 pointer-events-none">
-                  <div className="text-center px-6">
-                    <div className="text-6xl mb-4">🎬</div>
-                    <p className="text-2xl font-bold text-white mb-2">
-                      {language === 'ms' ? 'Video Demo Akan Datang' : 'Demo Video Coming Soon'}
-                    </p>               
-                  </div>
-                </div>
               </div>
             </div>
 

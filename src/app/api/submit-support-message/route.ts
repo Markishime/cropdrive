@@ -1,9 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { SupportMessage } from '@/types';
 
-// Initialize Resend with API key (or fallback for build time)
-const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_for_build');
+/**
+ * Support Message API Route - Uses Gmail SMTP (nodemailer) for email delivery
+ * 
+ * NO DOMAIN VERIFICATION REQUIRED!
+ * 
+ * REQUIRED ENVIRONMENT VARIABLES:
+ * - SMTP_HOST: SMTP server (default: 'smtp.gmail.com')
+ * - SMTP_PORT: SMTP port (default: 587)
+ * - SMTP_USER: Your Gmail address (e.g., 'yourname@gmail.com')
+ * - SMTP_PASS: Gmail App Password (NOT your regular password)
+ * - SUPPORT_TO_EMAIL: Email address to receive support messages (defaults to contact@agriglobalsolutions.com)
+ */
+
+const smtpHost = process.env.SMTP_HOST || 'smtp.gmail.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+const smtpUser = process.env.SMTP_USER; // Your Gmail address
+const smtpPass = process.env.SMTP_PASS; // Gmail App Password
+const supportToEmail = process.env.SUPPORT_TO_EMAIL || process.env.CONTACT_TO_EMAIL || 'contact@agriglobalsolutions.com';
 
 // Plan-based monthly limits
 const PLAN_LIMITS = {
@@ -66,11 +82,12 @@ async function getUserPlanLimit(userId: string): Promise<number> {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if API key is configured
-    if (!process.env.RESEND_API_KEY || process.env.RESEND_API_KEY === 're_placeholder_for_build') {
-      console.error('❌ Resend API key not configured');
+    // Check if SMTP is configured
+    if (!smtpUser || !smtpPass) {
+      console.error('❌ SMTP credentials not configured');
+      console.warn('⚠️ SMTP_USER and SMTP_PASS must be set in environment variables');
       return NextResponse.json(
-        { error: 'Email service not configured. Please add RESEND_API_KEY to environment variables.' },
+        { error: 'Email service not configured. Please add SMTP_USER and SMTP_PASS to environment variables.' },
         { status: 503 }
       );
     }
@@ -259,21 +276,44 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    // Send email notification
-    const { data, error } = await resend.emails.send({
-      from: 'CropDrive Support <support@agriglobalsolutions.com>',
-      to: ['contact@agriglobalsolutions.com'],
-      replyTo: supportMessage.userEmail, // Allow direct reply to farmer
-      subject: `🆘 Support: ${subject || 'New Message'} - ${supportMessage.userName} (${userPlan})`,
-      html: emailHtml,
+    // Create SMTP transporter
+    console.log('📧 Configuring SMTP transporter...');
+    console.log('📧 SMTP Host:', smtpHost);
+    console.log('📧 SMTP Port:', smtpPort);
+    console.log('📧 SMTP User:', smtpUser);
+    console.log('📧 To Email:', supportToEmail);
+
+    const transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: smtpPort,
+      secure: smtpPort === 465, // true for 465, false for other ports
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
     });
 
-    if (error) {
-      console.error('❌ Email send error:', error);
+    // Send email notification
+    console.log('📧 Attempting to send support email...');
+    
+    try {
+      const info = await transporter.sendMail({
+        from: `CropDrive Support <${smtpUser}>`, // From your Gmail
+        to: supportToEmail, // To the recipient email
+        replyTo: supportMessage.userEmail, // Allow direct reply to farmer
+        subject: `🆘 Support: ${subject || 'New Message'} - ${supportMessage.userName} (${userPlan})`,
+        html: emailHtml,
+      });
+
+      console.log('✅ Support email sent successfully!');
+      console.log('📧 Message ID:', info.messageId);
+      console.log('📧 Response:', info.response);
+    } catch (emailError: any) {
+      console.error('❌ Support email send error:', emailError);
+      console.error('❌ Error details:', JSON.stringify(emailError, null, 2));
+      
       // Don't fail the request if email fails, but log it
-      console.warn('Support message saved but email failed to send');
-    } else {
-      console.log('✅ Support email sent successfully:', data);
+      console.warn('⚠️ Support message saved to Firestore but email failed to send');
     }
 
     console.log('✅ Support message submitted successfully:', docRef.id);
