@@ -64,13 +64,19 @@ export default function HowItWorksPage() {
     };
   }, [mounted, currentLanguage]);
 
+  // Get video URLs from environment variables or fallback to local paths
+  const getVideoUrl = (language: 'en' | 'ms') => {
+    if (language === 'ms') {
+      return process.env.NEXT_PUBLIC_VIDEO_MALAYSIAN_URL || '/videos/CropDrive Intro Malaysian.mp4';
+    }
+    return process.env.NEXT_PUBLIC_VIDEO_ENGLISH_URL || '/videos/Cropdrive Intro English.mp4';
+  };
+
   // Update video source when language changes
   useEffect(() => {
     if (videoRef.current && mounted) {
       const video = videoRef.current;
-      const videoSrc = currentLanguage === 'ms' 
-        ? '/videos/CropDrive Intro Malaysian.mp4'
-        : '/videos/Cropdrive Intro English.mp4';
+      const videoSrc = getVideoUrl(currentLanguage);
       
       // Update video source
       video.src = videoSrc;
@@ -192,10 +198,7 @@ export default function HowItWorksPage() {
                   poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
                 >
                   <source 
-                    src={currentLanguage === 'ms' 
-                      ? '/videos/CropDrive Intro Malaysian.mp4'
-                      : '/videos/Cropdrive Intro English.mp4'
-                    } 
+                    src={getVideoUrl(currentLanguage)} 
                     type="video/mp4" 
                   />
                   {language === 'ms' 

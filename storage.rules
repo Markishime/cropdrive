@@ -45,6 +45,12 @@ service firebase.storage {
       allow write: if false;
     }
 
+    // Public videos - anyone can read (for website video content)
+    match /videos/{allPaths=**} {
+      allow read: if true;
+      allow write: if false; // Only upload via Firebase Console or Admin SDK
+    }
+
     // Admin files - no client access
     match /admin/{allPaths=**} {
       allow read, write: if false;
