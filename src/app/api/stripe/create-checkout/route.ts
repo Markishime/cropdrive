@@ -167,9 +167,15 @@ export async function POST(req: NextRequest) {
       priceId = null; // Force inline pricing
     }
 
+    // Check if user already has a Stripe customer ID
+    let stripeCustomerId = userData.stripeCustomerId;
+    
+    // If user doesn't have a Stripe customer ID, we'll use customer_email
+    // which creates a new customer during checkout
+    console.log('Stripe customer ID from user data:', stripeCustomerId || '(none - will create new customer)');
+
     // Create Stripe checkout session (with proper metadata for webhooks)
-    const sessionConfig: any = {
-      customer_email: userData.email,
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
       cancel_url: `${baseUrl}/pricing`,
@@ -187,12 +193,23 @@ export async function POST(req: NextRequest) {
           setup_future_usage: 'off_session'
         }
       },
-      // Note: customer_creation is only valid in 'payment' mode, not 'subscription' mode
-      // In subscription mode, Stripe automatically creates customers
-      customer_update: {
-        address: 'auto'
-      },
     };
+    
+    // IMPORTANT: customer_update can ONLY be used when passing an existing customer ID
+    // When using customer_email (for new customers), we must NOT include customer_update
+    if (stripeCustomerId) {
+      // Existing customer - use customer ID and enable customer_update
+      sessionConfig.customer = stripeCustomerId;
+      sessionConfig.customer_update = {
+        address: 'auto',
+        name: 'auto',
+      };
+      console.log('Using existing Stripe customer:', stripeCustomerId);
+    } else {
+      // New customer - use customer_email (Stripe will create customer during checkout)
+      sessionConfig.customer_email = userData.email;
+      console.log('Creating new Stripe customer for:', userData.email);
+    }
 
     // Try to use existing price IDs, fallback to creating inline prices for testing
     if (priceId && priceId.startsWith('price_')) {

@@ -108,243 +108,131 @@ export default function TermsPage() {
               <Card className="mb-8 bg-white/70 backdrop-blur-xl border-2 border-green-100 shadow-2xl">
                 <CardContent className="p-8 md:p-12">
                   <div className="prose prose-lg max-w-none">
-                    {language === 'ms' ? (
-                      <div className="space-y-6 text-gray-700">
-                        <p>
-                          Syarat Perkhidmatan ini ("Syarat") mengawal penggunaan anda terhadap platform CropDrive OP Advisor™ ("Platform") yang dikendalikan oleh CropDrive OP Advisor™ ("kami", "kita", atau "milik kami"). Dengan mengakses atau menggunakan Platform, anda bersetuju untuk terikat dengan Syarat ini.
-                        </p>
+                    <div className="space-y-6 text-gray-700">
+                      <p className="text-sm text-gray-500 mb-6">
+                        Last updated: 30 December 2025
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Penerimaan Syarat</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Operator</h2>
+                      <p>
+                        The operator of www.cropdrive.ai and the CropDrive OP Advisor service is AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia. Contact email: contact@agriglobalsolutions.com.
+                      </p>
 
-                        <p>
-                          Dengan mendaftar, mengakses, atau menggunakan Platform, anda mengakui bahawa anda telah membaca, memahami, dan bersetuju untuk terikat dengan Syarat ini. Jika anda tidak bersetuju dengan mana-mana bahagian Syarat ini, anda tidak boleh menggunakan Platform.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Definitions</h2>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>"AGS"</strong> means AGS – Agriculture Global Solutions OÜ.</li>
+                        <li><strong>"Website"</strong> means www.cropdrive.ai and any pages, subpages, and related interfaces operated under the CropDrive OP Advisor brand.</li>
+                        <li><strong>"Service"</strong> means the digital agronomy advisory and decision-support service provided through the Website, including subscriptions, user accounts, digital outputs, and any related digital content.</li>
+                        <li><strong>"User"</strong> means any person accessing or using the Website or Service.</li>
+                        <li><strong>"Consumer"</strong> means a natural person acting outside trade, business, or profession.</li>
+                        <li><strong>"Business Client"</strong> means any legal entity or any natural person acting for trade, business, or profession.</li>
+                        <li><strong>"Subscription"</strong> means a Consumer subscription plan displayed on the Website.</li>
+                        <li><strong>"Business Services"</strong> means services provided to Business Clients outside the Subscription plans, including customization, configuration, integration, enterprise support, bespoke deliverables, and any tailored development of digital tools.</li>
+                      </ul>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Penerangan Perkhidmatan</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Scope, acceptance, and precedence</h2>
+                      <p>
+                        These Terms govern access to and use of the Website and Service. Access to the Website or use of the Service constitutes acceptance of these Terms. Business Services are provided under a separate written agreement concluded between AGS and the Business Client. The separate written agreement prevails over these Terms for the scope covered by the separate written agreement.
+                      </p>
 
-                        <p>
-                          CropDrive OP Advisor™ menyediakan platform AI untuk analisis ladang kelapa sawit, termasuk:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Analisis AI laporan tanah dan daun</li>
-                          <li>Cadangan agronomi diperibadikan</li>
-                          <li>Laporan dan visualisasi trend</li>
-                          <li>Sokongan pakar melalui WhatsApp dan email</li>
-                          <li>Platform pengurusan ladang berasaskan langganan</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Service channels, intended users, and market presentation</h2>
+                      <p>
+                        The Website offers Subscriptions intended for Malaysian oil palm farmers, with pricing displayed in Malaysian Ringgit (RM). Subscription checkout is offered for Consumer purchases only. Business Services are discussed and agreed case by case, with scope, deliverables, acceptance criteria, timelines, pricing, payment methods, and payment schedules defined in the separate written agreement. Market presentation on the Website does not limit mandatory rights arising under applicable law in the User place of residence.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Akaun Pengguna</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Eligibility and age</h2>
+                      <p>
+                        Purchase and registration are intended for adults. By registering an account or purchasing a Subscription, the User represents age 18 or above.
+                      </p>
 
-                        <p>Untuk menggunakan Platform, anda mestilah:</p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Berumur sekurang-kurangnya 18 tahun</li>
-                          <li>Menyediakan maklumat yang benar dan terkini</li>
-                          <li>Mengekalkan kerahsiaan kata laluan anda</li>
-                          <li>Bertanggungjawab terhadap semua aktiviti akaun anda</li>
-                          <li>Memberitahu kami tentang penggunaan tanpa kebenaran</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Accounts, credentials, and security</h2>
+                      <p>
+                        Use of the Service requires an account. The User undertakes to provide accurate, complete, and current account information and to maintain confidentiality of credentials. The User bears responsibility for activity performed through the account. AGS reserves the right to suspend, restrict, or terminate access where a material breach, fraud indicators, abuse, or a security risk is identified, including to protect the Service, other users, and third-party systems supporting hosting, authentication, and payments.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Langganan dan Pembayaran</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Inputs required for Consumer Subscriptions</h2>
+                      <p>
+                        The Service delivers advisory outputs based on user-provided inputs. Consumer Subscriptions are designed around the upload and analysis of soil test results and leaf tissue analysis. Failure to provide required inputs, provision of incomplete inputs, or provision of inaccurate inputs limits the Service outputs and affects performance expectations.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Pelan Langganan</h3>
-                        <p>
-                          Platform menawarkan pelan langganan berbeza dengan ciri dan had yang berbeza. Harga dan ciri boleh berubah dengan notis 30 hari.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Advisory outputs and yield outcomes</h2>
+                      <p>
+                        The Service provides agronomic advisory outputs intended to support yield improvement when the User follows the advisory plan with sustained compliance. Yield improvement is a target outcome linked to user compliance, quality of input data, timing of field operations, site conditions, palm age, soil properties, nutrient availability, pest pressure, disease pressure, weather, and comparable external variables outside AGS control. No fixed yield figure, financial outcome, or field performance outcome is warranted. The User remains responsible for farm management decisions, procurement decisions, and field implementation.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Pembayaran</h3>
-                        <p>
-                          Semua pembayaran diproses melalui Stripe dan dibilkan dalam Euro (€). Harga dalam Ringgit Malaysia adalah untuk rujukan sahaja.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Ordering, contract formation, and delivery for Consumer Subscriptions</h2>
+                      <p>
+                        Subscription plans, pricing, billing interval, and key commercial conditions are displayed on the Website prior to checkout. Payment is processed through Stripe Checkout on Stripe-hosted pages. A binding contract for a Subscription is formed upon successful payment confirmation and activation of Subscription access linked to the User account. Digital access starts after payment confirmation and activation. Where activation does not occur after payment confirmation, the User should contact contact@agriglobalsolutions.com for investigation and resolution.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Pembaharuan Automatik</h3>
-                        <p>
-                          Langganan diperbaharui secara automatik melainkan dibatalkan. Anda boleh membatalkan pada bila-bila masa, tetapi akses akan kekal sehingga akhir tempoh bil semasa.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">10. Payments</h2>
+                      <p>
+                        Consumer Subscription payments are processed through Stripe Checkout and are linked to the Subscription plans shown on the Website. Stripe terms govern the payment processing on Stripe-hosted pages. Business Services payment methods and payment schedules are defined in the separate written agreement.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Penggunaan Boleh Diterima</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">11. Subscription term, renewal, and cancellation for Consumer Subscriptions</h2>
+                      <p>
+                        For the monthly Subscription, billing occurs in monthly instalments and the Subscription carries a 12-month minimum term. Cancellation is permitted at any time, with cancellation taking effect as a non-renewal at the end of the minimum term, and cancellation does not release the User from payment of remaining instalments due within the 12-month minimum term.
+                      </p>
+                      <p>
+                        For the yearly Subscription, billing occurs as a single annual payment for a one-year term, cancellation is permitted at any time as a non-renewal, and access continues until the end of the paid annual term.
+                      </p>
 
-                        <p>Anda bersetuju untuk:</p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Menggunakan Platform hanya untuk tujuan yang sah</li>
-                          <li>Tidak memuat naik kandungan yang menyalahi undang-undang atau berbahaya</li>
-                          <li>Tidak cuba mengakses sistem tanpa kebenaran</li>
-                          <li>Tidak menggunakan Platform untuk aktiviti penipuan</li>
-                          <li>Menghormati hak harta intelek orang lain</li>
-                          <li>Tidak berkongsi akaun anda dengan orang lain</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">12. Fees, refunds, and charge disputes</h2>
+                      <p>
+                        All fees are non-refundable after payment. Mandatory rights under applicable law remain unaffected. Where a duplicate charge or billing error is identified, AGS processes correction after verification. Billing dispute communications should be sent to contact@agriglobalsolutions.com with the account email, payment date, and payment amount.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Harta Intelek</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">13. Consumer withdrawal rights where mandatory law grants such rights</h2>
+                      <p>
+                        Certain jurisdictions grant statutory withdrawal rights for distance contracts. For digital services supplied immediately after purchase, mandatory rules in some jurisdictions treat express consent to immediate supply and acknowledgement of withdrawal-right loss as a condition for immediate supply. Where such mandatory rules apply, checkout collects the required consent and acknowledgement before immediate supply starts. Mandatory rights remain unaffected.
+                      </p>
 
-                        <p>
-                          Platform dan kandungannya adalah hak milik eksklusif CropDrive OP Advisor™. Anda diberi lesen terhad untuk menggunakan Platform mengikut Syarat ini.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">14. User data, confidentiality, and aggregation</h2>
+                      <p>
+                        The User retains rights in uploaded content and uploaded data. The User grants AGS a limited licence to process uploaded content and uploaded data for service delivery, account support, fraud prevention, security, troubleshooting, and quality management. AGS does not disclose personal data contained in uploaded soil and leaf test reports for commercial purposes or unrelated purposes. AGS aggregates non-personal agronomic variables from reports, including chemical composition values, for scientific and analytical purposes, with aggregation designed to exclude personal identifiers and direct attribution to an identifiable individual.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Penafian Waranti</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">15. Intellectual property and licence</h2>
+                      <p>
+                        All Website content, software, workflows, designs, trademarks, and service elements remain the property of AGS or licensors. A Subscription grants a limited, personal, non-exclusive, non-transferable right to access and use the Service during an active Subscription term, subject to these Terms. Business Services licensing and ownership terms are defined in the separate written agreement. Copying, redistribution, resale, sublicensing, reverse engineering, or creation of derivative works from the Service or Website content is prohibited without prior written permission from AGS.
+                      </p>
 
-                        <p>
-                          Platform disediakan "sebagaimana adanya" tanpa waranti apa-apa jenis. Kami tidak menjamin bahawa Platform akan bebas ralat atau tersedia secara berterusan.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">16. Acceptable use</h2>
+                      <p>
+                        The User undertakes to refrain from unauthorised access attempts, interference with service operation, interference with security controls, uploading malware, introducing harmful code, and use of the Service for unlawful activity. AGS reserves the right to take protective action, including suspension or termination, where unacceptable use is identified.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Had Liabiliti</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">17. Third-party systems</h2>
+                      <p>
+                        The Service depends on third-party providers for hosting, analytics, authentication, and payments. Planned maintenance and urgent security updates occur as required. AGS does not assume responsibility for outages or failures originating from third-party systems outside AGS control, subject to mandatory law.
+                      </p>
 
-                        <p>
-                          Dalam tiada keadaan pun kami akan bertanggungjawab terhadap sebarang kerosakan tidak langsung, sampingan, atau berbangkit yang timbul daripada penggunaan Platform.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">18. Support</h2>
+                      <p>
+                        Support is provided through contact@agriglobalsolutions.com. Target response time is within 24 hours, subject to workload and issue complexity.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Pembayaran Balik</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">19. Changes to the Service and these Terms</h2>
+                      <p>
+                        AGS updates the Service for security, performance, compliance, and feature development. AGS updates these Terms from time to time. Updated Terms apply to new purchases from the publication date. For ongoing Subscriptions, updated Terms apply from the next renewal date, unless mandatory law requires a different approach.
+                      </p>
 
-                        <p>
-                          Kami menawarkan jaminan kepuasan 30 hari untuk langganan baharu. Hubungi sokongan untuk permintaan pembayaran balik dalam tempoh ini.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">20. Liability</h2>
+                      <p>
+                        The Service provides advisory outputs and decision-support information. Farm decisions and implementation remain the User responsibility. For Consumers, liability limitations apply only to the extent permitted by mandatory consumer law. For Business Clients, liability is limited to direct damages and excludes indirect loss, loss of profit, and consequential loss to the extent permitted by law. Nothing in these Terms excludes liability for intent or liability which mandatory law treats as non-excludable.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Penamatan</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">21. Governing law and jurisdiction</h2>
+                      <p>
+                        These Terms are governed by the laws of Estonia, excluding conflict-of-law rules. Mandatory consumer protection rules applicable in the Consumer place of habitual residence remain unaffected. Jurisdiction lies with the competent courts of Estonia, subject to mandatory consumer forum rules applicable to Consumer claims.
+                      </p>
 
-                        <p>
-                          Kami boleh menamatkan akaun anda jika anda melanggar Syarat ini. Anda boleh menamatkan akaun anda pada bila-bila masa dengan menghubungi sokongan.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Undang-undang Terpakai</h2>
-
-                        <p>
-                          Syarat ini tertakluk kepada undang-undang Malaysia. Sebarang pertikaian akan diselesaikan melalui mahkamah Malaysia.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Perubahan Syarat</h2>
-
-                        <p>
-                          Kami boleh mengemaskini Syarat ini dari semasa ke semasa. Perubahan ketara akan dimaklumkan melalui email atau notis dalam Platform.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Hubungi Kami</h2>
-
-                        <p>
-                          Jika anda mempunyai sebarang pertanyaan tentang Syarat ini, sila hubungi kami:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Email: legal@cropdrive.com</li>
-                          <li>WhatsApp: +60123456789</li>
-                          <li>Alamat: [Alamat pejabat]</li>
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="space-y-6 text-gray-700">
-                        <p>
-                          These Terms of Service ("Terms") govern your use of the CropDrive OP Advisor™ platform ("Platform") operated by CropDrive OP Advisor™ ("we", "us", or "our"). By accessing or using the Platform, you agree to be bound by these Terms.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Acceptance of Terms</h2>
-
-                        <p>
-                          By registering, accessing, or using the Platform, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree with any part of these Terms, you may not use the Platform.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Description of Service</h2>
-
-                        <p>
-                          CropDrive OP Advisor™ provides an AI platform for palm oil farm analysis, including:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>AI analysis of soil and leaf reports</li>
-                          <li>Personalized agronomy recommendations</li>
-                          <li>Reports and trend visualizations</li>
-                          <li>Expert support via WhatsApp and email</li>
-                          <li>Subscription-based farm management platform</li>
-                        </ul>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">User Accounts</h2>
-
-                        <p>To use the Platform, you must:</p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Be at least 18 years old</li>
-                          <li>Provide accurate and current information</li>
-                          <li>Maintain the confidentiality of your password</li>
-                          <li>Be responsible for all account activities</li>
-                          <li>Notify us of unauthorized use</li>
-                        </ul>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Subscriptions and Payments</h2>
-
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Subscription Plans</h3>
-                        <p>
-                          The Platform offers different subscription plans with varying features and limits. Pricing and features are subject to change with 30 days notice.
-                        </p>
-
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Payments</h3>
-                        <p>
-                          All payments are processed through Stripe and charged in Euros (€). Malaysian Ringgit pricing is for reference only.
-                        </p>
-
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Automatic Renewal</h3>
-                        <p>
-                          Subscriptions automatically renew unless canceled. You may cancel at any time, but access will remain until the end of the current billing period.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Acceptable Use</h2>
-
-                        <p>You agree to:</p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Use the Platform only for lawful purposes</li>
-                          <li>Not upload illegal or harmful content</li>
-                          <li>Not attempt to access systems without authorization</li>
-                          <li>Not use the Platform for fraudulent activities</li>
-                          <li>Respect the intellectual property rights of others</li>
-                          <li>Not share your account with others</li>
-                        </ul>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Intellectual Property</h2>
-
-                        <p>
-                          The Platform and its content are the exclusive property of CropDrive OP Advisor™. You are granted a limited license to use the Platform in accordance with these Terms.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Disclaimer of Warranties</h2>
-
-                        <p>
-                          The Platform is provided "as is" without any warranties. We do not guarantee that the Platform will be error-free or continuously available.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Limitation of Liability</h2>
-
-                        <p>
-                          In no event shall we be liable for any indirect, incidental, or consequential damages arising from the use of the Platform.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Refunds</h2>
-
-                        <p>
-                          We offer a 30-day satisfaction guarantee for new subscriptions. Contact support for refund requests within this period.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Termination</h2>
-
-                        <p>
-                          We may terminate your account if you violate these Terms. You may terminate your account at any time by contacting support.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Governing Law</h2>
-
-                        <p>
-                          These Terms are governed by Malaysian law. Any disputes will be resolved through Malaysian courts.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Changes to Terms</h2>
-
-                        <p>
-                          We may update these Terms from time to time. Significant changes will be communicated through email or Platform notices.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Contact Us</h2>
-
-                        <p>
-                          If you have any questions about these Terms, please contact us:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Email: legal@cropdrive.com</li>
-                          <li>WhatsApp: +60123456789</li>
-                          <li>Address: [Office address]</li>
-                        </ul>
-                      </div>
-                    )}
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">22. Language</h2>
+                      <p>
+                        The Website provides an English version and a Bahasa Malaysia version through a language toggle. For Malaysia consumer disclosures, the Bahasa Malaysia version governs where a conflict exists.
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
