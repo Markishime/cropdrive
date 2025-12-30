@@ -1129,7 +1129,7 @@ export default function PaymentMethodPage() {
                             <Button
                               onClick={handleReactivateSubscription}
                               disabled={loading}
-                              className="bg-white text-green-700 hover:bg-green-50 hover:text-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
+                              className="bg-white text-gray-900 hover:bg-green-50 hover:text-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
                             >
                               {loading ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1447,7 +1447,7 @@ export default function PaymentMethodPage() {
                         onClick={() => {
                             setShowCancelModal(true);
                         }}
-                        className={`bg-red-600 text-white hover:bg-red-700 py-2 px-6 font-bold rounded-xl shadow-md flex items-center gap-2 transition-colors ${
+                        className={`bg-red-600 text-white hover:bg-red-700 py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${
                           loading || loadingSubscription || subscription?.pendingContractCancellation
                             ? 'opacity-70'
                             : ''
