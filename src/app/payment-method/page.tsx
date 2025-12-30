@@ -1105,7 +1105,7 @@ export default function PaymentMethodPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-4 mb-6 text-white"
+                        className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 mb-6 text-white"
                       >
                         <div className="flex items-start gap-3">
                           <AlertCircle className="w-6 h-6 flex-shrink-0 mt-0.5" />
@@ -1123,7 +1123,7 @@ export default function PaymentMethodPage() {
                             <Button
                               onClick={handleReactivateSubscription}
                               disabled={loading}
-                              className="bg-white text-amber-600 hover:bg-amber-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm"
+                              className="bg-white text-green-700 hover:bg-green-50 hover:text-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
                             >
                               {loading ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1188,7 +1188,7 @@ export default function PaymentMethodPage() {
                       {(subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation) && (
                         <Button 
                           onClick={handleReactivateSubscription}
-                          className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-3 font-bold rounded-xl shadow-lg disabled:opacity-50"
+                          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg disabled:opacity-50"
                         >
                           {loading ? (
                             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
