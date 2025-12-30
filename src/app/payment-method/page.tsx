@@ -1129,7 +1129,7 @@ export default function PaymentMethodPage() {
                             <Button
                               onClick={handleReactivateSubscription}
                               disabled={loading}
-                              className="bg-white text-gray-900 hover:bg-green-50 hover:text-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
+                              className="bg-green-600 text-white hover:bg-green-700 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
                             >
                               {loading ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1191,19 +1191,6 @@ export default function PaymentMethodPage() {
                           }
                         </Button>
                       </Link>
-                      {(subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation) && (
-                        <Button 
-                          onClick={handleReactivateSubscription}
-                          className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg disabled:opacity-50"
-                        >
-                          {loading ? (
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          ) : (
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                          )}
-                          {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
-                        </Button>
-                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -1458,7 +1445,7 @@ export default function PaymentMethodPage() {
                         ) : subscription?.pendingContractCancellation ? (
                           language === 'ms' ? 'Dijadualkan' : 'Scheduled'
                         ) : subscription?.cancelAtPeriodEnd ? (
-                          language === 'ms' ? 'Akan Dibatalkan' : 'Will Cancel'
+                          language === 'ms' ? 'Batalkan' : 'Cancel'
                         ) : (
                           language === 'ms' ? 'Batal' : 'Cancel'
                         )}
