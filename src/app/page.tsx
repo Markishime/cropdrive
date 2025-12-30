@@ -74,8 +74,8 @@ export default function HomePage() {
         </div>
 
         {/* Main Content */}
-        <div className="relative h-full flex items-center justify-center z-10 pt-6 xs:pt-10 sm:pt-12 md:pt-0">
-          <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 text-center w-full">
+        <div className="relative h-full flex items-center justify-center z-10 pt-6 xs:pt-10 sm:pt-12 md:pt-0 pointer-events-none">
+          <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 text-center w-full pointer-events-auto">
             {/* Dynamic Label */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
@@ -215,22 +215,32 @@ export default function HomePage() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 1, delay: 1.1 }}
-              className="flex flex-col sm:flex-row gap-3 xs:gap-4 sm:gap-6 justify-center items-center px-3 xs:px-4 sm:px-6 w-full max-w-2xl mx-auto mb-20 xs:mb-24 sm:mb-8 md:mb-12 relative z-30"
+              className="flex flex-col sm:flex-row gap-3 xs:gap-4 sm:gap-6 justify-center items-center px-3 xs:px-4 sm:px-6 w-full max-w-2xl mx-auto mb-20 xs:mb-24 sm:mb-8 md:mb-12 relative z-50 pointer-events-auto"
             >
-              <Link href="/pricing" className="w-full sm:w-auto max-w-xs sm:max-w-none z-30">
+              <Link 
+                href="/pricing" 
+                className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
+                style={{ pointerEvents: 'auto' }}
+              >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation cursor-pointer"
+                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   {language === 'ms' ? '🚀 Mulakan Sekarang' : '🚀 Get Started Now'}
                 </motion.button>
               </Link>
-              <Link href="/how-it-works" className="w-full sm:w-auto max-w-xs sm:max-w-none z-30">
+              <Link 
+                href="/how-it-works" 
+                className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
+                style={{ pointerEvents: 'auto' }}
+              >
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 xs:px-8 sm:px-10 py-3 xs:py-3.5 sm:py-4 md:py-5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation cursor-pointer"
+                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+                  style={{ pointerEvents: 'auto' }}
                 >
                   {language === 'ms' ? '▶️ Tonton Demo' : '▶️ Watch Demo'}
                 </motion.button>
