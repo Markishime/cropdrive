@@ -268,7 +268,6 @@ export default function HowItWorksPage() {
                     playsInline
                     preload="auto"
                     controlsList="nodownload"
-                    poster="https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=1200&h=675&fit=crop"
                   >
                     <source 
                       key={`source-${currentLanguage}-${getVideoUrl(currentLanguage)}`}

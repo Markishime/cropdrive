@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Download, Eye, Calendar, Search, Trash2, Plus } from 'lucide-react';
+import { FileText, Download, Eye, Calendar, Search, Trash2, Plus, RefreshCw } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import toast from 'react-hot-toast';
@@ -37,8 +37,13 @@ export default function ReportsPage() {
 
   useEffect(() => {
     setMounted(true);
-    const lang = getCurrentLanguage();
-    setCurrentLang(lang);
+    try {
+      const lang = getCurrentLanguage();
+      setCurrentLang(lang);
+    } catch (e) {
+      // getCurrentLanguage might fail if localStorage is not available
+      setCurrentLang('en');
+    }
   }, []);
 
   const { language } = useTranslation(currentLang);
@@ -411,15 +416,33 @@ export default function ReportsPage() {
                 }
               </p>
             </div>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => router.push('/assistant')}
-              className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
-            >
-              <Plus className="w-4 h-4" />
-              {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  setLoadingReports(true);
+                  // Force a re-fetch by triggering the useEffect
+                  setReports([]);
+                  setTimeout(() => {
+                    window.location.reload();
+                  }, 100);
+                }}
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+                title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
+              >
+                <RefreshCw className={`w-4 h-4 ${loadingReports ? 'animate-spin' : ''}`} />
+              </motion.button>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => router.push('/assistant')}
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+              >
+                <Plus className="w-4 h-4" />
+                {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
+              </motion.button>
+            </div>
           </motion.div>
         </div>
       </section>

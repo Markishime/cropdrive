@@ -102,8 +102,13 @@ export default function PaymentMethodPage() {
 
   useEffect(() => {
     setMounted(true);
-    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
-    setCurrentLang(lang);
+    try {
+      const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+      setCurrentLang(lang);
+    } catch (e) {
+      // localStorage might not be available
+      setCurrentLang('en');
+    }
   }, []);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
@@ -1183,6 +1188,24 @@ export default function PaymentMethodPage() {
                     <Shield className="w-4 h-4 text-green-600" />
                     <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
                   </div>
+                  
+                  {/* Manage Payment Method Button */}
+                  {subscription && (
+                    <div className="mt-6">
+                      <Button
+                        onClick={handleOpenBillingPortal}
+                        disabled={creatingPortalSession}
+                        className="w-full bg-gradient-to-r from-violet-600 to-purple-700 text-white hover:from-violet-700 hover:to-purple-800 py-3 font-bold rounded-xl shadow-lg"
+                      >
+                        {creatingPortalSession ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Settings className="w-4 h-4 mr-2" />
+                        )}
+                        {language === 'ms' ? 'Urus Kaedah Pembayaran' : 'Manage Payment Method'}
+                      </Button>
+                    </div>
+                  )}
                 </motion.div>
 
                 {/* Billing Settings */}

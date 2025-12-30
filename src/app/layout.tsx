@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
 import { Analytics } from '@vercel/analytics/next';
@@ -20,6 +20,19 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 });
 
+// Mobile-friendly viewport settings (exported separately as per Next.js 14+ requirement)
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#166534' },
+    { media: '(prefers-color-scheme: dark)', color: '#14532d' },
+  ],
+};
+
 export const metadata: Metadata = {
   title: {
     default: 'CropDrive Oil Palm Advisor™ - Oil Palm AI Agronomy Platform',
@@ -31,10 +44,25 @@ export const metadata: Metadata = {
   creator: 'CropDrive Oil Palm Advisor',
   publisher: 'CropDrive Oil Palm Advisor',
   applicationName: 'CropDrive Oil Palm Advisor™',
+  // Mobile app-like experience
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'CropDrive',
+  },
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
+  },
+  // Additional mobile-friendly settings
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'format-detection': 'telephone=no',
+    'msapplication-TileColor': '#166534',
+    'msapplication-tap-highlight': 'no',
   },
   metadataBase: new URL('https://cropdrive.ai'),
   alternates: {

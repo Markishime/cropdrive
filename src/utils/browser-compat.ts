@@ -136,12 +136,110 @@ export const getBrowserCompatibility = () => {
   };
 };
 
+// Check if device supports touch
+export const isTouchDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
+// Check if device is mobile
+export const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  
+  // Check for mobile user agents
+  const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|tablet/i;
+  
+  // Also check screen width for responsiveness
+  const isSmallScreen = window.innerWidth <= 768;
+  
+  return mobileRegex.test(userAgent.toLowerCase()) || isSmallScreen;
+};
+
+// Check if device is iOS
+export const isIOS = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+};
+
+// Check if device is Android
+export const isAndroid = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  return /android/i.test(navigator.userAgent);
+};
+
+// Check if browser is Safari
+export const isSafari = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+};
+
+// Check if browser is Safari on iOS
+export const isIOSSafari = (): boolean => {
+  return isIOS() && isSafari();
+};
+
+// Get safe viewport dimensions (handles mobile quirks)
+export const getViewportDimensions = (): { width: number; height: number } => {
+  if (typeof window === 'undefined') {
+    return { width: 1024, height: 768 };
+  }
+  
+  return {
+    width: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0),
+    height: Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0),
+  };
+};
+
+// Check if media queries are supported
+export const isMediaQuerySupported = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return typeof window.matchMedia !== 'undefined';
+};
+
+// Safe matchMedia wrapper
+export const safeMatchMedia = (query: string): boolean => {
+  if (!isMediaQuerySupported()) return false;
+  
+  try {
+    return window.matchMedia(query).matches;
+  } catch (e) {
+    console.warn(`Failed to match media query: ${query}`, e);
+    return false;
+  }
+};
+
+// Check if prefers reduced motion
+export const prefersReducedMotion = (): boolean => {
+  return safeMatchMedia('(prefers-reduced-motion: reduce)');
+};
+
+// Check if prefers dark mode
+export const prefersDarkMode = (): boolean => {
+  return safeMatchMedia('(prefers-color-scheme: dark)');
+};
+
 // Log browser compatibility (useful for debugging)
 export const logBrowserCompatibility = () => {
   if (typeof window === 'undefined') return;
   
   const compat = getBrowserCompatibility();
+  const deviceInfo = {
+    isMobile: isMobileDevice(),
+    isTouch: isTouchDevice(),
+    isIOS: isIOS(),
+    isAndroid: isAndroid(),
+    isSafari: isSafari(),
+    viewport: getViewportDimensions(),
+    prefersReducedMotion: prefersReducedMotion(),
+  };
+  
   console.log('Browser Compatibility:', compat);
+  console.log('Device Info:', deviceInfo);
   
   // Warn about critical missing features
   if (!compat.localStorage) {

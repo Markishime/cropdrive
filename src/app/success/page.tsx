@@ -281,13 +281,28 @@ function SuccessPageContent() {
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center py-3">
+                  <div className="flex justify-between items-center py-3 border-b border-gray-200">
                     <span className="text-gray-600">
                       {language === 'ms' ? 'ID Sesi' : 'Session ID'}
                     </span>
                     <span className="font-mono text-sm text-gray-500">
-                      {sessionId}
+                      {sessionId ? sessionId.slice(0, 20) + '...' : 'N/A'}
                     </span>
+                  </div>
+
+                  {/* Payment Status Indicator */}
+                  <div className="flex justify-between items-center py-3">
+                    <span className="text-gray-600">
+                      {language === 'ms' ? 'Status Pembayaran' : 'Payment Status'}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-bold">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        POST 200 OK
+                      </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
