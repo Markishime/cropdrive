@@ -175,6 +175,8 @@ export async function POST(req: NextRequest) {
     console.log('Stripe customer ID from user data:', stripeCustomerId || '(none - will create new customer)');
 
     // Create Stripe checkout session (with proper metadata for webhooks)
+    // Note: In subscription mode, Stripe automatically saves the payment method
+    // for future recurring charges, so we don't need setup_future_usage
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       mode: 'subscription',
       success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}&plan=${planId}`,
@@ -187,12 +189,6 @@ export async function POST(req: NextRequest) {
       payment_method_types: ['card'],
       billing_address_collection: 'auto',
       allow_promotion_codes: true,
-      // Ensure payment method is saved for future use
-      payment_method_options: {
-        card: {
-          setup_future_usage: 'off_session'
-        }
-      },
     };
     
     // IMPORTANT: customer_update can ONLY be used when passing an existing customer ID
