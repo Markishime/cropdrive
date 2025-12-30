@@ -360,25 +360,34 @@ export async function PATCH(req: NextRequest) {
         });
       }
 
-      // Update user document
+      // Get billing cycle to determine renewal period
+      const priceItem = subscription.items?.data?.[0]?.price;
+      const interval = priceItem?.recurring?.interval; // 'month' or 'year'
+      const billingCycle = interval === 'year' ? 'yearly' : 'monthly';
+      const renewalPeriod = interval === 'year' ? 'year' : 'month';
+
+      // Update user document - keep subscription status as 'active' even when auto-renewal is off
+      // The subscription remains active until the period ends, it just won't renew automatically
       await adminDb.collection('users').doc(userId).update({
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        subscriptionStatus: subscription.cancel_at_period_end ? 'canceling' : 'active',
+        // Don't change subscriptionStatus - subscription is still active, just won't auto-renew
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
       console.log('✅ Auto-renewal toggled:', { 
         subscriptionId: stripeSubscriptionId, 
-        cancelAtPeriodEnd: subscription.cancel_at_period_end 
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        billingCycle: billingCycle
       });
 
       return NextResponse.json({
         success: true,
         status: 200,
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        billingCycle: billingCycle,
         message: subscription.cancel_at_period_end 
-          ? 'Auto-renewal disabled. Your subscription will end at the current period.'
-          : 'Auto-renewal enabled. Your subscription will renew automatically.',
+          ? `Auto-renewal disabled. Your subscription will remain active until the end of the current ${renewalPeriod}, but will not renew automatically.`
+          : `Auto-renewal enabled. Your subscription will renew automatically every ${renewalPeriod}.`,
       }, { status: 200 });
     }
 

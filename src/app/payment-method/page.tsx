@@ -505,22 +505,28 @@ export default function PaymentMethodPage() {
           await refreshUser();
         }
         
-        toast.success(
+        // Use API message if available, otherwise use default
+        const successMessage = data.message || (
           data.cancelAtPeriodEnd
-            ? (language === 'ms' ? '🔄 Pembaharuan auto dimatikan' : '🔄 Auto-renewal turned off')
-            : (language === 'ms' ? '🔄 Pembaharuan auto dihidupkan' : '🔄 Auto-renewal turned on'),
-          {
-            duration: 3000,
-            style: {
-              borderRadius: '12px',
-              background: '#10b981',
-              color: '#fff',
-              padding: '16px',
-              fontSize: '14px',
-              fontWeight: '600',
-            },
-          }
+            ? (language === 'ms' 
+                ? '🔄 Pembaharuan auto dimatikan. Langganan anda akan kekal aktif sehingga akhir tempoh.' 
+                : '🔄 Auto-renewal turned off. Your subscription will remain active until the end of the period.')
+            : (language === 'ms' 
+                ? '🔄 Pembaharuan auto dihidupkan. Langganan akan diperbaharui secara automatik.' 
+                : '🔄 Auto-renewal turned on. Subscription will renew automatically.')
         );
+        
+        toast.success(successMessage, {
+          duration: 4000,
+          style: {
+            borderRadius: '12px',
+            background: '#10b981',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        });
       } else {
         throw new Error(data.error || data.details || 'Failed to update');
       }
@@ -979,11 +985,11 @@ export default function PaymentMethodPage() {
                       </h2>
                       <span className={`px-4 py-2 rounded-full text-sm font-bold ${
                         subscription?.cancelAtPeriodEnd 
-                          ? 'bg-amber-100 text-amber-700' 
+                          ? 'bg-yellow-100 text-yellow-700' 
                           : 'bg-green-100 text-green-700'
                       }`}>
                         {subscription?.cancelAtPeriodEnd 
-                          ? (language === 'ms' ? 'Akan Dibatalkan' : 'Cancelling')
+                          ? (language === 'ms' ? 'Pembaharuan Auto Dimatikan' : 'Auto-Renewal Off')
                           : (language === 'ms' ? 'Aktif' : 'Active')
                         }
                       </span>
@@ -1100,7 +1106,7 @@ export default function PaymentMethodPage() {
                       </div>
                     )}
 
-                    {/* Cancellation Warning Banner */}
+                    {/* Auto-Renewal Off Warning Banner */}
                     {subscription?.cancelAtPeriodEnd && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -1112,13 +1118,13 @@ export default function PaymentMethodPage() {
                           <div className="flex-1">
                             <p className="font-bold mb-1">
                               {language === 'ms' 
-                                ? 'Langganan Anda Akan Dibatalkan' 
-                                : 'Your Subscription Will Be Cancelled'}
+                                ? 'Pembaharuan Automatik Dimatikan' 
+                                : 'Auto-Renewal Turned Off'}
                             </p>
                             <p className="text-sm text-white/90 mb-3">
                               {language === 'ms' 
-                                ? `Anda masih boleh menggunakan semua ciri sehingga ${formatDate(subscription.currentPeriodEnd)}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
-                                : `You can still use all features until ${formatDate(subscription.currentPeriodEnd)}. After that, you won't be able to access the AI assistant.`}
+                                ? `Langganan anda masih aktif dan anda boleh menggunakan semua ciri sehingga ${formatDate(subscription.currentPeriodEnd)}. Selepas itu, langganan tidak akan diperbaharui secara automatik.`
+                                : `Your subscription is still active and you can use all features until ${formatDate(subscription.currentPeriodEnd)}. After that, your subscription will not renew automatically.`}
                             </p>
                             <Button
                               onClick={handleReactivateSubscription}
@@ -1347,8 +1353,12 @@ export default function PaymentMethodPage() {
                           </p>
                           <p className="text-sm text-gray-500">
                             {autoRenewal
-                                ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
-                                : (language === 'ms' ? 'Langganan akan tamat pada akhir tempoh. Anda masih perlu membayar sehingga akhir tahun tetapi tidak boleh menggunakan pembantu AI.' : 'Subscription will end at period end. You will still pay until end of year but cannot use AI assistant.')
+                                ? (subscriptionInterval === 'year'
+                                    ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
+                                    : (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap bulan' : 'Subscription will renew automatically every month'))
+                                : (subscriptionInterval === 'year'
+                                    ? (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir tahun, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the year, but will not renew automatically after that')
+                                    : (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir bulan, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the month, but will not renew automatically after that'))
                               }
                           </p>
                         </div>
