@@ -122,38 +122,64 @@ export default function RightOfWithdrawalPage() {
                       </div>
 
                       <div className="space-y-6 text-gray-700">
+                        <div className="bg-blue-50 p-6 rounded-xl mb-6 border-2 border-blue-200">
+                          <p className="font-semibold text-gray-900 mb-0">
+                            This notice applies to Consumers within the European Union and the European Economic Area who purchase the CropDrive OP Advisor digital service through www.cropdrive.ai.
+                          </p>
+                        </div>
+
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Right of withdrawal</h3>
                         <p>
-                          You have the right to withdraw from this contract within fourteen days without giving any reason. The withdrawal period will expire after fourteen days from the day of the conclusion of the contract.
+                          You have the right to withdraw from this contract within fourteen days without giving any reason. The withdrawal period expires fourteen days after the day the contract is concluded.
                         </p>
 
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How to exercise the right of withdrawal</h3>
+                        <p>
+                          To exercise the right of withdrawal, you must inform us of your decision to withdraw from this contract by an unequivocal statement sent by email or by post.
+                        </p>
                         <div className="bg-yellow-50 p-6 rounded-xl mb-6 border-2 border-yellow-200">
-                          <p className="font-semibold text-gray-900 mb-3">To exercise the right of withdrawal, you must inform us:</p>
                           <div className="space-y-2 text-gray-700">
-                            <p><span className="font-semibold">AGS - Agriculture Global Solutions OÜ</span></p>
+                            <p className="font-semibold text-gray-900">AGS – Agriculture Global Solutions OÜ</p>
                             <p>Sakala tn 7-2, Kesklinna linnaosa</p>
                             <p>10141 Tallinn, Harju maakond, Estonia</p>
                             <p>
                               <span className="font-semibold">Email:</span> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a>
                             </p>
                           </div>
-                          <p className="mt-4 text-gray-700">
-                            of your decision to withdraw from this contract by an unequivocal statement (e.g., a letter sent by post or email). You may use the attached model withdrawal form, but it is not obligatory.
-                          </p>
                         </div>
-
                         <p>
-                          To meet the withdrawal deadline, it is sufficient for you to send your communication concerning your exercise of the right of withdrawal before the withdrawal period has expired.
+                          To meet the withdrawal deadline, it is sufficient that you send your withdrawal statement before the withdrawal period expires.
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Effects of Withdrawal:</h3>
-
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Effects of withdrawal</h3>
                         <p>
-                          If you withdraw from this contract, we shall reimburse to you all payments received from you, including the costs of delivery (with the exception of the supplementary costs resulting from your choice of a type of delivery other than the least expensive type of standard delivery offered by us), without undue delay and in any event not later than fourteen days from the day on which we are informed about your decision to withdraw from this contract. We will carry out such reimbursement using the same means of payment as you used for the initial transaction, unless you have expressly agreed otherwise; in any event, you will not incur any fees as a result of such reimbursement.
+                          If you withdraw from this contract, we reimburse all payments received from you without undue delay and in any event no later than fourteen days from the day we receive your withdrawal statement. Reimbursement is made using the same payment method used for the original transaction, unless an alternative method is expressly agreed, and no fees are charged for the reimbursement.
                         </p>
 
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Start of service during the withdrawal period and proportionate payment</h3>
                         <p>
-                          If you requested to begin the performance of services during the withdrawal period, you shall pay us an amount which is in proportion to what has been provided until you have communicated to us your withdrawal from this contract, in comparison with the full coverage of the contract.
+                          The CropDrive OP Advisor service is a digital service supplied online and access is normally activated immediately after purchase. Where you request that performance of the digital service begins during the withdrawal period and you later withdraw, you owe a proportionate amount for the service supplied up to the time you informed us of the withdrawal, compared to the full contract term.
                         </p>
+
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Loss of the right of withdrawal for digital content supplied immediately</h3>
+                        <p>
+                          Where the contract includes digital content not supplied on a tangible medium and you request immediate supply, you acknowledge that the right of withdrawal is lost once the supply of that digital content begins.
+                        </p>
+
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Model withdrawal form</h3>
+                        <p className="mb-4">
+                          Complete and send this form only if you wish to withdraw from the contract.
+                        </p>
+                        <div className="bg-gray-50 p-6 rounded-xl mb-6 border-2 border-gray-200 font-mono text-sm">
+                          <p className="mb-4">To: AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia, Email: contact@agriglobalsolutions.com</p>
+                          <p className="mb-4">I hereby give notice that I withdraw from my contract for the supply of the following service: CropDrive OP Advisor subscription.</p>
+                          <p className="mb-2">Ordered on: [date]</p>
+                          <p className="mb-2">Account email used for purchase: [email]</p>
+                          <p className="mb-2">Name: [name]</p>
+                          <p className="mb-2">Address: [address]</p>
+                          <p className="mb-2">Date: [date]</p>
+                          <p>Signature (only if sent by post): [signature]</p>
+                        </div>
                       </div>
                     </div>
 
