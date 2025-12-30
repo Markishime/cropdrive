@@ -116,170 +116,50 @@ export default function AccessibilityPage() {
               </div>
 
               <div className="prose prose-lg max-w-none">
-                <div className="bg-gradient-to-r from-green-50 to-yellow-50 p-6 rounded-2xl mb-8 border-2 border-green-200">
-                  <p className="text-lg text-gray-800 font-semibold mb-0">
-                    🌱 AGS - Agriculture Global Solutions OÜ is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone and applying the relevant accessibility standards.
-                  </p>
-                </div>
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  CropDrive OP Advisor, available at www.cropdrive.ai, is committed to providing an accessible digital experience for all users, including people with disabilities. We work to improve usability and accessibility on an ongoing basis and aim to align our design and development with the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA.
+                </p>
 
-                <div className="mb-12">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-0">
-                      Measures to Support Accessibility
-                    </h2>
-                  </div>
-                  <ul className="space-y-4">
-                    <li className="flex items-start">
-                      <svg className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700 text-lg">We follow best practices and guidelines as defined by the <strong>Web Content Accessibility Guidelines (WCAG) 2.1</strong>, aiming to meet AA standards.</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700 text-lg">We conduct regular assessments and updates to enhance accessibility on our website.</span>
-                    </li>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Measures to support accessibility</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  We design and develop core user journeys with accessibility in mind, including navigation, forms, and subscription purchase flows. We review new pages and features for accessibility issues and address problems identified through internal testing and user feedback.
+                </p>
+
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Feedback and contact</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  If you encounter an accessibility barrier on www.cropdrive.ai, or if you need content in an alternative format, please contact us:
+                </p>
+                <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
+                  <ul className="list-none space-y-2 text-gray-700">
+                    <li><strong>Email:</strong> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
+                    <li><strong>Phone:</strong> <a href="tel:+4915163105462" className="text-green-700 hover:text-green-800">+49 15163105462</a></li>
+                    <li><strong>Postal address:</strong> AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
                   </ul>
                 </div>
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  We aim to respond to accessibility feedback within 14 days.
+                </p>
 
-                <div className="mb-12">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-yellow-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-0">
-                      Feedback
-                    </h2>
-                  </div>
-                  <p className="text-lg text-gray-700 mb-6">
-                    We welcome your feedback on the accessibility of our website. If you encounter any accessibility barriers or have suggestions for improvement, please contact us:
-                  </p>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Compatibility</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  www.cropdrive.ai is designed to work with current major browsers, including Chrome, Firefox, Safari, and Edge, and with common assistive technologies, including screen readers.
+                </p>
 
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-2xl mb-8 border-2 border-green-300 shadow-lg">
-                    <h3 className="text-xl font-heading font-semibold text-gray-800 mb-3">
-                      Contact Information:
-                    </h3>
-                    <p className="text-gray-700">AGS - Agriculture Global Solutions OÜ</p>
-                    <p className="text-gray-700">Sakala tn 7-2,</p>
-                    <p className="text-gray-700">Kesklinna linnaosa,</p>
-                    <p className="text-gray-700">10141 Tallinn, Harju maakond,</p>
-                    <p className="text-gray-700">Estonia</p>
-                    <p className="text-gray-700">
-                      Email: <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:underline font-semibold">contact@agriglobalsolutions.com</a>
-                    </p>
-                    <p className="text-gray-700">Phone: +49 5221 8719889</p>
-                  </div>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Technical specifications</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  The website relies on modern web technologies, including Next.js, TypeScript, and Tailwind CSS.
+                </p>
 
-                  <p className="text-lg text-gray-700 mb-8">
-                    We aim to respond to accessibility feedback within 14 days.
-                  </p>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Limitations and alternatives</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Some third-party pages and components, including Stripe-hosted checkout pages, are controlled by third parties and may not fully meet accessibility standards in all cases. If you experience a barrier during checkout, contact us and we will help you complete the purchase through an alternative route. Some downloadable documents, if provided on the website, may not always be fully accessible. On request, we will provide an accessible alternative format.
+                </p>
 
-                <div className="mb-12">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-0">
-                      Compatibility with Browsers and Assistive Technology
-                    </h2>
-                  </div>
-                  <p className="text-lg text-gray-700 mb-4">
-                    Our website is designed to be compatible with the following:
-                  </p>
-                  <ul className="space-y-3">
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
-                      <span className="text-gray-700 text-lg">Major browsers such as Chrome, Firefox, Safari, and Edge</span>
-                    </li>
-                    <li className="flex items-center">
-                      <span className="w-2 h-2 bg-green-600 rounded-full mr-3"></span>
-                      <span className="text-gray-700 text-lg">Assistive technologies including screen readers</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="mb-12">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-0">
-                      Technical Specifications
-                    </h2>
-                  </div>
-                  <p className="text-lg text-gray-700 mb-4">
-                    Our website relies on the following technologies to work with accessibility:
-                  </p>
-                  <div className="grid grid-cols-3 gap-4">
-                    {['Next.js', 'Tailwind CSS', 'TypeScript'].map((tech) => (
-                      <div key={tech} className="bg-gray-100 p-4 rounded-xl text-center border-2 border-gray-200 hover:border-green-400 transition-all">
-                        <span className="text-gray-800 font-bold text-lg">{tech}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mb-8">
-                  <div className="flex items-center space-x-3 mb-6">
-                    <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                    </div>
-                    <h2 className="text-2xl md:text-3xl font-heading font-bold text-gray-900 mb-0">
-                      Limitations and Alternatives
-                    </h2>
-                  </div>
-                  <p className="text-lg text-gray-700 mb-6">
-                    Despite our efforts to ensure the accessibility of our website, some limitations may still exist. Below is a description of known limitations and potential solutions:
-                  </p>
-                  <ul className="space-y-4">
-                    <li className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200">
-                      <div className="flex items-start">
-                        <svg className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <div>
-                          <strong className="text-gray-900">PDF Documents:</strong>
-                          <p className="text-gray-700 mt-1">Some of our PDF documents may not be fully accessible. We are working on providing accessible alternatives and improving the accessibility of these documents.</p>
-                        </div>
-                      </div>
-                    </li>
-                    <li className="bg-yellow-50 p-4 rounded-xl border-2 border-yellow-200">
-                      <div className="flex items-start">
-                        <svg className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-1" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                        </svg>
-                        <div>
-                          <strong className="text-gray-900">Third-Party Content:</strong>
-                          <p className="text-gray-700 mt-1">Some third-party content embedded in our website, such as videos and widgets, may not fully comply with accessibility standards. We are working with our partners to improve this.</p>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                  <div className="mt-6 p-6 bg-blue-50 rounded-2xl border-2 border-blue-200">
-                    <p className="text-lg text-gray-800">
-                      <strong>Need help?</strong> If you need any assistance or an alternative format, please contact us at{' '}
-                      <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 hover:underline font-bold">
-                        contact@agriglobalsolutions.com
-                      </a>
-                    </p>
-                  </div>
-                </div>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Need help</h2>
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  If you need assistance using the service or accessing content, contact us at{' '}
+                  <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline font-semibold">contact@agriglobalsolutions.com</a>.
+                </p>
               </div>
             </div>
 
@@ -300,88 +180,49 @@ export default function AccessibilityPage() {
               </div>
 
               <div className="prose prose-lg max-w-none">
-                <div className="bg-gradient-to-r from-red-50 to-yellow-50 p-6 rounded-2xl mb-8 border-2 border-red-200">
-                  <p className="text-lg text-gray-800 font-semibold mb-0">
-                    🇩🇪 AGS - Agriculture Global Solutions OÜ ist bestrebt, die digitale Barrierefreiheit für Menschen mit Behinderungen zu gewährleisten. Wir verbessern kontinuierlich die Benutzererfahrung für alle und wenden die relevanten Barrierefreiheitsstandards an.
-                  </p>
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  CropDrive OP Advisor, verfügbar unter www.cropdrive.ai, ist bestrebt, allen Nutzern, einschließlich Menschen mit Behinderungen, ein barrierefreies digitales Erlebnis zu bieten. Wir arbeiten kontinuierlich daran, die Benutzerfreundlichkeit und Barrierefreiheit zu verbessern und streben an, unser Design und unsere Entwicklung an die Web Content Accessibility Guidelines (WCAG) 2.1 Level AA auszurichten.
+                </p>
+
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Maßnahmen zur Unterstützung der Barrierefreiheit</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Wir gestalten und entwickeln Kernbenutzerreisen mit Blick auf Barrierefreiheit, einschließlich Navigation, Formularen und Abonnement-Kaufprozessen. Wir überprüfen neue Seiten und Funktionen auf Barrierefreiheitsprobleme und beheben Probleme, die durch interne Tests und Benutzerfeedback identifiziert wurden.
+                </p>
+
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Feedback und Kontakt</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Wenn Sie auf www.cropdrive.ai auf eine Barrierefreiheitsbarriere stoßen oder Inhalte in einem alternativen Format benötigen, kontaktieren Sie uns bitte:
+                </p>
+                <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
+                  <ul className="list-none space-y-2 text-gray-700">
+                    <li><strong>E-Mail:</strong> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
+                    <li><strong>Telefon:</strong> <a href="tel:+4915163105462" className="text-green-700 hover:text-green-800">+49 15163105462</a></li>
+                    <li><strong>Postanschrift:</strong> AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estland</li>
+                  </ul>
                 </div>
-
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6 mt-12">
-                  Maßnahmen zur Unterstützung der Barrierefreiheit
-                </h2>
-                <ul className="space-y-3 text-gray-700 mb-8">
-                  <li>Wir folgen den besten Praktiken und Richtlinien, wie sie in den Web Content Accessibility Guidelines (WCAG) 2.1 definiert sind, mit dem Ziel, die AA-Standards zu erfüllen.</li>
-                  <li>Wir führen regelmäßige Bewertungen und Aktualisierungen durch, um die Barrierefreiheit auf unserer Website zu verbessern.</li>
-                </ul>
-
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6 mt-12">
-                  Feedback
-                </h2>
-                <p className="text-lg text-gray-700 mb-4">
-                  Wir freuen uns über Ihr Feedback zur Barrierefreiheit unserer Website. Wenn Sie auf Barrieren stoßen oder Verbesserungsvorschläge haben, kontaktieren Sie uns bitte:
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  Wir bemühen uns, innerhalb von 14 Tagen auf Barrierefreiheitsfeedback zu antworten.
                 </p>
 
-                <div className="bg-gray-100 p-6 rounded-lg mb-8">
-                  <h3 className="text-xl font-heading font-semibold text-gray-800 mb-3">
-                    Kontaktdaten:
-                  </h3>
-                  <p className="text-gray-700">AGS - Agriculture Global Solutions OÜ</p>
-                  <p className="text-gray-700">Sakala tn 7-2,</p>
-                  <p className="text-gray-700">Kesklinna linnaosa,</p>
-                  <p className="text-gray-700">10141 Tallinn, Harju maakond,</p>
-                  <p className="text-gray-700">Estland</p>
-                  <p className="text-gray-700">
-                    E-Mail: <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:underline font-semibold">contact@agriglobalsolutions.com</a>
-                  </p>
-                  <p className="text-gray-700">Telefon: +49 5221 8719889</p>
-                </div>
-
-                <p className="text-lg text-gray-700 mb-8">
-                  Wir bemühen uns, innerhalb von 14 Tagen auf Ihr Feedback zur Barrierefreiheit zu antworten.
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Kompatibilität</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  www.cropdrive.ai ist so konzipiert, dass es mit aktuellen gängigen Browsern, einschließlich Chrome, Firefox, Safari und Edge, sowie mit gängigen Hilfstechnologien, einschließlich Screenreadern, funktioniert.
                 </p>
 
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6 mt-12">
-                  Kompatibilität mit Browsern und Hilfstechnologien
-                </h2>
-                <p className="text-lg text-gray-700 mb-4">
-                  Unsere Website ist mit den folgenden kompatibel:
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Technische Spezifikationen</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Die Website basiert auf modernen Webtechnologien, einschließlich Next.js, TypeScript und Tailwind CSS.
                 </p>
-                <ul className="space-y-3 text-gray-700 mb-8">
-                  <li>Gängige Browser wie Chrome, Firefox, Safari und Edge</li>
-                  <li>Hilfstechnologien einschließlich Screenreadern</li>
-                </ul>
 
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6 mt-12">
-                  Technische Spezifikationen
-                </h2>
-                <p className="text-lg text-gray-700 mb-4">
-                  Unsere Website verwendet die folgenden Technologien zur Unterstützung der Barrierefreiheit:
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Einschränkungen und Alternativen</h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
+                  Einige Seiten und Komponenten von Drittanbietern, einschließlich Stripe-gehosteter Checkout-Seiten, werden von Dritten kontrolliert und entsprechen möglicherweise nicht in allen Fällen vollständig den Barrierefreiheitsstandards. Wenn Sie während des Checkouts auf eine Barriere stoßen, kontaktieren Sie uns und wir helfen Ihnen, den Kauf über einen alternativen Weg abzuschließen. Einige herunterladbare Dokumente, falls auf der Website bereitgestellt, sind möglicherweise nicht immer vollständig barrierefrei. Auf Anfrage stellen wir ein barrierefreies alternatives Format bereit.
                 </p>
-                <ul className="space-y-3 text-gray-700 mb-8">
-                  <li>Next.js</li>
-                  <li>Tailwind CSS</li>
-                  <li>TypeScript</li>
-                </ul>
 
-                <h2 className="text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-6 mt-12">
-                  Einschränkungen und Alternativen
-                </h2>
-                <p className="text-lg text-gray-700 mb-4">
-                  Trotz unserer Bemühungen, die Barrierefreiheit unserer Website zu gewährleisten, können einige Einschränkungen bestehen bleiben. Nachfolgend eine Beschreibung der bekannten Einschränkungen und möglichen Lösungen:
-                </p>
-                <ul className="space-y-4 text-gray-700 mb-8">
-                  <li>
-                    <strong>PDF-Dokumente:</strong> Einige unserer PDF-Dokumente sind möglicherweise nicht vollständig barrierefrei. Wir arbeiten daran, barrierefreie Alternativen bereitzustellen und die Barrierefreiheit dieser Dokumente zu verbessern.
-                  </li>
-                  <li>
-                    <strong>Inhalte Dritter:</strong> Einige eingebettete Inhalte von Drittanbietern, wie Videos und Widgets, entsprechen möglicherweise nicht vollständig den Barrierefreiheitsstandards. Wir arbeiten mit unseren Partnern daran, dies zu verbessern.
-                  </li>
-                </ul>
-                <p className="text-lg text-gray-700 mb-8">
-                  Wenn Sie Hilfe benötigen oder ein alternatives Format wünschen, kontaktieren Sie uns bitte unter{' '}
-                  <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:underline font-semibold">
-                    contact@agriglobalsolutions.com
-                  </a>.
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Benötigen Sie Hilfe</h2>
+                <p className="text-gray-700 leading-relaxed mb-8">
+                  Wenn Sie Hilfe bei der Nutzung des Dienstes oder beim Zugriff auf Inhalte benötigen, kontaktieren Sie uns unter{' '}
+                  <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline font-semibold">contact@agriglobalsolutions.com</a>.
                 </p>
               </div>
             </div>
