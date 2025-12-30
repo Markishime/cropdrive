@@ -49,6 +49,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           cancelAtPeriodEnd: userData.cancelAtPeriodEnd || false,
           stripeCustomerId: userData.stripeCustomerId,
           stripeSubscriptionId: userData.stripeSubscriptionId,
+          paymentMethod: userData.paymentMethod || undefined,
           uploadsUsed: userData.uploadsUsed || 0,
           uploadsLimit: userData.uploadsLimit || 0,
           lastLogin: new Date(),

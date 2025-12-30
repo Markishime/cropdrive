@@ -8,8 +8,8 @@ import { useTranslation, getCurrentLanguage } from '@/i18n';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/lib/auth';
-import { doc, setDoc, updateDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { doc, setDoc, updateDoc, serverTimestamp, collection, addDoc, Timestamp } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 
 function SuccessPageContent() {
@@ -50,6 +50,55 @@ function SuccessPageContent() {
 
       try {
         console.log('🚀 Activating plan immediately:', plan, 'for user:', user.uid);
+        console.log('📋 Session ID:', sessionId);
+
+        // First, fetch the checkout session from Stripe to get subscription details
+        let stripeSubscriptionId: string | null = null;
+        let stripeCustomerId: string | null = null;
+        let billingCycle = 'monthly';
+        let paymentMethodData: any = null;
+        let currentPeriodEnd = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // Default 30 days
+
+        try {
+          const firebaseUser = auth.currentUser;
+          if (firebaseUser) {
+            const token = await firebaseUser.getIdToken();
+            
+            // Fetch session details from our API
+            const response = await fetch(`/api/stripe/session?session_id=${sessionId}`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+            
+            if (response.ok) {
+              const data = await response.json();
+              console.log('📊 Session data from Stripe:', data);
+              
+              if (data.session) {
+                stripeSubscriptionId = data.session.subscription || null;
+                stripeCustomerId = data.session.customer || null;
+                billingCycle = data.session.billingCycle || 'monthly';
+                paymentMethodData = data.session.paymentMethod || null;
+                
+                if (data.session.currentPeriodEnd) {
+                  currentPeriodEnd = new Date(data.session.currentPeriodEnd);
+                }
+                
+                console.log('✅ Got subscription details:', {
+                  stripeSubscriptionId,
+                  stripeCustomerId,
+                  billingCycle,
+                  hasPaymentMethod: !!paymentMethodData
+                });
+              }
+            } else {
+              console.warn('⚠️ Could not fetch session details, will rely on webhook');
+            }
+          }
+        } catch (sessionError) {
+          console.warn('⚠️ Error fetching session details:', sessionError);
+        }
 
         // Define plan limits (precision is unlimited = -1)
         const planLimits = {
@@ -60,16 +109,56 @@ function SuccessPageContent() {
 
         const limits = planLimits[plan as keyof typeof planLimits] || planLimits.start;
 
-        // Update user document with new plan
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, {
+        // Build user update object with all available data
+        const userUpdateData: any = {
           plan: plan,
           uploadsLimit: limits.uploadsLimit,
           uploadsUsed: 0,
+          subscriptionStatus: 'active',
           updatedAt: serverTimestamp(),
-        });
+        };
 
-        console.log('✅ User plan updated in Firestore:', plan);
+        // Add Stripe data if available
+        if (stripeSubscriptionId) {
+          userUpdateData.stripeSubscriptionId = stripeSubscriptionId;
+        }
+        if (stripeCustomerId) {
+          userUpdateData.stripeCustomerId = stripeCustomerId;
+        }
+        if (billingCycle) {
+          userUpdateData.billingCycle = billingCycle;
+        }
+        if (paymentMethodData) {
+          userUpdateData.paymentMethod = paymentMethodData;
+        }
+        userUpdateData.currentPeriodEnd = Timestamp.fromDate(currentPeriodEnd);
+        userUpdateData.cancelAtPeriodEnd = false;
+
+        // Update user document with new plan and subscription data
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, userUpdateData);
+
+        console.log('✅ User document updated with subscription data:', userUpdateData);
+
+        // Create/update subscription record in Firestore if we have subscription ID
+        if (stripeSubscriptionId) {
+          const subscriptionRef = doc(db, 'subscriptions', stripeSubscriptionId);
+          await setDoc(subscriptionRef, {
+            id: stripeSubscriptionId,
+            userId: user.uid,
+            planId: plan,
+            stripeSubscriptionId: stripeSubscriptionId,
+            stripeCustomerId: stripeCustomerId,
+            status: 'active',
+            currentPeriodStart: serverTimestamp(),
+            currentPeriodEnd: Timestamp.fromDate(currentPeriodEnd),
+            cancelAtPeriodEnd: false,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+            paymentMethod: paymentMethodData,
+          }, { merge: true });
+          console.log('✅ Subscription record created/updated');
+        }
 
         // Create membership record (similar to what webhook does)
         const membershipRef = doc(db, 'memberships', user.uid);
@@ -78,8 +167,10 @@ function SuccessPageContent() {
           planId: plan,
           status: 'active',
           stripeSessionId: sessionId,
+          stripeSubscriptionId: stripeSubscriptionId,
+          stripeCustomerId: stripeCustomerId,
           currentPeriodStart: serverTimestamp(),
-          currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+          currentPeriodEnd: Timestamp.fromDate(currentPeriodEnd),
           cancelAtPeriodEnd: false,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
@@ -122,6 +213,8 @@ function SuccessPageContent() {
             planId: plan,
             sessionId: sessionId,
             userId: user.uid,
+            stripeSubscriptionId,
+            stripeCustomerId,
             timestamp: new Date().toISOString(),
           };
           

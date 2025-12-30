@@ -207,6 +207,15 @@ export async function POST(req: NextRequest) {
       console.log('Creating new Stripe customer for:', userData.email);
     }
 
+    // Always set subscription_data.metadata for webhook processing
+    sessionConfig.subscription_data = {
+      metadata: {
+        userId: userId,
+        planId: planId,
+        isYearly: isYearly.toString(),
+      },
+    };
+
     // Try to use existing price IDs, fallback to creating inline prices for testing
     if (priceId && priceId.startsWith('price_')) {
       sessionConfig.line_items = [
@@ -215,13 +224,6 @@ export async function POST(req: NextRequest) {
           quantity: 1,
         },
       ];
-      sessionConfig.subscription_data = {
-        metadata: {
-          userId: userId,
-          planId: planId,
-          isYearly: isYearly.toString(),
-        },
-      };
     } else {
       // Create inline price for testing (when no Stripe Price ID is configured)
       // Prices in cents (smallest currency unit): MYR 36 = 3600 cents

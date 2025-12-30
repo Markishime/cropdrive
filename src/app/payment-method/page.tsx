@@ -169,6 +169,34 @@ export default function PaymentMethodPage() {
     }
   }, [user, language]);
 
+  // Sync subscription data from Stripe
+  const syncSubscription = useCallback(async () => {
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return null;
+      
+      const token = await firebaseUser.getIdToken();
+      console.log('🔄 Syncing subscription data from Stripe...');
+      
+      const response = await fetch('/api/stripe/sync-subscription', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log('✅ Sync result:', data);
+        return data.subscription;
+      }
+      return null;
+    } catch (error) {
+      console.error('❌ Error syncing subscription:', error);
+      return null;
+    }
+  }, []);
+
   // Fetch subscription details from Stripe
   const fetchSubscription = useCallback(async (showErrorToast = true) => {
     if (!user) return;
@@ -196,6 +224,24 @@ export default function PaymentMethodPage() {
         console.log('📊 Response status:', response.status, 'Success:', data.success);
         console.log('📊 User stripeSubscriptionId:', user?.stripeSubscriptionId);
         
+        // If no subscription but user has an active plan, try to sync
+        if (!data.subscription && user?.plan && user.plan !== 'none') {
+          console.log('⚠️ User has plan but no subscription data, attempting sync...');
+          const syncedSubscription = await syncSubscription();
+          
+          if (syncedSubscription) {
+            console.log('✅ Synced subscription:', syncedSubscription);
+            setSubscription(syncedSubscription);
+            setAutoRenewal(!syncedSubscription.cancelAtPeriodEnd);
+            
+            // Refresh user data to get updated subscription info
+            if (refreshUser) {
+              await refreshUser();
+            }
+            return;
+          }
+        }
+        
         // Set subscription even if null (to indicate we've checked)
         setSubscription(data.subscription);
         
@@ -212,6 +258,24 @@ export default function PaymentMethodPage() {
         const errorData = await response.json();
         console.error('❌ Error fetching subscription:', errorData);
         console.error('📊 Response status:', response.status);
+        
+        // If no subscription ID and user has a plan, try to sync
+        if (errorData.error === 'No active subscription' && user?.plan && user.plan !== 'none') {
+          console.log('⚠️ No subscription ID but user has plan, attempting sync...');
+          const syncedSubscription = await syncSubscription();
+          
+          if (syncedSubscription) {
+            console.log('✅ Synced subscription:', syncedSubscription);
+            setSubscription(syncedSubscription);
+            setAutoRenewal(!syncedSubscription.cancelAtPeriodEnd);
+            
+            // Refresh user data to get updated subscription info
+            if (refreshUser) {
+              await refreshUser();
+            }
+            return;
+          }
+        }
         
         // If user has subscription ID but API failed, don't clear subscription state
         // This allows buttons to remain enabled if subscription was previously loaded
@@ -239,7 +303,7 @@ export default function PaymentMethodPage() {
     } finally {
       setLoadingSubscription(false);
     }
-  }, [user, language]);
+  }, [user, language, syncSubscription, refreshUser]);
 
   // Fetch billing settings
   const fetchBillingSettings = useCallback(async () => {
@@ -365,6 +429,25 @@ export default function PaymentMethodPage() {
       }
       
       const token = await firebaseUser.getIdToken();
+      
+      // First, sync subscription if we don't have subscription data
+      if (!subscription && user?.plan && user.plan !== 'none') {
+        console.log('🔄 No subscription data for auto-renewal toggle, syncing first...');
+        const syncedSubscription = await syncSubscription();
+        
+        if (syncedSubscription) {
+          setSubscription(syncedSubscription);
+          if (refreshUser) await refreshUser();
+        } else {
+          toast.error(
+            language === 'ms' 
+              ? 'Tiada langganan aktif ditemui. Sila hubungi sokongan.' 
+              : 'No active subscription found. Please contact support.'
+          );
+          setUpdatingAutoRenewal(false);
+          return;
+        }
+      }
       
       // First, try to get current subscription state from API
       let currentCancelAtPeriodEnd = false;
@@ -611,8 +694,18 @@ export default function PaymentMethodPage() {
       
       const token = await firebaseUser.getIdToken();
       
-      // The API will check for subscription ID from Firestore, so we don't need to check user state here
-      // Just proceed with the cancellation request
+      // First, try to sync subscription if we don't have subscription data
+      if (!subscription) {
+        console.log('🔄 No subscription data, syncing first...');
+        const syncedSubscription = await syncSubscription();
+        
+        if (syncedSubscription) {
+          setSubscription(syncedSubscription);
+          if (refreshUser) await refreshUser();
+        }
+      }
+      
+      // Now proceed with the cancellation request
       const response = await fetch('/api/stripe/subscription', {
         method: 'DELETE',
         headers: {
@@ -645,7 +738,27 @@ export default function PaymentMethodPage() {
         await fetchSubscription();
         if (refreshUser) await refreshUser();
       } else {
-        throw new Error(data.error || 'Failed to cancel');
+        // If still no subscription after sync, show helpful message
+        if (data.error === 'No active subscription') {
+          toast.error(
+            language === 'ms' 
+              ? '❌ Tiada langganan aktif ditemui. Sila hubungi sokongan jika anda mempunyai langganan.' 
+              : '❌ No active subscription found. Please contact support if you have a subscription.',
+            {
+              duration: 5000,
+              style: {
+                borderRadius: '12px',
+                background: '#ef4444',
+                color: '#fff',
+                padding: '16px',
+                fontSize: '14px',
+                fontWeight: '600',
+              },
+            }
+          );
+        } else {
+          throw new Error(data.error || 'Failed to cancel');
+        }
       }
     } catch (error: any) {
       console.error('Cancel subscription error:', error);
