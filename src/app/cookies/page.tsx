@@ -108,153 +108,131 @@ export default function CookiesPage() {
               <Card className="mb-8 bg-white/70 backdrop-blur-xl border-2 border-green-100 shadow-2xl">
                 <CardContent className="p-8 md:p-12">
                   <div className="prose prose-lg max-w-none">
-                    {language === 'ms' ? (
-                      <div className="space-y-6 text-gray-700">
-                        <p>
-                          CropDrive OP Advisor™ ("kami", "kita", atau "platform kami") menggunakan kuki dan teknologi penjejakan yang serupa untuk meningkatkan pengalaman anda di platform kami. Dasar Kuki ini menerangkan bagaimana kami menggunakan kuki dan teknologi serupa.
-                        </p>
+                    <div className="space-y-6 text-gray-700">
+                      <p className="text-sm text-gray-500 mb-6">
+                        Last updated: 29 December 2025
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Apakah Kuki?</h2>
-                        <p>
-                          Kuki adalah fail teks kecil yang diletakkan pada peranti anda apabila anda melayari laman web. Kuki membantu laman web mengingati maklumat tentang lawatan anda, seperti pilihan bahasa dan keutamaan anda.
-                        </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Who runs this website</h2>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>Website:</strong> www.cropdrive.ai</li>
+                        <li><strong>Operator:</strong> AGS – Agriculture Global Solutions OÜ</li>
+                        <li><strong>Email:</strong> contact@agriglobalsolutions.com</li>
+                        <li><strong>Address:</strong> Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
+                      </ul>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Jenis Kuki yang Kami Gunakan</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Legal standard</h2>
+                      <p>
+                        This website follows the EU device storage rules.
+                      </p>
+                      <p>
+                        EU ePrivacy Directive 2002/58/EC, Article 5(3), covers storing information on a user device and accessing information already stored on a user device.
+                      </p>
+                      <p>
+                        Where data links to an identifiable person, GDPR applies, including consent rules in Articles 4(11) and 7, and transparency duties in Article 13.
+                      </p>
+                      <p>
+                        The Planet49 ruling confirms that pre-ticked boxes do not count as consent and that the device storage rule applies regardless of whether the stored information qualifies as personal data.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Kuki Penting</h3>
-                        <p>
-                          Kuki ini diperlukan untuk platform berfungsi dengan betul. Tanpa kuki ini, beberapa ciri mungkin tidak tersedia.
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Kuki sesi untuk autentikasi pengguna</li>
-                          <li>Kuki keselamatan untuk melindungi daripada serangan</li>
-                          <li>Kuki pilihan bahasa</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. What cookies are</h2>
+                      <p>
+                        Cookies are small text files stored by a website on your device.
+                      </p>
+                      <p>
+                        This policy also covers similar technologies, such as local storage, session storage, and comparable browser storage.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Kuki Analitik</h3>
-                        <p>
-                          Kuki ini membantu kami memahami bagaimana pengguna berinteraksi dengan platform kami. Kami menggunakan perkhidmatan seperti Google Analytics untuk mengumpul data ini.
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Menganalisis lalu lintas laman web</li>
-                          <li>Memahami tingkah laku pengguna</li>
-                          <li>Meningkatkan pengalaman pengguna</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. What we use on www.cropdrive.ai</h2>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Kuki Prestasi</h3>
-                        <p>
-                          Kuki ini membantu kami meningkatkan prestasi platform dengan mengingati pilihan anda dan mengoptimumkan muatan halaman.
-                        </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">4.1 Strictly necessary storage</h3>
+                      <p>
+                        These items support functions you request, such as sign-in, language, and basic interface settings.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Menguruskan Kuki</h2>
-                        <p>
-                          Anda boleh mengawal dan menguruskan kuki melalui tetapan pelayar web anda. Kebanyakan pelayar membenarkan anda untuk:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Melihat kuki yang disimpan</li>
-                          <li>Memadam kuki</li>
-                          <li>Menyekat kuki dari laman web tertentu</li>
-                          <li>Menyekat semua kuki</li>
-                        </ul>
+                      <h4 className="text-lg font-semibold text-gray-900 mt-4 mb-2">Local storage</h4>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>cropdrive-language</strong><br />
+                          Purpose: remembers your language choice.<br />
+                          Storage: until you delete site data in your browser, or you change the language.</li>
+                        <li><strong>cropdrive-remember-email</strong><br />
+                          Purpose: remembers your email after you choose "Remember Me".<br />
+                          Storage: until you delete site data in your browser, or you overwrite it.</li>
+                        <li><strong>sidebar-collapsed</strong><br />
+                          Purpose: remembers sidebar display after you change it.<br />
+                          Storage: until you delete site data in your browser, or you overwrite it.</li>
+                      </ul>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Kuki Pihak Ketiga</h2>
-                        <p>
-                          Kami juga menggunakan perkhidmatan pihak ketiga yang mungkin meletakkan kuki pada peranti anda:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Google Analytics untuk analisis</li>
-                          <li>Stripe untuk pemprosesan pembayaran</li>
-                          <li>Firebase untuk autentikasi dan penyimpanan data</li>
-                        </ul>
+                      <h4 className="text-lg font-semibold text-gray-900 mt-4 mb-2">Session storage</h4>
+                      <ul className="list-disc pl-6 space-y-2">
+                        <li><strong>pending_analysis_results</strong><br />
+                          Purpose: temporary storage during an analysis workflow.<br />
+                          Storage: removed when the browser tab closes.</li>
+                      </ul>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Perubahan kepada Dasar Ini</h2>
-                        <p>
-                          Kami mungkin mengemaskini Dasar Kuki ini dari semasa ke semasa. Kami akan memberitahu anda tentang perubahan ketara melalui email atau notis dalam platform.
-                        </p>
+                      <h4 className="text-lg font-semibold text-gray-900 mt-4 mb-2">Sign-in storage</h4>
+                      <p>
+                        Sign-in uses Firebase Authentication.
+                      </p>
+                      <p>
+                        Firebase stores sign-in state in browser storage to keep you signed in.
+                      </p>
+                      <p>
+                        Storage: ends after logout, or after deletion of site data in your browser.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Hubungi Kami</h2>
-                        <p>
-                          Jika anda mempunyai sebarang pertanyaan tentang Dasar Kuki ini, sila hubungi kami:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Email: contact@agriglobalsolutions.com</li>
-                          <li>WhatsApp: +60123456789</li>
-                        </ul>
-                      </div>
-                    ) : (
-                      <div className="space-y-6 text-gray-700">
-                        <p>
-                          CropDrive OP Advisor™ ("we", "us", or "our platform") uses cookies and similar tracking technologies to enhance your experience on our platform. This Cookie Policy explains how we use cookies and similar technologies.
-                        </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">4.2 Analytics</h3>
+                      <p>
+                        We use Vercel Web Analytics to measure general website usage and improve the site.
+                      </p>
+                      <p>
+                        Based on current configuration, Vercel Web Analytics runs without cookies on www.cropdrive.ai.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">What Are Cookies?</h2>
-                        <p>
-                          Cookies are small text files that are placed on your device when you visit a website. Cookies help websites remember information about your visit, such as your language preferences and settings.
-                        </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">4.3 Payments</h3>
+                      <p>
+                        Payments run on Stripe hosted checkout pages on stripe.com.
+                      </p>
+                      <p>
+                        When you start checkout, your browser leaves www.cropdrive.ai and loads Stripe pages.
+                      </p>
+                      <p>
+                        Stripe controls cookies and similar technologies on Stripe pages.
+                      </p>
 
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Types of Cookies We Use</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Consent</h2>
+                      <p>
+                        Under EU rules, consent is required before any non-essential cookies or non-essential device storage starts.
+                      </p>
+                      <p>
+                        Strictly necessary storage for a service you request does not require consent.
+                      </p>
+                      <p>
+                        If we add non-essential cookies or non-essential device storage in a future update, we will present a consent choice before those technologies start.
+                      </p>
+                      <p>
+                        Consent withdrawal will be available through a cookie settings control on the website.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Essential Cookies</h3>
-                        <p>
-                          These cookies are necessary for the platform to function properly. Without these cookies, some features may not be available.
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Session cookies for user authentication</li>
-                          <li>Security cookies to protect against attacks</li>
-                          <li>Language preference cookies</li>
-                        </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. How to manage cookies and storage</h2>
+                      <p>
+                        You manage cookies and site storage through your browser settings.
+                      </p>
+                      <p>
+                        Deleting site data for www.cropdrive.ai removes cookies and browser storage linked to this website.
+                      </p>
+                      <p>
+                        Logging out ends the active signed-in session, and browser storage remains until you delete site data.
+                      </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Analytics Cookies</h3>
-                        <p>
-                          These cookies help us understand how users interact with our platform. We use services like Google Analytics to collect this data.
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Analyzing website traffic</li>
-                          <li>Understanding user behavior</li>
-                          <li>Improving user experience</li>
-                        </ul>
-
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Performance Cookies</h3>
-                        <p>
-                          These cookies help us improve platform performance by remembering your preferences and optimizing page loads.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Managing Cookies</h2>
-                        <p>
-                          You can control and manage cookies through your web browser settings. Most browsers allow you to:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>View stored cookies</li>
-                          <li>Delete cookies</li>
-                          <li>Block cookies from specific websites</li>
-                          <li>Block all cookies</li>
-                        </ul>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Third-Party Cookies</h2>
-                        <p>
-                          We also use third-party services that may place cookies on your device:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Google Analytics for analytics</li>
-                          <li>Stripe for payment processing</li>
-                          <li>Firebase for authentication and data storage</li>
-                        </ul>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Changes to This Policy</h2>
-                        <p>
-                          We may update this Cookie Policy from time to time. We will notify you of significant changes through email or platform notices.
-                        </p>
-
-                        <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Contact Us</h2>
-                        <p>
-                          If you have any questions about this Cookie Policy, please contact us:
-                        </p>
-                        <ul className="list-disc pl-6 space-y-2">
-                          <li>Email: contact@agriglobalsolutions.com</li>
-                          <li>WhatsApp: +60123456789</li>
-                        </ul>
-                      </div>
-                    )}
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Updates</h2>
+                      <p>
+                        We update this policy when technologies change.
+                      </p>
+                      <p>
+                        The date at the top shows the current version.
+                      </p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

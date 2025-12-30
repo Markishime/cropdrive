@@ -23,7 +23,6 @@ import {
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
-import '@/utils/test-ai-integration'; // Load test utilities in development
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);

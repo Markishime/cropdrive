@@ -506,11 +506,11 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     );
   }
 
-  // Update user plan and limits
+  // Update user plan and limits (precision is unlimited = -1)
   const planLimits: Record<string, { uploadsLimit: number }> = {
     start: { uploadsLimit: 2 },
     smart: { uploadsLimit: 5 },
-    precision: { uploadsLimit: 10 }
+    precision: { uploadsLimit: -1 }
   };
 
   const limits = planLimits[planId];

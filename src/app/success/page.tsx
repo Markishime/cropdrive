@@ -51,11 +51,11 @@ function SuccessPageContent() {
       try {
         console.log('🚀 Activating plan immediately:', plan, 'for user:', user.uid);
 
-        // Define plan limits
+        // Define plan limits (precision is unlimited = -1)
         const planLimits = {
           start: { uploadsLimit: 2 },
           smart: { uploadsLimit: 5 },
-          precision: { uploadsLimit: 10 }
+          precision: { uploadsLimit: -1 }
         };
 
         const limits = planLimits[plan as keyof typeof planLimits] || planLimits.start;

@@ -3,6 +3,7 @@ import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
 import { Analytics } from '@vercel/analytics/next';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import CookieConsent from '@/components/CookieConsent';
 import { Toaster } from 'react-hot-toast';
 import '@/styles/globals.css';
 
@@ -200,6 +201,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           <LayoutWrapper>
             {children}
           </LayoutWrapper>
+          <CookieConsent />
           <Analytics />
         </AuthProvider>
       </body>
