@@ -1011,8 +1011,8 @@ export default function PaymentMethodPage() {
                                 : 'bg-green-100 text-green-700'
                             }`}>
                               {billingCycle === 'yearly' 
-                                ? (language === 'ms' ? 'Tahunan' : 'Yearly')
-                                : (language === 'ms' ? 'Bulanan' : 'Monthly')
+                                ? (language === 'ms' ? 'Bayar Pendahuluan' : 'Pay Upfront')
+                                : (language === 'ms' ? 'Bayar Mengikut Masa' : 'Pay Over Time')
                               }
                             </span>
                           </div>
@@ -1143,7 +1143,7 @@ export default function PaymentMethodPage() {
                       </motion.div>
                     )}
 
-                    {/* Pending Contract Cancellation Banner (for monthly Option A) */}
+                    {/* Pending Contract Cancellation Banner (for installment Option A) */}
                     {subscription?.pendingContractCancellation && subscription?.contractCancellationDate && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
@@ -1160,8 +1160,8 @@ export default function PaymentMethodPage() {
                             </p>
                             <p className="text-sm text-white/90 mb-3">
                               {language === 'ms' 
-                                ? `Langganan anda akan diteruskan dengan bayaran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir tahun kontrak), kemudian dibatalkan secara automatik.`
-                                : `Your subscription will continue with monthly payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of contract year), then be automatically cancelled.`}
+                                ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir tahun kontrak), kemudian dibatalkan secara automatik.`
+                                : `Your subscription will continue with monthly installment payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of contract year), then be automatically cancelled.`}
                             </p>
                             <Button
                               onClick={handleReactivateSubscription}
@@ -1420,11 +1420,11 @@ export default function PaymentMethodPage() {
                           <p className="text-sm text-gray-500">
                             {subscription?.pendingContractCancellation
                               ? (language === 'ms'
-                                  ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar setiap bulan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
-                                  : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly until contract end but cannot use AI assistant.`)
+                                  ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar ansuran bulanan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
+                                  : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly installments until contract end but cannot use AI assistant.`)
                                 : (language === 'ms'
-                                  ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
-                                  : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.')
+                                  ? 'Pembatalan akan menghentikan pembaharuan automatik untuk tahun berikutnya. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
+                                  : 'Cancellation will stop auto-renewal for the following year. Services will continue until the end of the current billing period.')
                             }
                           </p>
                         </div>
@@ -1597,7 +1597,7 @@ export default function PaymentMethodPage() {
                                   {language === 'ms' ? tier.nameMs : tier.name}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  RM {tier.monthlyPrice}/{language === 'ms' ? 'bulan' : 'month'}
+                                  RM {tier.monthlyPrice}/{language === 'ms' ? 'mo' : 'mo'} ({language === 'ms' ? 'Jumlah: ' : 'Total: '}{tier.monthlyPrice * 12} RM)
                                 </p>
                               </div>
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${

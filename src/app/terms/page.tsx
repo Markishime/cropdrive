@@ -172,10 +172,10 @@ export default function TermsPage() {
 
                       <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">11. Subscription term, renewal, and cancellation for Consumer Subscriptions</h2>
                       <p>
-                        For the monthly Subscription, billing occurs in monthly instalments and the Subscription carries a 12-month minimum term. Cancellation is permitted at any time, with cancellation taking effect as a non-renewal at the end of the minimum term, and cancellation does not release the User from payment of remaining instalments due within the 12-month minimum term.
+                        For the flexible Installment plan (Pay Over Time), billing occurs in monthly instalments and the Subscription carries a 12-month minimum term. Cancellation is permitted at any time, with cancellation taking effect as a non-renewal at the end of the minimum term, and cancellation does not release the User from payment of remaining instalments due within the 12-month minimum term.
                       </p>
                       <p>
-                        For the yearly Subscription, billing occurs as a single annual payment for a one-year term, cancellation is permitted at any time as a non-renewal, and access continues until the end of the paid annual term.
+                        For the Pay Upfront plan, billing occurs as a single annual payment for a one-year term, cancellation is permitted at any time as a non-renewal, and access continues until the end of the paid annual term.
                       </p>
 
                       <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">12. Fees, refunds, and charge disputes</h2>

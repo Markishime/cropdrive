@@ -93,8 +93,8 @@ export default function PricingPage() {
     // If same plan but different billing cycle, show switch option
     if (currentUserPlan === tierId) {
       const switchText = isYearly 
-        ? (language === 'ms' ? '🔄 Tukar ke Tahunan' : '🔄 Switch to Yearly')
-        : (language === 'ms' ? '🔄 Tukar ke Bulanan' : '🔄 Switch to Monthly');
+        ? (language === 'ms' ? '🔄 Tukar ke Bayar Pendahuluan' : '🔄 Switch to Pay Upfront')
+        : (language === 'ms' ? '🔄 Tukar ke Bayar Mengikut Masa' : '🔄 Switch to Pay Over Time');
       return {
         text: switchText,
         className: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 font-bold shadow-lg',
@@ -287,31 +287,52 @@ export default function PricingPage() {
             </motion.div>
 
             {/* Billing Toggle */}
-            <div className="inline-flex items-center justify-center space-x-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
-              <span className={`text-lg font-bold ${!isYearly ? 'text-yellow-400' : 'text-white/70'}`}>
-                {language === 'ms' ? 'BULANAN' : 'MONTHLY'}
-              </span>
-              <button
-                onClick={() => setIsYearly(!isYearly)}
-                aria-label={isYearly ? (language === 'ms' ? 'Tukar ke bil bulanan' : 'Switch to monthly billing') : (language === 'ms' ? 'Tukar ke bil tahunan' : 'Switch to yearly billing')}
-                title={isYearly ? (language === 'ms' ? 'Tukar ke bil bulanan' : 'Switch to monthly billing') : (language === 'ms' ? 'Tukar ke bil tahunan' : 'Switch to yearly billing')}
-                className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                  isYearly ? 'bg-yellow-400' : 'bg-white/30'
-                }`}
-              >
-                <span
-                  className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
-                    isYearly ? 'translate-x-11' : 'translate-x-1'
-                  }`}
-                />
-              </button>
-              <span className={`text-lg font-bold ${isYearly ? 'text-yellow-400' : 'text-white/70'}`}>
-                {language === 'ms' ? 'TAHUNAN' : 'YEARLY'}
-              </span>
-              {isYearly && (
-                <span className="bg-yellow-400 text-green-900 text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider ml-4">
-                  {language === 'ms' ? 'Jimat 20%' : 'Save 20%'}
+            <div className="inline-flex flex-col items-center justify-center space-y-4">
+              <div className="inline-flex items-center justify-center space-x-6 bg-white/10 backdrop-blur-sm rounded-full px-8 py-4">
+                <span className={`text-lg font-bold ${!isYearly ? 'text-yellow-400' : 'text-white/70'}`}>
+                  {language === 'ms' ? 'BAYAR MENGIKUT MASA' : 'PAY OVER TIME'}
                 </span>
+                <button
+                  onClick={() => setIsYearly(!isYearly)}
+                  aria-label={isYearly ? (language === 'ms' ? 'Tukar ke bayar mengikut masa' : 'Switch to pay over time') : (language === 'ms' ? 'Tukar ke bayar pendahuluan' : 'Switch to pay upfront')}
+                  title={isYearly ? (language === 'ms' ? 'Tukar ke bayar mengikut masa' : 'Switch to pay over time') : (language === 'ms' ? 'Tukar ke bayar pendahuluan' : 'Switch to pay upfront')}
+                  className={`relative inline-flex h-10 w-20 items-center rounded-full transition-colors duration-300 focus:outline-none ${
+                    isYearly ? 'bg-yellow-400' : 'bg-white/30'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-8 w-8 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
+                      isYearly ? 'translate-x-11' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+                <span className={`text-lg font-bold ${isYearly ? 'text-yellow-400' : 'text-white/70'}`}>
+                  {language === 'ms' ? 'BAYAR PENDAHULUAN' : 'PAY UPFRONT'}
+                </span>
+                {isYearly && (
+                  <span className="bg-yellow-400 text-green-900 text-sm font-bold px-4 py-2 rounded-full uppercase tracking-wider ml-4">
+                    {language === 'ms' ? 'Jimat 20%' : 'Save 20%'}
+                  </span>
+                )}
+              </div>
+              
+              {/* Disclaimers */}
+              {!isYearly ? (
+                <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
+                  <p className="text-sm text-white/90 text-center leading-relaxed">
+                    {language === 'ms' 
+                      ? 'Dapatkan akses penuh tahunan dengan segera, bayar melalui ansuran yang mudah. Pelan ini adalah keahlian 12 bulan yang ditagih setiap bulan. Dengan memilih pelan ansuran, anda bersetuju untuk membayar jumlah kos pelan sepanjang tahun. Pembatalan awal menghentikan pembaharuan automatik untuk tahun berikutnya.'
+                      : 'Get full annual access immediately, pay via convenient installments. These plans are 12-month memberships billed monthly. By selecting an installment plan, you agree to pay the total plan cost over the course of the year. Early cancellation stops auto-renewal for the following year.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="max-w-2xl mx-auto bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 border border-white/20">
+                  <p className="text-sm text-white/90 text-center leading-relaxed">
+                    {language === 'ms' 
+                      ? 'Dapatkan akses penuh tahunan dengan segera, dengan penjimatan maksimum. Pelan ini adalah keahlian 12 bulan yang dibayar dalam satu transaksi pendahuluan. Dengan membayar terlebih dahulu, anda mendapat diskaun 20% dan mengelakkan pengebilan bulanan. Pelan diperbaharui secara automatik setiap tahun.'
+                      : 'Get full annual access immediately, with maximum savings. These plans are 12-month memberships paid in a single upfront transaction. By paying in advance, you secure a 20% discount and avoid monthly billing. Plan renews automatically each year.'}
+                  </p>
+                </div>
               )}
             </div>
           </motion.div>
@@ -355,22 +376,40 @@ export default function PricingPage() {
 
                     <div className="mb-6 bg-gradient-to-br from-green-700 to-green-900 rounded-lg p-6 text-white">
                       {/* MYR Price */}
-                      <div className="flex items-baseline justify-center mb-4">
-                        <span className="text-6xl font-black text-yellow-400">
-                          {isYearly ? tier.yearlyPrice : tier.monthlyPrice}
-                        </span>
-                        <span className="text-2xl text-white/90 ml-2 font-bold">
-                          RM
-                        </span>
-                      </div>
-
-                      <p className="text-lg text-white/80 mt-3 font-medium">
-                        {isYearly ? (language === 'ms' ? '/tahun' : '/year') : (language === 'ms' ? '/bulan' : '/month')}
-                      </p>
-                      {isYearly && (
-                        <p className="text-sm text-yellow-300 mt-2 font-semibold">
-                          (~RM{Math.round(tier.yearlyPrice / 12)}/{language === 'ms' ? 'bulan' : 'month'})
-                        </p>
+                      {isYearly ? (
+                        <>
+                          <div className="flex items-baseline justify-center mb-4">
+                            <span className="text-6xl font-black text-yellow-400">
+                              {tier.yearlyPrice}
+                            </span>
+                            <span className="text-2xl text-white/90 ml-2 font-bold">
+                              RM
+                            </span>
+                          </div>
+                          <p className="text-lg text-white/80 mt-3 font-medium">
+                            {language === 'ms' ? '/tahun' : '/year'}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <div className="flex items-baseline justify-center mb-2">
+                            <span className="text-6xl font-black text-yellow-400">
+                              {tier.monthlyPrice}
+                            </span>
+                            <span className="text-2xl text-white/90 ml-2 font-bold">
+                              RM
+                            </span>
+                            <span className="text-xl text-white/80 ml-2 font-medium">
+                              /{language === 'ms' ? 'mo' : 'mo'}
+                            </span>
+                          </div>
+                          <p className="text-base text-white/80 mt-2 font-medium">
+                            {language === 'ms' ? 'Jumlah: ' : 'Total: '}
+                            <span className="font-bold text-yellow-300">
+                              {tier.monthlyPrice * 12} RM
+                            </span>
+                          </p>
+                        </>
                       )}
                     </div>
                   </div>
@@ -624,16 +663,16 @@ export default function PricingPage() {
                     : 'No, the prices shown are final. There are no setup fees, transaction fees, or hidden charges.',
                 },
                 {
-                  question: language === 'ms' ? 'Bolehkah saya batalkan langganan bulanan?' : 'Can I cancel my monthly subscription?',
+                  question: language === 'ms' ? 'Bolehkah saya batalkan pelan ansuran?' : 'Can I cancel my installment plan?',
                   answer: language === 'ms'
-                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Walau bagaimanapun, tempoh langganan minimum ialah satu tahun, jadi anda masih perlu membayar sehingga akhir tahun semasa anda.'
-                    : 'Yes. You can cancel any time. However, the minimum subscription period is one year, so you will still pay until the end of your current year.',
+                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Walau bagaimanapun, tempoh langganan minimum ialah satu tahun, jadi anda masih perlu membayar sehingga akhir tahun semasa anda. Pembatalan menghentikan pembaharuan automatik untuk tahun berikutnya.'
+                    : 'Yes. You can cancel any time. However, the minimum subscription period is one year, so you will still pay until the end of your current year. Cancellation stops auto-renewal for the following year.',
                 },
                 {
-                  question: language === 'ms' ? 'Bolehkah saya batalkan langganan tahunan?' : 'Can I cancel my yearly subscription?',
+                  question: language === 'ms' ? 'Bolehkah saya batalkan pelan pendahuluan?' : 'Can I cancel my upfront plan?',
                   answer: language === 'ms'
-                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Anda akan terus mempunyai akses ke akaun anda sehingga akhir tahun bil semasa.'
-                    : 'Yes. You can cancel any time. You will keep access to your account until the end of your current billing year.',
+                    ? 'Ya. Anda boleh batalkan pada bila-bila masa. Anda akan terus mempunyai akses ke akaun anda sehingga akhir tahun bil semasa. Pembatalan menghentikan pembaharuan automatik untuk tahun berikutnya.'
+                    : 'Yes. You can cancel any time. You will keep access to your account until the end of your current billing year. Cancellation stops auto-renewal for the following year.',
                 },
                 {
                   question: language === 'ms' ? 'Bagaimana dengan sokongan?' : 'What about support?',
