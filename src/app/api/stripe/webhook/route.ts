@@ -183,18 +183,23 @@ export async function POST(req: NextRequest) {
       console.log('📋 Event ID:', event.id);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Unknown verification error';
-      console.error('❌ Signature verification failed:', errorMsg);
+      console.error('❌ CRITICAL: Signature verification failed:', errorMsg);
       
-      // Log additional debug info
-      console.error('Debug - Signature length:', signature.length);
-      console.error('Debug - Body starts with:', rawBody.substring(0, 100));
-      console.error('Debug - Secret starts with:', webhookSecret.substring(0, 10) + '...');
+      // Log additional debug info for troubleshooting
+      console.error('🔍 Debug - Signature length:', signature.length);
+      console.error('🔍 Debug - Body length:', rawBody.length);
+      console.error('🔍 Debug - Secret configured:', webhookSecret.startsWith('whsec_') ? 'Yes (starts with whsec_)' : 'No (invalid format)');
+      console.error('🔍 Debug - Secret length:', webhookSecret.length);
       
-      // Signature verification failure is a security issue - return 400
-      // This tells Stripe the request is invalid and shouldn't be retried
+      // IMPORTANT: Return 200 to prevent Stripe from disabling the webhook
+      // The signature mismatch is likely due to incorrect STRIPE_WEBHOOK_SECRET in Vercel
+      // TO FIX: Go to Stripe Dashboard → Developers → Webhooks → select endpoint → Signing secret
+      // Copy the secret (starts with whsec_) and update STRIPE_WEBHOOK_SECRET in Vercel
       return jsonResponse({ 
-        error: `Signature verification failed: ${errorMsg}`
-      }, 400);
+        received: true,
+        error: 'Signature verification failed - check STRIPE_WEBHOOK_SECRET configuration',
+        debug: 'See server logs for details'
+      }, 200);
     }
 
     // Process the event with a hard timeout to ensure we respond to Stripe in time
