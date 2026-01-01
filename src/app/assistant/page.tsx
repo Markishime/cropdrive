@@ -1013,10 +1013,10 @@ export default function AssistantPage() {
           </h1>
           
           <p className="text-gray-600 mb-6">
-            {subscriptionCancelling
+            {subscriptionCancelled
               ? (language === 'ms' 
-                  ? 'Langganan anda telah dibatalkan. Anda masih perlu membayar sehingga akhir tempoh tetapi tidak boleh menggunakan Pembantu AI. Anda boleh memilih untuk membuka semula pelan yang dibatalkan.' 
-                  : 'Your subscription has been cancelled. You will still pay until end of period but cannot use AI Assistant. You can choose to re-open the cancelled plan.')
+                  ? 'Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri sehingga akhir tempoh pembayaran tahun semasa.' 
+                  : 'Your subscription has been cancelled. However, you can still use all features until the end of your current payment year.')
               : (language === 'ms' 
                   ? 'Langganan anda telah tamat. Sila langgan pelan baru untuk terus menggunakan Pembantu AI CropDrive.' 
                   : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.')
@@ -1024,7 +1024,7 @@ export default function AssistantPage() {
           </p>
           
           <div className="space-y-3">
-            {subscriptionCancelling ? (
+            {subscriptionCancelled ? (
               <>
                 <Link href="/payment-method" className="block">
                   <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-4 font-bold rounded-xl shadow-lg text-lg">
@@ -1217,8 +1217,8 @@ export default function AssistantPage() {
         </div>
       </motion.div>
 
-      {/* Subscription Cancelling Warning Banner */}
-      {subscriptionCancelling && user?.currentPeriodEnd && (
+      {/* Subscription Cancelled Warning Banner */}
+      {subscriptionCancelled && user?.currentPeriodEnd && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -1231,8 +1231,8 @@ export default function AssistantPage() {
                 <AlertTriangle className="w-5 h-5 text-white flex-shrink-0" />
                 <p className="text-sm font-semibold">
                   {language === 'ms' 
-                    ? `⚠️ Langganan anda akan tamat pada ${new Date(user.currentPeriodEnd).toLocaleDateString('ms-MY', { dateStyle: 'long' })}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
-                    : `⚠️ Your subscription will end on ${new Date(user.currentPeriodEnd).toLocaleDateString('en-US', { dateStyle: 'long' })}. After that, you won't be able to access the AI assistant.`
+                    ? `⚠️ Langganan anda telah dibatalkan. Akses akan tamat pada ${new Date(user.currentPeriodEnd).toLocaleDateString('ms-MY', { dateStyle: 'long' })}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
+                    : `⚠️ Your subscription has been cancelled. Access will end on ${new Date(user.currentPeriodEnd).toLocaleDateString('en-US', { dateStyle: 'long' })}. After that, you won't be able to access the AI assistant.`
                   }
                 </p>
               </div>
@@ -1255,7 +1255,7 @@ export default function AssistantPage() {
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: subscriptionCancelling ? 0.3 : 0.2 }}
+        transition={{ duration: 0.5, delay: subscriptionCancelled ? 0.3 : 0.2 }}
         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
       >
         <div className="max-w-7xl mx-auto">
