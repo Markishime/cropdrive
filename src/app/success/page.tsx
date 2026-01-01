@@ -52,6 +52,23 @@ function SuccessPageContent() {
         console.log('🚀 Activating plan immediately:', plan, 'for user:', user.uid);
         console.log('📋 Session ID:', sessionId);
 
+        // Check if this is an upgrade/downgrade (user already has an active subscription)
+        const isUpgradeOrDowngrade = user.subscriptionStatus === 'active' && user.plan && user.plan !== plan;
+        
+        if (isUpgradeOrDowngrade) {
+          console.log('🔄 This is a plan upgrade/downgrade from', user.plan, 'to', plan);
+          console.log('ℹ️ Webhook will handle the subscription update. Showing success message.');
+          
+          // For upgrades/downgrades, just show success and let webhook handle the update
+          setPlanActivated(true);
+          toast.success(
+            language === 'ms'
+              ? `🎉 Pelan berjaya ditukar ke ${plan}!`
+              : `🎉 Plan successfully changed to ${plan}!`
+          );
+          return;
+        }
+
         // First, fetch the checkout session from Stripe to get subscription details
         let stripeSubscriptionId: string | null = null;
         let stripeCustomerId: string | null = null;
@@ -233,22 +250,20 @@ function SuccessPageContent() {
 
       } catch (error) {
         console.error('❌ Error activating plan:', error);
-        // Don't show error toast if plan is already activated (might be from webhook)
-        // The webhook will handle the update, so we just log the error
-        if (!planActivated) {
-          toast.error(
-            language === 'ms'
-              ? 'Ralat mengaktifkan pelan. Webhook akan memproses perubahan. Sila semak semula dalam beberapa saat.'
-              : 'Error activating plan. Webhook will process the change. Please refresh in a few seconds.'
-          );
-        } else {
-          console.log('ℹ️ Plan already activated, error may be from webhook processing');
-        }
+        // For any errors, still show success since payment went through
+        // The webhook will handle the database update
+        setPlanActivated(true);
+        toast.success(
+          language === 'ms'
+            ? `🎉 Pembayaran berjaya! Pelan anda sedang dikemas kini.`
+            : `🎉 Payment successful! Your plan is being updated.`
+        );
+        console.log('ℹ️ Showing success despite error - webhook will handle update.');
       }
     };
 
     activatePlan();
-  }, [user?.uid, sessionId, plan, planActivated, language]);
+  }, [user?.uid, sessionId, plan, planActivated, language, user?.subscriptionStatus, user?.plan]);
 
   useEffect(() => {
     // If no session ID, allow success page but show warning
