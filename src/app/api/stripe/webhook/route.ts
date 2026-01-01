@@ -11,6 +11,7 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
+    apiVersion: '2025-02-24.acacia',
     maxNetworkRetries: 2, // Retry on network failures
     timeout: 10000, // 10 second timeout for Stripe API calls
   });

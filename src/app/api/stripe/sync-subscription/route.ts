@@ -4,6 +4,7 @@ import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-02-24.acacia',
   maxNetworkRetries: 2,
   timeout: 10000,
 });
