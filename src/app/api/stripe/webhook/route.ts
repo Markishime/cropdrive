@@ -620,70 +620,132 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
 
   const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
   
+  // Get subscription document to find userId
+  const subscriptionDoc = await firestoreWithRetry(
+    () => subscriptionRef.get(),
+    'Get subscription for user lookup'
+  );
+  
+  if (!subscriptionDoc?.exists) {
+    console.warn('⚠️ Subscription document not found:', subscription.id);
+    return;
+  }
+  
+  const subscriptionData = subscriptionDoc.data();
+  const userId = subscriptionData?.userId;
+  
+  // Extract plan ID from subscription items (for upgrades/downgrades)
+  let planId: string | null = null;
+  let isYearly = false;
+  
+  if (subscription.items?.data?.length > 0) {
+    const priceId = subscription.items.data[0]?.price?.id;
+    console.log('🔍 Extracting plan from price ID:', priceId);
+    
+    // Map price ID to plan
+    const priceToPlan: Record<string, { planId: string; isYearly: boolean }> = {};
+    const priceEnvMappings = [
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_START_MONTHLY', planId: 'start', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_START_YEARLY', planId: 'start', isYearly: true },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_SMART_MONTHLY', planId: 'smart', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_SMART_YEARLY', planId: 'smart', isYearly: true },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_PRECISION_MONTHLY', planId: 'precision', isYearly: false },
+      { env: 'NEXT_PUBLIC_STRIPE_PRICE_PRECISION_YEARLY', planId: 'precision', isYearly: true },
+    ];
+    
+    for (const mapping of priceEnvMappings) {
+      const envValue = process.env[mapping.env];
+      if (envValue) {
+        priceToPlan[envValue] = { planId: mapping.planId, isYearly: mapping.isYearly };
+      }
+    }
+    
+    if (priceId && priceToPlan[priceId]) {
+      planId = priceToPlan[priceId].planId;
+      isYearly = priceToPlan[priceId].isYearly;
+      console.log('✅ Plan extracted from subscription:', planId, 'yearly:', isYearly);
+    } else {
+      // Fallback: use existing planId from subscription document
+      planId = subscriptionData?.planId || null;
+      console.warn('⚠️ Could not extract plan from price ID, using existing planId:', planId);
+    }
+  }
+  
+  // Define plan limits
+  const planLimits = {
+    start: { uploadsLimit: 2 },
+    smart: { uploadsLimit: 5 },
+    precision: { uploadsLimit: -1 }
+  };
+  
   // Update subscription record
+  const subscriptionUpdate: any = {
+    status: subscription.status,
+    currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_start * 1000)),
+    currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+    cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
+    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+  };
+  
+  // Add planId if we extracted it
+  if (planId) {
+    subscriptionUpdate.planId = planId;
+  }
+  
   await firestoreWithRetry(
-    () => subscriptionRef.set({
-      status: subscription.status,
-      currentPeriodStart: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_start * 1000)),
-      currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
-      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
-      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    }, { merge: true }),
+    () => subscriptionRef.set(subscriptionUpdate, { merge: true }),
     'Update subscription record'
   );
 
   // If subscription is canceled, mark as cancelled but preserve plan and period end for access
   // Access continues until currentPeriodEnd even after cancellation
   if (subscription.status === 'canceled') {
-    const subscriptionDoc = await firestoreWithRetry(
-      () => subscriptionRef.get(),
-      'Get subscription for user lookup'
-    );
-    
-    if (subscriptionDoc?.exists) {
-      const subscriptionData = subscriptionDoc.data();
-      const userId = subscriptionData?.userId;
-      
-      if (userId) {
-        // Preserve plan and period end - only update status
-        // Access continues until currentPeriodEnd
-        await firestoreWithRetry(
-          () => adminDb.collection('users').doc(userId).update({
-            subscriptionStatus: 'canceled',
-            // Keep currentPeriodEnd so service access continues until period end
-            currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          }),
-          'Mark subscription as cancelled (preserve access)'
-        );
-        console.log('✅ Subscription cancelled, access preserved until period end:', userId);
-      }
+    if (userId) {
+      // Preserve plan and period end - only update status
+      // Access continues until currentPeriodEnd
+      await firestoreWithRetry(
+        () => adminDb.collection('users').doc(userId).update({
+          subscriptionStatus: 'canceled',
+          // Keep currentPeriodEnd so service access continues until period end
+          currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }),
+        'Mark subscription as cancelled (preserve access)'
+      );
+      console.log('✅ Subscription cancelled, access preserved until period end:', userId);
     }
   }
-  
+  // If subscription is active and we have a planId, update user's plan (for upgrades/downgrades)
+  else if (subscription.status === 'active' && planId && userId) {
+    const limits = planLimits[planId as keyof typeof planLimits];
+    if (limits) {
+      await firestoreWithRetry(
+        () => adminDb.collection('users').doc(userId).update({
+          plan: planId,
+          uploadsLimit: limits.uploadsLimit,
+          subscriptionStatus: 'active',
+          currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+          billingCycle: isYearly ? 'yearly' : 'monthly',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }),
+        'Update user plan from subscription update'
+      );
+      console.log('✅ User plan updated from subscription:', userId, 'new plan:', planId, 'uploadsLimit:', limits.uploadsLimit);
+    }
+  }
   // If subscription is unpaid (different from cancelled - no access)
-  if (subscription.status === 'unpaid') {
-    const subscriptionDoc = await firestoreWithRetry(
-      () => subscriptionRef.get(),
-      'Get subscription for user lookup'
-    );
-    
-    if (subscriptionDoc?.exists) {
-      const subscriptionData = subscriptionDoc.data();
-      const userId = subscriptionData?.userId;
-      
-      if (userId) {
-        await firestoreWithRetry(
-          () => adminDb.collection('users').doc(userId).update({
-            plan: 'start',
-            uploadsLimit: 10,
-            subscriptionStatus: 'unpaid',
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          }),
-          'Downgrade user plan for unpaid'
-        );
-        console.log('⬇️ Downgraded user to basic plan (unpaid):', userId);
-      }
+  else if (subscription.status === 'unpaid') {
+    if (userId) {
+      await firestoreWithRetry(
+        () => adminDb.collection('users').doc(userId).update({
+          plan: 'start',
+          uploadsLimit: 10,
+          subscriptionStatus: 'unpaid',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }),
+        'Downgrade user plan for unpaid'
+      );
+      console.log('⬇️ Downgraded user to basic plan (unpaid):', userId);
     }
   }
 

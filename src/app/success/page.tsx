@@ -233,11 +233,17 @@ function SuccessPageContent() {
 
       } catch (error) {
         console.error('❌ Error activating plan:', error);
-        toast.error(
-          language === 'ms'
-            ? 'Ralat mengaktifkan pelan. Sila hubungi sokongan.'
-            : 'Error activating plan. Please contact support.'
-        );
+        // Don't show error toast if plan is already activated (might be from webhook)
+        // The webhook will handle the update, so we just log the error
+        if (!planActivated) {
+          toast.error(
+            language === 'ms'
+              ? 'Ralat mengaktifkan pelan. Webhook akan memproses perubahan. Sila semak semula dalam beberapa saat.'
+              : 'Error activating plan. Webhook will process the change. Please refresh in a few seconds.'
+          );
+        } else {
+          console.log('ℹ️ Plan already activated, error may be from webhook processing');
+        }
       }
     };
 
