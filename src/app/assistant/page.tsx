@@ -35,6 +35,8 @@ export default function AssistantPage() {
   const { language } = useTranslation(mounted ? currentLang : 'en');
 
   // Check if user has exceeded their upload limit
+  // Note: Upload limits apply even if subscription is cancelled (as long as within period end)
+  // Limits are based on plan: Start (2), Smart (5), Precision (unlimited/-1)
   const isUploadLimitExceeded = (): boolean => {
     if (!user) return false;
     // If no plan, they need to subscribe first
@@ -46,7 +48,7 @@ export default function AssistantPage() {
     
     // If unlimited (-1), never exceeded
     if (uploadsLimit === -1) return false;
-    // Check if used >= limit
+    // Check if used >= limit (e.g., 2/2, 5/5 means limit exceeded)
     return uploadsUsed >= uploadsLimit;
   };
 
@@ -154,34 +156,30 @@ export default function AssistantPage() {
     };
   }, [currentLang, mounted]);
 
-  // Check if subscription has expired or is cancelled (block access immediately upon cancellation)
+  // Check if subscription has expired
+  // Note: Even if subscription is cancelled, service access continues until currentPeriodEnd
   const isSubscriptionExpired = (): boolean => {
     if (!user) return false;
     
     // If user has no plan or plan is 'none', they need to subscribe
     if (!user.plan || user.plan === 'none') return true;
     
-    // If subscription is set to cancel at period end, block access immediately (even if still paying)
-    if (user.cancelAtPeriodEnd) return true;
-    
-    // Note: pendingContractCancellation is checked in subscription data, not user data
-    // This check has been removed as it's not available on the User type
-    
-    // If subscription status is canceled
-    if (user.subscriptionStatus === 'canceled') return true;
-    
-    // Check if current period has ended
+    // Check if current period has ended - this is the only check that matters for access
+    // Even if subscription is cancelled, access continues until period end
     if (user.currentPeriodEnd) {
       const periodEnd = new Date(user.currentPeriodEnd);
       const now = new Date();
       if (now >= periodEnd) return true;
+    } else {
+      // If no period end date and subscription is cancelled, block access
+      if (user.subscriptionStatus === 'canceled') return true;
     }
     
     return false;
   };
 
   const subscriptionExpired = user ? isSubscriptionExpired() : false;
-  const subscriptionCancelling = user?.cancelAtPeriodEnd;
+  const subscriptionCancelled = user?.subscriptionStatus === 'canceled';
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -1103,8 +1101,8 @@ export default function AssistantPage() {
           
           <p className="text-gray-600 mb-6">
             {language === 'ms' 
-              ? `Anda telah mencapai had ${uploadsLimit === -1 ? '∞' : uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda. Naik taraf pelan anda untuk terus menganalisis laporan makmal.` 
-              : `You've reached your ${uploadsLimit === -1 ? 'unlimited' : uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan. Upgrade your plan to continue analyzing lab reports.`}
+              ? `Anda telah mencapai had ${uploadsLimit === -1 ? '∞' : uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda (${uploadsUsed}/${uploadsLimit}). ${subscriptionCancelled ? 'Walaupun langganan anda telah dibatalkan, had muat naik masih terpakai sehingga akhir tempoh pembayaran.' : 'Naik taraf pelan anda untuk terus menganalisis laporan makmal.'}` 
+              : `You've reached your ${uploadsLimit === -1 ? 'unlimited' : uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan (${uploadsUsed}/${uploadsLimit}). ${subscriptionCancelled ? 'Even though your subscription is cancelled, upload limits still apply until the end of your payment period.' : 'Upgrade your plan to continue analyzing lab reports.'}`}
           </p>
           
           <div className="space-y-3">

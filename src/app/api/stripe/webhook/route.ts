@@ -627,8 +627,37 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     'Update subscription record'
   );
 
-  // If subscription is canceled or unpaid, downgrade user
-  if (subscription.status === 'canceled' || subscription.status === 'unpaid') {
+  // If subscription is canceled, mark as cancelled but preserve plan and period end for access
+  // Access continues until currentPeriodEnd even after cancellation
+  if (subscription.status === 'canceled') {
+    const subscriptionDoc = await firestoreWithRetry(
+      () => subscriptionRef.get(),
+      'Get subscription for user lookup'
+    );
+    
+    if (subscriptionDoc?.exists) {
+      const subscriptionData = subscriptionDoc.data();
+      const userId = subscriptionData?.userId;
+      
+      if (userId) {
+        // Preserve plan and period end - only update status
+        // Access continues until currentPeriodEnd
+        await firestoreWithRetry(
+          () => adminDb.collection('users').doc(userId).update({
+            subscriptionStatus: 'canceled',
+            // Keep currentPeriodEnd so service access continues until period end
+            currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          }),
+          'Mark subscription as cancelled (preserve access)'
+        );
+        console.log('✅ Subscription cancelled, access preserved until period end:', userId);
+      }
+    }
+  }
+  
+  // If subscription is unpaid (different from cancelled - no access)
+  if (subscription.status === 'unpaid') {
     const subscriptionDoc = await firestoreWithRetry(
       () => subscriptionRef.get(),
       'Get subscription for user lookup'
@@ -643,12 +672,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
           () => adminDb.collection('users').doc(userId).update({
             plan: 'start',
             uploadsLimit: 10,
-            subscriptionStatus: 'canceled',
+            subscriptionStatus: 'unpaid',
             updatedAt: admin.firestore.FieldValue.serverTimestamp(),
           }),
-          'Downgrade user plan'
+          'Downgrade user plan for unpaid'
         );
-        console.log('⬇️ Downgraded user to basic plan:', userId);
+        console.log('⬇️ Downgraded user to basic plan (unpaid):', userId);
       }
     }
   }
@@ -669,9 +698,11 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const subscriptionRef = adminDb.collection('subscriptions').doc(subscription.id);
   
   // Mark subscription as canceled
+  const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
   await firestoreWithRetry(
     () => subscriptionRef.set({
       status: 'canceled',
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     }, { merge: true }),
     'Mark subscription canceled'
@@ -688,17 +719,17 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     const userId = subscriptionData?.userId;
     
     if (userId) {
+      // Preserve plan and period end - access continues until period end
       await firestoreWithRetry(
         () => adminDb.collection('users').doc(userId).update({
-          plan: 'none',
-          uploadsLimit: 0,
-          uploadsUsed: 0,
           subscriptionStatus: 'canceled',
+          // Keep currentPeriodEnd so service access continues until period end
+          currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         }),
-        'Downgrade user after deletion'
+        'Mark subscription as cancelled (preserve access)'
       );
-      console.log('⬇️ Downgraded user after subscription deletion:', userId);
+      console.log('✅ Subscription deleted, access preserved until period end:', userId);
     }
   }
 

@@ -426,10 +426,13 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'No active subscription' }, { status: 400 });
     }
 
-    // Cancel the subscription at period end (not immediately)
-    const subscription = await stripe.subscriptions.update(stripeSubscriptionId, {
-      cancel_at_period_end: true,
-    });
+    // Get subscription details before cancelling to preserve period end date
+    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
+    
+    // Cancel the subscription immediately (not at period end)
+    // Service access will continue until currentPeriodEnd
+    await stripe.subscriptions.cancel(stripeSubscriptionId);
 
     // Update Firestore subscriptions collection - use set with merge to handle missing docs
     const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
@@ -437,38 +440,41 @@ export async function DELETE(req: NextRequest) {
     
     if (subscriptionDoc.exists) {
       await subscriptionRef.update({
-        cancelAtPeriodEnd: true,
+        status: 'canceled',
         cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Preserve period end for access control
+        currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       });
     } else {
       // Create the document if it doesn't exist
       await subscriptionRef.set({
         userId,
         stripeSubscriptionId,
-        cancelAtPeriodEnd: true,
+        status: 'canceled',
         cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       });
     }
 
-    // Update user document
+    // Update user document - mark as cancelled but preserve plan and period end for access
     await adminDb.collection('users').doc(userId).update({
-      subscriptionStatus: 'canceling',
-      cancelAtPeriodEnd: true,
+      subscriptionStatus: 'canceled',
       subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+      // Keep currentPeriodEnd so service access continues until period end
+      currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     
-    console.log('✅ Subscription cancellation set for user:', userId);
+    console.log('✅ Subscription cancelled immediately for user:', userId, 'Service access until:', currentPeriodEnd);
 
     return NextResponse.json({
       success: true,
       status: 200,
-      message: 'Subscription will be cancelled at the end of the current billing period.',
-      cancelAt: new Date((subscription as any).current_period_end * 1000),
-      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      message: 'Subscription cancelled. Service access continues until the end of the current billing period.',
+      currentPeriodEnd: currentPeriodEnd,
     }, { status: 200 });
 
   } catch (error: any) {
@@ -481,6 +487,7 @@ export async function DELETE(req: NextRequest) {
 }
 
 // POST - Reactivate a cancelled subscription (before period ends)
+// Note: Since subscriptions are cancelled immediately, reactivation requires creating a new subscription
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -504,37 +511,34 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No subscription found' }, { status: 400 });
     }
 
-    // First, check if the subscription is still within the period
-    const currentSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    // Try to retrieve the subscription
+    let currentSubscription;
+    try {
+      currentSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    } catch (error: any) {
+      // Subscription doesn't exist or is already deleted
+      return NextResponse.json({ 
+        error: 'Subscription has been cancelled. Please subscribe to a new plan.',
+        expired: true
+      }, { status: 400 });
+    }
     
     // Check if subscription has already ended
     if (currentSubscription.status === 'canceled') {
       return NextResponse.json({ 
-        error: 'Subscription has already ended. Please subscribe to a new plan.',
+        error: 'Subscription has been cancelled. Please subscribe to a new plan to continue service.',
         expired: true
       }, { status: 400 });
     }
 
-    // Check if the current period has ended
-    const now = Math.floor(Date.now() / 1000);
-    if (now >= (currentSubscription as any).current_period_end) {
-      return NextResponse.json({ 
-        error: 'Subscription period has ended. Please subscribe to a new plan.',
-        expired: true
-      }, { status: 400 });
-    }
-
-    // Reactivate by setting cancel_at_period_end to false
-    const subscription = await stripe.subscriptions.update(stripeSubscriptionId, {
-      cancel_at_period_end: false,
-    });
-
+    // If subscription is still active, reactivate by clearing cancellation flags
     // Update Firestore subscriptions collection (also clear pending contract cancellation)
     const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
     const subscriptionDoc = await subscriptionRef.get();
     
     if (subscriptionDoc.exists) {
       await subscriptionRef.update({
+        status: 'active',
         cancelAtPeriodEnd: false,
         pendingContractCancellation: false,
         contractCancellationDate: admin.firestore.FieldValue.delete(),
@@ -558,10 +562,9 @@ export async function POST(req: NextRequest) {
       status: 200,
       message: 'Subscription has been reactivated successfully!',
       subscription: {
-        id: subscription.id,
-        status: subscription.status,
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
-        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        id: currentSubscription.id,
+        status: currentSubscription.status,
+        currentPeriodEnd: new Date((currentSubscription as any).current_period_end * 1000),
       },
     }, { status: 200 });
 

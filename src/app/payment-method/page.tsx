@@ -984,12 +984,12 @@ export default function PaymentMethodPage() {
                         {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
                       </h2>
                       <span className={`px-4 py-2 rounded-full text-sm font-bold ${
-                        subscription?.cancelAtPeriodEnd 
-                          ? 'bg-yellow-100 text-yellow-700' 
+                        subscription?.status === 'canceled' 
+                          ? 'bg-amber-100 text-amber-700' 
                           : 'bg-green-100 text-green-700'
                       }`}>
-                        {subscription?.cancelAtPeriodEnd 
-                          ? (language === 'ms' ? 'Pembaharuan Auto Dimatikan' : 'Auto-Renewal Off')
+                        {subscription?.status === 'canceled' 
+                          ? (language === 'ms' ? 'Dibatalkan' : 'Cancelled')
                           : (language === 'ms' ? 'Aktif' : 'Active')
                         }
                       </span>
@@ -1078,26 +1078,26 @@ export default function PaymentMethodPage() {
                     {/* Next Billing Info */}
                     {subscription && (
                       <div className={`rounded-xl p-4 mb-6 ${
-                        subscription.cancelAtPeriodEnd 
+                        subscription.status === 'canceled' 
                           ? 'bg-amber-50 border-2 border-amber-200' 
                           : 'bg-gray-50'
                       }`}>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <Clock className={`w-5 h-5 ${subscription.cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-500'}`} />
+                            <Clock className={`w-5 h-5 ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`} />
                             <div>
-                              <p className={`text-sm font-bold ${subscription.cancelAtPeriodEnd ? 'text-amber-700' : 'text-gray-700'}`}>
-                                {subscription.cancelAtPeriodEnd 
-                                  ? (language === 'ms' ? 'Langganan Tamat' : 'Subscription Ends')
+                              <p className={`text-sm font-bold ${subscription.status === 'canceled' ? 'text-amber-700' : 'text-gray-700'}`}>
+                                {subscription.status === 'canceled' 
+                                  ? (language === 'ms' ? 'Akses Tamat' : 'Access Ends')
                                   : (language === 'ms' ? 'Bil Seterusnya' : 'Next Billing')
                                 }
                               </p>
-                              <p className={`text-xs ${subscription.cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-500'}`}>
+                              <p className={`text-xs ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`}>
                                 {formatDate(subscription.currentPeriodEnd)}
                               </p>
                             </div>
                           </div>
-                          {!subscription.cancelAtPeriodEnd && (
+                          {subscription.status !== 'canceled' && (
                             <p className="text-lg font-black text-green-600">
                               RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
                             </p>
@@ -1106,38 +1106,31 @@ export default function PaymentMethodPage() {
                       </div>
                     )}
 
-                    {/* Auto-Renewal Off Warning Banner */}
-                    {subscription?.cancelAtPeriodEnd && (
+                    {/* Subscription Cancelled - Service Continues Until Period End */}
+                    {subscription?.status === 'canceled' && subscription?.currentPeriodEnd && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-4 mb-6 text-white"
+                        className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-4 mb-6 text-white"
                       >
                         <div className="flex items-start gap-3">
                           <AlertCircle className="w-6 h-6 flex-shrink-0 mt-0.5" />
                           <div className="flex-1">
                             <p className="font-bold mb-1">
                               {language === 'ms' 
-                                ? 'Pembaharuan Automatik Dimatikan' 
-                                : 'Auto-Renewal Turned Off'}
+                                ? 'Langganan Dibatalkan' 
+                                : 'Subscription Cancelled'}
                             </p>
                             <p className="text-sm text-white/90 mb-3">
                               {language === 'ms' 
-                                ? `Langganan anda masih aktif dan anda boleh menggunakan semua ciri sehingga ${formatDate(subscription.currentPeriodEnd)}. Selepas itu, langganan tidak akan diperbaharui secara automatik.`
-                                : `Your subscription is still active and you can use all features until ${formatDate(subscription.currentPeriodEnd)}. After that, your subscription will not renew automatically.`}
+                                ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription.currentPeriodEnd)} (akhir tempoh pembayaran tahun semasa). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
+                                : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.currentPeriodEnd)} (end of current payment year). To continue after this date, please subscribe to a new plan.`}
                             </p>
-                            <Button
-                              onClick={handleReactivateSubscription}
-                              disabled={loading}
-                              className="bg-green-600 text-white hover:bg-green-700 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors"
-                            >
-                              {loading ? (
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                              ) : (
-                                <RefreshCw className="w-4 h-4 mr-2" />
-                              )}
-                              {language === 'ms' ? 'Aktifkan Semula Langganan' : 'Reactivate Subscription'}
-                            </Button>
+                            <Link href="/pricing">
+                              <Button className="bg-white text-amber-600 hover:bg-amber-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors mt-2">
+                                {language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe to New Plan'}
+                              </Button>
+                            </Link>
                           </div>
                         </div>
                       </motion.div>
@@ -1185,7 +1178,7 @@ export default function PaymentMethodPage() {
                       <Link href="/pricing">
                         <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
                           <TrendingUp className="w-4 h-4 mr-2" />
-                          {subscription?.cancelAtPeriodEnd || subscription?.pendingContractCancellation
+                          {subscription?.status === 'canceled' || subscription?.pendingContractCancellation
                             ? (language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe New Plan')
                             : (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
                           }
@@ -1444,8 +1437,8 @@ export default function PaymentMethodPage() {
                           <Loader2 className="w-4 h-4 animate-spin" />
                         ) : subscription?.pendingContractCancellation ? (
                           language === 'ms' ? 'Dijadualkan' : 'Scheduled'
-                        ) : subscription?.cancelAtPeriodEnd ? (
-                          language === 'ms' ? 'Batalkan' : 'Cancel'
+                        ) : subscription?.status === 'canceled' ? (
+                          language === 'ms' ? 'Dibatalkan' : 'Cancelled'
                         ) : (
                           language === 'ms' ? 'Batal' : 'Cancel'
                         )}

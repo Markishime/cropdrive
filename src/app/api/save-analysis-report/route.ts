@@ -79,16 +79,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Check user's upload limits before saving
+    // Note: Even if subscription is cancelled, limits still apply until period end
     if (adminDb) {
       const userDoc = await adminDb.collection('users').doc(userId).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
         const uploadsUsed = userData?.uploadsUsed || 0;
         const uploadsLimit = userData?.uploadsLimit || 10;
+        const subscriptionStatus = userData?.subscriptionStatus;
+        const currentPeriodEnd = userData?.currentPeriodEnd;
         
-        console.log(`📊 Checking upload limits for user ${userId}: ${uploadsUsed}/${uploadsLimit}`);
+        console.log(`📊 Checking upload limits for user ${userId}: ${uploadsUsed}/${uploadsLimit}, status: ${subscriptionStatus}`);
+        
+        // If subscription is cancelled, check if we're still within the period end
+        if (subscriptionStatus === 'canceled' && currentPeriodEnd) {
+          const periodEndDate = currentPeriodEnd.toDate ? currentPeriodEnd.toDate() : new Date(currentPeriodEnd);
+          const now = new Date();
+          if (now >= periodEndDate) {
+            console.log(`❌ User ${userId} subscription period has ended`);
+            return NextResponse.json(
+              { 
+                error: 'Subscription expired',
+                message: 'Your subscription period has ended. Please subscribe to a new plan to continue.',
+                uploadsUsed,
+                uploadsLimit 
+              },
+              { status: 403 }
+            );
+          }
+        }
         
         // Check if user has exceeded their limit (unless unlimited: -1)
+        // This applies regardless of subscription status (as long as within period end)
         if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
           console.log(`❌ User ${userId} has exceeded upload limit: ${uploadsUsed}/${uploadsLimit}`);
           return NextResponse.json(
