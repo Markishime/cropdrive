@@ -90,35 +90,12 @@ service cloud.firestore {
     }
     
     // Allow querying analysis_results by userId or user_id (for both website and Streamlit)
-    // Specific compound query rules for the exact queries used in the app
+    // Note: Firestore rules have limitations checking query parameters, so we allow authenticated queries
+    // Document-level rules ensure users only see their own data
     match /analysis_results {
-      // Allow compound queries: user_id == uid AND status == 'completed'
-      allow read: if request.auth != null &&
-        request.query.where('user_id', '==', request.auth.uid).size() >= 1 &&
-        request.query.where('status', '==', 'completed').size() >= 1;
-
-      // Allow compound queries: userId == uid AND status == 'completed'
-      allow read: if request.auth != null &&
-        request.query.where('userId', '==', request.auth.uid).size() >= 1 &&
-        request.query.where('status', '==', 'completed').size() >= 1;
-
-      // Allow fallback queries: user_id == uid only (without status filter)
-      allow read: if request.auth != null &&
-        request.query.where('user_id', '==', request.auth.uid).size() >= 1 &&
-        request.query.where().size() == 1;
-
-      // Allow fallback queries: userId == uid only (without status filter)
-      allow read: if request.auth != null &&
-        request.query.where('userId', '==', request.auth.uid).size() >= 1 &&
-        request.query.where().size() == 1;
-
-      // Allow manual refresh queries in the app (used in event handlers)
-      allow read: if request.auth != null &&
-        request.query.where('user_id', '==', request.auth.uid).size() >= 1;
-
-      // Allow manual refresh queries for userId format
-      allow read: if request.auth != null &&
-        request.query.where('userId', '==', request.auth.uid).size() >= 1;
+      // Allow all authenticated users to query - document rules will filter results
+      // This is necessary because Firestore rules can't easily check query.where() parameters
+      allow read: if request.auth != null;
     }
     
     // Reports collection - kept for backward compatibility (deprecated, use analysis_results)
