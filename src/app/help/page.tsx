@@ -23,7 +23,9 @@ import {
   MapPin
 } from 'lucide-react';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useAuth } from '@/lib/auth';
 import SupportForm from '@/components/SupportForm';
+import toast from 'react-hot-toast';
 
 interface FAQ {
   question: string;
@@ -130,12 +132,29 @@ const categories: Category[] = [
   { id: 'troubleshooting', label: 'Troubleshooting', labelMs: 'Penyelesaian Masalah', icon: AlertCircle }
 ];
 
+interface ContactFormData {
+  name: string;
+  email: string;
+  organization: string;
+  role: string;
+  message: string;
+}
+
 export default function HelpCenterPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedFAQs, setExpandedFAQs] = useState<Set<number>>(new Set());
+  const { user, loading: authLoading } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactFormData, setContactFormData] = useState<ContactFormData>({
+    name: '',
+    email: '',
+    organization: '',
+    role: '',
+    message: '',
+  });
 
   useEffect(() => {
     setMounted(true);
@@ -177,6 +196,71 @@ export default function HelpCenterPage() {
 
     return matchesSearch && matchesCategory;
   });
+
+  const handleContactInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setContactFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!contactFormData.name || !contactFormData.email || !contactFormData.message) {
+      toast.error(language === 'ms' 
+        ? 'Sila isi semua medan yang diperlukan' 
+        : 'Please fill in all required fields'
+      );
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(contactFormData.email)) {
+      toast.error(language === 'ms' 
+        ? 'Sila masukkan alamat e-mel yang sah' 
+        : 'Please enter a valid email address'
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(contactFormData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success !== false) {
+        toast.success(language === 'ms' 
+          ? 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.' 
+          : 'Your message has been sent! We\'ll get back to you soon.',
+          { duration: 5000 }
+        );
+        setContactFormData({
+          name: '',
+          email: '',
+          organization: '',
+          role: '',
+          message: '',
+        });
+      } else {
+        throw new Error(data.error || data.message || 'Failed to send message');
+      }
+    } catch (error) {
+      console.error('Contact form error:', error);
+      toast.error(language === 'ms' 
+        ? 'Gagal menghantar mesej. Sila cuba lagi atau e-mel kami terus.' 
+        : 'Failed to send message. Please try again or email us directly.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
@@ -310,25 +394,27 @@ export default function HelpCenterPage() {
 
           {/* Search and Filter */}
           <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 mb-8 border border-gray-100">
-            <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
+            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-end">
               {/* Search */}
-              <div className="flex-1 relative">
-                <label htmlFor="faq-search" className="sr-only">
-                  {language === 'ms' ? 'Cari soalan' : 'Search questions'}
+              <div className="flex-1 w-full">
+                <label htmlFor="faq-search" className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ms' ? 'Cari Soalan' : 'Search Questions'}
                 </label>
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="faq-search"
-                  type="text"
-                  placeholder={language === 'ms' ? 'Cari soalan...' : 'Search questions...'}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
-                />
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <input
+                    id="faq-search"
+                    type="text"
+                    placeholder={language === 'ms' ? 'Cari soalan...' : 'Search questions...'}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+                  />
+                </div>
               </div>
 
               {/* Category Filter */}
-              <div className="md:w-64">
+              <div className="md:w-64 w-full">
                 <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-2">
                   {language === 'ms' ? 'Kategori' : 'Category'}
                 </label>
@@ -541,9 +627,124 @@ export default function HelpCenterPage() {
               </div>
             </div>
 
-            {/* Contact Form */}
+            {/* Contact Form or Support Form */}
             <div>
-              <SupportForm locale={currentLanguage} />
+              {!authLoading && !user ? (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100"
+                >
+                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">
+                    {language === 'ms' ? 'Hantar Mesej' : 'Send Message'}
+                  </h3>
+                  <form onSubmit={handleContactSubmit} className="space-y-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label htmlFor="contact-name" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {language === 'ms' ? 'Nama Penuh' : 'Full Name'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          id="contact-name"
+                          name="name"
+                          value={contactFormData.name}
+                          onChange={handleContactInputChange}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                          placeholder={language === 'ms' ? 'Masukkan nama anda' : 'Enter your name'}
+                          required
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="contact-email" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {language === 'ms' ? 'E-mel' : 'Email'} <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          id="contact-email"
+                          name="email"
+                          value={contactFormData.email}
+                          onChange={handleContactInputChange}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                          placeholder="you@example.com"
+                          required
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                      <div>
+                        <label htmlFor="contact-organization" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {language === 'ms' ? 'Organisasi (pilihan)' : 'Organization (optional)'}
+                        </label>
+                        <input
+                          type="text"
+                          id="contact-organization"
+                          name="organization"
+                          value={contactFormData.organization}
+                          onChange={handleContactInputChange}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                          placeholder={language === 'ms' ? 'Nama syarikat atau ladang' : 'Company or farm name'}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="contact-role" className="block text-sm font-semibold text-gray-700 mb-2">
+                          {language === 'ms' ? 'Peranan Anda' : 'Your Role'}
+                        </label>
+                        <input
+                          type="text"
+                          id="contact-role"
+                          name="role"
+                          value={contactFormData.role}
+                          onChange={handleContactInputChange}
+                          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                          placeholder={language === 'ms' ? 'Contoh: Petani, NGO, Makmal' : 'e.g. Farmer, NGO, Lab'}
+                          disabled={isSubmitting}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label htmlFor="contact-message" className="block text-sm font-semibold text-gray-700 mb-2">
+                        {language === 'ms' ? 'Mesej Anda' : 'Your Message'} <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        id="contact-message"
+                        name="message"
+                        value={contactFormData.message}
+                        onChange={handleContactInputChange}
+                        className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base min-h-[140px] resize-y focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                        placeholder={language === 'ms' ? 'Bagaimana kami boleh membantu anda?' : 'How can we help you?'}
+                        required
+                        disabled={isSubmitting}
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full inline-flex items-center justify-center px-6 py-3 rounded-lg bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold text-base shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          {language === 'ms' ? 'Menghantar...' : 'Sending...'}
+                        </>
+                      ) : (
+                        language === 'ms' ? 'Hantar Mesej' : 'Send Message'
+                      )}
+                    </button>
+                  </form>
+                </motion.div>
+              ) : (
+                <SupportForm locale={currentLanguage} />
+              )}
             </div>
           </div>
         </motion.section>

@@ -279,14 +279,14 @@ export default function BlogPage() {
           className="mb-24"
         >
           <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 border border-gray-100">
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-end">
               {/* Search */}
-              <div className="flex-1">
-                <label htmlFor="blog-search" className="sr-only">
-                  {language === 'ms' ? 'Cari artikel' : 'Search articles'}
+              <div className="flex-1 w-full">
+                <label htmlFor="blog-search" className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ms' ? 'Cari Artikel' : 'Search Articles'}
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="blog-search"
                     type="text"
@@ -299,7 +299,7 @@ export default function BlogPage() {
               </div>
 
               {/* Category Filter */}
-              <div className="lg:w-64">
+              <div className="lg:w-64 w-full">
                 <label htmlFor="blog-category-filter" className="block text-sm font-medium text-gray-700 mb-2">
                   {language === 'ms' ? 'Kategori' : 'Category'}
                 </label>
