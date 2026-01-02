@@ -181,7 +181,7 @@ export default function HelpCenterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-16 sm:py-20 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -190,13 +190,15 @@ export default function HelpCenterPage() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <div className="flex items-center justify-center mb-6">
-              <HelpCircle className="w-16 h-16 text-white mr-4" />
-              <h1 className="text-4xl sm:text-5xl font-black text-white">
+            <div className="flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+                <HelpCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
                 {language === 'ms' ? 'Pusat Bantuan' : 'Help Center'}
               </h1>
             </div>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+            <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto px-4">
               {language === 'ms'
                 ? 'Dapatkan bantuan dan sokongan untuk platform AI pintar CropDrive. Cari jawapan kepada soalan lazim atau hubungi pasukan sokongan kami.'
                 : 'Get help and support for the CropDrive smart AI platform. Find answers to frequently asked questions or contact our support team.'
@@ -207,19 +209,19 @@ export default function HelpCenterPage() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         {/* Features Overview */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-16"
+          className="mb-12 sm:mb-16 lg:mb-20"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
               {language === 'ms' ? 'Apa Yang Boleh Kami Bantu?' : 'What Can We Help You With?'}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Platform CropDrive menawarkan sokongan komprehensif untuk semua keperluan analisis ladang kelapa sawit anda.'
                 : 'The CropDrive platform offers comprehensive support for all your palm oil farm analysis needs.'
@@ -227,7 +229,7 @@ export default function HelpCenterPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 icon: Leaf,
@@ -277,11 +279,11 @@ export default function HelpCenterPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 * index }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow"
+                className="bg-white rounded-xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all duration-300 border border-gray-100"
               >
-                <feature.icon className="w-12 h-12 text-green-600 mb-4" />
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
+                <feature.icon className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -292,13 +294,13 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-16"
+          className="mb-12 sm:mb-16 lg:mb-20"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
               {language === 'ms' ? 'Soalan Lazim' : 'Frequently Asked Questions'}
             </h2>
-            <p className="text-lg text-gray-600">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Cari jawapan kepada soalan yang paling kerap ditanya.'
                 : 'Find answers to the most frequently asked questions.'
@@ -307,17 +309,21 @@ export default function HelpCenterPage() {
           </div>
 
           {/* Search and Filter */}
-          <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
+          <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-gray-100">
+            <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
               {/* Search */}
               <div className="flex-1 relative">
+                <label htmlFor="faq-search" className="sr-only">
+                  {language === 'ms' ? 'Cari soalan' : 'Search questions'}
+                </label>
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
+                  id="faq-search"
                   type="text"
                   placeholder={language === 'ms' ? 'Cari soalan...' : 'Search questions...'}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
                 />
               </div>
 
@@ -330,7 +336,7 @@ export default function HelpCenterPage() {
                   id="category-filter"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all bg-white"
                 >
                   <option value="all">
                     {language === 'ms' ? 'Semua Kategori' : 'All Categories'}
@@ -346,31 +352,31 @@ export default function HelpCenterPage() {
           </div>
 
           {/* FAQ List */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {filteredFAQs.map((faq, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden"
+                className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full px-5 sm:px-6 py-4 sm:py-5 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-start space-x-3">
+                  <div className="flex items-start space-x-3 sm:space-x-4 flex-1 pr-4">
                     {(() => {
                       const category = categories.find(cat => cat.id === faq.category);
                       const IconComponent = category?.icon || HelpCircle;
-                      return <IconComponent className="w-5 h-5 text-green-600 mt-1 flex-shrink-0" />;
+                      return <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mt-1 flex-shrink-0" />;
                     })()}
-                    <div>
-                      <h3 className="font-semibold text-gray-900 text-lg">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">
                         {language === 'ms' ? faq.questionMs : faq.question}
                       </h3>
-                      <div className="flex items-center mt-1">
-                        <span className="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      <div className="flex items-center">
+                        <span className="text-xs sm:text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full font-medium">
                           {(() => {
                             const category = categories.find(cat => cat.id === faq.category);
                             return language === 'ms' ? category?.labelMs : category?.label;
@@ -380,9 +386,9 @@ export default function HelpCenterPage() {
                     </div>
                   </div>
                   {expandedFAQs.has(index) ? (
-                    <ChevronUp className="w-5 h-5 text-gray-500" />
+                    <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                    <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   )}
                 </button>
 
@@ -391,10 +397,10 @@ export default function HelpCenterPage() {
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
-                    className="px-6 pb-4"
+                    className="px-5 sm:px-6 pb-4 sm:pb-5"
                   >
-                    <div className="pt-2 border-t border-gray-100">
-                      <p className="text-gray-700 leading-relaxed">
+                    <div className="pt-3 border-t border-gray-100">
+                      <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                         {language === 'ms' ? faq.answerMs : faq.answer}
                       </p>
                     </div>
@@ -405,12 +411,12 @@ export default function HelpCenterPage() {
           </div>
 
           {filteredFAQs.length === 0 && (
-            <div className="text-center py-12">
-              <HelpCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="text-center py-12 sm:py-16">
+              <HelpCircle className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
                 {language === 'ms' ? 'Tiada Soalan Dijumpai' : 'No Questions Found'}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto">
                 {language === 'ms'
                   ? 'Cuba cari dengan kata kunci yang berbeza.'
                   : 'Try searching with different keywords.'
@@ -425,13 +431,13 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mb-16"
+          className="mb-12 sm:mb-16 lg:mb-20"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
               {language === 'ms' ? 'Hubungi Kami' : 'Contact Us'}
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Tidak menemui jawapan yang anda cari? Pasukan sokongan kami sedia membantu.'
                 : "Can't find the answer you're looking for? Our support team is here to help."
@@ -439,23 +445,25 @@ export default function HelpCenterPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-12">
             {/* Contact Information */}
-            <div className="space-y-8">
-              <div className="bg-white rounded-xl shadow-lg p-8">
-                <h3 className="text-2xl font-bold text-gray-900 mb-6">
+            <div className="space-y-6 sm:space-y-8">
+              <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">
                   {language === 'ms' ? 'Maklumat Hubungan' : 'Contact Information'}
                 </h3>
 
-                <div className="space-y-6">
+                <div className="space-y-5 sm:space-y-6">
                   <div className="flex items-start space-x-4">
-                    <Mail className="w-6 h-6 text-green-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">
                         {language === 'ms' ? 'Emel' : 'Email'}
                       </h4>
-                      <p className="text-gray-600">support@cropdrive.com</p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-gray-700 font-medium">support@cropdrive.com</p>
+                      <p className="text-sm text-gray-500 mt-1.5">
                         {language === 'ms'
                           ? 'Kami membalas dalam 12-16 jam'
                           : 'We respond within 12-16 hours'
@@ -465,13 +473,15 @@ export default function HelpCenterPage() {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <Phone className="w-6 h-6 text-green-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">
                         {language === 'ms' ? 'Telefon' : 'Phone'}
                       </h4>
-                      <p className="text-gray-600">+60 3-1234 5678</p>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-gray-700 font-medium">+60 3-1234 5678</p>
+                      <p className="text-sm text-gray-500 mt-1.5">
                         {language === 'ms'
                           ? 'Isnin - Jumaat, 9:00 AM - 6:00 PM MST'
                           : 'Monday - Friday, 9:00 AM - 6:00 PM MST'
@@ -481,12 +491,14 @@ export default function HelpCenterPage() {
                   </div>
 
                   <div className="flex items-start space-x-4">
-                    <MapPin className="w-6 h-6 text-green-600 mt-1" />
-                    <div>
-                      <h4 className="font-semibold text-gray-900">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-gray-900 mb-1">
                         {language === 'ms' ? 'Alamat' : 'Address'}
                       </h4>
-                      <p className="text-gray-600">
+                      <p className="text-gray-700 font-medium">
                         CropDrive OP Advisor™<br />
                         Kuala Lumpur, Malaysia
                       </p>
@@ -496,32 +508,32 @@ export default function HelpCenterPage() {
               </div>
 
               {/* Response Times */}
-              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-8 border border-green-200">
-                <h3 className="text-xl font-bold text-gray-900 mb-4">
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6 sm:p-8 border-2 border-green-200 shadow-md">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-5">
                   {language === 'ms' ? 'Masa Respons' : 'Response Times'}
                 </h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700">
+                <div className="space-y-3 sm:space-y-4">
+                  <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">
+                    <span className="text-sm sm:text-base text-gray-700 font-medium">
                       {language === 'ms' ? 'Sokongan Emel' : 'Email Support'}
                     </span>
-                    <span className="font-semibold text-green-700">
+                    <span className="font-bold text-green-700 text-sm sm:text-base">
                       {language === 'ms' ? '12-16 jam' : '12-16 hours'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700">
+                  <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">
+                    <span className="text-sm sm:text-base text-gray-700 font-medium">
                       {language === 'ms' ? 'Analisis AI' : 'AI Analysis'}
                     </span>
-                    <span className="font-semibold text-green-700">
+                    <span className="font-bold text-green-700 text-sm sm:text-base">
                       {language === 'ms' ? '2-15 minit' : '2-15 minutes'}
                     </span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-700">
+                  <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">
+                    <span className="text-sm sm:text-base text-gray-700 font-medium">
                       {language === 'ms' ? 'Isu Kritikal' : 'Critical Issues'}
                     </span>
-                    <span className="font-semibold text-red-700">
+                    <span className="font-bold text-red-700 text-sm sm:text-base">
                       {language === 'ms' ? '4-6 jam' : '4-6 hours'}
                     </span>
                   </div>
@@ -541,12 +553,12 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center"
+          className="text-center pt-8 sm:pt-12"
         >
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-6 sm:mb-8">
             {language === 'ms' ? 'Pautan Berguna' : 'Quick Links'}
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
             {[
               {
                 href: '/pricing',
@@ -575,10 +587,12 @@ export default function HelpCenterPage() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.4, delay: 0.1 * index }}
-                className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all hover:-translate-y-1 flex flex-col items-center"
+                className="bg-white rounded-xl shadow-md p-5 sm:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center border border-gray-100 group"
               >
-                <link.icon className="w-8 h-8 text-green-600 mb-3" />
-                <span className="font-semibold text-gray-900">{link.label}</span>
+                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-green-600 transition-colors">
+                  <link.icon className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 group-hover:text-white transition-colors" />
+                </div>
+                <span className="font-semibold text-gray-900 text-sm sm:text-base">{link.label}</span>
               </motion.a>
             ))}
           </div>
