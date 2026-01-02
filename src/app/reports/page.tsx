@@ -5,8 +5,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X } from 'lucide-react';
-import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
+import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X, AlertTriangle } from 'lucide-react';
+import { collection, query, where, orderBy, getDocs, doc, deleteDoc, getDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
 import toast from 'react-hot-toast';
@@ -33,6 +33,9 @@ export default function ReportsPage() {
   const [loadingReports, setLoadingReports] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [fullReportData, setFullReportData] = useState<any>(null);
+  const [loadingFullReport, setLoadingFullReport] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<Report | null>(null);
   
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -409,26 +412,89 @@ export default function ReportsPage() {
     return matchesSearch && report.status === 'completed';
   });
 
-  const handleDeleteReport = async (reportId: string) => {
-    if (!confirm(language === 'ms' ? 'Adakah anda pasti mahu memadam laporan ini?' : 'Are you sure you want to delete this report?')) {
-      return;
-    }
+  const handleDeleteClick = (report: Report) => {
+    setReportToDelete(report);
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!reportToDelete) return;
+
+    const reportId = reportToDelete.id;
     setDeletingId(reportId);
+    setReportToDelete(null);
+    
     try {
       await deleteDoc(doc(db, 'analysis_results', reportId));
       setReports(reports.filter(r => r.id !== reportId));
-      toast.success(language === 'ms' ? '✓ Laporan dipadam' : '✓ Report deleted');
+      toast.success(
+        language === 'ms' 
+          ? '✓ Laporan berjaya dipadam' 
+          : '✓ Report successfully deleted',
+        {
+          duration: 3000,
+          icon: '🗑️',
+        }
+      );
     } catch (error) {
       console.error('Error deleting report:', error);
-      toast.error(language === 'ms' ? '✗ Ralat memadam laporan' : '✗ Error deleting report');
+      toast.error(
+        language === 'ms' 
+          ? '✗ Ralat memadam laporan. Sila cuba lagi.' 
+          : '✗ Error deleting report. Please try again.',
+        {
+          duration: 4000,
+        }
+      );
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleViewReport = (report: Report) => {
+  const handleDeleteCancel = () => {
+    setReportToDelete(null);
+  };
+
+  const handleViewReport = async (report: Report) => {
     setSelectedReport(report);
+    setLoadingFullReport(true);
+    setFullReportData(null);
+    
+    try {
+      // Fetch the full document from Firestore
+      const reportDoc = await getDoc(doc(db, 'analysis_results', report.id));
+      if (reportDoc.exists()) {
+        const data = reportDoc.data();
+        // Convert Firestore Timestamps to readable format
+        const processedData: any = {};
+        for (const [key, value] of Object.entries(data)) {
+          if (value && typeof value === 'object' && 'toDate' in value) {
+            // Firestore Timestamp
+            processedData[key] = value.toDate().toISOString();
+          } else if (value && typeof value === 'object' && 'seconds' in value) {
+            // Timestamp with seconds property
+            processedData[key] = new Date(value.seconds * 1000).toISOString();
+          } else {
+            processedData[key] = value;
+          }
+        }
+        setFullReportData(processedData);
+      } else {
+        toast.error(
+          language === 'ms' 
+            ? 'Laporan tidak dijumpai' 
+            : 'Report not found'
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching full report:', error);
+      toast.error(
+        language === 'ms' 
+          ? 'Ralat memuatkan laporan' 
+          : 'Error loading report'
+      );
+    } finally {
+      setLoadingFullReport(false);
+    }
   };
 
   if (authLoading || !user) {
@@ -611,7 +677,7 @@ export default function ReportsPage() {
                         </button>
                         
                         <button
-                          onClick={() => handleDeleteReport(report.id)}
+                          onClick={() => handleDeleteClick(report)}
                           disabled={deletingId === report.id}
                           className="flex items-center justify-center w-12 h-12 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 border border-red-200 hover:border-red-300"
                           title={language === 'ms' ? 'Padam' : 'Delete'}
@@ -654,47 +720,152 @@ export default function ReportsPage() {
               </button>
             </div>
             <div className="p-6 sm:p-8 overflow-y-auto flex-1">
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">
-                    {language === 'ms' ? 'Tarikh' : 'Date'}
-                  </h3>
-                  <p className="text-gray-600">
-                    {new Date(selectedReport.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
-                    })}
-                  </p>
-                </div>
-                
-                {selectedReport.summary && (
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">
-                      {language === 'ms' ? 'Ringkasan' : 'Summary'}
-                    </h3>
-                    <p className="text-gray-600 whitespace-pre-wrap">{selectedReport.summary}</p>
+              {loadingFullReport ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                    <p className="text-gray-600 font-medium">
+                      {language === 'ms' ? 'Memuatkan data laporan...' : 'Loading report data...'}
+                    </p>
                   </div>
-                )}
-
-                {selectedReport.analysisData && (
+                </div>
+              ) : fullReportData ? (
+                <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      {language === 'ms' ? 'Data Analisis' : 'Analysis Data'}
+                      {language === 'ms' ? 'Data Lengkap dari Firestore' : 'Complete Data from Firestore'}
                     </h3>
-                    <div className="bg-gray-50 rounded-lg p-4 overflow-x-auto">
-                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
-                        {JSON.stringify(selectedReport.analysisData, null, 2)}
-                      </pre>
+                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                      <div className="overflow-x-auto">
+                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
+                          {JSON.stringify(fullReportData, null, 2)}
+                        </pre>
+                      </div>
                     </div>
                   </div>
-                )}
-
-                {!selectedReport.summary && !selectedReport.analysisData && (
-                  <div className="text-center py-8 text-gray-500">
-                    {language === 'ms' ? 'Tiada maklumat tambahan tersedia' : 'No additional information available'}
+                  
+                  {/* Also show formatted key fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {fullReportData.title && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                          {language === 'ms' ? 'Tajuk' : 'Title'}
+                        </h4>
+                        <p className="text-gray-900">{fullReportData.title}</p>
+                      </div>
+                    )}
+                    {fullReportData.date && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                          {language === 'ms' ? 'Tarikh' : 'Date'}
+                        </h4>
+                        <p className="text-gray-900">{fullReportData.date}</p>
+                      </div>
+                    )}
+                    {fullReportData.status && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                          {language === 'ms' ? 'Status' : 'Status'}
+                        </h4>
+                        <p className="text-gray-900">{fullReportData.status}</p>
+                      </div>
+                    )}
+                    {(fullReportData.userId || fullReportData.user_id) && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
+                          {language === 'ms' ? 'ID Pengguna' : 'User ID'}
+                        </h4>
+                        <p className="text-gray-900 font-mono text-xs">{fullReportData.userId || fullReportData.user_id}</p>
+                      </div>
+                    )}
                   </div>
-                )}
+                  
+                  {fullReportData.summary && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        {language === 'ms' ? 'Ringkasan' : 'Summary'}
+                      </h4>
+                      <p className="text-gray-600 whitespace-pre-wrap bg-white p-4 rounded-lg border border-gray-200">
+                        {fullReportData.summary}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  {language === 'ms' ? 'Tiada data tersedia' : 'No data available'}
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {reportToDelete && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={handleDeleteCancel}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-black text-gray-900 mb-1">
+                    {language === 'ms' ? 'Padam Laporan?' : 'Delete Report?'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {language === 'ms' 
+                      ? 'Tindakan ini tidak boleh dibatalkan.' 
+                      : 'This action cannot be undone.'}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                <p className="text-sm font-medium text-gray-700 mb-1">
+                  {language === 'ms' ? 'Laporan:' : 'Report:'}
+                </p>
+                <p className="text-gray-900 font-semibold">{reportToDelete.title}</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  {new Date(reportToDelete.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={handleDeleteCancel}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition"
+                >
+                  {language === 'ms' ? 'Batal' : 'Cancel'}
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={deletingId === reportToDelete.id}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg font-bold hover:from-red-700 hover:to-red-800 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {deletingId === reportToDelete.id ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      {language === 'ms' ? 'Memadam...' : 'Deleting...'}
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-4 h-4" />
+                      {language === 'ms' ? 'Padam' : 'Delete'}
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </motion.div>
