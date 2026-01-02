@@ -10,7 +10,7 @@ if (!stripeSecretKey) {
 
 const stripe = stripeSecretKey
   ? new Stripe(stripeSecretKey, {
-      apiVersion: '2025-12-15.clover',
+      apiVersion: '2025-12-15.clover' as any,
       maxNetworkRetries: 2,
       timeout: 10000,
     })
