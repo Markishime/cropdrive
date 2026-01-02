@@ -95,7 +95,14 @@ service cloud.firestore {
     match /analysis_results {
       // Allow all authenticated users to query - document rules will filter results
       // This is necessary because Firestore rules can't easily check query.where() parameters
-      allow read: if request.auth != null;
+      // The document-level rules (above) ensure users can only read their own documents
+      // We allow list operations (queries) for authenticated users
+      allow list: if request.auth != null;
+      allow get: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.user_id == request.auth.uid ||
+        !resource.exists
+      );
     }
     
     // Reports collection - kept for backward compatibility (deprecated, use analysis_results)

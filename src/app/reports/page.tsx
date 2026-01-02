@@ -238,12 +238,12 @@ export default function ReportsPage() {
     };
     
     try {
-      // Query 1: user_id (primary format used by AI assistant) with status
-      // This is the main query since actual data uses user_id
+      // Query 1: user_id (primary format used by AI assistant)
+      // Query without status filter to avoid Firestore rule limitations with compound queries
+      // We'll filter for completed reports on the client side
       const q1 = query(
         reportsRef,
-        where('user_id', '==', user.uid),
-        where('status', '==', 'completed')
+        where('user_id', '==', user.uid)
       );
       
       unsubscribe1 = onSnapshot(
@@ -252,63 +252,30 @@ export default function ReportsPage() {
           console.log(`📊 Query 1 (user_id): ${snapshot.size} reports found`);
           snapshot.forEach((doc) => {
             const report = processReportDoc(doc, user.uid);
-            if (report) {
+            // Filter for completed reports on client side
+            if (report && report.status === 'completed') {
               allReports.set(doc.id, report);
             }
           });
           updateReportsFromMap();
         },
         (error: any) => {
-          console.warn('⚠️ Query 1 (user_id) error:', {
+          console.error('❌ Query 1 (user_id) error:', {
             code: error.code,
             message: error.message,
             userId: user.uid,
             isAuthenticated: !!user.uid
           });
-
-          // Check if it's a permissions error
-          if (error.code === 'permission-denied') {
-            console.error('❌ Permission denied for user_id query. Check Firestore rules.');
-          }
-
-          // Fallback: Query without status filter
-          console.log('🔄 Trying fallback query without status filter...');
-          try {
-            const q1Fallback = query(
-              reportsRef,
-              where('user_id', '==', user.uid)
-            );
-            
-            unsubscribe1 = onSnapshot(
-              q1Fallback,
-              (snapshot) => {
-                console.log(`📊 Query 1 Fallback (user_id only): ${snapshot.size} reports found`);
-                snapshot.forEach((doc) => {
-                  const report = processReportDoc(doc, user.uid);
-                  if (report && report.status === 'completed') {
-                    allReports.set(doc.id, report);
-                  }
-                });
-                updateReportsFromMap();
-              },
-              (error2: any) => {
-                console.error('❌ Query 1 Fallback error:', error2);
-                setLoadingReports(false);
-              }
-            );
-          } catch (fallbackErr) {
-            console.error('❌ Error setting up fallback query:', fallbackErr);
-            setLoadingReports(false);
-          }
+          setLoadingReports(false);
         }
       );
       
       // Query 2: userId (website format) - backup query for older reports that might use userId
+      // Query without status filter to avoid Firestore rule limitations with compound queries
       try {
         const q2 = query(
           reportsRef,
-          where('userId', '==', user.uid),
-          where('status', '==', 'completed')
+          where('userId', '==', user.uid)
         );
         
         unsubscribe2 = onSnapshot(
@@ -317,40 +284,18 @@ export default function ReportsPage() {
             console.log(`📊 Query 2 (userId): ${snapshot.size} reports found`);
             snapshot.forEach((doc) => {
               const report = processReportDoc(doc, user.uid);
-              if (report) {
+              // Filter for completed reports on client side
+              if (report && report.status === 'completed') {
                 allReports.set(doc.id, report);
               }
             });
             updateReportsFromMap();
           },
           (error: any) => {
-            console.warn('⚠️ Query 2 (userId) error:', error.code, error.message);
-            // Try without status filter
-            try {
-              const q2Fallback = query(
-                reportsRef,
-                where('userId', '==', user.uid)
-              );
-              
-              unsubscribe2 = onSnapshot(
-                q2Fallback,
-                (snapshot) => {
-                  console.log(`📊 Query 2 Fallback (userId only): ${snapshot.size} reports found`);
-                  snapshot.forEach((doc) => {
-                    const report = processReportDoc(doc, user.uid);
-                    if (report && report.status === 'completed') {
-                      allReports.set(doc.id, report);
-                    }
-                  });
-                  updateReportsFromMap();
-                },
-                (error2: any) => {
-                  console.error('❌ Query 2 Fallback error:', error2);
-                }
-              );
-            } catch (err) {
-              console.error('❌ Error setting up query 2 fallback:', err);
-            }
+            console.warn('⚠️ Query 2 (userId) error:', {
+              code: error.code,
+              message: error.message
+            });
           }
         );
       } catch (err) {
