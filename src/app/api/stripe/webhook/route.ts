@@ -11,7 +11,7 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2025-02-24.acacia',
+    apiVersion: '2025-12-15.clover' as any,
     maxNetworkRetries: 2, // Retry on network failures
     timeout: 10000, // 10 second timeout for Stripe API calls
   });
@@ -106,8 +106,40 @@ async function processEvent(event: Stripe.Event, stripe: Stripe): Promise<void> 
         await handlePaymentSucceeded(event.data.object as Stripe.Invoice);
         break;
 
+      case 'invoice.paid':
+        // More reliable than payment_succeeded - fires after payment is fully confirmed
+        // This is critical for subscription renewals to ensure payments are processed
+        await handlePaymentSucceeded(event.data.object as Stripe.Invoice);
+        break;
+
       case 'invoice.payment_failed':
         await handlePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'invoice.payment_action_required':
+        // Critical for 3D Secure/SCA authentication requirements
+        // User needs to authenticate payment - don't mark as failed yet
+        await handlePaymentActionRequired(event.data.object as Stripe.Invoice);
+        break;
+
+      case 'payment_intent.succeeded':
+        // Backup verification for successful payments (one-time or subscription)
+        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+        break;
+
+      case 'payment_intent.payment_failed':
+        // Backup for failed payment intents
+        console.log('⚠️ Payment intent failed:', (event.data.object as Stripe.PaymentIntent).id);
+        break;
+
+      case 'charge.succeeded':
+        // Backup verification for successful charges
+        console.log('✅ Charge succeeded:', (event.data.object as Stripe.Charge).id);
+        break;
+
+      case 'charge.failed':
+        // Backup for failed charges
+        console.log('❌ Charge failed:', (event.data.object as Stripe.Charge).id);
         break;
 
       default:
@@ -972,6 +1004,70 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
       'Mark user past_due'
     );
     console.log('⚠️ Payment failed, marked as past_due:', userId);
+  }
+}
+
+// Handle payment action required (3D Secure/SCA authentication)
+async function handlePaymentActionRequired(invoice: Stripe.Invoice) {
+  console.log('🔐 Payment action required (3D Secure/SCA):', invoice.id);
+
+  const subscriptionId = (invoice as any).subscription as string;
+  if (!subscriptionId) {
+    console.log('ℹ️ Invoice has no subscription, skipping');
+    return;
+  }
+
+  const subscriptionRef = adminDb.collection('subscriptions').doc(subscriptionId);
+  const subscriptionDoc = await firestoreWithRetry(
+    () => subscriptionRef.get(),
+    'Get subscription for action required'
+  );
+
+  if (!subscriptionDoc?.exists) {
+    console.warn('⚠️ Subscription not found for action required:', subscriptionId);
+    return;
+  }
+
+  const subscriptionData = subscriptionDoc.data();
+  const userId = subscriptionData?.userId;
+
+  // Mark subscription as requiring action (don't mark as failed yet)
+  await firestoreWithRetry(
+    () => subscriptionRef.set({
+      status: 'requires_action',
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    }, { merge: true }),
+    'Mark subscription requires_action'
+  );
+
+  // Update user status to indicate payment needs authentication
+  if (userId) {
+    await firestoreWithRetry(
+      () => adminDb.collection('users').doc(userId).update({
+        subscriptionStatus: 'requires_action',
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }),
+      'Mark user requires_action'
+    );
+    console.log('🔐 Payment requires authentication:', userId);
+    console.log('💡 User should complete authentication in Stripe Customer Portal');
+  }
+}
+
+// Handle payment intent succeeded (backup verification)
+async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
+  console.log('✅ Payment intent succeeded:', paymentIntent.id);
+
+  // If this payment intent is associated with an invoice, the invoice.paid event
+  // will handle the main processing. This is just for logging/verification.
+  if (paymentIntent.invoice) {
+    const invoiceId = typeof paymentIntent.invoice === 'string' 
+      ? paymentIntent.invoice 
+      : (paymentIntent.invoice as Stripe.Invoice).id;
+    console.log('💡 Payment intent linked to invoice:', invoiceId, '- invoice.paid will handle processing');
+  } else {
+    // One-time payment (not subscription) - could be handled here if needed
+    console.log('💡 One-time payment succeeded (not subscription-related)');
   }
 }
 

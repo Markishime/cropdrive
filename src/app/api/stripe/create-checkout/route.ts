@@ -10,7 +10,7 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2025-02-24.acacia',
+    apiVersion: '2025-12-15.clover',
     maxNetworkRetries: 2,
     timeout: 10000,
   });
