@@ -200,15 +200,19 @@ export default function ReportsPage() {
     });
 
     // Refresh the authentication token to ensure it's valid
-    try {
-      const auth = getAuth();
-      if (auth.currentUser) {
-        await auth.currentUser.getIdToken(true); // Force refresh
-        console.log('🔄 Authentication token refreshed');
+    const refreshToken = async () => {
+      try {
+        const auth = getAuth();
+        if (auth.currentUser) {
+          await auth.currentUser.getIdToken(true); // Force refresh
+          console.log('🔄 Authentication token refreshed');
+        }
+      } catch (tokenError) {
+        console.error('❌ Error refreshing auth token:', tokenError);
       }
-    } catch (tokenError) {
-      console.error('❌ Error refreshing auth token:', tokenError);
-    }
+    };
+
+    refreshToken();
 
     const reportsRef = collection(db, 'analysis_results');
     
