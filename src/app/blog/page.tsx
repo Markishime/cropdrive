@@ -242,7 +242,7 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-16 sm:py-20 relative overflow-hidden">
+      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
@@ -251,13 +251,15 @@ export default function BlogPage() {
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <div className="flex items-center justify-center mb-6">
-              <BookOpen className="w-16 h-16 text-white mr-4" />
-              <h1 className="text-4xl sm:text-5xl font-black text-white">
+            <div className="flex items-center justify-center mb-4 sm:mb-6">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
+                <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
                 {language === 'ms' ? 'Blog' : 'Blog'}
               </h1>
             </div>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
+            <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto px-4">
               {language === 'ms'
                 ? 'Pandangan terkini tentang teknologi AI, pertanian lestari, dan inovasi dalam industri kelapa sawit Malaysia.'
                 : 'Latest insights on AI technology, sustainable agriculture, and innovations in Malaysia\'s palm oil industry.'
@@ -268,36 +270,44 @@ export default function BlogPage() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
         {/* Filters and Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-12"
+          className="mb-8 sm:mb-12"
         >
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
+          <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 border border-gray-100">
+            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
               {/* Search */}
               <div className="flex-1">
+                <label htmlFor="blog-search" className="sr-only">
+                  {language === 'ms' ? 'Cari artikel' : 'Search articles'}
+                </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                   <input
+                    id="blog-search"
                     type="text"
                     placeholder={language === 'ms' ? 'Cari artikel...' : 'Search articles...'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
                   />
                 </div>
               </div>
 
               {/* Category Filter */}
               <div className="lg:w-64">
+                <label htmlFor="blog-category-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ms' ? 'Kategori' : 'Category'}
+                </label>
                 <select
+                  id="blog-category-filter"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all bg-white"
                 >
                   {categories.map(category => (
                     <option key={category.id} value={category.id}>
@@ -310,16 +320,19 @@ export default function BlogPage() {
 
             {/* Tags */}
             {allTags.length > 0 && (
-              <div className="mt-6">
-                <div className="flex flex-wrap gap-2">
+              <div className="mt-5 sm:mt-6">
+                <p className="text-sm font-medium text-gray-700 mb-3">
+                  {language === 'ms' ? 'Tag:' : 'Tags:'}
+                </p>
+                <div className="flex flex-wrap gap-2 sm:gap-3">
                   {allTags.map(tag => (
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
                         selectedTags.includes(tag)
-                          ? 'bg-green-600 text-white'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                          ? 'bg-green-600 text-white shadow-md hover:bg-green-700'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
                       }`}
                     >
                       {tag}
@@ -337,54 +350,54 @@ export default function BlogPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mb-16"
+            className="mb-12 sm:mb-16 lg:mb-20"
           >
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-6 sm:mb-8">
               {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
               {featuredPosts.map((post, index) => (
                 <motion.div
                   key={post.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group"
                 >
-                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 bg-black/20"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-16 h-16 text-white/80" />
+                      <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-white/80" />
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center flex-wrap gap-2 mb-3">
+                      <span className="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                         {language === 'ms' ? post.categoryMs : post.category}
                       </span>
-                      <span className="text-gray-500 text-xs">•</span>
+                      <span className="text-gray-400 text-xs">•</span>
                       <span className="text-gray-500 text-xs">{formatDate(post.date)}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
                       {language === 'ms' ? post.titleMs : post.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                       {language === 'ms' ? post.excerptMs : post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <User className="w-4 h-4" />
-                        <span>{language === 'ms' ? post.authorMs : post.author}</span>
-                        <span className="text-gray-500">•</span>
-                        <Clock className="w-4 h-4" />
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
+                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="truncate max-w-[100px] sm:max-w-none">{language === 'ms' ? post.authorMs : post.author}</span>
+                        <span className="text-gray-400">•</span>
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>{language === 'ms' ? post.readTimeMs : post.readTime}</span>
                       </div>
                       <Link
                         href={`/blog/${post.id}`}
-                        className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center"
+                        className="text-green-600 hover:text-green-700 font-semibold text-xs sm:text-sm flex items-center group-hover:gap-2 transition-all"
                       >
                         {language === 'ms' ? 'Baca Lagi' : 'Read More'}
-                        <ChevronRight className="w-4 h-4 ml-1" />
+                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                       </Link>
                     </div>
                   </div>
@@ -399,23 +412,24 @@ export default function BlogPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
+          className="mb-12 sm:mb-16 lg:mb-20"
         >
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
               {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
             </h2>
-            <div className="text-gray-600">
+            <div className="text-sm sm:text-base text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
               {filteredPosts.length} {language === 'ms' ? 'artikel' : 'articles'}
             </div>
           </div>
 
           {filteredPosts.length === 0 ? (
-            <div className="text-center py-12">
-              <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="text-center py-12 sm:py-16">
+              <BookOpen className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
+              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
                 {language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
               </h3>
-              <p className="text-gray-600">
+              <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto">
                 {language === 'ms'
                   ? 'Cuba cari dengan kata kunci yang berbeza atau kategori lain.'
                   : 'Try searching with different keywords or select another category.'
@@ -423,49 +437,49 @@ export default function BlogPage() {
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {regularPosts.map((post, index) => (
                 <motion.div
                   key={post.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow"
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group"
                 >
-                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden">
+                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
                     <div className="absolute inset-0 bg-black/20"></div>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-12 h-12 text-white/80" />
+                      <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-white/80" />
                     </div>
                   </div>
-                  <div className="p-6">
-                    <div className="flex items-center space-x-2 mb-3">
-                      <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center flex-wrap gap-2 mb-3">
+                      <span className="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                         {language === 'ms' ? post.categoryMs : post.category}
                       </span>
-                      <span className="text-gray-500 text-xs">•</span>
+                      <span className="text-gray-400 text-xs">•</span>
                       <span className="text-gray-500 text-xs">{formatDate(post.date)}</span>
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
                       {language === 'ms' ? post.titleMs : post.title}
                     </h3>
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-3 leading-relaxed">
                       {language === 'ms' ? post.excerptMs : post.excerpt}
                     </p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2 text-sm text-gray-500">
-                        <User className="w-4 h-4" />
-                        <span>{language === 'ms' ? post.authorMs : post.author}</span>
-                        <span className="text-gray-500">•</span>
-                        <Clock className="w-4 h-4" />
+                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
+                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                        <span className="truncate max-w-[100px] sm:max-w-none">{language === 'ms' ? post.authorMs : post.author}</span>
+                        <span className="text-gray-400">•</span>
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                         <span>{language === 'ms' ? post.readTimeMs : post.readTime}</span>
                       </div>
                       <Link
                         href={`/blog/${post.id}`}
-                        className="text-green-600 hover:text-green-700 font-medium text-sm flex items-center"
+                        className="text-green-600 hover:text-green-700 font-semibold text-xs sm:text-sm flex items-center group-hover:gap-2 transition-all"
                       >
                         {language === 'ms' ? 'Baca Lagi' : 'Read More'}
-                        <ChevronRight className="w-4 h-4 ml-1" />
+                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
                       </Link>
                     </div>
                   </div>
@@ -480,27 +494,33 @@ export default function BlogPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="mt-16"
+          className="pt-8 sm:pt-12"
         >
-          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 text-center text-white">
-            <h2 className="text-3xl font-bold mb-4">
-              {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
-            </h2>
-            <p className="text-green-100 mb-6 max-w-2xl mx-auto">
-              {language === 'ms'
-                ? 'Dapatkan kemas kini terkini tentang teknologi AI, tip pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
-                : 'Get the latest updates on AI technology, farming tips, and palm oil industry news delivered straight to your inbox.'
-              }
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-              <input
-                type="email"
-                placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
-                className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-2 focus:ring-white focus:outline-none"
-              />
-              <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-semibold hover:bg-green-50 transition-colors">
-                {language === 'ms' ? 'Langgan' : 'Subscribe'}
-              </button>
+          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-6 sm:p-8 lg:p-10 text-center text-white shadow-xl border-4 border-green-500/20">
+            <div className="max-w-2xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 sm:mb-4">
+                {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
+              </h2>
+              <p className="text-base sm:text-lg text-green-100 mb-6 sm:mb-8 leading-relaxed">
+                {language === 'ms'
+                  ? 'Dapatkan kemas kini terkini tentang teknologi AI, tip pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
+                  : 'Get the latest updates on AI technology, farming tips, and palm oil industry news delivered straight to your inbox.'
+                }
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  {language === 'ms' ? 'Alamat emel' : 'Email address'}
+                </label>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
+                  className="flex-1 px-4 py-3 rounded-lg text-gray-900 focus:ring-2 focus:ring-white focus:outline-none shadow-lg"
+                />
+                <button className="bg-white text-green-600 px-6 py-3 rounded-lg font-bold hover:bg-green-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 whitespace-nowrap">
+                  {language === 'ms' ? 'Langgan' : 'Subscribe'}
+                </button>
+              </div>
             </div>
           </div>
         </motion.section>
