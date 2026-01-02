@@ -158,6 +158,12 @@ async function processEvent(event: Stripe.Event, stripe: Stripe): Promise<void> 
 export async function POST(req: NextRequest) {
   const requestStart = Date.now();
   console.log('🔔 Stripe webhook received at:', new Date().toISOString());
+  
+  // Ensure we're handling HTTPS (prevent redirect issues)
+  const protocol = req.headers.get('x-forwarded-proto') || 'https';
+  if (protocol !== 'https') {
+    console.warn('⚠️ Webhook received via non-HTTPS protocol:', protocol);
+  }
 
   // Wrap entire handler in try-catch to ensure we always return a valid response
   try {
