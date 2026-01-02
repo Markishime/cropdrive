@@ -372,15 +372,17 @@ export default function HomePage() {
               className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               {/* Farmers Image - Large */}
-              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden">
+              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
                 <Image
                   src="/images/Who-do-we-serve/Farmers.png"
                   alt={language === 'ms' ? 'Pekebun Kecil' : 'Farmers'}
                   width={800}
                   height={600}
-                  className="w-full h-full object-cover"
+                  priority
+                  className="w-full h-full object-cover relative z-0"
+                  unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-yellow-50/90 via-yellow-50/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-yellow-50/90 via-yellow-50/50 to-transparent z-10 pointer-events-none"></div>
               </div>
 
               <div className="p-6 sm:p-8 lg:p-10">
@@ -460,15 +462,17 @@ export default function HomePage() {
               className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
               {/* Organizations Image - Large */}
-              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden">
+              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
                 <Image
                   src="/images/Who-do-we-serve/Organizations.png"
                   alt={language === 'ms' ? 'Organisasi' : 'Organizations'}
                   width={800}
                   height={600}
-                  className="w-full h-full object-cover"
+                  priority
+                  className="w-full h-full object-cover relative z-0"
+                  unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-green-50/90 via-green-50/50 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-green-50/90 via-green-50/50 to-transparent z-10 pointer-events-none"></div>
               </div>
 
               <div className="p-6 sm:p-8 lg:p-10">
