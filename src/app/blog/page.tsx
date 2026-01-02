@@ -242,24 +242,24 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="flex items-center justify-center mb-4 sm:mb-6">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
-                <BookOpen className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-                {language === 'ms' ? 'Blog' : 'Blog'}
-              </h1>
-            </div>
-            <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto px-4">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+              <span className="text-yellow-400">{language === 'ms' ? 'Blog' : 'Blog'}</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
                 ? 'Pandangan terkini tentang teknologi AI, pertanian lestari, dan inovasi dalam industri kelapa sawit Malaysia.'
                 : 'Latest insights on AI technology, sustainable agriculture, and innovations in Malaysia\'s palm oil industry.'
@@ -270,13 +270,13 @@ export default function BlogPage() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Filters and Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-8 sm:mb-12"
+          className="mb-24"
         >
           <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 border border-gray-100">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6">
@@ -350,9 +350,9 @@ export default function BlogPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="mb-12 sm:mb-16 lg:mb-20"
+            className="mb-24"
           >
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-6 sm:mb-8">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-12">
               {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
@@ -412,10 +412,10 @@ export default function BlogPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mb-12 sm:mb-16 lg:mb-20"
+          className="mb-24"
         >
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-3">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-3">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900">
               {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
             </h2>
             <div className="text-sm sm:text-base text-gray-600 bg-gray-100 px-3 py-1.5 rounded-full font-medium">
@@ -494,14 +494,13 @@ export default function BlogPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="pt-8 sm:pt-12"
         >
-          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-6 sm:p-8 lg:p-10 text-center text-white shadow-xl border-4 border-green-500/20">
+          <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 lg:p-10 text-center text-white shadow-xl border-4 border-green-500/20">
             <div className="max-w-2xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-3 sm:mb-4">
+              <h2 className="text-4xl md:text-5xl font-black mb-6">
                 {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
               </h2>
-              <p className="text-base sm:text-lg text-green-100 mb-6 sm:mb-8 leading-relaxed">
+              <p className="text-xl text-green-100 mb-8 leading-relaxed">
                 {language === 'ms'
                   ? 'Dapatkan kemas kini terkini tentang teknologi AI, tip pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
                   : 'Get the latest updates on AI technology, farming tips, and palm oil industry news delivered straight to your inbox.'

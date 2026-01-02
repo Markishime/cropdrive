@@ -181,24 +181,24 @@ export default function HelpCenterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+            backgroundSize: '40px 40px'
+          }}></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="flex items-center justify-center mb-4 sm:mb-6">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mr-3 sm:mr-4">
-                <HelpCircle className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white">
-                {language === 'ms' ? 'Pusat Bantuan' : 'Help Center'}
-              </h1>
-            </div>
-            <p className="text-base sm:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto px-4">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+              {language === 'ms' ? 'Pusat' : 'Help'} <span className="text-yellow-400">{language === 'ms' ? 'Bantuan' : 'Center'}</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms'
                 ? 'Dapatkan bantuan dan sokongan untuk platform AI pintar CropDrive. Cari jawapan kepada soalan lazim atau hubungi pasukan sokongan kami.'
                 : 'Get help and support for the CropDrive smart AI platform. Find answers to frequently asked questions or contact our support team.'
@@ -209,19 +209,19 @@ export default function HelpCenterPage() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Features Overview */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="mb-12 sm:mb-16 lg:mb-20"
+          className="mb-24"
         >
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
               {language === 'ms' ? 'Apa Yang Boleh Kami Bantu?' : 'What Can We Help You With?'}
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Platform CropDrive menawarkan sokongan komprehensif untuk semua keperluan analisis ladang kelapa sawit anda.'
                 : 'The CropDrive platform offers comprehensive support for all your palm oil farm analysis needs.'
@@ -294,13 +294,13 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
-          className="mb-12 sm:mb-16 lg:mb-20"
+          className="mb-24"
         >
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
               {language === 'ms' ? 'Soalan Lazim' : 'Frequently Asked Questions'}
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Cari jawapan kepada soalan yang paling kerap ditanya.'
                 : 'Find answers to the most frequently asked questions.'
@@ -309,7 +309,7 @@ export default function HelpCenterPage() {
           </div>
 
           {/* Search and Filter */}
-          <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 mb-6 sm:mb-8 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 mb-8 border border-gray-100">
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6">
               {/* Search */}
               <div className="flex-1 relative">
@@ -431,13 +431,13 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mb-12 sm:mb-16 lg:mb-20"
+          className="mb-24"
         >
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 mb-3 sm:mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
               {language === 'ms' ? 'Hubungi Kami' : 'Contact Us'}
             </h2>
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               {language === 'ms'
                 ? 'Tidak menemui jawapan yang anda cari? Pasukan sokongan kami sedia membantu.'
                 : "Can't find the answer you're looking for? Our support team is here to help."
@@ -553,9 +553,9 @@ export default function HelpCenterPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="text-center pt-8 sm:pt-12"
+          className="text-center"
         >
-          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mb-6 sm:mb-8">
+          <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-12">
             {language === 'ms' ? 'Pautan Berguna' : 'Quick Links'}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
