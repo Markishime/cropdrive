@@ -379,10 +379,9 @@ export default function HomePage() {
                   width={800}
                   height={600}
                   priority
-                  className="w-full h-full object-cover relative z-0"
+                  className="w-full h-full object-cover"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-yellow-50/90 via-yellow-50/50 to-transparent z-10 pointer-events-none"></div>
               </div>
 
               <div className="p-6 sm:p-8 lg:p-10">
@@ -469,10 +468,9 @@ export default function HomePage() {
                   width={800}
                   height={600}
                   priority
-                  className="w-full h-full object-cover relative z-0"
+                  className="w-full h-full object-cover"
                   unoptimized
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-green-50/90 via-green-50/50 to-transparent z-10 pointer-events-none"></div>
               </div>
 
               <div className="p-6 sm:p-8 lg:p-10">
