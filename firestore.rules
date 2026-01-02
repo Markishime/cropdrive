@@ -68,25 +68,56 @@ service cloud.firestore {
     // Works for both website and Streamlit app (when authenticated)
     match /analysis_results/{resultId} {
       // Read: User can read their own analysis results
+      // Support both userId (website) and user_id (AI assistant) formats
       allow read: if isAuthenticated() && (
         resource.data.userId == request.auth.uid ||
+        resource.data.user_id == request.auth.uid ||
         // Allow reading if document doesn't exist yet (for create operations)
         !resource.exists
       );
       
-      // Create: User can create analysis results with their own userId
-      allow create: if isAuthenticated() && 
-        request.resource.data.userId == request.auth.uid &&
-        // Validate required fields
-        request.resource.data.keys().hasAll(['userId', 'title', 'type', 'status', 'date', 'createdAt']);
+      // Create: User can create analysis results with their own userId or user_id
+      allow create: if isAuthenticated() && (
+        (request.resource.data.userId != null && request.resource.data.userId == request.auth.uid) ||
+        (request.resource.data.user_id != null && request.resource.data.user_id == request.auth.uid)
+      );
       
       // Update/Delete: User can only modify their own analysis results
-      allow update, delete: if isOwner(resource.data.userId);
+      allow update, delete: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        resource.data.user_id == request.auth.uid
+      );
     }
     
-    // Allow querying analysis_results by userId (for both website and Streamlit)
+    // Allow querying analysis_results by userId or user_id (for both website and Streamlit)
+    // Specific compound query rules for the exact queries used in the app
     match /analysis_results {
-      allow read: if isAuthenticated() &&
+      // Allow compound queries: user_id == uid AND status == 'completed'
+      allow read: if request.auth != null &&
+        request.query.where('user_id', '==', request.auth.uid).size() >= 1 &&
+        request.query.where('status', '==', 'completed').size() >= 1;
+
+      // Allow compound queries: userId == uid AND status == 'completed'
+      allow read: if request.auth != null &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1 &&
+        request.query.where('status', '==', 'completed').size() >= 1;
+
+      // Allow fallback queries: user_id == uid only (without status filter)
+      allow read: if request.auth != null &&
+        request.query.where('user_id', '==', request.auth.uid).size() >= 1 &&
+        request.query.where().size() == 1;
+
+      // Allow fallback queries: userId == uid only (without status filter)
+      allow read: if request.auth != null &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1 &&
+        request.query.where().size() == 1;
+
+      // Allow manual refresh queries in the app (used in event handlers)
+      allow read: if request.auth != null &&
+        request.query.where('user_id', '==', request.auth.uid).size() >= 1;
+
+      // Allow manual refresh queries for userId format
+      allow read: if request.auth != null &&
         request.query.where('userId', '==', request.auth.uid).size() >= 1;
     }
     

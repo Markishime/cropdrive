@@ -8,6 +8,7 @@ import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { FileText, Download, Eye, Calendar, Search, Trash2, Plus, RefreshCw } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { getAuth } from 'firebase/auth';
 import toast from 'react-hot-toast';
 
 interface Report {
@@ -185,6 +186,30 @@ export default function ReportsPage() {
     setLoadingReports(true);
     console.log('🔍 Setting up real-time reports listener for user:', user.uid);
 
+    // Check authentication status
+    if (!user) {
+      console.error('❌ No user found when setting up reports listener');
+      setLoadingReports(false);
+      return;
+    }
+
+    console.log('✅ User authenticated:', {
+      uid: user.uid,
+      email: user.email,
+      isAuthenticated: !!user.uid
+    });
+
+    // Refresh the authentication token to ensure it's valid
+    try {
+      const auth = getAuth();
+      if (auth.currentUser) {
+        await auth.currentUser.getIdToken(true); // Force refresh
+        console.log('🔄 Authentication token refreshed');
+      }
+    } catch (tokenError) {
+      console.error('❌ Error refreshing auth token:', tokenError);
+    }
+
     const reportsRef = collection(db, 'analysis_results');
     
     // Try to set up real-time listener with orderBy
@@ -230,7 +255,18 @@ export default function ReportsPage() {
           updateReportsFromMap();
         },
         (error: any) => {
-          console.warn('⚠️ Query 1 (user_id) error:', error.code, error.message);
+          console.warn('⚠️ Query 1 (user_id) error:', {
+            code: error.code,
+            message: error.message,
+            userId: user.uid,
+            isAuthenticated: !!user.uid
+          });
+
+          // Check if it's a permissions error
+          if (error.code === 'permission-denied') {
+            console.error('❌ Permission denied for user_id query. Check Firestore rules.');
+          }
+
           // Fallback: Query without status filter
           console.log('🔄 Trying fallback query without status filter...');
           try {
