@@ -3,6 +3,11 @@ import Stripe from 'stripe';
 import admin, { adminDb } from '@/lib/firebase-admin';
 import { addPaymentToSheet, updateSubscriptionStatus, addCancellationToSheet } from '@/lib/googleSheets';
 
+// Route segment config - prevent redirects and ensure proper handling
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 10; // 10 seconds max for Vercel
+
 // Initialize Stripe with error handling
 function getStripe(): Stripe | null {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -34,6 +39,8 @@ function jsonResponse(data: object, status: number): Response {
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'no-store, no-cache, must-revalidate',
+      // Prevent any redirects
+      'X-Content-Type-Options': 'nosniff',
     },
   });
 }
@@ -159,8 +166,14 @@ export async function POST(req: NextRequest) {
   const requestStart = Date.now();
   console.log('🔔 Stripe webhook received at:', new Date().toISOString());
   
-  // Ensure we're handling HTTPS (prevent redirect issues)
+  // Log request details for debugging
+  const url = req.url;
+  const method = req.method;
+  const host = req.headers.get('host');
   const protocol = req.headers.get('x-forwarded-proto') || 'https';
+  console.log('📋 Request details:', { url, method, host, protocol });
+  
+  // Ensure we're handling HTTPS (prevent redirect issues)
   if (protocol !== 'https') {
     console.warn('⚠️ Webhook received via non-HTTPS protocol:', protocol);
   }
@@ -1076,5 +1089,3 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     console.log('💡 One-time payment succeeded (not subscription-related)');
   }
 }
-
-  
