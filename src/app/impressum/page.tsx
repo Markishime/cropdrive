@@ -111,71 +111,61 @@ export default function ImpressumPage() {
                     <div className="space-y-6 text-gray-700">
                       <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Impressum</h2>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Angaben gemäß § 5 TMG:</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Angaben gemäß § 5 Digitale-Dienste-Gesetz (DDG)</h3>
                       <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
                         <p className="font-semibold text-gray-900 mb-2">AGS – Agriculture Global Solutions OÜ</p>
-                        <p className="text-gray-700">Sakala tn 7-2</p>
-                        <p className="text-gray-700">Kesklinna linnaosa</p>
+                        <p className="text-gray-700">Sakala tn 7-2, Kesklinna linnaosa</p>
                         <p className="text-gray-700">10141 Tallinn, Harju maakond</p>
                         <p className="text-gray-700">Estland</p>
                       </div>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Vertreten durch:</h3>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li>Geschäftsführer: Dr. Aleksandre Loladze</li>
-                        <li>Registernummer: 17010632</li>
-                        <li>Registergericht: Tartu Maakohtu registriosakond</li>
-                      </ul>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Vertretungsberechtigt</h3>
+                      <p className="text-gray-700 mb-4">Geschäftsführer: Dr. Aleksandre Loladze</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Kontakt:</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Registereintrag</h3>
+                      <p className="text-gray-700 mb-4">Registergericht: Tartu Maakohtu registriosakond (Estland)</p>
+                      <p className="text-gray-700 mb-4">Registernummer: 17010632</p>
+
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Kontakt</h3>
                       <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
                         <p className="text-gray-700 mb-2">
-                          <span className="font-semibold">Telefon:</span> <a href="tel:+4952218719889" className="text-green-700 hover:text-green-800 underline">+49 5221 8719889</a>
+                          <span className="font-semibold">E-Mail:</span> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a>
                         </p>
                         <p className="text-gray-700">
-                          <span className="font-semibold">E-Mail:</span> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a>
+                          <span className="font-semibold">Telefon:</span> <a href="tel:+4915163105462" className="text-green-700 hover:text-green-800 underline">+49 15163105462</a>
                         </p>
                       </div>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV:</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Wirtschafts-Identifikationsnummer / Umsatzsteuer-Identifikationsnummer</h3>
+                      <p className="text-gray-700 mb-4">W-IdNr. / USt-IdNr.: DE457459260</p>
+                      <p className="text-gray-700 mb-4">USt-IdNr. (Estland): EE102877607</p>
+
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Verantwortlich für journalistisch-redaktionelle Inhalte gemäß § 18 Abs. 2 MStV</h3>
                       <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
                         <p className="font-semibold text-gray-900 mb-2">Dr. Aleksandre Loladze</p>
-                        <p className="text-gray-700">Sakala tn 7-2</p>
-                        <p className="text-gray-700">Kesklinna linnaosa</p>
+                        <p className="text-gray-700">Sakala tn 7-2, Kesklinna linnaosa</p>
                         <p className="text-gray-700">10141 Tallinn, Harju maakond</p>
                         <p className="text-gray-700">Estland</p>
                       </div>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Zielgruppe / Geschäftsbereich:</h3>
-                      <p className="text-gray-700">
-                        Unsere Dienstleistungen richten sich ausschließlich an Unternehmen, Organisationen und Institutionen (B2B). Ein Verkauf oder eine Leistungserbringung an Verbraucher (§ 13 BGB) findet nicht statt.
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Haftung für Inhalte</h3>
+                      <p className="text-gray-700 mb-4">
+                        Wir sind für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Wir übernehmen keine Gewähr für die Aktualität, Vollständigkeit und Richtigkeit der Inhalte. Eine Haftung für konkrete Rechtsverletzungen besteht erst ab dem Zeitpunkt der Kenntnis. Bei Bekanntwerden entsprechender Rechtsverletzungen entfernen wir die betroffenen Inhalte unverzüglich.
                       </p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Haftung für Inhalte:</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Haftung für Links</h3>
                       <p className="text-gray-700 mb-4">
-                        Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit hinweisen.
-                      </p>
-                      <p className="text-gray-700">
-                        Verpflichtungen zur Entfernung oder Sperrung der Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt. Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer konkreten Rechtsverletzung möglich. Bei Bekanntwerden entsprechender Rechtsverletzungen entfernen wir diese Inhalte umgehend.
+                        Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Für diese fremden Inhalte übernehmen wir keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber verantwortlich. Zum Zeitpunkt der Verlinkung waren Rechtsverstöße nicht erkennbar. Bei Bekanntwerden von Rechtsverletzungen entfernen wir derartige Links unverzüglich.
                       </p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Haftung für Links:</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Urheberrecht</h3>
                       <p className="text-gray-700 mb-4">
-                        Unser Angebot enthält Links zu externen Websites Dritter, auf deren Inhalte wir keinen Einfluss haben. Deshalb übernehmen wir für diese fremden Inhalte auch keine Gewähr. Für die Inhalte der verlinkten Seiten ist stets der jeweilige Anbieter oder Betreiber verantwortlich. Zum Zeitpunkt der Verlinkung wurden die Seiten auf mögliche Rechtsverstöße überprüft; rechtswidrige Inhalte waren nicht erkennbar.
-                      </p>
-                      <p className="text-gray-700">
-                        Eine permanente inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen entfernen wir solche Links umgehend.
+                        Die durch den Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Jede Verwertung außerhalb der Grenzen des Urheberrechts bedarf der vorherigen schriftlichen Zustimmung des jeweiligen Rechteinhabers. Soweit Inhalte nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet und entsprechende Inhalte als solche gekennzeichnet. Bei Bekanntwerden von Rechtsverletzungen entfernen wir derartige Inhalte unverzüglich.
                       </p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Urheberrecht:</h3>
-                      <p className="text-gray-700 mb-4">
-                        Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechts bedürfen der schriftlichen Zustimmung des jeweiligen Autors oder Erstellers.
-                      </p>
-                      <p className="text-gray-700 mb-4">
-                        Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen Gebrauch gestattet.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Verbraucherstreitbeilegung gemäß § 36 VSBG</h3>
                       <p className="text-gray-700">
-                        Soweit Inhalte nicht vom Betreiber erstellt wurden, werden die Urheberrechte Dritter beachtet und als solche gekennzeichnet. Bei Bekanntwerden von Rechtsverletzungen entfernen wir solche Inhalte umgehend.
+                        Wir sind weder verpflichtet noch bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
                       </p>
                     </div>
                   </div>

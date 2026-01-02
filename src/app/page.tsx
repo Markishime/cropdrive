@@ -371,17 +371,15 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl p-5 xs:p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              {/* Palm Fruit Icon */}
-              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 bg-yellow-400 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 text-green-900" viewBox="0 0 64 64" fill="currentColor">
-                  <circle cx="32" cy="28" r="10" opacity="0.9"/>
-                  <circle cx="26" cy="34" r="8" opacity="0.8"/>
-                  <circle cx="38" cy="34" r="8" opacity="0.8"/>
-                  <circle cx="32" cy="40" r="7" opacity="0.7"/>
-                  <circle cx="22" cy="28" r="7" opacity="0.7"/>
-                  <circle cx="42" cy="28" r="7" opacity="0.7"/>
-                  <rect x="30" y="42" width="4" height="12" rx="2" opacity="0.9"/>
-                </svg>
+              {/* Farmers Image */}
+              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mx-auto border-4 border-yellow-400 shadow-lg">
+                <Image
+                  src="/images/Who-do-we-serve/Farmers.png"
+                  alt={language === 'ms' ? 'Pekebun Kecil' : 'Farmers'}
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-green-900 mb-2 xs:mb-3 sm:mb-4 text-center">
@@ -458,17 +456,15 @@ export default function HomePage() {
               viewport={{ once: true }}
               className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl p-5 xs:p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              {/* Plantation Icon */}
-              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 bg-green-600 rounded-full flex items-center justify-center mx-auto">
-                <svg className="w-10 h-10 xs:w-12 xs:h-12 sm:w-14 sm:h-14 text-white" viewBox="0 0 64 64" fill="currentColor">
-                  <rect x="10" y="35" width="12" height="20" opacity="0.8"/>
-                  <rect x="26" y="30" width="12" height="25" opacity="0.9"/>
-                  <rect x="42" y="25" width="12" height="30" opacity="0.8"/>
-                  <rect x="8" y="55" width="48" height="4" opacity="0.7"/>
-                  <path d="M10 35 L16 15 L22 35" opacity="0.6"/>
-                  <path d="M26 30 L32 10 L38 30" opacity="0.7"/>
-                  <path d="M42 25 L48 8 L54 25" opacity="0.6"/>
-                </svg>
+              {/* Organizations Image */}
+              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mx-auto border-4 border-green-600 shadow-lg">
+                <Image
+                  src="/images/Who-do-we-serve/Organizations.png"
+                  alt={language === 'ms' ? 'Organisasi' : 'Organizations'}
+                  width={96}
+                  height={96}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-green-900 mb-2 xs:mb-3 sm:mb-4 text-center">
