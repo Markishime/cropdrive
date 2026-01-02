@@ -27,6 +27,8 @@ import {
   LineChart,
   Zap
 } from 'lucide-react';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -141,6 +143,58 @@ export default function DashboardPage() {
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
   }, [mounted, refreshUser, user?.uid]);
+
+  // Real-time listener to count reports and sync uploadsUsed
+  useEffect(() => {
+    if (!mounted || !user?.uid) return;
+
+    console.log('📊 Dashboard: Setting up real-time reports listener to count uploads...');
+    
+    const reportsRef = collection(db, 'analysis_results');
+    
+    // Query for both userId and user_id formats
+    const q1 = query(reportsRef, where('userId', '==', user.uid));
+    const q2 = query(reportsRef, where('user_id', '==', user.uid));
+    
+    const allReports = new Set<string>();
+    
+    const unsubscribe1 = onSnapshot(q1, (snapshot) => {
+      snapshot.forEach((doc) => {
+        allReports.add(doc.id);
+      });
+      const count = allReports.size;
+      console.log('📊 Dashboard: Reports count (userId):', count);
+      
+      // If user.uploadsUsed doesn't match, refresh user data
+      if (user.uploadsUsed !== count && refreshUser) {
+        console.log('🔄 Dashboard: uploadsUsed mismatch, refreshing user data...');
+        refreshUser();
+      }
+    }, (error) => {
+      console.warn('⚠️ Dashboard: Error in userId query:', error);
+    });
+    
+    const unsubscribe2 = onSnapshot(q2, (snapshot) => {
+      snapshot.forEach((doc) => {
+        allReports.add(doc.id);
+      });
+      const count = allReports.size;
+      console.log('📊 Dashboard: Reports count (user_id):', count);
+      
+      // If user.uploadsUsed doesn't match, refresh user data
+      if (user.uploadsUsed !== count && refreshUser) {
+        console.log('🔄 Dashboard: uploadsUsed mismatch, refreshing user data...');
+        refreshUser();
+      }
+    }, (error) => {
+      console.warn('⚠️ Dashboard: Error in user_id query:', error);
+    });
+    
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [mounted, user?.uid, user?.uploadsUsed, refreshUser]);
 
   // Handler functions - Notifications moved to AuthenticatedNavbar
 

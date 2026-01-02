@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Download, Eye, Calendar, Search, Trash2, Plus, RefreshCw } from 'lucide-react';
+import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
@@ -22,16 +22,17 @@ interface Report {
   userId: string;
   createdAt: Timestamp;
   fileUrl?: string;
+  analysisData?: any;
 }
 
 export default function ReportsPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'soil' | 'leaf'>('all');
   const [reports, setReports] = useState<Report[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
   
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -175,7 +176,8 @@ export default function ReportsPage() {
       summary: reportSummary,
       userId: userId || currentUserId,
       createdAt: createdAt,
-      fileUrl: data.fileUrl || data.file_url || data.fileURL
+      fileUrl: data.fileUrl || data.file_url || data.fileURL,
+      analysisData: data.analysisData || data.analysis_data || null
     };
   }, []);
 
@@ -403,9 +405,8 @@ export default function ReportsPage() {
   const filteredReports = reports.filter(report => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          report.summary.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesType = filterType === 'all' || report.type === filterType;
     // Only show completed reports (already filtered in fetch, but double-check)
-    return matchesSearch && matchesType && report.status === 'completed';
+    return matchesSearch && report.status === 'completed';
   });
 
   const handleDeleteReport = async (reportId: string) => {
@@ -427,17 +428,7 @@ export default function ReportsPage() {
   };
 
   const handleViewReport = (report: Report) => {
-    // For now, just show a message. You can implement a modal or redirect to a detail page
-    toast.success(language === 'ms' ? `Membuka laporan: ${report.title}` : `Opening report: ${report.title}`);
-    // TODO: Implement report viewing logic
-  };
-
-  const handleDownloadReport = (report: Report) => {
-    if (report.fileUrl) {
-      window.open(report.fileUrl, '_blank');
-    } else {
-      toast.error(language === 'ms' ? 'Tiada fail untuk dimuat turun' : 'No file available for download');
-    }
+    setSelectedReport(report);
   };
 
   if (authLoading || !user) {
@@ -454,51 +445,53 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-      {/* Simple Header */}
-      <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-8 sm:py-12 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:40px_40px]"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="flex items-center justify-between flex-wrap gap-4"
+            transition={{ duration: 0.8 }}
+            className="text-center"
           >
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-black text-white mb-2">
-                {language === 'ms' ? 'Sejarah Analisis' : 'Analysis History'}
-              </h1>
-              <p className="text-sm sm:text-base text-white/80">
-                {language === 'ms' 
-                  ? 'Laporan analisis yang telah selesai'
-                  : 'Completed analysis reports'
-                }
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+              {language === 'ms' ? 'Sejarah' : 'Analysis'} <span className="text-yellow-400">{language === 'ms' ? 'Analisis' : 'History'}</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+              {language === 'ms'
+                ? 'Lihat semua laporan analisis yang telah selesai dan akses cadangan agronomi anda.'
+                : 'View all completed analysis reports and access your agronomic recommendations.'
+              }
+            </p>
+            <div className="flex items-center justify-center gap-4 flex-wrap">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => {
                   setLoadingReports(true);
-                  // Force a re-fetch by triggering the useEffect
                   setReports([]);
                   setTimeout(() => {
                     window.location.reload();
                   }, 100);
                 }}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-3 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
                 title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
               >
-                <RefreshCw className={`w-4 h-4 ${loadingReports ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-5 h-5 ${loadingReports ? 'animate-spin' : ''}`} />
+                {language === 'ms' ? 'Muat Semula' : 'Refresh'}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => router.push('/assistant')}
-                className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg font-semibold flex items-center gap-2 transition"
+                className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 px-6 py-3 rounded-lg font-black flex items-center gap-2 transition shadow-lg hover:shadow-xl"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-5 h-5" />
                 {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
               </motion.button>
             </div>
@@ -507,69 +500,53 @@ export default function ReportsPage() {
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Search and Type Filter */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+        {/* Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-6"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mb-12"
         >
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1 relative">
-              <label htmlFor="reports-search" className="sr-only">
-                {language === 'ms' ? 'Cari laporan' : 'Search reports'}
-              </label>
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                id="reports-search"
-                name="reports-search"
-                type="text"
-                placeholder={language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition"
-              />
-            </div>
-
-            {/* Type Filter */}
-            <div className="flex gap-2">
-              {['all', 'soil', 'leaf'].map((type) => (
-                <button
-                  key={type}
-                  onClick={() => setFilterType(type as any)}
-                  className={`px-4 py-2 rounded-lg font-medium transition ${
-                    filterType === type
-                      ? 'bg-green-600 text-white'
-                      : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
-                  }`}
-                >
-                  {type === 'all' ? (language === 'ms' ? 'Semua' : 'All') :
-                   type === 'soil' ? (language === 'ms' ? 'Tanah' : 'Soil') :
-                   (language === 'ms' ? 'Daun' : 'Leaf')}
-                </button>
-              ))}
+          <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100">
+            <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-end">
+              <div className="flex-1 w-full">
+                <label htmlFor="reports-search" className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ms' ? 'Cari Laporan' : 'Search Reports'}
+                </label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <input
+                    id="reports-search"
+                    name="reports-search"
+                    type="text"
+                    placeholder={language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
 
         {/* Reports List */}
-        <div className="space-y-4">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className="mb-24"
+        >
           {filteredReports.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="bg-white rounded-lg shadow border border-gray-200 p-12 text-center"
-            >
-              <div className="w-16 h-16 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
-                <FileText className="w-8 h-8 text-gray-400" />
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 sm:p-16 text-center">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl mx-auto mb-6 flex items-center justify-center">
+                <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4">
                 {language === 'ms' ? 'Tiada Laporan Dijumpai' : 'No Reports Found'}
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
                 {language === 'ms'
                   ? 'Cuba cari dengan kata kunci lain atau muat naik laporan baharu'
                   : 'Try searching with different keywords or upload a new report'
@@ -577,102 +554,152 @@ export default function ReportsPage() {
               </p>
               <button
                 onClick={() => router.push('/assistant')}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl"
               >
                 <Plus className="w-5 h-5" />
                 {language === 'ms' ? 'Muat Naik Laporan' : 'Upload Report'}
               </button>
-            </motion.div>
+            </div>
           ) : (
-            filteredReports.map((report, index) => (
-              <motion.div
-                key={report.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <div className="bg-white rounded-lg shadow border border-gray-200 hover:shadow-lg transition">
-                  <div className="p-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div className="grid grid-cols-1 gap-6 sm:gap-8">
+              {filteredReports.map((report, index) => (
+                <motion.div
+                  key={report.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                >
+                  <div className="p-6 sm:p-8">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                       {/* Report Info */}
                       <div className="flex items-start gap-4 flex-1">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                          report.type === 'soil' ? 'bg-yellow-100' : 'bg-purple-100'
-                        }`}>
-                          <FileText className={`w-6 h-6 ${
-                            report.type === 'soil' ? 'text-yellow-600' : 'text-purple-600'
-                          }`} />
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
+                          <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-green-700" />
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <h3 className="text-lg font-bold text-gray-900 truncate">
-                              {report.title}
-                            </h3>
-                            <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              report.type === 'soil'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-purple-100 text-purple-800'
-                            }`}>
-                              {report.type === 'soil'
-                                ? (language === 'ms' ? 'Tanah' : 'Soil')
-                                : (language === 'ms' ? 'Daun' : 'Leaf')
-                              }
-                            </span>
-                          </div>
+                          <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-2">
+                            {report.title}
+                          </h3>
                           
-                          <p className="text-sm text-gray-600 mb-2">{report.summary}</p>
+                          {report.summary && (
+                            <p className="text-base text-gray-600 mb-4 line-clamp-2">{report.summary}</p>
+                          )}
                           
-                          <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span className="flex items-center gap-1">
-                              <Calendar className="w-3 h-3" />
-                              {new Date(report.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US')}
-                            </span>
-                            <span>
-                              {report.recommendations} {language === 'ms' ? 'cadangan' : 'recommendations'}
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <span className="flex items-center gap-2">
+                              <Calendar className="w-4 h-4" />
+                              {new Date(report.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric'
+                              })}
                             </span>
                           </div>
                         </div>
                       </div>
 
                       {/* Actions */}
-                      <div className="flex items-center gap-2 flex-shrink-0">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         <button
                           onClick={() => handleViewReport(report)}
-                          className="flex items-center gap-1 px-3 py-2 bg-white text-gray-700 rounded-lg font-medium border border-gray-300 hover:bg-gray-50 transition"
+                          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl"
                         >
-                          <Eye className="w-4 h-4" />
-                          <span className="hidden sm:inline">{language === 'ms' ? 'Lihat' : 'View'}</span>
-                        </button>
-                        
-                        <button
-                          onClick={() => handleDownloadReport(report)}
-                          className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
-                        >
-                          <Download className="w-4 h-4" />
-                          <span className="hidden sm:inline">{language === 'ms' ? 'Muat' : 'Download'}</span>
+                          <Eye className="w-5 h-5" />
+                          <span>{language === 'ms' ? 'Lihat' : 'View'}</span>
                         </button>
                         
                         <button
                           onClick={() => handleDeleteReport(report.id)}
                           disabled={deletingId === report.id}
-                          className="flex items-center px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50"
+                          className="flex items-center justify-center w-12 h-12 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 border border-red-200 hover:border-red-300"
+                          title={language === 'ms' ? 'Padam' : 'Delete'}
                         >
                           {deletingId === report.id ? (
-                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                            <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                           ) : (
-                            <Trash2 className="w-4 h-4" />
+                            <Trash2 className="w-5 h-5" />
                           )}
                         </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              </motion.div>
-            ))
+                </motion.div>
+              ))}
+            </div>
           )}
-        </div>
+        </motion.div>
       </div>
+
+      {/* Report Detail Modal */}
+      {selectedReport && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setSelectedReport(null)}>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4 flex items-center justify-between">
+              <h2 className="text-2xl font-black text-white">{selectedReport.title}</h2>
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="text-white hover:bg-white/20 rounded-lg p-2 transition"
+                aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                title={language === 'ms' ? 'Tutup' : 'Close'}
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="p-6 sm:p-8 overflow-y-auto flex-1">
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {language === 'ms' ? 'Tarikh' : 'Date'}
+                  </h3>
+                  <p className="text-gray-600">
+                    {new Date(selectedReport.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+                
+                {selectedReport.summary && (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">
+                      {language === 'ms' ? 'Ringkasan' : 'Summary'}
+                    </h3>
+                    <p className="text-gray-600 whitespace-pre-wrap">{selectedReport.summary}</p>
+                  </div>
+                )}
+
+                {selectedReport.analysisData && (
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">
+                      {language === 'ms' ? 'Data Analisis' : 'Analysis Data'}
+                    </h3>
+                    <div className="bg-gray-50 rounded-lg p-4 overflow-x-auto">
+                      <pre className="text-sm text-gray-700 whitespace-pre-wrap">
+                        {JSON.stringify(selectedReport.analysisData, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+
+                {!selectedReport.summary && !selectedReport.analysisData && (
+                  <div className="text-center py-8 text-gray-500">
+                    {language === 'ms' ? 'Tiada maklumat tambahan tersedia' : 'No additional information available'}
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
