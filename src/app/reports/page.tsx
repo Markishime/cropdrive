@@ -731,65 +731,159 @@ export default function ReportsPage() {
                 </div>
               ) : fullReportData ? (
                 <div className="space-y-6">
+                  {/* Basic Information */}
                   <div>
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
-                      {language === 'ms' ? 'Data Lengkap dari Firestore' : 'Complete Data from Firestore'}
+                      {language === 'ms' ? 'Maklumat Asas' : 'Basic Information'}
                     </h3>
-                    <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
-                      <div className="overflow-x-auto">
-                        <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
-                          {JSON.stringify(fullReportData, null, 2)}
-                        </pre>
-                      </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {fullReportData.title && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                            {language === 'ms' ? 'Tajuk Laporan' : 'Report Title'}
+                          </h4>
+                          <p className="text-gray-900 font-medium">{fullReportData.title}</p>
+                        </div>
+                      )}
+                      {fullReportData.date && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                            {language === 'ms' ? 'Tarikh Analisis' : 'Analysis Date'}
+                          </h4>
+                          <p className="text-gray-900 font-medium">
+                            {new Date(fullReportData.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </p>
+                        </div>
+                      )}
+                      {fullReportData.status && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                            {language === 'ms' ? 'Status' : 'Status'}
+                          </h4>
+                          <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                            fullReportData.status === 'completed' 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {fullReportData.status === 'completed' 
+                              ? (language === 'ms' ? 'Selesai' : 'Completed')
+                              : (language === 'ms' ? 'Sedang Diproses' : 'Processing')}
+                          </span>
+                        </div>
+                      )}
+                      {fullReportData.type && (
+                        <div className="bg-white p-4 rounded-lg border border-gray-200">
+                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                            {language === 'ms' ? 'Jenis Analisis' : 'Analysis Type'}
+                          </h4>
+                          <p className="text-gray-900 font-medium capitalize">
+                            {fullReportData.type === 'soil' 
+                              ? (language === 'ms' ? 'Tanah' : 'Soil')
+                              : fullReportData.type === 'leaf'
+                              ? (language === 'ms' ? 'Daun' : 'Leaf')
+                              : fullReportData.type}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  
-                  {/* Also show formatted key fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {fullReportData.title && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                          {language === 'ms' ? 'Tajuk' : 'Title'}
-                        </h4>
-                        <p className="text-gray-900">{fullReportData.title}</p>
-                      </div>
-                    )}
-                    {fullReportData.date && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                          {language === 'ms' ? 'Tarikh' : 'Date'}
-                        </h4>
-                        <p className="text-gray-900">{fullReportData.date}</p>
-                      </div>
-                    )}
-                    {fullReportData.status && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                          {language === 'ms' ? 'Status' : 'Status'}
-                        </h4>
-                        <p className="text-gray-900">{fullReportData.status}</p>
-                      </div>
-                    )}
-                    {(fullReportData.userId || fullReportData.user_id) && (
-                      <div>
-                        <h4 className="text-sm font-semibold text-gray-700 mb-1">
-                          {language === 'ms' ? 'ID Pengguna' : 'User ID'}
-                        </h4>
-                        <p className="text-gray-900 font-mono text-xs">{fullReportData.userId || fullReportData.user_id}</p>
-                      </div>
-                    )}
-                  </div>
-                  
+
+                  {/* Summary */}
                   {fullReportData.summary && (
                     <div>
-                      <h4 className="text-sm font-semibold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Ringkasan' : 'Summary'}
-                      </h4>
-                      <p className="text-gray-600 whitespace-pre-wrap bg-white p-4 rounded-lg border border-gray-200">
-                        {fullReportData.summary}
-                      </p>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        {language === 'ms' ? 'Ringkasan Analisis' : 'Analysis Summary'}
+                      </h3>
+                      <div className="bg-white p-5 rounded-lg border border-gray-200">
+                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
+                          {fullReportData.summary}
+                        </p>
+                      </div>
                     </div>
                   )}
+
+                  {/* Recommendations */}
+                  {(fullReportData.recommendations || fullReportData.recommendationsCount || (Array.isArray(fullReportData.recommendations) && fullReportData.recommendations.length > 0)) && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        {language === 'ms' ? 'Cadangan' : 'Recommendations'}
+                      </h3>
+                      <div className="bg-white p-5 rounded-lg border border-gray-200">
+                        {Array.isArray(fullReportData.recommendations) ? (
+                          <ul className="space-y-3">
+                            {fullReportData.recommendations.map((rec: string, index: number) => (
+                              <li key={index} className="flex items-start gap-3">
+                                <span className="text-green-600 font-bold mt-1">•</span>
+                                <span className="text-gray-700 flex-1">{rec}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="text-gray-700">
+                            {language === 'ms' 
+                              ? `${fullReportData.recommendationsCount || fullReportData.recommendations || 0} cadangan tersedia`
+                              : `${fullReportData.recommendationsCount || fullReportData.recommendations || 0} recommendations available`}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Analysis Data */}
+                  {fullReportData.analysisData && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        {language === 'ms' ? 'Data Analisis Terperinci' : 'Detailed Analysis Data'}
+                      </h3>
+                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
+                        <div className="overflow-x-auto">
+                          <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-white p-4 rounded-lg border border-gray-300">
+                            {JSON.stringify(fullReportData.analysisData, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Additional Information */}
+                  {(fullReportData.fileUrl || fullReportData.file_url || fullReportData.fileURL) && (
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                        {language === 'ms' ? 'Fail Terlampir' : 'Attached File'}
+                      </h3>
+                      <div className="bg-white p-4 rounded-lg border border-gray-200">
+                        <a 
+                          href={fullReportData.fileUrl || fullReportData.file_url || fullReportData.fileURL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-600 hover:text-green-700 font-semibold underline flex items-center gap-2"
+                        >
+                          {language === 'ms' ? 'Lihat Fail' : 'View File'}
+                          <Eye className="w-4 h-4" />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Technical Details (Collapsible) */}
+                  <details className="bg-gray-50 rounded-lg border border-gray-200">
+                    <summary className="p-4 cursor-pointer font-semibold text-gray-700 hover:text-gray-900">
+                      {language === 'ms' ? 'Maklumat Teknikal (Pilihan)' : 'Technical Details (Optional)'}
+                    </summary>
+                    <div className="p-4 pt-0 border-t border-gray-200">
+                      <div className="bg-white rounded-lg p-4 border border-gray-300">
+                        <div className="overflow-x-auto">
+                          <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono">
+                            {JSON.stringify(fullReportData, null, 2)}
+                          </pre>
+                        </div>
+                      </div>
+                    </div>
+                  </details>
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
