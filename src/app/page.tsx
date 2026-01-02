@@ -362,29 +362,31 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 xs:gap-6 sm:gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12">
             {/* Farmers Card */}
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl p-5 xs:p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              {/* Farmers Image */}
-              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mx-auto border-4 border-yellow-400 shadow-lg">
+              {/* Farmers Image - Large */}
+              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden">
                 <Image
                   src="/images/Who-do-we-serve/Farmers.png"
                   alt={language === 'ms' ? 'Pekebun Kecil' : 'Farmers'}
-                  width={96}
-                  height={96}
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-yellow-50/90 via-yellow-50/50 to-transparent"></div>
               </div>
 
-              <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-green-900 mb-2 xs:mb-3 sm:mb-4 text-center">
-                {language === 'ms' ? 'Pekebun Kecil' : 'Farmers'}
-              </h3>
+              <div className="p-6 sm:p-8 lg:p-10">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-green-900 mb-4 sm:mb-6 text-center">
+                  {language === 'ms' ? 'Pekebun Kecil' : 'Farmers'}
+                </h3>
 
               <p className="text-sm xs:text-base sm:text-lg text-green-900/80 font-semibold mb-3 xs:mb-4 sm:mb-6 text-center">
                 {''}
@@ -437,15 +439,16 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <Link href="/pricing">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300 touch-manipulation"
-                >
-                  {language === 'ms' ? '🛒 Sertai Sekarang' : '🛒 Join Us Now'}
-                </motion.button>
-              </Link>
+                <Link href="/pricing">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300"
+                  >
+                    {language === 'ms' ? '🛒 Sertai Sekarang' : '🛒 Join Us Now'}
+                  </motion.button>
+                </Link>
+              </div>
             </motion.div>
 
             {/* Organizations Card */}
@@ -454,28 +457,26 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl p-5 xs:p-6 sm:p-8 lg:p-10 border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
             >
-              {/* Organizations Image */}
-              <div className="mb-3 xs:mb-4 sm:mb-6 w-16 h-16 xs:w-20 xs:h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mx-auto border-4 border-green-600 shadow-lg">
+              {/* Organizations Image - Large */}
+              <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden">
                 <Image
                   src="/images/Who-do-we-serve/Organizations.png"
                   alt={language === 'ms' ? 'Organisasi' : 'Organizations'}
-                  width={96}
-                  height={96}
+                  width={800}
+                  height={600}
                   className="w-full h-full object-cover"
                 />
+                <div className="absolute inset-0 bg-gradient-to-t from-green-50/90 via-green-50/50 to-transparent"></div>
               </div>
 
-              <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-green-900 mb-2 xs:mb-3 sm:mb-4 text-center">
-                {language === 'ms' ? 'Organisasi' : 'Organizations'}
-              </h3>
+              <div className="p-6 sm:p-8 lg:p-10">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-green-900 mb-4 sm:mb-6 text-center">
+                  {language === 'ms' ? 'Organisasi' : 'Organizations'}
+                </h3>
 
-              <p className="text-sm xs:text-base sm:text-lg text-green-900/80 font-semibold mb-3 xs:mb-4 sm:mb-6 text-center">
-                {''}
-              </p>
-
-              <div className="space-y-2 xs:space-y-3 sm:space-y-4 mb-5 xs:mb-6 sm:mb-8">
+                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
                 <div className="flex items-start space-x-2 xs:space-x-3">
                   <svg className="w-4 h-4 xs:w-5 xs:h-5 sm:w-6 sm:h-6 text-green-700 flex-shrink-0 mt-0.5 xs:mt-1" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -520,17 +521,18 @@ export default function HomePage() {
                     }
                   </p>
                 </div>
-              </div>
+                </div>
 
-              <Link href="/get-started/organizations">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full px-5 xs:px-6 sm:px-8 py-2.5 xs:py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-sm xs:text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300 touch-manipulation"
-                >
-                  {language === 'ms' ? '📅 Tempah Demo' : '📅 Book A Demo'}
-                </motion.button>
-              </Link>
+                <Link href="/get-started/organizations">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                  >
+                    {language === 'ms' ? '📅 Tempah Demo' : '📅 Book A Demo'}
+                  </motion.button>
+                </Link>
+              </div>
             </motion.div>
           </div>
         </div>
