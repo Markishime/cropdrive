@@ -33,6 +33,13 @@ interface FAQ {
   category: string;
 }
 
+interface Category {
+  id: string;
+  label: string;
+  labelMs: string;
+  icon: React.ComponentType<{ className?: string }>;
+}
+
 const faqs: FAQ[] = [
   // Getting Started
   {
@@ -115,7 +122,7 @@ const faqs: FAQ[] = [
   }
 ];
 
-const categories = [
+const categories: Category[] = [
   { id: 'getting-started', label: 'Getting Started', labelMs: 'Bermula', icon: BookOpen },
   { id: 'analysis', label: 'Analysis & Results', labelMs: 'Analisis & Keputusan', icon: BarChart3 },
   { id: 'billing', label: 'Subscription & Billing', labelMs: 'Langganan & Bil', icon: Shield },
@@ -316,7 +323,11 @@ export default function HelpCenterPage() {
 
               {/* Category Filter */}
               <div className="md:w-64">
+                <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                  {language === 'ms' ? 'Kategori' : 'Category'}
+                </label>
                 <select
+                  id="category-filter"
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
