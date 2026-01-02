@@ -230,8 +230,70 @@ export default function ReportsPage() {
           updateReportsFromMap();
         },
         (error: any) => {
-          console.warn('⚠️ Query 1 (userId) error:', error.code, error.message);
-          // Continue with query 2 even if query 1 fails
+          console.warn('⚠️ Query 1 (userId with orderBy) error:', error.code, error.message);
+          // Fallback: Try query without orderBy if index is missing
+          if (error.code === 'failed-precondition' || error.code === 'unavailable') {
+            console.log('🔄 Trying fallback query without orderBy...');
+            try {
+              const q1Fallback = query(
+                reportsRef,
+                where('userId', '==', user.uid),
+                where('status', '==', 'completed')
+              );
+              
+              unsubscribe1 = onSnapshot(
+                q1Fallback,
+                (snapshot) => {
+                  console.log(`📊 Query 1 Fallback (userId, no orderBy): ${snapshot.size} reports found`);
+                  snapshot.forEach((doc) => {
+                    const report = processReportDoc(doc, user.uid);
+                    if (report) {
+                      allReports.set(doc.id, report);
+                    }
+                  });
+                  updateReportsFromMap();
+                },
+                (error2: any) => {
+                  console.error('❌ Query 1 Fallback error:', error2.code, error2.message);
+                  // Last resort: Query without status filter
+                  console.log('🔄 Trying last resort query without status filter...');
+                  try {
+                    const q1LastResort = query(
+                      reportsRef,
+                      where('userId', '==', user.uid)
+                    );
+                    
+                    unsubscribe1 = onSnapshot(
+                      q1LastResort,
+                      (snapshot) => {
+                        console.log(`📊 Query 1 Last Resort (userId only): ${snapshot.size} reports found`);
+                        snapshot.forEach((doc) => {
+                          const report = processReportDoc(doc, user.uid);
+                          if (report && report.status === 'completed') {
+                            allReports.set(doc.id, report);
+                          }
+                        });
+                        updateReportsFromMap();
+                      },
+                      (error3: any) => {
+                        console.error('❌ Query 1 Last Resort error:', error3);
+                        setLoadingReports(false);
+                      }
+                    );
+                  } catch (lastResortErr) {
+                    console.error('❌ Error setting up last resort query:', lastResortErr);
+                    setLoadingReports(false);
+                  }
+                }
+              );
+            } catch (fallbackErr) {
+              console.error('❌ Error setting up fallback query:', fallbackErr);
+              setLoadingReports(false);
+            }
+          } else {
+            console.error('❌ Query 1 error:', error);
+            setLoadingReports(false);
+          }
         }
       );
       
@@ -305,8 +367,8 @@ export default function ReportsPage() {
       setReports([]);
     }
     
-    // Also listen for custom events as backup
-    const handleReportSaved = (event: Event) => {
+      // Also listen for custom events as backup and trigger a manual refresh
+    const handleReportSaved = async (event: Event) => {
       const customEvent = event as CustomEvent;
       const eventUserId = customEvent.detail?.userId;
       const currentUserId = user?.uid;
@@ -318,16 +380,47 @@ export default function ReportsPage() {
         timestamp: new Date().toISOString()
       });
 
-      // Real-time listener should handle this automatically, but log for debugging
+      // Real-time listener should handle this automatically, but trigger a manual refresh as backup
       if (currentUserId && (!eventUserId || eventUserId === currentUserId)) {
-        console.log('✅ Event received for current user - real-time listener should update automatically');
-        console.log('⏳ Waiting for real-time listener to update...');
+        console.log('✅ Event received for current user - triggering manual refresh as backup');
         
-        // The onSnapshot listener should automatically pick up the new document
-        // If it doesn't appear after a few seconds, there might be an issue with:
-        // 1. The document not being saved correctly
-        // 2. The query filters not matching
-        // 3. The real-time listener not working
+        // Wait a bit for Firestore to sync, then manually fetch the new report
+        setTimeout(async () => {
+          try {
+            const reportsRef = collection(db, 'analysis_results');
+            const simpleQuery = query(
+              reportsRef,
+              where('userId', '==', currentUserId)
+            );
+            
+            const snapshot = await getDocs(simpleQuery);
+            console.log(`🔄 Manual refresh: Found ${snapshot.size} reports for user ${currentUserId}`);
+            
+            const newReports: Report[] = [];
+            snapshot.forEach((doc) => {
+              const report = processReportDoc(doc, currentUserId);
+              if (report && report.status === 'completed') {
+                newReports.push(report);
+              }
+            });
+            
+            // Merge with existing reports
+            const existingIds = new Set(reports.map(r => r.id));
+            const reportsToAdd = newReports.filter(r => !existingIds.has(r.id));
+            
+            if (reportsToAdd.length > 0) {
+              console.log(`✅ Adding ${reportsToAdd.length} new reports from manual refresh`);
+              const updatedReports = [...reports, ...reportsToAdd].sort((a, b) => {
+                const dateA = a.createdAt?.toDate ? a.createdAt.toDate().getTime() : new Date(a.date).getTime();
+                const dateB = b.createdAt?.toDate ? b.createdAt.toDate().getTime() : new Date(b.date).getTime();
+                return dateB - dateA;
+              });
+              setReports(updatedReports);
+            }
+          } catch (error) {
+            console.error('❌ Error in manual refresh:', error);
+          }
+        }, 2000); // Wait 2 seconds for Firestore to sync
       }
     };
     
