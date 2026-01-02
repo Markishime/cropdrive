@@ -24,6 +24,7 @@ const footerSections: FooterSection[] = [
     titleMs: 'Syarikat',
     links: [
       { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
+      { href: '/blog', label: 'Blog', labelMs: 'Blog' },
     ],
   },
   {
