@@ -209,18 +209,18 @@ export default function ReportsPage() {
     };
     
     try {
-      // Query 1: userId (website format) with status and createdAt
+      // Query 1: user_id (primary format used by AI assistant) with status
+      // This is the main query since actual data uses user_id
       const q1 = query(
         reportsRef,
-        where('userId', '==', user.uid),
-        where('status', '==', 'completed'),
-        orderBy('createdAt', 'desc')
+        where('user_id', '==', user.uid),
+        where('status', '==', 'completed')
       );
       
       unsubscribe1 = onSnapshot(
         q1,
         (snapshot) => {
-          console.log(`📊 Query 1 (userId): ${snapshot.size} reports found`);
+          console.log(`📊 Query 1 (user_id): ${snapshot.size} reports found`);
           snapshot.forEach((doc) => {
             const report = processReportDoc(doc, user.uid);
             if (report) {
@@ -230,86 +230,51 @@ export default function ReportsPage() {
           updateReportsFromMap();
         },
         (error: any) => {
-          console.warn('⚠️ Query 1 (userId with orderBy) error:', error.code, error.message);
-          // Fallback: Try query without orderBy if index is missing
-          if (error.code === 'failed-precondition' || error.code === 'unavailable') {
-            console.log('🔄 Trying fallback query without orderBy...');
-            try {
-              const q1Fallback = query(
-                reportsRef,
-                where('userId', '==', user.uid),
-                where('status', '==', 'completed')
-              );
-              
-              unsubscribe1 = onSnapshot(
-                q1Fallback,
-                (snapshot) => {
-                  console.log(`📊 Query 1 Fallback (userId, no orderBy): ${snapshot.size} reports found`);
-                  snapshot.forEach((doc) => {
-                    const report = processReportDoc(doc, user.uid);
-                    if (report) {
-                      allReports.set(doc.id, report);
-                    }
-                  });
-                  updateReportsFromMap();
-                },
-                (error2: any) => {
-                  console.error('❌ Query 1 Fallback error:', error2.code, error2.message);
-                  // Last resort: Query without status filter
-                  console.log('🔄 Trying last resort query without status filter...');
-                  try {
-                    const q1LastResort = query(
-                      reportsRef,
-                      where('userId', '==', user.uid)
-                    );
-                    
-                    unsubscribe1 = onSnapshot(
-                      q1LastResort,
-                      (snapshot) => {
-                        console.log(`📊 Query 1 Last Resort (userId only): ${snapshot.size} reports found`);
-                        snapshot.forEach((doc) => {
-                          const report = processReportDoc(doc, user.uid);
-                          if (report && report.status === 'completed') {
-                            allReports.set(doc.id, report);
-                          }
-                        });
-                        updateReportsFromMap();
-                      },
-                      (error3: any) => {
-                        console.error('❌ Query 1 Last Resort error:', error3);
-                        setLoadingReports(false);
-                      }
-                    );
-                  } catch (lastResortErr) {
-                    console.error('❌ Error setting up last resort query:', lastResortErr);
-                    setLoadingReports(false);
+          console.warn('⚠️ Query 1 (user_id) error:', error.code, error.message);
+          // Fallback: Query without status filter
+          console.log('🔄 Trying fallback query without status filter...');
+          try {
+            const q1Fallback = query(
+              reportsRef,
+              where('user_id', '==', user.uid)
+            );
+            
+            unsubscribe1 = onSnapshot(
+              q1Fallback,
+              (snapshot) => {
+                console.log(`📊 Query 1 Fallback (user_id only): ${snapshot.size} reports found`);
+                snapshot.forEach((doc) => {
+                  const report = processReportDoc(doc, user.uid);
+                  if (report && report.status === 'completed') {
+                    allReports.set(doc.id, report);
                   }
-                }
-              );
-            } catch (fallbackErr) {
-              console.error('❌ Error setting up fallback query:', fallbackErr);
-              setLoadingReports(false);
-            }
-          } else {
-            console.error('❌ Query 1 error:', error);
+                });
+                updateReportsFromMap();
+              },
+              (error2: any) => {
+                console.error('❌ Query 1 Fallback error:', error2);
+                setLoadingReports(false);
+              }
+            );
+          } catch (fallbackErr) {
+            console.error('❌ Error setting up fallback query:', fallbackErr);
             setLoadingReports(false);
           }
         }
       );
       
-      // Query 2: user_id (AI assistant format) with status
-      // Try with timestamp first (AI assistant uses string timestamp)
+      // Query 2: userId (website format) - backup query for older reports that might use userId
       try {
-        const q2a = query(
+        const q2 = query(
           reportsRef,
-          where('user_id', '==', user.uid),
+          where('userId', '==', user.uid),
           where('status', '==', 'completed')
         );
         
         unsubscribe2 = onSnapshot(
-          q2a,
+          q2,
           (snapshot) => {
-            console.log(`📊 Query 2 (user_id): ${snapshot.size} reports found`);
+            console.log(`📊 Query 2 (userId): ${snapshot.size} reports found`);
             snapshot.forEach((doc) => {
               const report = processReportDoc(doc, user.uid);
               if (report) {
@@ -319,35 +284,32 @@ export default function ReportsPage() {
             updateReportsFromMap();
           },
           (error: any) => {
-            console.warn('⚠️ Query 2 (user_id) error:', error.code, error.message);
-            // If timestamp orderBy fails, try without orderBy
-            if (error.code === 'failed-precondition' || error.code === 'unavailable') {
-              try {
-                const q2b = query(
-                  reportsRef,
-                  where('user_id', '==', user.uid),
-                  where('status', '==', 'completed')
-                );
-                
-                unsubscribe2 = onSnapshot(
-                  q2b,
-                  (snapshot) => {
-                    console.log(`📊 Query 2b (user_id, no orderBy): ${snapshot.size} reports found`);
-                    snapshot.forEach((doc) => {
-                      const report = processReportDoc(doc, user.uid);
-                      if (report) {
-                        allReports.set(doc.id, report);
-                      }
-                    });
-                    updateReportsFromMap();
-                  },
-                  (error2: any) => {
-                    console.error('❌ Query 2b (user_id) error:', error2);
-                  }
-                );
-              } catch (err) {
-                console.error('❌ Error setting up query 2b:', err);
-              }
+            console.warn('⚠️ Query 2 (userId) error:', error.code, error.message);
+            // Try without status filter
+            try {
+              const q2Fallback = query(
+                reportsRef,
+                where('userId', '==', user.uid)
+              );
+              
+              unsubscribe2 = onSnapshot(
+                q2Fallback,
+                (snapshot) => {
+                  console.log(`📊 Query 2 Fallback (userId only): ${snapshot.size} reports found`);
+                  snapshot.forEach((doc) => {
+                    const report = processReportDoc(doc, user.uid);
+                    if (report && report.status === 'completed') {
+                      allReports.set(doc.id, report);
+                    }
+                  });
+                  updateReportsFromMap();
+                },
+                (error2: any) => {
+                  console.error('❌ Query 2 Fallback error:', error2);
+                }
+              );
+            } catch (err) {
+              console.error('❌ Error setting up query 2 fallback:', err);
             }
           }
         );
@@ -388,13 +350,14 @@ export default function ReportsPage() {
         setTimeout(async () => {
           try {
             const reportsRef = collection(db, 'analysis_results');
+            // Query using user_id (primary format) first
             const simpleQuery = query(
               reportsRef,
-              where('userId', '==', currentUserId)
+              where('user_id', '==', currentUserId)
             );
             
             const snapshot = await getDocs(simpleQuery);
-            console.log(`🔄 Manual refresh: Found ${snapshot.size} reports for user ${currentUserId}`);
+            console.log(`🔄 Manual refresh: Found ${snapshot.size} reports for user ${currentUserId} using user_id`);
             
             const newReports: Report[] = [];
             snapshot.forEach((doc) => {
@@ -403,6 +366,24 @@ export default function ReportsPage() {
                 newReports.push(report);
               }
             });
+            
+            // Also try userId format as backup
+            try {
+              const backupQuery = query(
+                reportsRef,
+                where('userId', '==', currentUserId)
+              );
+              const backupSnapshot = await getDocs(backupQuery);
+              console.log(`🔄 Manual refresh backup: Found ${backupSnapshot.size} reports using userId`);
+              backupSnapshot.forEach((doc) => {
+                const report = processReportDoc(doc, currentUserId);
+                if (report && report.status === 'completed') {
+                  newReports.push(report);
+                }
+              });
+            } catch (backupError) {
+              console.warn('⚠️ Backup query failed:', backupError);
+            }
             
             // Merge with existing reports
             const existingIds = new Set(reports.map(r => r.id));
