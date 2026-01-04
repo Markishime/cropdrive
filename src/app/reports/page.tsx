@@ -1033,8 +1033,24 @@ export default function ReportsPage() {
                             const entries = Object.entries(data);
                             
                             entries.forEach(([key, value]) => {
-                              // Skip already displayed fields
-                              if (['ph', 'nitrogen', 'phosphorus', 'potassium', 'recommendations', 'recommendationsMs', 'summary', 'results', 'report', 'analysisResults', 'formattedReport'].includes(key)) {
+                              // Skip already displayed fields and internal/technical fields
+                              const skipFields = [
+                                // Already displayed fields
+                                'ph', 'nitrogen', 'phosphorus', 'potassium', 'recommendations', 'recommendationsMs', 
+                                'summary', 'results', 'report', 'analysisResults', 'formattedReport',
+                                // Prompt and AI-related fields (should not be shown)
+                                'prompt', 'systemPrompt', 'userPrompt', 'messages', 'conversation', 'chatHistory',
+                                'apiKey', 'model', 'temperature', 'maxTokens', 'topP', 'frequencyPenalty', 'presencePenalty',
+                                // Internal/technical fields
+                                'internal', 'debug', 'metadata', '_metadata', '_id', '__v', 'version', 'schema'
+                              ];
+                              
+                              if (skipFields.includes(key)) {
+                                return;
+                              }
+                              
+                              // Skip empty values
+                              if (value === null || value === undefined || value === '') {
                                 return;
                               }
                               
@@ -1328,12 +1344,44 @@ export default function ReportsPage() {
                             return sections;
                           }
                           
-                          // Skip fields that are already displayed in other sections
-                          const skipFields = ['title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsCount', 'recommendationsMs', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id', 'createdAt', 'updatedAt', 'timestamp', 'id'];
+                          // Skip fields that are already displayed in other sections, metadata, or internal/technical fields
+                          const skipFields = [
+                            // Already displayed fields
+                            'title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsCount', 'recommendationsMs', 
+                            'fileUrl', 'file_url', 'fileURL', 
+                            // User and metadata fields
+                            'userId', 'user_id', 'createdAt', 'updatedAt', 'timestamp', 'id',
+                            // Prompt and AI-related fields (should not be shown)
+                            'prompt', 'systemPrompt', 'userPrompt', 'messages', 'conversation', 'chatHistory', 
+                            'apiKey', 'model', 'temperature', 'maxTokens', 'topP', 'frequencyPenalty', 'presencePenalty',
+                            // Internal/technical fields
+                            'internal', 'debug', 'metadata', '_metadata', '_id', '__v', 'version', 'schema'
+                          ];
                           
-                          Object.entries(data).forEach(([key, value]) => {
+                          // Sort entries to prioritize important data first
+                          const entries = Object.entries(data).sort(([keyA], [keyB]) => {
+                            // Priority order: analysis data, results, then others
+                            const priority: Record<string, number> = {
+                              'analysisData': 1,
+                              'analysisResults': 2,
+                              'results': 3,
+                              'report': 4,
+                              'formattedReport': 5,
+                              'data': 6,
+                            };
+                            const priorityA = priority[keyA.toLowerCase()] || 99;
+                            const priorityB = priority[keyB.toLowerCase()] || 99;
+                            return priorityA - priorityB;
+                          });
+                          
+                          entries.forEach(([key, value]) => {
                             // Skip already displayed fields and metadata
                             if (skipFields.includes(key)) {
+                              return;
+                            }
+                            
+                            // Skip empty values
+                            if (value === null || value === undefined || value === '') {
                               return;
                             }
                             
