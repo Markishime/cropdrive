@@ -911,7 +911,7 @@ export default function ReportsPage() {
                           // Format soil analysis data
                           if (data.ph !== undefined || data.nitrogen !== undefined || data.phosphorus !== undefined || data.potassium !== undefined) {
                             allSections.push(
-                              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                              <div key="soil-nutrients" className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
                                 <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
                                   {language === 'ms' ? 'Nilai Nutrien Tanah' : 'Soil Nutrient Values'}
                                 </h4>
@@ -1314,21 +1314,216 @@ export default function ReportsPage() {
                     </div>
                   )}
 
-                  {/* Technical Details (Collapsible) */}
-                  <details className="bg-gray-50 rounded-lg border border-gray-200">
-                    <summary className="p-4 cursor-pointer font-semibold text-gray-700 hover:text-gray-900">
-                      {language === 'ms' ? 'Maklumat Teknikal (Pilihan)' : 'Technical Details (Optional)'}
-                    </summary>
-                    <div className="p-4 pt-0 border-t border-gray-200">
-                      <div className="bg-white rounded-lg p-4 border border-gray-300">
-                        <div className="overflow-x-auto">
-                          <pre className="text-xs text-gray-600 whitespace-pre-wrap font-mono">
-                            {JSON.stringify(fullReportData, null, 2)}
-                          </pre>
-                        </div>
-                      </div>
+                  {/* Complete Report Data - Professional Format */}
+                  <div>
+                    <h3 className="text-xl font-black text-gray-900 mb-6">
+                      {language === 'ms' ? 'Laporan Lengkap' : 'Complete Report'}
+                    </h3>
+                    <div className="space-y-6">
+                      {(() => {
+                        const formatReportData = (data: any, depth: number = 0): React.ReactElement[] => {
+                          const sections: React.ReactElement[] = [];
+                          
+                          if (!data || typeof data !== 'object') {
+                            return sections;
+                          }
+                          
+                          // Skip fields that are already displayed in other sections
+                          const skipFields = ['title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsCount', 'recommendationsMs', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id', 'createdAt', 'updatedAt', 'timestamp', 'id'];
+                          
+                          Object.entries(data).forEach(([key, value]) => {
+                            // Skip already displayed fields and metadata
+                            if (skipFields.includes(key)) {
+                              return;
+                            }
+                            
+                            const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                            
+                            // Handle arrays
+                            if (Array.isArray(value)) {
+                              if (value.length > 0) {
+                                sections.push(
+                                  <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                      {keyLabel}
+                                    </h4>
+                                    <ul className="space-y-3">
+                                      {value.map((item: any, idx: number) => (
+                                        <li key={idx} className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                          <span className="text-green-600 font-bold mt-1 text-lg flex-shrink-0">•</span>
+                                          <div className="flex-1">
+                                            {typeof item === 'object' && item !== null ? (
+                                              <div className="space-y-2">
+                                                {Object.entries(item).map(([k, v]) => (
+                                                  <p key={k} className="text-gray-800 leading-relaxed">
+                                                    <span className="font-semibold text-gray-900 capitalize">
+                                                      {k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}: 
+                                                    </span>
+                                                    <span className="font-medium ml-2">
+                                                      {typeof v === 'object' && v !== null 
+                                                        ? Object.entries(v).map(([sk, sv]) => 
+                                                            `${sk.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(sv)}`
+                                                          ).join(', ')
+                                                        : String(v)}
+                                                    </span>
+                                                  </p>
+                                                ))}
+                                              </div>
+                                            ) : (
+                                              <span className="text-gray-800 font-medium leading-relaxed">{String(item)}</span>
+                                            )}
+                                          </div>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                );
+                              }
+                            }
+                            // Handle objects
+                            else if (typeof value === 'object' && value !== null) {
+                              const objEntries = Object.entries(value);
+                              if (objEntries.length > 0) {
+                                // Check if it's a table-like structure (e.g., standards with min/max/optimal)
+                                const isTableStructure = objEntries.every(([k, v]) => 
+                                  typeof v === 'object' && v !== null && 
+                                  (v.hasOwnProperty('min') || v.hasOwnProperty('max') || v.hasOwnProperty('optimal') || 
+                                   v.hasOwnProperty('value') || typeof v === 'number')
+                                );
+                                
+                                if (isTableStructure && depth === 0) {
+                                  // Format as table
+                                  sections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                        {keyLabel}
+                                      </h4>
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                          <thead>
+                                            <tr className="bg-gray-50">
+                                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                                {language === 'ms' ? 'Parameter' : 'Parameter'}
+                                              </th>
+                                              {objEntries[0] && typeof objEntries[0][1] === 'object' && objEntries[0][1] !== null && (
+                                                Object.keys(objEntries[0][1] as object).map((subKey) => (
+                                                  <th key={subKey} className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200 capitalize">
+                                                    {subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+                                                  </th>
+                                                ))
+                                              )}
+                                            </tr>
+                                          </thead>
+                                          <tbody className="divide-y divide-gray-100">
+                                            {objEntries.map(([param, paramValue]: [string, any]) => (
+                                              <tr key={param} className="hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900 uppercase">
+                                                  {param}
+                                                </td>
+                                                {typeof paramValue === 'object' && paramValue !== null ? (
+                                                  Object.entries(paramValue).map(([subKey, subValue]) => (
+                                                    <td key={subKey} className="px-4 py-3 text-sm text-gray-700 text-center font-semibold">
+                                                      {typeof subValue === 'number' ? subValue.toFixed(2) : String(subValue)}
+                                                    </td>
+                                                  ))
+                                                ) : (
+                                                  <td className="px-4 py-3 text-sm text-gray-700 text-center font-semibold">
+                                                    {typeof paramValue === 'number' ? paramValue.toFixed(2) : String(paramValue)}
+                                                  </td>
+                                                )}
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  );
+                                } else {
+                                  // Format as key-value pairs
+                                  sections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                        {keyLabel}
+                                      </h4>
+                                      <div className="space-y-3">
+                                        {objEntries.map(([subKey, subValue]) => {
+                                          const subKeyLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                                          
+                                          if (typeof subValue === 'object' && subValue !== null && !Array.isArray(subValue)) {
+                                            return (
+                                              <div key={subKey} className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                                                <h5 className="font-semibold text-gray-900 mb-2 capitalize">{subKeyLabel}</h5>
+                                                <div className="space-y-2 ml-4">
+                                                  {Object.entries(subValue).map(([nestedKey, nestedValue]) => (
+                                                    <p key={nestedKey} className="text-gray-800 leading-relaxed">
+                                                      <span className="font-semibold text-gray-900 capitalize">
+                                                        {nestedKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}: 
+                                                      </span>
+                                                      <span className="font-medium ml-2">
+                                                        {typeof nestedValue === 'object' && nestedValue !== null
+                                                          ? Object.entries(nestedValue).map(([k, v]) => 
+                                                              `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(v)}`
+                                                            ).join(', ')
+                                                          : String(nestedValue)}
+                                                      </span>
+                                                    </p>
+                                                  ))}
+                                                </div>
+                                              </div>
+                                            );
+                                          }
+                                          
+                                          return (
+                                            <div key={subKey} className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                              <p className="text-gray-800 leading-relaxed">
+                                                <span className="font-semibold text-gray-900 capitalize">{subKeyLabel}: </span>
+                                                <span className="font-medium">
+                                                  {typeof subValue === 'object' && subValue !== null
+                                                    ? Object.entries(subValue).map(([k, v]) => 
+                                                        `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(v)}`
+                                                      ).join(', ')
+                                                    : String(subValue)}
+                                                </span>
+                                              </p>
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              }
+                            }
+                            // Handle simple values
+                            else if (value !== null && value !== undefined) {
+                              sections.push(
+                                <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                  <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                    <p className="text-gray-800 leading-relaxed">
+                                      <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
+                                      <span className="font-medium">{String(value)}</span>
+                                    </p>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          });
+                          
+                          return sections;
+                        };
+                        
+                        const reportSections = formatReportData(fullReportData);
+                        
+                        return reportSections.length > 0 ? reportSections : (
+                          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                            <p className="text-gray-600 text-center">
+                              {language === 'ms' ? 'Tiada data tambahan tersedia' : 'No additional data available'}
+                            </p>
+                          </div>
+                        );
+                      })()}
                     </div>
-                  </details>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
