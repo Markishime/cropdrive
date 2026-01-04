@@ -733,24 +733,24 @@ export default function ReportsPage() {
                 <div className="space-y-6">
                   {/* Basic Information */}
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900 mb-4">
+                    <h3 className="text-xl font-black text-gray-900 mb-6">
                       {language === 'ms' ? 'Maklumat Asas' : 'Basic Information'}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {fullReportData.title && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
+                          <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                             {language === 'ms' ? 'Tajuk Laporan' : 'Report Title'}
                           </h4>
-                          <p className="text-gray-900 font-medium">{fullReportData.title}</p>
+                          <p className="text-gray-900 font-bold text-lg">{fullReportData.title}</p>
                         </div>
                       )}
                       {fullReportData.date && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
+                          <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                             {language === 'ms' ? 'Tarikh Analisis' : 'Analysis Date'}
                           </h4>
-                          <p className="text-gray-900 font-medium">
+                          <p className="text-gray-900 font-bold text-lg">
                             {new Date(fullReportData.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
                               year: 'numeric',
                               month: 'long',
@@ -760,14 +760,14 @@ export default function ReportsPage() {
                         </div>
                       )}
                       {fullReportData.status && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
+                          <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                             {language === 'ms' ? 'Status' : 'Status'}
                           </h4>
-                          <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                          <span className={`inline-block px-4 py-2 rounded-lg text-sm font-bold ${
                             fullReportData.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : 'bg-yellow-100 text-yellow-800'
+                              ? 'bg-green-100 text-green-800 border border-green-300' 
+                              : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
                           }`}>
                             {fullReportData.status === 'completed' 
                               ? (language === 'ms' ? 'Selesai' : 'Completed')
@@ -776,11 +776,11 @@ export default function ReportsPage() {
                         </div>
                       )}
                       {fullReportData.type && (
-                        <div className="bg-white p-4 rounded-lg border border-gray-200">
-                          <h4 className="text-sm font-semibold text-gray-700 mb-2">
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
+                          <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
                             {language === 'ms' ? 'Jenis Analisis' : 'Analysis Type'}
                           </h4>
-                          <p className="text-gray-900 font-medium capitalize">
+                          <p className="text-gray-900 font-bold text-lg capitalize">
                             {fullReportData.type === 'soil' 
                               ? (language === 'ms' ? 'Tanah' : 'Soil')
                               : fullReportData.type === 'leaf'
@@ -793,58 +793,350 @@ export default function ReportsPage() {
                   </div>
 
                   {/* Summary */}
-                  {fullReportData.summary && (
+                  {(fullReportData.summary || fullReportData.analysisData?.summary) && (
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                      <h3 className="text-xl font-black text-gray-900 mb-6">
                         {language === 'ms' ? 'Ringkasan Analisis' : 'Analysis Summary'}
                       </h3>
-                      <div className="bg-white p-5 rounded-lg border border-gray-200">
-                        <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-                          {fullReportData.summary}
+                      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
+                        <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-medium">
+                          {fullReportData.summary || fullReportData.analysisData?.summary}
                         </p>
                       </div>
                     </div>
                   )}
 
                   {/* Recommendations */}
-                  {(fullReportData.recommendations || fullReportData.recommendationsCount || (Array.isArray(fullReportData.recommendations) && fullReportData.recommendations.length > 0)) && (
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">
-                        {language === 'ms' ? 'Cadangan' : 'Recommendations'}
-                      </h3>
-                      <div className="bg-white p-5 rounded-lg border border-gray-200">
-                        {Array.isArray(fullReportData.recommendations) ? (
-                          <ul className="space-y-3">
-                            {fullReportData.recommendations.map((rec: string, index: number) => (
-                              <li key={index} className="flex items-start gap-3">
-                                <span className="text-green-600 font-bold mt-1">•</span>
-                                <span className="text-gray-700 flex-1">{rec}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        ) : (
-                          <p className="text-gray-700">
-                            {language === 'ms' 
-                              ? `${fullReportData.recommendationsCount || fullReportData.recommendations || 0} cadangan tersedia`
-                              : `${fullReportData.recommendationsCount || fullReportData.recommendations || 0} recommendations available`}
-                          </p>
-                        )}
+                  {(() => {
+                    const recommendations = fullReportData.recommendations || fullReportData.analysisData?.recommendations;
+                    const recommendationsMs = fullReportData.recommendationsMs || fullReportData.analysisData?.recommendationsMs;
+                    const recommendationsCount = fullReportData.recommendationsCount || fullReportData.analysisData?.recommendationsCount;
+                    const hasRecommendations = (Array.isArray(recommendations) && recommendations.length > 0) || 
+                                             (Array.isArray(recommendationsMs) && recommendationsMs.length > 0) ||
+                                             recommendationsCount;
+                    
+                    if (!hasRecommendations) return null;
+                    
+                    const displayRecommendations = (language === 'ms' && Array.isArray(recommendationsMs) && recommendationsMs.length > 0) 
+                      ? recommendationsMs 
+                      : (Array.isArray(recommendations) && recommendations.length > 0) 
+                        ? recommendations 
+                        : null;
+                    
+                    return (
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900 mb-6">
+                          {language === 'ms' ? 'Cadangan Agronomi' : 'Agronomic Recommendations'}
+                        </h3>
+                        <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6 shadow-sm">
+                          {displayRecommendations ? (
+                            <ul className="space-y-4">
+                              {displayRecommendations.map((rec: string, index: number) => (
+                                <li key={index} className="flex items-start gap-4 bg-white p-4 rounded-lg border border-green-100 shadow-sm hover:shadow-md transition-shadow">
+                                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">
+                                    {index + 1}
+                                  </div>
+                                  <p className="text-gray-800 flex-1 leading-relaxed font-medium">{rec}</p>
+                                </li>
+                              ))}
+                            </ul>
+                          ) : (
+                            <div className="bg-white p-4 rounded-lg border border-green-100">
+                              <p className="text-gray-700 text-center">
+                                {language === 'ms' 
+                                  ? `${recommendationsCount || 0} cadangan tersedia`
+                                  : `${recommendationsCount || 0} recommendations available`}
+                              </p>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Analysis Data */}
                   {fullReportData.analysisData && (
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">
+                      <h3 className="text-xl font-black text-gray-900 mb-6">
                         {language === 'ms' ? 'Data Analisis Terperinci' : 'Detailed Analysis Data'}
                       </h3>
-                      <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border border-gray-200">
-                        <div className="overflow-x-auto">
-                          <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-white p-4 rounded-lg border border-gray-300">
-                            {JSON.stringify(fullReportData.analysisData, null, 2)}
-                          </pre>
-                        </div>
+                      <div className="space-y-6">
+                        {(() => {
+                          const data = fullReportData.analysisData;
+                          
+                          // Format soil analysis data
+                          if (data.ph !== undefined || data.nitrogen !== undefined || data.phosphorus !== undefined || data.potassium !== undefined) {
+                            return (
+                              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                                  {language === 'ms' ? 'Nilai Nutrien Tanah' : 'Soil Nutrient Values'}
+                                </h4>
+                                <div className="overflow-x-auto">
+                                  <table className="w-full">
+                                    <thead>
+                                      <tr className="bg-gray-50">
+                                        <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                          {language === 'ms' ? 'Parameter' : 'Parameter'}
+                                        </th>
+                                        <th className="px-4 py-3 text-right text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                          {language === 'ms' ? 'Nilai' : 'Value'}
+                                        </th>
+                                        <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                          {language === 'ms' ? 'Status' : 'Status'}
+                                        </th>
+                                      </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                      {data.ph !== undefined && (
+                                        <tr className="hover:bg-gray-50">
+                                          <td className="px-4 py-3 text-sm font-medium text-gray-900">pH</td>
+                                          <td className="px-4 py-3 text-sm text-gray-700 text-right font-semibold">{data.ph.toFixed(2)}</td>
+                                          <td className="px-4 py-3 text-sm text-center">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                              data.ph >= 5.0 && data.ph <= 6.5 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : data.ph >= 4.5 && data.ph <= 7.0
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                              {data.ph >= 5.0 && data.ph <= 6.5 
+                                                ? (language === 'ms' ? 'Optimal' : 'Optimal')
+                                                : data.ph >= 4.5 && data.ph <= 7.0
+                                                ? (language === 'ms' ? 'Boleh Diterima' : 'Acceptable')
+                                                : (language === 'ms' ? 'Perlu Perhatian' : 'Needs Attention')}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      )}
+                                      {data.nitrogen !== undefined && (
+                                        <tr className="hover:bg-gray-50">
+                                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {language === 'ms' ? 'Nitrogen (N)' : 'Nitrogen (N)'}
+                                          </td>
+                                          <td className="px-4 py-3 text-sm text-gray-700 text-right font-semibold">{data.nitrogen.toFixed(2)}</td>
+                                          <td className="px-4 py-3 text-sm text-center">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                              data.nitrogen >= 2.0 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : data.nitrogen >= 1.5
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                              {data.nitrogen >= 2.0 
+                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                : data.nitrogen >= 1.5
+                                                ? (language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      )}
+                                      {data.phosphorus !== undefined && (
+                                        <tr className="hover:bg-gray-50">
+                                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {language === 'ms' ? 'Fosforus (P)' : 'Phosphorus (P)'}
+                                          </td>
+                                          <td className="px-4 py-3 text-sm text-gray-700 text-right font-semibold">{data.phosphorus.toFixed(2)}</td>
+                                          <td className="px-4 py-3 text-sm text-center">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                              data.phosphorus >= 0.15 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : data.phosphorus >= 0.10
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                              {data.phosphorus >= 0.15 
+                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                : data.phosphorus >= 0.10
+                                                ? (language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      )}
+                                      {data.potassium !== undefined && (
+                                        <tr className="hover:bg-gray-50">
+                                          <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                            {language === 'ms' ? 'Kalium (K)' : 'Potassium (K)'}
+                                          </td>
+                                          <td className="px-4 py-3 text-sm text-gray-700 text-right font-semibold">{data.potassium.toFixed(2)}</td>
+                                          <td className="px-4 py-3 text-sm text-center">
+                                            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                                              data.potassium >= 0.80 
+                                                ? 'bg-green-100 text-green-800' 
+                                                : data.potassium >= 0.60
+                                                ? 'bg-yellow-100 text-yellow-800'
+                                                : 'bg-red-100 text-red-800'
+                                            }`}>
+                                              {data.potassium >= 0.80 
+                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                : data.potassium >= 0.60
+                                                ? (language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      )}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            );
+                          }
+                          
+                          // Format other structured data
+                          if (typeof data === 'object' && data !== null) {
+                            const entries = Object.entries(data);
+                            const sections: React.ReactElement[] = [];
+                            
+                            entries.forEach(([key, value]) => {
+                              // Skip already displayed fields
+                              if (['ph', 'nitrogen', 'phosphorus', 'potassium', 'recommendations', 'recommendationsMs', 'summary'].includes(key)) {
+                                return;
+                              }
+                              
+                              // Format MPOB standards as a special table
+                              if (key === 'mpoStandards' || key === 'mpo_standards' || key === 'mpobStandards') {
+                                const standards = value as any;
+                                if (standards && typeof standards === 'object') {
+                                  sections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                                        {language === 'ms' ? 'Piawaian MPOB' : 'MPOB Standards'}
+                                      </h4>
+                                      <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                          <thead>
+                                            <tr className="bg-gray-50">
+                                              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                                {language === 'ms' ? 'Parameter' : 'Parameter'}
+                                              </th>
+                                              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                                {language === 'ms' ? 'Minimum' : 'Minimum'}
+                                              </th>
+                                              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                                {language === 'ms' ? 'Maksimum' : 'Maximum'}
+                                              </th>
+                                              <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 border-b border-gray-200">
+                                                {language === 'ms' ? 'Optimal' : 'Optimal'}
+                                              </th>
+                                            </tr>
+                                          </thead>
+                                          <tbody className="divide-y divide-gray-100">
+                                            {Object.entries(standards).map(([param, range]: [string, any]) => (
+                                              <tr key={param} className="hover:bg-gray-50">
+                                                <td className="px-4 py-3 text-sm font-medium text-gray-900 uppercase">
+                                                  {param}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-700 text-center font-semibold">
+                                                  {range?.min !== undefined ? range.min.toFixed(2) : '-'}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-700 text-center font-semibold">
+                                                  {range?.max !== undefined ? range.max.toFixed(2) : '-'}
+                                                </td>
+                                                <td className="px-4 py-3 text-sm text-gray-700 text-center font-semibold">
+                                                  {range?.optimal !== undefined ? range.optimal.toFixed(2) : '-'}
+                                                </td>
+                                              </tr>
+                                            ))}
+                                          </tbody>
+                                        </table>
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                                return;
+                              }
+                              
+                              // Format arrays as lists
+                              if (Array.isArray(value)) {
+                                if (value.length > 0) {
+                                  sections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                        {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+                                      </h4>
+                                      <ul className="space-y-3">
+                                        {value.map((item: any, idx: number) => (
+                                          <li key={idx} className="flex items-start gap-3 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                            <span className="text-green-600 font-bold mt-1 text-lg">•</span>
+                                            <span className="text-gray-800 flex-1 font-medium">
+                                              {typeof item === 'object' && item !== null
+                                                ? Object.entries(item).map(([k, v]) => (
+                                                    <div key={k} className="mb-1 last:mb-0">
+                                                      <span className="font-semibold capitalize">{k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}: </span>
+                                                      <span>{String(v)}</span>
+                                                    </div>
+                                                  ))
+                                                : String(item)}
+                                            </span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  );
+                                }
+                              }
+                              // Format objects as nested sections
+                              else if (typeof value === 'object' && value !== null) {
+                                const objValue = value as Record<string, any>;
+                                const objEntries = Object.entries(objValue);
+                                
+                                if (objEntries.length > 0) {
+                                  sections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                        {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+                                      </h4>
+                                      <div className="space-y-3">
+                                        {objEntries.map(([subKey, subValue]) => (
+                                          <div key={subKey} className="flex justify-between items-start py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                            <span className="text-sm font-semibold text-gray-700 capitalize">
+                                              {subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}:
+                                            </span>
+                                            <span className="text-sm text-gray-900 font-bold text-right ml-4">
+                                              {typeof subValue === 'object' && subValue !== null
+                                                ? JSON.stringify(subValue, null, 2)
+                                                : String(subValue)}
+                                            </span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  );
+                                }
+                              }
+                              // Format simple key-value pairs
+                              else if (value !== null && value !== undefined) {
+                                sections.push(
+                                  <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                    <div className="flex justify-between items-center py-2 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                      <span className="text-sm font-semibold text-gray-700 capitalize">
+                                        {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}:
+                                      </span>
+                                      <span className="text-sm text-gray-900 font-bold">
+                                        {String(value)}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            });
+                            
+                            return sections.length > 0 ? sections : null;
+                          }
+                          
+                          // Fallback to formatted JSON
+                          return (
+                            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                              <div className="overflow-x-auto">
+                                <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono bg-gray-50 p-4 rounded-lg border border-gray-300">
+                                  {JSON.stringify(data, null, 2)}
+                                </pre>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
                   )}
