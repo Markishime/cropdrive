@@ -927,30 +927,60 @@ export default function ReportsPage() {
                             const data = analysisData;
                             const allSections: React.ReactElement[] = [];
                           
-                          // Helper function to recursively format nested objects/values as readable text
-                          const formatValue = (val: any, depth: number = 0): string => {
+                          // Helper function to convert key names to readable labels
+                          const formatKeyName = (key: string): string => {
+                            return key
+                              .replace(/([A-Z])/g, ' $1') // Add space before capital letters
+                              .replace(/_/g, ' ') // Replace underscores with spaces
+                              .replace(/\b\w/g, (char) => char.toUpperCase()) // Capitalize first letter of each word
+                              .trim();
+                          };
+
+                          // Helper function to format values as readable sentences
+                          const formatValueAsSentence = (key: string, val: any, depth: number = 0): string => {
                             if (val === null || val === undefined) return '';
-                            if (typeof val === 'string') return val;
-                            if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+                            if (typeof val === 'string') {
+                              // If it's already a sentence, return as is
+                              if (val.length > 20 && (val.includes('.') || val.includes(','))) {
+                                return val;
+                              }
+                              return val;
+                            }
+                            if (typeof val === 'number') {
+                              // Format numbers with appropriate precision
+                              if (Number.isInteger(val)) return val.toString();
+                              return val.toFixed(2);
+                            }
+                            if (typeof val === 'boolean') {
+                              return val ? 'Yes' : 'No';
+                            }
                             if (Array.isArray(val)) {
                               if (val.length === 0) return '';
-                              return val.map((item, idx) => {
+                              // For arrays, create a sentence
+                              const items = val.map((item, idx) => {
                                 if (typeof item === 'object' && item !== null) {
-                                  const formatted = formatValue(item, depth + 1);
-                                  return formatted ? `${idx + 1}. ${formatted}` : '';
+                                  return formatValueAsSentence('', item, depth + 1);
                                 }
-                                return `${idx + 1}. ${String(item)}`;
-                              }).filter(Boolean).join('; ');
+                                return String(item);
+                              }).filter(Boolean);
+                              if (items.length === 1) return items[0];
+                              if (items.length === 2) return `${items[0]} and ${items[1]}`;
+                              return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
                             }
                             if (typeof val === 'object' && val !== null) {
-                              if (depth > 2) return '[Nested Object]'; // Prevent infinite recursion
+                              if (depth > 2) return '[Additional Details]'; // Prevent infinite recursion
                               const entries = Object.entries(val);
                               if (entries.length === 0) return '';
-                              return entries.map(([k, v]) => {
-                                const keyName = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase();
-                                const formatted = formatValue(v, depth + 1);
-                                return formatted ? `${keyName}: ${formatted}` : '';
-                              }).filter(Boolean).join(', ');
+                              // Create a readable sentence from object properties
+                              const parts = entries.map(([k, v]) => {
+                                const keyLabel = formatKeyName(k);
+                                const valueStr = formatValueAsSentence(k, v, depth + 1);
+                                if (valueStr) {
+                                  return `${keyLabel} is ${valueStr}`;
+                                }
+                                return '';
+                              }).filter(Boolean);
+                              return parts.join('. ') + (parts.length > 0 ? '.' : '');
                             }
                             return String(val);
                           };
@@ -1254,77 +1284,171 @@ export default function ReportsPage() {
                               // Format arrays as lists with readable sentences
                               if (Array.isArray(value)) {
                                 if (value.length > 0) {
-                                  const formatArrayItem = (item: any): string => {
+                                  const formatArrayItem = (item: any, idx: number): React.ReactNode => {
                                     if (typeof item === 'object' && item !== null) {
-                                      // Convert object to readable sentence using recursive formatter
-                                      return formatValue(item);
+                                      // If it's an object, format it as a structured item
+                                      const entries = Object.entries(item);
+                                      if (entries.length > 0) {
+                                        return (
+                                          <div className="space-y-2">
+                                            {entries.map(([k, v]) => {
+                                              const itemKeyLabel = formatKeyName(k);
+                                              const itemValue = formatValueAsSentence(k, v);
+                                              return (
+                                                <div key={k} className="pl-4 border-l-2 border-green-200">
+                                                  <p className="text-gray-800 leading-relaxed">
+                                                    <span className="font-semibold text-gray-900">{itemKeyLabel}: </span>
+                                                    <span className="font-medium">{itemValue || String(v)}</span>
+                                                  </p>
+                                                </div>
+                                              );
+                                            })}
+                                          </div>
+                                        );
+                                      }
+                                      return formatValueAsSentence('', item);
                                     }
-                                    return String(item);
+                                    return <span>{String(item)}</span>;
                                   };
 
                                   allSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
-                                        {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
+                                    <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-300">
+                                        {formatKeyName(key)}
                                       </h4>
-                                      <ul className="space-y-3">
+                                      <ol className="space-y-4">
                                         {value.map((item: any, idx: number) => (
-                                          <li key={idx} className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                            <span className="text-green-600 font-bold mt-1 text-lg flex-shrink-0">•</span>
-                                            <span className="text-gray-800 flex-1 font-medium leading-relaxed">
-                                              {formatArrayItem(item)}
+                                          <li key={idx} className="flex items-start gap-4 bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                                            <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">
+                                              {idx + 1}
                                             </span>
+                                            <div className="flex-1 text-gray-800 font-medium leading-relaxed">
+                                              {formatArrayItem(item, idx)}
+                                            </div>
                                           </li>
                                         ))}
-                                      </ul>
+                                      </ol>
                                     </div>
                                   );
                                 }
                               }
-                              // Format objects as nested sections with readable sentences
+                              // Format objects as nested sections with readable sentences and proper structure
                               else if (typeof value === 'object' && value !== null) {
                                 const objValue = value as Record<string, any>;
                                 const objEntries = Object.entries(objValue);
                                 
                                 if (objEntries.length > 0) {
-                                  // Use the recursive formatValue function defined above
-                                  const formatNestedValue = (val: any): string => formatValue(val);
-
-                                  allSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
-                                        {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
-                                      </h4>
-                                      <div className="space-y-3">
-                                        {objEntries.map(([subKey, subValue]) => {
-                                          const keyLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
-                                          const formattedValue = formatNestedValue(subValue);
-                                          
-                                          return (
-                                            <div key={subKey} className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                              <p className="text-gray-800 leading-relaxed">
-                                                <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                                <span className="font-medium">{formattedValue}</span>
-                                              </p>
-                                            </div>
-                                          );
-                                        })}
-                                      </div>
-                                    </div>
+                                  // Check if this looks like tabular data (all values are numbers or similar types)
+                                  const isTabularData = objEntries.every(([_, v]) => 
+                                    typeof v === 'number' || 
+                                    typeof v === 'string' || 
+                                    (typeof v === 'object' && v !== null && Object.keys(v).length <= 3)
                                   );
+
+                                  if (isTabularData && objEntries.length > 2) {
+                                    // Format as a table for better readability
+                                    allSections.push(
+                                      <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                          {formatKeyName(key)}
+                                        </h4>
+                                        <div className="overflow-x-auto">
+                                          <table className="w-full">
+                                            <thead>
+                                              <tr className="bg-gradient-to-r from-green-50 to-emerald-50">
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b-2 border-green-200">
+                                                  {language === 'ms' ? 'Parameter' : 'Parameter'}
+                                                </th>
+                                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 border-b-2 border-green-200">
+                                                  {language === 'ms' ? 'Nilai' : 'Value'}
+                                                </th>
+                                              </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                              {objEntries.map(([subKey, subValue]) => {
+                                                const keyLabel = formatKeyName(subKey);
+                                                let displayValue: React.ReactNode;
+                                                
+                                                if (typeof subValue === 'object' && subValue !== null) {
+                                                  // If it's an object, show its properties
+                                                  displayValue = (
+                                                    <div className="space-y-1">
+                                                      {Object.entries(subValue).map(([k, v]) => (
+                                                        <div key={k} className="text-sm">
+                                                          <span className="font-medium text-gray-700">{formatKeyName(k)}: </span>
+                                                          <span className="text-gray-900">
+                                                            {typeof v === 'number' ? (Number.isInteger(v) ? v : v.toFixed(2)) : String(v)}
+                                                          </span>
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  );
+                                                } else {
+                                                  displayValue = (
+                                                    <span className="font-semibold text-gray-900">
+                                                      {typeof subValue === 'number' 
+                                                        ? (Number.isInteger(subValue) ? subValue : subValue.toFixed(2))
+                                                        : String(subValue)}
+                                                    </span>
+                                                  );
+                                                }
+                                                
+                                                return (
+                                                  <tr key={subKey} className="hover:bg-gray-50 transition-colors">
+                                                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                                                      {keyLabel}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-gray-800">
+                                                      {displayValue}
+                                                    </td>
+                                                  </tr>
+                                                );
+                                              })}
+                                            </tbody>
+                                          </table>
+                                        </div>
+                                      </div>
+                                    );
+                                  } else {
+                                    // Format as readable paragraphs with sentences
+                                    allSections.push(
+                                      <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                        <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                          {formatKeyName(key)}
+                                        </h4>
+                                        <div className="space-y-4">
+                                          {objEntries.map(([subKey, subValue]) => {
+                                            const keyLabel = formatKeyName(subKey);
+                                            const sentence = formatValueAsSentence(subKey, subValue);
+                                            
+                                            if (!sentence) return null;
+                                            
+                                            return (
+                                              <div key={subKey} className="bg-white py-3 px-4 rounded-lg border border-gray-100 shadow-sm">
+                                                <p className="text-gray-800 leading-relaxed text-base">
+                                                  <span className="font-semibold text-gray-900">{keyLabel}: </span>
+                                                  <span className="font-medium">{sentence}</span>
+                                                </p>
+                                              </div>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
                                 }
                               }
                               // Format simple key-value pairs as readable sentences
                               else if (value !== null && value !== undefined) {
-                                const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
-                                const formattedValue = formatValue(value);
-                                if (formattedValue) {
+                                const keyLabel = formatKeyName(key);
+                                const sentence = formatValueAsSentence(key, value);
+                                if (sentence) {
                                   allSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <p className="text-gray-800 leading-relaxed">
-                                          <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                          <span className="font-medium">{formattedValue}</span>
+                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                      <div className="bg-gradient-to-r from-gray-50 to-white py-4 px-5 rounded-lg border border-gray-100">
+                                        <p className="text-gray-800 leading-relaxed text-base">
+                                          <span className="font-semibold text-gray-900">{keyLabel}: </span>
+                                          <span className="font-medium">{sentence}</span>
                                         </p>
                                       </div>
                                     </div>
@@ -1339,52 +1463,67 @@ export default function ReportsPage() {
                             return allSections;
                           }
                           
-                          // Fallback: Format all data as readable sections
+                          // Fallback: Format all data as readable sections with professional formatting
                           if (typeof data === 'object' && data !== null) {
                             const entries = Object.entries(data);
                             const fallbackSections: React.ReactElement[] = [];
                             
                             entries.forEach(([key, value]) => {
-                              const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                              const keyLabel = formatKeyName(key);
                               
                               if (Array.isArray(value) && value.length > 0) {
                                 fallbackSections.push(
-                                  <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                  <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
+                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-300">
                                       {keyLabel}
                                     </h4>
-                                    <ul className="space-y-3">
+                                    <ol className="space-y-4">
                                       {value.map((item: any, idx: number) => (
-                                        <li key={idx} className="flex items-start gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                                          <span className="text-green-600 font-bold mt-1 text-lg flex-shrink-0">•</span>
-                                          <span className="text-gray-800 flex-1 font-medium leading-relaxed">
-                                            {typeof item === 'object' && item !== null
-                                              ? formatValue(item)
-                                              : String(item)}
+                                        <li key={idx} className="flex items-start gap-4 bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                                          <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">
+                                            {idx + 1}
                                           </span>
+                                          <div className="flex-1 text-gray-800 font-medium leading-relaxed">
+                                            {typeof item === 'object' && item !== null
+                                              ? (() => {
+                                                  const itemEntries = Object.entries(item);
+                                                  return (
+                                                    <div className="space-y-2">
+                                                      {itemEntries.map(([k, v]) => (
+                                                        <div key={k} className="pl-4 border-l-2 border-blue-200">
+                                                          <p className="text-gray-800 leading-relaxed">
+                                                            <span className="font-semibold text-gray-900">{formatKeyName(k)}: </span>
+                                                            <span className="font-medium">{formatValueAsSentence(k, v)}</span>
+                                                          </p>
+                                                        </div>
+                                                      ))}
+                                                    </div>
+                                                  );
+                                                })()
+                                              : String(item)}
+                                          </div>
                                         </li>
                                       ))}
-                                    </ul>
+                                    </ol>
                                   </div>
                                 );
                               } else if (typeof value === 'object' && value !== null) {
                                 const objEntries = Object.entries(value);
                                 if (objEntries.length > 0) {
                                   fallbackSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                    <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
                                         {keyLabel}
                                       </h4>
-                                      <div className="space-y-3">
+                                      <div className="space-y-4">
                                         {objEntries.map(([subKey, subValue]) => {
-                                          const subKeyLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                                          const subKeyLabel = formatKeyName(subKey);
+                                          const sentence = formatValueAsSentence(subKey, subValue);
                                           return (
-                                            <div key={subKey} className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                              <p className="text-gray-800 leading-relaxed">
-                                                <span className="font-semibold text-gray-900 capitalize">{subKeyLabel}: </span>
-                                                <span className="font-medium">
-                                                  {formatValue(subValue)}
-                                                </span>
+                                            <div key={subKey} className="bg-white py-3 px-4 rounded-lg border border-gray-100 shadow-sm">
+                                              <p className="text-gray-800 leading-relaxed text-base">
+                                                <span className="font-semibold text-gray-900">{subKeyLabel}: </span>
+                                                <span className="font-medium">{sentence || String(subValue)}</span>
                                               </p>
                                             </div>
                                           );
@@ -1394,14 +1533,14 @@ export default function ReportsPage() {
                                   );
                                 }
                               } else if (value !== null && value !== undefined) {
-                                const formattedValue = formatValue(value);
-                                if (formattedValue) {
+                                const sentence = formatValueAsSentence(key, value);
+                                if (sentence) {
                                   fallbackSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                        <p className="text-gray-800 leading-relaxed">
-                                          <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                          <span className="font-medium">{formattedValue}</span>
+                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                      <div className="bg-gradient-to-r from-gray-50 to-white py-4 px-5 rounded-lg border border-gray-100">
+                                        <p className="text-gray-800 leading-relaxed text-base">
+                                          <span className="font-semibold text-gray-900">{keyLabel}: </span>
+                                          <span className="font-medium">{sentence}</span>
                                         </p>
                                       </div>
                                     </div>
@@ -1411,8 +1550,8 @@ export default function ReportsPage() {
                             });
                             
                             return fallbackSections.length > 0 ? fallbackSections : (
-                              <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                <p className="text-gray-600 text-center">
+                              <div className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                <p className="text-gray-600 text-center text-lg">
                                   {language === 'ms' ? 'Tiada data tambahan tersedia' : 'No additional data available'}
                                 </p>
                               </div>
@@ -1446,30 +1585,55 @@ export default function ReportsPage() {
                       'prompt', 'promptUsed', 'prompt_used', 'systemPrompt', 'userPrompt'
                     ]);
                     
-                    // Helper function to recursively format nested objects/values as readable text
-                    const formatValueForRoot = (val: any, depth: number = 0): string => {
+                    // Helper function to format values as readable sentences (reuse the same logic)
+                    const formatKeyNameForRoot = (key: string): string => {
+                      return key
+                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/_/g, ' ')
+                        .replace(/\b\w/g, (char) => char.toUpperCase())
+                        .trim();
+                    };
+
+                    const formatValueForRoot = (key: string, val: any, depth: number = 0): string => {
                       if (val === null || val === undefined) return '';
-                      if (typeof val === 'string') return val;
-                      if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+                      if (typeof val === 'string') {
+                        if (val.length > 20 && (val.includes('.') || val.includes(','))) {
+                          return val;
+                        }
+                        return val;
+                      }
+                      if (typeof val === 'number') {
+                        if (Number.isInteger(val)) return val.toString();
+                        return val.toFixed(2);
+                      }
+                      if (typeof val === 'boolean') {
+                        return val ? 'Yes' : 'No';
+                      }
                       if (Array.isArray(val)) {
                         if (val.length === 0) return '';
-                        return val.map((item, idx) => {
+                        const items = val.map((item) => {
                           if (typeof item === 'object' && item !== null) {
-                            const formatted = formatValueForRoot(item, depth + 1);
-                            return formatted ? `${idx + 1}. ${formatted}` : '';
+                            return formatValueForRoot('', item, depth + 1);
                           }
-                          return `${idx + 1}. ${String(item)}`;
-                        }).filter(Boolean).join('; ');
+                          return String(item);
+                        }).filter(Boolean);
+                        if (items.length === 1) return items[0];
+                        if (items.length === 2) return `${items[0]} and ${items[1]}`;
+                        return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
                       }
                       if (typeof val === 'object' && val !== null) {
-                        if (depth > 2) return '[Nested Object]'; // Prevent infinite recursion
+                        if (depth > 2) return '[Additional Details]';
                         const entries = Object.entries(val);
                         if (entries.length === 0) return '';
-                        return entries.map(([k, v]) => {
-                          const keyName = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase();
-                          const formatted = formatValueForRoot(v, depth + 1);
-                          return formatted ? `${keyName}: ${formatted}` : '';
-                        }).filter(Boolean).join(', ');
+                        const parts = entries.map(([k, v]) => {
+                          const keyLabel = formatKeyNameForRoot(k);
+                          const valueStr = formatValueForRoot(k, v, depth + 1);
+                          if (valueStr) {
+                            return `${keyLabel} is ${valueStr}`;
+                          }
+                          return '';
+                        }).filter(Boolean);
+                        return parts.join('. ') + (parts.length > 0 ? '.' : '');
                       }
                       return String(val);
                     };
@@ -1495,62 +1659,90 @@ export default function ReportsPage() {
                         <h3 className="text-xl font-black text-gray-900 mb-6">
                           {language === 'ms' ? 'Data Analisis Tambahan' : 'Additional Analysis Data'}
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-6">
                           {rootAnalysisFields.map(([key, value]) => {
-                            const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                            const keyLabel = formatKeyNameForRoot(key);
                             
                             if (Array.isArray(value) && value.length > 0) {
                               return (
-                                <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
+                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-300">
                                     {keyLabel}
                                   </h4>
-                                  <ul className="space-y-2">
+                                  <ol className="space-y-4">
                                     {value.map((item: any, idx: number) => (
-                                      <li key={idx} className="flex items-start gap-3 bg-gray-50 p-3 rounded-lg">
-                                        <span className="text-green-600 font-bold mt-1 flex-shrink-0">•</span>
-                                        <span className="text-gray-800 flex-1 font-medium">
-                                          {typeof item === 'object' && item !== null
-                                            ? formatValueForRoot(item)
-                                            : String(item)}
+                                      <li key={idx} className="flex items-start gap-4 bg-white p-4 rounded-lg border border-blue-100 shadow-sm">
+                                        <span className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 text-white flex items-center justify-center font-bold text-sm mt-0.5">
+                                          {idx + 1}
                                         </span>
+                                        <div className="flex-1 text-gray-800 font-medium leading-relaxed">
+                                          {typeof item === 'object' && item !== null
+                                            ? (() => {
+                                                const itemEntries = Object.entries(item);
+                                                return (
+                                                  <div className="space-y-2">
+                                                    {itemEntries.map(([k, v]) => (
+                                                      <div key={k} className="pl-4 border-l-2 border-blue-200">
+                                                        <p className="text-gray-800 leading-relaxed">
+                                                          <span className="font-semibold text-gray-900">{formatKeyNameForRoot(k)}: </span>
+                                                          <span className="font-medium">{formatValueForRoot(k, v)}</span>
+                                                        </p>
+                                                      </div>
+                                                    ))}
+                                                  </div>
+                                                );
+                                              })()
+                                            : String(item)}
+                                        </div>
                                       </li>
                                     ))}
-                                  </ul>
+                                  </ol>
                                 </div>
                               );
                             }
                             
                             if (typeof value === 'object' && value !== null) {
+                              const objEntries = Object.entries(value);
+                              if (objEntries.length > 0) {
+                                return (
+                                  <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                      {keyLabel}
+                                    </h4>
+                                    <div className="space-y-4">
+                                      {objEntries.map(([subKey, subValue]) => {
+                                        const subKeyLabel = formatKeyNameForRoot(subKey);
+                                        const sentence = formatValueForRoot(subKey, subValue);
+                                        return (
+                                          <div key={subKey} className="bg-white py-3 px-4 rounded-lg border border-gray-100 shadow-sm">
+                                            <p className="text-gray-800 leading-relaxed text-base">
+                                              <span className="font-semibold text-gray-900">{subKeyLabel}: </span>
+                                              <span className="font-medium">{sentence || String(subValue)}</span>
+                                            </p>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              }
+                            }
+                            
+                            const sentence = formatValueForRoot(key, value);
+                            if (sentence) {
                               return (
-                                <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
-                                    {keyLabel}
-                                  </h4>
-                                  <div className="space-y-2">
-                                    {Object.entries(value).map(([subKey, subValue]) => (
-                                      <div key={subKey} className="bg-gray-50 p-3 rounded-lg">
-                                        <p className="text-gray-800">
-                                          <span className="font-semibold capitalize">{subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}: </span>
-                                          <span className="font-medium">{formatValueForRoot(subValue)}</span>
-                                        </p>
-                                      </div>
-                                    ))}
+                                <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                  <div className="bg-gradient-to-r from-gray-50 to-white py-4 px-5 rounded-lg border border-gray-100">
+                                    <p className="text-gray-800 leading-relaxed text-base">
+                                      <span className="font-semibold text-gray-900">{keyLabel}: </span>
+                                      <span className="font-medium">{sentence}</span>
+                                    </p>
                                   </div>
                                 </div>
                               );
                             }
                             
-                            return (
-                              <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                <div className="bg-gray-50 p-4 rounded-lg">
-                                  <p className="text-gray-800">
-                                    <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                    <span className="font-medium">{formatValueForRoot(value)}</span>
-                                  </p>
-                                </div>
-                              </div>
-                            );
+                            return null;
                           })}
                         </div>
                       </div>
