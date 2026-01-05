@@ -927,6 +927,34 @@ export default function ReportsPage() {
                             const data = analysisData;
                             const allSections: React.ReactElement[] = [];
                           
+                          // Helper function to recursively format nested objects/values as readable text
+                          const formatValue = (val: any, depth: number = 0): string => {
+                            if (val === null || val === undefined) return '';
+                            if (typeof val === 'string') return val;
+                            if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+                            if (Array.isArray(val)) {
+                              if (val.length === 0) return '';
+                              return val.map((item, idx) => {
+                                if (typeof item === 'object' && item !== null) {
+                                  const formatted = formatValue(item, depth + 1);
+                                  return formatted ? `${idx + 1}. ${formatted}` : '';
+                                }
+                                return `${idx + 1}. ${String(item)}`;
+                              }).filter(Boolean).join('; ');
+                            }
+                            if (typeof val === 'object' && val !== null) {
+                              if (depth > 2) return '[Nested Object]'; // Prevent infinite recursion
+                              const entries = Object.entries(val);
+                              if (entries.length === 0) return '';
+                              return entries.map(([k, v]) => {
+                                const keyName = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase();
+                                const formatted = formatValue(v, depth + 1);
+                                return formatted ? `${keyName}: ${formatted}` : '';
+                              }).filter(Boolean).join(', ');
+                            }
+                            return String(val);
+                          };
+                          
                           // Helper function to format text as report with proper headers, sub-headers, and bullets
                           const formatTextAsReport = (text: string) => {
                             return text.split('\n').map((line: string, idx: number) => {
@@ -1138,7 +1166,7 @@ export default function ReportsPage() {
                                 'ph', 'nitrogen', 'phosphorus', 'potassium', 'recommendations', 'recommendationsMs', 
                                 'summary', 'results', 'report', 'analysisResults', 'formattedReport', 'fullReport',
                                 // Prompt and AI-related fields (should not be shown)
-                                'prompt', 'systemPrompt', 'userPrompt', 'messages', 'conversation', 'chatHistory',
+                                'prompt', 'promptUsed', 'prompt_used', 'systemPrompt', 'userPrompt', 'messages', 'conversation', 'chatHistory',
                                 'apiKey', 'model', 'temperature', 'maxTokens', 'topP', 'frequencyPenalty', 'presencePenalty',
                                 // Internal/technical fields
                                 'internal', 'debug', 'metadata', '_metadata', '_id', '__v', 'version', 'schema',
@@ -1228,12 +1256,8 @@ export default function ReportsPage() {
                                 if (value.length > 0) {
                                   const formatArrayItem = (item: any): string => {
                                     if (typeof item === 'object' && item !== null) {
-                                      // Convert object to readable sentence
-                                      const parts = Object.entries(item).map(([k, v]) => {
-                                        const keyName = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase();
-                                        return `${keyName}: ${String(v)}`;
-                                      });
-                                      return parts.join(', ');
+                                      // Convert object to readable sentence using recursive formatter
+                                      return formatValue(item);
                                     }
                                     return String(item);
                                   };
@@ -1263,24 +1287,8 @@ export default function ReportsPage() {
                                 const objEntries = Object.entries(objValue);
                                 
                                 if (objEntries.length > 0) {
-                                  const formatValue = (val: any): string => {
-                                    if (Array.isArray(val)) {
-                                      return val.map((v, i) => {
-                                        if (typeof v === 'object' && v !== null) {
-                                          return Object.entries(v).map(([k, vv]) => 
-                                            `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(vv)}`
-                                          ).join(', ');
-                                        }
-                                        return String(v);
-                                      }).join('; ');
-                                    }
-                                    if (typeof val === 'object' && val !== null) {
-                                      return Object.entries(val).map(([k, v]) => 
-                                        `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(v)}`
-                                      ).join(', ');
-                                    }
-                                    return String(val);
-                                  };
+                                  // Use the recursive formatValue function defined above
+                                  const formatNestedValue = (val: any): string => formatValue(val);
 
                                   allSections.push(
                                     <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
@@ -1290,7 +1298,7 @@ export default function ReportsPage() {
                                       <div className="space-y-3">
                                         {objEntries.map(([subKey, subValue]) => {
                                           const keyLabel = subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
-                                          const formattedValue = formatValue(subValue);
+                                          const formattedValue = formatNestedValue(subValue);
                                           
                                           return (
                                             <div key={subKey} className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
@@ -1309,16 +1317,19 @@ export default function ReportsPage() {
                               // Format simple key-value pairs as readable sentences
                               else if (value !== null && value !== undefined) {
                                 const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
-                                allSections.push(
-                                  <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                    <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                      <p className="text-gray-800 leading-relaxed">
-                                        <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                        <span className="font-medium">{String(value)}</span>
-                                      </p>
+                                const formattedValue = formatValue(value);
+                                if (formattedValue) {
+                                  allSections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                        <p className="text-gray-800 leading-relaxed">
+                                          <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
+                                          <span className="font-medium">{formattedValue}</span>
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                );
+                                  );
+                                }
                               }
                             });
                           }
@@ -1348,9 +1359,7 @@ export default function ReportsPage() {
                                           <span className="text-green-600 font-bold mt-1 text-lg flex-shrink-0">•</span>
                                           <span className="text-gray-800 flex-1 font-medium leading-relaxed">
                                             {typeof item === 'object' && item !== null
-                                              ? Object.entries(item).map(([k, v]) => 
-                                                  `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(v)}`
-                                                ).join(', ')
+                                              ? formatValue(item)
                                               : String(item)}
                                           </span>
                                         </li>
@@ -1374,11 +1383,7 @@ export default function ReportsPage() {
                                               <p className="text-gray-800 leading-relaxed">
                                                 <span className="font-semibold text-gray-900 capitalize">{subKeyLabel}: </span>
                                                 <span className="font-medium">
-                                                  {typeof subValue === 'object' && subValue !== null
-                                                    ? Object.entries(subValue).map(([k, v]) => 
-                                                        `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase()}: ${String(v)}`
-                                                      ).join(', ')
-                                                    : String(subValue)}
+                                                  {formatValue(subValue)}
                                                 </span>
                                               </p>
                                             </div>
@@ -1389,16 +1394,19 @@ export default function ReportsPage() {
                                   );
                                 }
                               } else if (value !== null && value !== undefined) {
-                                fallbackSections.push(
-                                  <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                    <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
-                                      <p className="text-gray-800 leading-relaxed">
-                                        <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                        <span className="font-medium">{String(value)}</span>
-                                      </p>
+                                const formattedValue = formatValue(value);
+                                if (formattedValue) {
+                                  fallbackSections.push(
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                      <div className="py-3 px-4 bg-gray-50 rounded-lg border border-gray-100">
+                                        <p className="text-gray-800 leading-relaxed">
+                                          <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
+                                          <span className="font-medium">{formattedValue}</span>
+                                        </p>
+                                      </div>
                                     </div>
-                                  </div>
-                                );
+                                  );
+                                }
                               }
                             });
                             
@@ -1433,8 +1441,38 @@ export default function ReportsPage() {
                     const displayedFields = new Set([
                       'title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsMs',
                       'recommendationsCount', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id',
-                      'createdAt', 'updatedAt', 'timestamp', 'id', 'analysisData'
+                      'createdAt', 'updatedAt', 'timestamp', 'id', 'analysisData',
+                      // Skip prompt-related fields
+                      'prompt', 'promptUsed', 'prompt_used', 'systemPrompt', 'userPrompt'
                     ]);
+                    
+                    // Helper function to recursively format nested objects/values as readable text
+                    const formatValueForRoot = (val: any, depth: number = 0): string => {
+                      if (val === null || val === undefined) return '';
+                      if (typeof val === 'string') return val;
+                      if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+                      if (Array.isArray(val)) {
+                        if (val.length === 0) return '';
+                        return val.map((item, idx) => {
+                          if (typeof item === 'object' && item !== null) {
+                            const formatted = formatValueForRoot(item, depth + 1);
+                            return formatted ? `${idx + 1}. ${formatted}` : '';
+                          }
+                          return `${idx + 1}. ${String(item)}`;
+                        }).filter(Boolean).join('; ');
+                      }
+                      if (typeof val === 'object' && val !== null) {
+                        if (depth > 2) return '[Nested Object]'; // Prevent infinite recursion
+                        const entries = Object.entries(val);
+                        if (entries.length === 0) return '';
+                        return entries.map(([k, v]) => {
+                          const keyName = k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim().toLowerCase();
+                          const formatted = formatValueForRoot(v, depth + 1);
+                          return formatted ? `${keyName}: ${formatted}` : '';
+                        }).filter(Boolean).join(', ');
+                      }
+                      return String(val);
+                    };
                     
                     const rootAnalysisFields = Object.entries(fullReportData || {})
                       .filter(([key, value]) => {
@@ -1473,9 +1511,7 @@ export default function ReportsPage() {
                                         <span className="text-green-600 font-bold mt-1 flex-shrink-0">•</span>
                                         <span className="text-gray-800 flex-1 font-medium">
                                           {typeof item === 'object' && item !== null
-                                            ? Object.entries(item).map(([k, v]) => 
-                                                `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}: ${String(v)}`
-                                              ).join(', ')
+                                            ? formatValueForRoot(item)
                                             : String(item)}
                                         </span>
                                       </li>
@@ -1496,7 +1532,7 @@ export default function ReportsPage() {
                                       <div key={subKey} className="bg-gray-50 p-3 rounded-lg">
                                         <p className="text-gray-800">
                                           <span className="font-semibold capitalize">{subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}: </span>
-                                          <span className="font-medium">{String(subValue)}</span>
+                                          <span className="font-medium">{formatValueForRoot(subValue)}</span>
                                         </p>
                                       </div>
                                     ))}
@@ -1510,7 +1546,7 @@ export default function ReportsPage() {
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                   <p className="text-gray-800">
                                     <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
-                                    <span className="font-medium">{String(value)}</span>
+                                    <span className="font-medium">{formatValueForRoot(value)}</span>
                                   </p>
                                 </div>
                               </div>
