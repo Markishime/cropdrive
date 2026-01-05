@@ -464,21 +464,50 @@ export default function ReportsPage() {
       const reportDoc = await getDoc(doc(db, 'analysis_results', report.id));
       if (reportDoc.exists()) {
         const data = reportDoc.data();
-        // Convert Firestore Timestamps to readable format
-        const processedData: any = {};
-        for (const [key, value] of Object.entries(data)) {
-          if (value && typeof value === 'object' && 'toDate' in value) {
-            // Firestore Timestamp
-            processedData[key] = value.toDate().toISOString();
-          } else if (value && typeof value === 'object' && 'seconds' in value) {
-            // Timestamp with seconds property
-            processedData[key] = new Date(value.seconds * 1000).toISOString();
-          } else {
-            processedData[key] = value;
+        console.log('📄 Raw Firestore data:', data);
+        
+        // Helper function to recursively process Firestore data
+        const processFirestoreValue = (value: any): any => {
+          if (value === null || value === undefined) {
+            return value;
           }
-        }
+          
+          // Handle Firestore Timestamp
+          if (value && typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+            return value.toDate().toISOString();
+          }
+          
+          // Handle Timestamp with seconds property
+          if (value && typeof value === 'object' && 'seconds' in value && typeof value.seconds === 'number') {
+            return new Date(value.seconds * 1000).toISOString();
+          }
+          
+          // Handle arrays
+          if (Array.isArray(value)) {
+            return value.map(item => processFirestoreValue(item));
+          }
+          
+          // Handle nested objects
+          if (typeof value === 'object' && value !== null) {
+            const processed: any = {};
+            for (const [k, v] of Object.entries(value)) {
+              processed[k] = processFirestoreValue(v);
+            }
+            return processed;
+          }
+          
+          // Return primitive values as-is
+          return value;
+        };
+        
+        // Process all data recursively to handle nested structures
+        const processedData = processFirestoreValue(data);
+        console.log('✅ Processed report data:', processedData);
+        console.log('📊 Analysis data:', processedData.analysisData);
+        
         setFullReportData(processedData);
       } else {
+        console.error('❌ Report document does not exist:', report.id);
         toast.error(
           language === 'ms' 
             ? 'Laporan tidak dijumpai' 
@@ -486,7 +515,7 @@ export default function ReportsPage() {
         );
       }
     } catch (error) {
-      console.error('Error fetching full report:', error);
+      console.error('❌ Error fetching full report:', error);
       toast.error(
         language === 'ms' 
           ? 'Ralat memuatkan laporan' 
@@ -855,15 +884,48 @@ export default function ReportsPage() {
                   })()}
 
                   {/* Analysis Results - Formatted Report */}
-                  {fullReportData.analysisData && (
-                    <div>
-                      <h3 className="text-xl font-black text-gray-900 mb-6">
-                        {language === 'ms' ? 'Keputusan Analisis Lengkap' : 'Complete Analysis Results'}
-                      </h3>
-                      <div className="space-y-6">
-                        {(() => {
-                          const data = fullReportData.analysisData;
-                          const allSections: React.ReactElement[] = [];
+                  {(() => {
+                    // Get analysis data from either analysisData field or root level
+                    // Some reports store data in analysisData, others store it at root level
+                    const metadataFields = new Set([
+                      'title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsMs', 
+                      'recommendationsCount', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id', 
+                      'createdAt', 'updatedAt', 'timestamp', 'id', 'user_id'
+                    ]);
+                    
+                    // Check if analysisData exists and has content
+                    const hasAnalysisDataField = fullReportData.analysisData && 
+                      typeof fullReportData.analysisData === 'object' &&
+                      Object.keys(fullReportData.analysisData).length > 0;
+                    
+                    // Check if there are analysis fields at root level
+                    const rootAnalysisFields = Object.keys(fullReportData || {}).filter(key => 
+                      !metadataFields.has(key) && 
+                      fullReportData[key] !== null && 
+                      fullReportData[key] !== undefined &&
+                      fullReportData[key] !== ''
+                    );
+                    
+                    const hasRootAnalysisData = rootAnalysisFields.length > 0;
+                    
+                    // Use analysisData if it exists, otherwise use root level data
+                    const analysisData = hasAnalysisDataField 
+                      ? fullReportData.analysisData 
+                      : (hasRootAnalysisData ? fullReportData : null);
+                    
+                    if (!analysisData || (typeof analysisData === 'object' && Object.keys(analysisData).length === 0)) {
+                      return null;
+                    }
+                    
+                    return (
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900 mb-6">
+                          {language === 'ms' ? 'Keputusan Analisis Lengkap' : 'Complete Analysis Results'}
+                        </h3>
+                        <div className="space-y-6">
+                          {(() => {
+                            const data = analysisData;
+                            const allSections: React.ReactElement[] = [];
                           
                           // Helper function to format text as report with proper headers, sub-headers, and bullets
                           const formatTextAsReport = (text: string) => {
@@ -1360,9 +1422,104 @@ export default function ReportsPage() {
                             </div>
                           );
                         })()}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
+
+                  {/* Additional Root-Level Analysis Data (if not in analysisData) */}
+                  {(() => {
+                    // Check if there are analysis fields at root level that weren't already displayed
+                    const displayedFields = new Set([
+                      'title', 'date', 'status', 'type', 'summary', 'recommendations', 'recommendationsMs',
+                      'recommendationsCount', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id',
+                      'createdAt', 'updatedAt', 'timestamp', 'id', 'analysisData'
+                    ]);
+                    
+                    const rootAnalysisFields = Object.entries(fullReportData || {})
+                      .filter(([key, value]) => {
+                        // Skip already displayed fields
+                        if (displayedFields.has(key)) return false;
+                        // Skip empty values
+                        if (value === null || value === undefined || value === '') return false;
+                        // Skip if it's already in analysisData
+                        if (fullReportData.analysisData && fullReportData.analysisData[key] !== undefined) return false;
+                        // Include objects, arrays, and meaningful strings/numbers
+                        return typeof value === 'object' || 
+                               (typeof value === 'string' && value.length > 0) ||
+                               typeof value === 'number';
+                      });
+                    
+                    if (rootAnalysisFields.length === 0) return null;
+                    
+                    return (
+                      <div>
+                        <h3 className="text-xl font-black text-gray-900 mb-6">
+                          {language === 'ms' ? 'Data Analisis Tambahan' : 'Additional Analysis Data'}
+                        </h3>
+                        <div className="space-y-4">
+                          {rootAnalysisFields.map(([key, value]) => {
+                            const keyLabel = key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim();
+                            
+                            if (Array.isArray(value) && value.length > 0) {
+                              return (
+                                <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                    {keyLabel}
+                                  </h4>
+                                  <ul className="space-y-2">
+                                    {value.map((item: any, idx: number) => (
+                                      <li key={idx} className="flex items-start gap-3 bg-gray-50 p-3 rounded-lg">
+                                        <span className="text-green-600 font-bold mt-1 flex-shrink-0">•</span>
+                                        <span className="text-gray-800 flex-1 font-medium">
+                                          {typeof item === 'object' && item !== null
+                                            ? Object.entries(item).map(([k, v]) => 
+                                                `${k.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}: ${String(v)}`
+                                              ).join(', ')
+                                            : String(item)}
+                                        </span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              );
+                            }
+                            
+                            if (typeof value === 'object' && value !== null) {
+                              return (
+                                <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                  <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                    {keyLabel}
+                                  </h4>
+                                  <div className="space-y-2">
+                                    {Object.entries(value).map(([subKey, subValue]) => (
+                                      <div key={subKey} className="bg-gray-50 p-3 rounded-lg">
+                                        <p className="text-gray-800">
+                                          <span className="font-semibold capitalize">{subKey.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ')}: </span>
+                                          <span className="font-medium">{String(subValue)}</span>
+                                        </p>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            }
+                            
+                            return (
+                              <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                                <div className="bg-gray-50 p-4 rounded-lg">
+                                  <p className="text-gray-800">
+                                    <span className="font-semibold text-gray-900 capitalize">{keyLabel}: </span>
+                                    <span className="font-medium">{String(value)}</span>
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })()}
 
                   {/* Additional Information */}
                   {(fullReportData.fileUrl || fullReportData.file_url || fullReportData.fileURL) && (
