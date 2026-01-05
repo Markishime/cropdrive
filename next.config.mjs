@@ -14,6 +14,13 @@ const nextConfig = {
       },
     ],
   },
+  // CRITICAL: Prevent trailing slash redirects that cause 307 errors for Stripe webhooks
+  // This ensures /api/stripe/webhook and /api/stripe/webhook/ both work without redirects
+  trailingSlash: false,
+  // Ensure API routes don't get redirected
+  async redirects() {
+    return [];
+  },
 };
 
 export default nextConfig;

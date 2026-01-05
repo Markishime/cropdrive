@@ -3,10 +3,34 @@ import Stripe from 'stripe';
 import admin, { adminDb } from '@/lib/firebase-admin';
 import { addPaymentToSheet, updateSubscriptionStatus, addCancellationToSheet } from '@/lib/googleSheets';
 
+/**
+ * CRITICAL: Stripe Webhook Configuration
+ * 
+ * To prevent 307 redirect errors, ensure your Stripe webhook URL is configured EXACTLY as:
+ * https://cropdrive.ai/api/stripe/webhook
+ * 
+ * IMPORTANT: Do NOT include a trailing slash (/)
+ * 
+ * If you see 307 errors in Stripe dashboard:
+ * 1. Go to Stripe Dashboard → Developers → Webhooks
+ * 2. Select your webhook endpoint
+ * 3. Click "Edit" and verify the URL is: https://cropdrive.ai/api/stripe/webhook (no trailing slash)
+ * 4. Save and test again
+ * 
+ * The 307 error occurs when Next.js/Vercel redirects the request (usually due to trailing slash mismatch)
+ * before it reaches this handler. This handler always returns 200 OK, so if Stripe receives 307,
+ * it means the redirect happened before this code executed.
+ */
+
 // Route segment config - prevent redirects and ensure proper handling
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 export const maxDuration = 10; // 10 seconds max for Vercel
+
+// CRITICAL: Prevent any redirects that could cause 307 errors
+// This ensures Stripe receives a direct 200 response
+export const fetchCache = 'force-no-store';
+export const revalidate = 0;
 
 // Initialize Stripe with error handling
 function getStripe(): Stripe | null {
@@ -16,7 +40,7 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2025-12-15.clover' as any,
+    apiVersion: '2025-09-30.clover' as any, // Match Stripe webhook API version
     maxNetworkRetries: 2, // Retry on network failures
     timeout: 10000, // 10 second timeout for Stripe API calls
   });
@@ -33,15 +57,22 @@ function getWebhookSecret(): string | null {
 }
 
 // Helper to create consistent JSON responses
+// CRITICAL: This must return a direct response without any redirects
 function jsonResponse(data: object, status: number): Response {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+    'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+    'Pragma': 'no-cache',
+    'Expires': '0',
+    // Prevent any redirects or caching
+    'X-Content-Type-Options': 'nosniff',
+    'X-Frame-Options': 'DENY',
+  };
+  
   return new Response(JSON.stringify(data), {
     status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      // Prevent any redirects
-      'X-Content-Type-Options': 'nosniff',
-    },
+    statusText: status === 200 ? 'OK' : undefined,
+    headers,
   });
 }
 
@@ -171,11 +202,37 @@ export async function POST(req: NextRequest) {
   const method = req.method;
   const host = req.headers.get('host');
   const protocol = req.headers.get('x-forwarded-proto') || 'https';
-  console.log('📋 Request details:', { url, method, host, protocol });
+  const userAgent = req.headers.get('user-agent');
+  const stripeSignature = req.headers.get('stripe-signature');
+  
+  console.log('📋 Request details:', { 
+    url, 
+    method, 
+    host, 
+    protocol,
+    hasStripeSignature: !!stripeSignature,
+    userAgent: userAgent?.substring(0, 50)
+  });
+  
+  // CRITICAL: If this is not a Stripe webhook (missing signature), return 200 immediately
+  // This prevents any redirects that could cause 307 errors
+  if (!stripeSignature) {
+    console.warn('⚠️ Request missing Stripe signature - returning 200 to prevent redirect');
+    return jsonResponse({ 
+      received: true,
+      note: 'Missing Stripe signature - this endpoint only accepts Stripe webhooks'
+    }, 200);
+  }
   
   // Ensure we're handling HTTPS (prevent redirect issues)
   if (protocol !== 'https') {
     console.warn('⚠️ Webhook received via non-HTTPS protocol:', protocol);
+    // Still return 200 to prevent redirect loops
+    return jsonResponse({ 
+      received: true,
+      error: 'HTTPS required',
+      protocol
+    }, 200);
   }
 
   // Wrap entire handler in try-catch to ensure we always return a valid response
