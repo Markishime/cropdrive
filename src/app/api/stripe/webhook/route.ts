@@ -828,10 +828,21 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   else if (subscription.status === 'active' && planId && userId) {
     const limits = planLimits[planId as keyof typeof planLimits];
     if (limits) {
+      // Get current user data to check if this is an upgrade
+      const userRef = adminDb.collection('users').doc(userId);
+      const userDoc = await firestoreWithRetry(
+        () => userRef.get(),
+        'Get user data for upgrade check'
+      );
+      
+      const currentPlan = userDoc?.data()?.plan;
+      const isUpgrade = currentPlan && currentPlan !== planId;
+      
       await firestoreWithRetry(
         () => adminDb.collection('users').doc(userId).update({
           plan: planId,
           uploadsLimit: limits.uploadsLimit,
+          uploadsUsed: 0, // Reset to 0 for upgrades
           subscriptionStatus: 'active',
           currentPeriodEnd: admin.firestore.Timestamp.fromDate(new Date((subscription as any).current_period_end * 1000)),
           billingCycle: isYearly ? 'yearly' : 'monthly',
@@ -839,7 +850,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
         }),
         'Update user plan from subscription update'
       );
-      console.log('✅ User plan updated from subscription:', userId, 'new plan:', planId, 'uploadsLimit:', limits.uploadsLimit);
+      console.log('✅ User plan updated from subscription:', userId, 'new plan:', planId, 'uploadsLimit:', limits.uploadsLimit, isUpgrade ? '(upgrade - uploadsUsed reset to 0)' : '');
     }
   }
   // If subscription is unpaid (different from cancelled - no access)

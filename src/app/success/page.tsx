@@ -55,20 +55,6 @@ function SuccessPageContent() {
         // Check if this is an upgrade/downgrade (user already has an active subscription)
         const isUpgradeOrDowngrade = user.subscriptionStatus === 'active' && user.plan && user.plan !== plan;
         
-        if (isUpgradeOrDowngrade) {
-          console.log('🔄 This is a plan upgrade/downgrade from', user.plan, 'to', plan);
-          console.log('ℹ️ Webhook will handle the subscription update. Showing success message.');
-          
-          // For upgrades/downgrades, just show success and let webhook handle the update
-          setPlanActivated(true);
-          toast.success(
-            language === 'ms'
-              ? `🎉 Pelan berjaya ditukar ke ${plan}!`
-              : `🎉 Plan successfully changed to ${plan}!`
-          );
-          return;
-        }
-
         // First, fetch the checkout session from Stripe to get subscription details
         let stripeSubscriptionId: string | null = null;
         let stripeCustomerId: string | null = null;
@@ -127,13 +113,20 @@ function SuccessPageContent() {
         const limits = planLimits[plan as keyof typeof planLimits] || planLimits.start;
 
         // Build user update object with all available data
+        // For upgrades: reset uploadsUsed to 0 and update plan/limit
+        // For new subscriptions: also reset uploadsUsed to 0
         const userUpdateData: any = {
           plan: plan,
           uploadsLimit: limits.uploadsLimit,
-          uploadsUsed: 0,
+          uploadsUsed: 0, // Always reset to 0 for upgrades and new subscriptions
           subscriptionStatus: 'active',
           updatedAt: serverTimestamp(),
         };
+        
+        if (isUpgradeOrDowngrade) {
+          console.log('🔄 This is a plan upgrade/downgrade from', user.plan, 'to', plan);
+          console.log('🔄 Resetting uploadsUsed to 0 and updating plan limits');
+        }
 
         // Add Stripe data if available
         if (stripeSubscriptionId) {
@@ -214,11 +207,19 @@ function SuccessPageContent() {
         }
 
         setPlanActivated(true);
-        toast.success(
-          language === 'ms'
-            ? `🎉 Pelan ${plan} diaktifkan!`
-            : `🎉 ${plan} plan activated!`
-        );
+        if (isUpgradeOrDowngrade) {
+          toast.success(
+            language === 'ms'
+              ? `🎉 Pelan berjaya ditukar ke ${plan}! Had muat naik telah ditetapkan semula.`
+              : `🎉 Plan successfully changed to ${plan}! Upload limit has been reset.`
+          );
+        } else {
+          toast.success(
+            language === 'ms'
+              ? `🎉 Pelan ${plan} diaktifkan!`
+              : `🎉 ${plan} plan activated!`
+          );
+        }
 
         // Send postMessage to parent window (if in iframe) or to window itself
         // This allows other pages/tabs to know that checkout was successful
