@@ -28,7 +28,7 @@ import {
   Zap
 } from 'lucide-react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, auth } from '@/lib/firebase';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -152,24 +152,63 @@ export default function DashboardPage() {
     
     const reportsRef = collection(db, 'analysis_results');
     
-    // Query for both userId and user_id formats
-    const q1 = query(reportsRef, where('userId', '==', user.uid));
-    const q2 = query(reportsRef, where('user_id', '==', user.uid));
+    // Query for both userId and user_id formats, only completed reports
+    const q1 = query(reportsRef, where('userId', '==', user.uid), where('status', '==', 'completed'));
+    const q2 = query(reportsRef, where('user_id', '==', user.uid), where('status', '==', 'completed'));
     
     const allReports = new Set<string>();
+    let lastCount = 0;
+    
+    const syncUploads = async () => {
+      const count = allReports.size;
+      if (count !== lastCount) {
+        lastCount = count;
+        console.log('📊 Dashboard: Total completed reports count:', count);
+        
+        // If user.uploadsUsed doesn't match, sync it
+        if (user.uploadsUsed !== count) {
+          console.log(`🔄 Dashboard: uploadsUsed mismatch (${user.uploadsUsed} vs ${count}), syncing...`);
+          try {
+            const firebaseUser = auth.currentUser;
+            if (firebaseUser) {
+              const token = await firebaseUser.getIdToken();
+              const response = await fetch('/api/sync-uploads', {
+                method: 'POST',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                },
+              });
+              
+              if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Dashboard: Uploads synced successfully:', data);
+                // Refresh user data to get updated uploadsUsed
+                if (refreshUser) {
+                  await refreshUser();
+                }
+              } else {
+                console.warn('⚠️ Dashboard: Failed to sync uploads, refreshing user data instead');
+                if (refreshUser) {
+                  await refreshUser();
+                }
+              }
+            }
+          } catch (error) {
+            console.error('❌ Dashboard: Error syncing uploads:', error);
+            // Fallback to refresh user data
+            if (refreshUser) {
+              await refreshUser();
+            }
+          }
+        }
+      }
+    };
     
     const unsubscribe1 = onSnapshot(q1, (snapshot) => {
       snapshot.forEach((doc) => {
         allReports.add(doc.id);
       });
-      const count = allReports.size;
-      console.log('📊 Dashboard: Reports count (userId):', count);
-      
-      // If user.uploadsUsed doesn't match, refresh user data
-      if (user.uploadsUsed !== count && refreshUser) {
-        console.log('🔄 Dashboard: uploadsUsed mismatch, refreshing user data...');
-        refreshUser();
-      }
+      syncUploads();
     }, (error) => {
       console.warn('⚠️ Dashboard: Error in userId query:', error);
     });
@@ -178,14 +217,7 @@ export default function DashboardPage() {
       snapshot.forEach((doc) => {
         allReports.add(doc.id);
       });
-      const count = allReports.size;
-      console.log('📊 Dashboard: Reports count (user_id):', count);
-      
-      // If user.uploadsUsed doesn't match, refresh user data
-      if (user.uploadsUsed !== count && refreshUser) {
-        console.log('🔄 Dashboard: uploadsUsed mismatch, refreshing user data...');
-        refreshUser();
-      }
+      syncUploads();
     }, (error) => {
       console.warn('⚠️ Dashboard: Error in user_id query:', error);
     });

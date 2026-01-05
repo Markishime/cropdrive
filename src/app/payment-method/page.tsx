@@ -243,6 +243,7 @@ export default function PaymentMethodPage() {
         }
         
         // Set subscription even if null (to indicate we've checked)
+        // This is NOT an error - user might not have a subscription
         setSubscription(data.subscription);
         
         if (data.subscription) {
@@ -253,9 +254,12 @@ export default function PaymentMethodPage() {
           // User has subscription ID but API returned null - might be a timing issue
           console.warn('⚠️ User has stripeSubscriptionId but API returned null subscription');
           // Don't set autoRenewal state if no subscription data
+          // Don't show error - this is not necessarily an error state
         }
+        // If subscription is null and no subscription ID, that's fine - user just doesn't have one
       } else {
-        const errorData = await response.json();
+        // Only show error if response is NOT ok (500, 404, etc.)
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
         console.error('❌ Error fetching subscription:', errorData);
         console.error('📊 Response status:', response.status);
         
@@ -277,18 +281,20 @@ export default function PaymentMethodPage() {
           }
         }
         
-        // If user has subscription ID but API failed, don't clear subscription state
-        // This allows buttons to remain enabled if subscription was previously loaded
-        if (!user?.stripeSubscriptionId) {
-          setSubscription(null);
+        // Only show error toast for actual errors (500, network errors, etc.)
+        // Don't show error for 404 or "No active subscription" - those are valid states
+        if (showErrorToast && response.status >= 500) {
+          toast.error(
+            language === 'ms' 
+              ? 'Gagal memuatkan butiran langganan' 
+              : 'Failed to load subscription details'
+          );
         }
         
-        if (showErrorToast) {
-        toast.error(
-          language === 'ms' 
-            ? 'Gagal memuatkan butiran langganan' 
-            : 'Failed to load subscription details'
-        );
+        // If user has subscription ID but API failed, don't clear subscription state
+        // This allows buttons to remain enabled if subscription was previously loaded
+        if (!user?.stripeSubscriptionId && response.status >= 500) {
+          setSubscription(null);
         }
       }
     } catch (error) {
@@ -345,7 +351,38 @@ export default function PaymentMethodPage() {
     }
   }, [user, fetchInvoices, fetchSubscription, fetchBillingSettings]);
 
-  // Listen for analysis report saved events to refresh user data
+  // Sync uploads based on actual analysis_results count
+  const syncUploads = useCallback(async () => {
+    if (!user?.uid) return;
+    
+    try {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+      
+      const token = await firebaseUser.getIdToken();
+      const response = await fetch('/api/sync-uploads', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        if (data.synced) {
+          console.log('✅ Payment Method: Uploads synced:', data);
+          // Refresh user data to get updated uploadsUsed
+          if (refreshUser) {
+            await refreshUser();
+          }
+        }
+      }
+    } catch (error) {
+      console.error('❌ Payment Method: Error syncing uploads:', error);
+    }
+  }, [user?.uid, refreshUser]);
+
+  // Listen for analysis report saved events to refresh user data and sync uploads
   useEffect(() => {
     if (!mounted || !refreshUser || !user?.uid) return;
     
@@ -362,7 +399,8 @@ export default function PaymentMethodPage() {
       
       // Only refresh if the event is for the current user
       if (!eventUserId || eventUserId === currentUserId) {
-        console.log('✅ Payment Method: Refreshing user data from Firestore for user:', currentUserId);
+        console.log('✅ Payment Method: Syncing uploads and refreshing user data...');
+        await syncUploads();
         await refreshUser();
         console.log('✅ Payment Method: User data refreshed from Firestore');
       } else {
@@ -374,7 +412,14 @@ export default function PaymentMethodPage() {
     return () => {
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
-  }, [mounted, refreshUser, user?.uid]);
+  }, [mounted, refreshUser, user?.uid, syncUploads]);
+
+  // Sync uploads on page load
+  useEffect(() => {
+    if (mounted && user?.uid) {
+      syncUploads();
+    }
+  }, [mounted, user?.uid, syncUploads]);
 
   // Auto-refresh subscription data periodically
   useEffect(() => {
