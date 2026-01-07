@@ -1204,7 +1204,13 @@ export default function ReportsPage() {
                                 'formattedText', 'displayText'
                               ];
                               
-                              if (skipFields.includes(key)) {
+                              // Case-insensitive check for prompt-related fields
+                              const keyLower = key.toLowerCase();
+                              const isPromptField = keyLower.includes('prompt') || 
+                                                    keyLower.includes('steps count') || 
+                                                    keyLower.includes('steps') && (keyLower.includes('count') || keyLower.includes('item'));
+                              
+                              if (skipFields.includes(key) || isPromptField) {
                                 return;
                               }
                               
@@ -1582,7 +1588,8 @@ export default function ReportsPage() {
                       'recommendationsCount', 'fileUrl', 'file_url', 'fileURL', 'userId', 'user_id',
                       'createdAt', 'updatedAt', 'timestamp', 'id', 'analysisData',
                       // Skip prompt-related fields
-                      'prompt', 'promptUsed', 'prompt_used', 'systemPrompt', 'userPrompt'
+                      'prompt', 'promptUsed', 'prompt_used', 'promptUsed', 'systemPrompt', 'userPrompt',
+                      'stepsCount', 'steps', 'steps_count', 'stepsCount', 'Steps Count', 'Steps'
                     ]);
                     
                     // Helper function to format values as readable sentences (reuse the same logic)
@@ -1642,6 +1649,12 @@ export default function ReportsPage() {
                       .filter(([key, value]) => {
                         // Skip already displayed fields
                         if (displayedFields.has(key)) return false;
+                        // Skip prompt-related fields (case-insensitive)
+                        const keyLower = key.toLowerCase();
+                        const isPromptField = keyLower.includes('prompt') || 
+                                              keyLower.includes('steps count') || 
+                                              (keyLower.includes('steps') && (keyLower.includes('count') || keyLower.includes('item')));
+                        if (isPromptField) return false;
                         // Skip empty values
                         if (value === null || value === undefined || value === '') return false;
                         // Skip if it's already in analysisData
