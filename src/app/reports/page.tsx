@@ -919,10 +919,10 @@ export default function ReportsPage() {
                     
                     return (
                       <div>
-                        <h3 className="text-xl font-black text-gray-900 mb-6">
+                        <h3 className="text-2xl font-bold text-gray-900 mb-8 mt-6">
                           {language === 'ms' ? 'Keputusan Analisis Lengkap' : 'Complete Analysis Results'}
                         </h3>
-                        <div className="space-y-6">
+                        <div className="space-y-8">
                           {(() => {
                             const data = analysisData;
                             const allSections: React.ReactElement[] = [];
@@ -993,7 +993,7 @@ export default function ReportsPage() {
                               // Format main headers (lines starting with # or all caps followed by colon)
                               if (trimmedLine.match(/^#{1,2}\s/) || (trimmedLine.match(/^[A-Z][A-Z\s]{3,}:?$/) && trimmedLine.length < 50)) {
                                 return (
-                                  <h4 key={idx} className="text-xl font-black text-gray-900 mt-6 mb-3 first:mt-0 pb-2 border-b-2 border-green-300">
+                                  <h4 key={idx} className="text-xl font-bold text-gray-900 mt-8 mb-4 first:mt-0 pb-3 border-b-2 border-green-300">
                                     {trimmedLine.replace(/^#{1,2}\s/, '').replace(/:$/, '').trim()}
                                   </h4>
                                 );
@@ -1002,7 +1002,7 @@ export default function ReportsPage() {
                               // Format sub-headers (lines starting with ### or lines with colon at end)
                               if (trimmedLine.match(/^###\s/) || (trimmedLine.match(/^[A-Z][^.!?]*:$/) && trimmedLine.length < 80)) {
                                 return (
-                                  <h5 key={idx} className="text-lg font-bold text-gray-800 mt-4 mb-2">
+                                  <h5 key={idx} className="text-lg font-bold text-gray-800 mt-6 mb-3">
                                     {trimmedLine.replace(/^###\s/, '').replace(/:$/, '').trim()}
                                   </h5>
                                 );
@@ -1011,9 +1011,9 @@ export default function ReportsPage() {
                               // Format bullet points
                               if (trimmedLine.match(/^[-•*]\s/) || trimmedLine.match(/^\d+[.)]\s/)) {
                                 return (
-                                  <div key={idx} className="flex items-start gap-3 my-2 ml-2">
+                                  <div key={idx} className="flex items-start gap-3 my-3 ml-2">
                                     <span className="text-green-600 font-bold mt-1 flex-shrink-0 text-lg">•</span>
-                                    <span className="flex-1 text-gray-800 font-medium leading-relaxed">
+                                    <span className="flex-1 text-gray-800 leading-relaxed text-base">
                                       {trimmedLine.replace(/^[-•*]\s/, '').replace(/^\d+[.)]\s/, '').trim()}
                                     </span>
                                   </div>
@@ -1025,11 +1025,11 @@ export default function ReportsPage() {
                                 const num = trimmedLine.match(/^\d+\./)?.[0];
                                 const content = trimmedLine.replace(/^\d+\.\s/, '').trim();
                                 return (
-                                  <div key={idx} className="flex items-start gap-3 my-2 ml-2">
+                                  <div key={idx} className="flex items-start gap-3 my-3 ml-2">
                                     <span className="text-green-700 font-bold mt-1 flex-shrink-0 bg-green-100 px-2 py-0.5 rounded">
                                       {num}
                                     </span>
-                                    <span className="flex-1 text-gray-800 font-medium leading-relaxed">
+                                    <span className="flex-1 text-gray-800 leading-relaxed text-base">
                                       {content}
                                     </span>
                                   </div>
@@ -1039,7 +1039,7 @@ export default function ReportsPage() {
                               // Regular paragraph
                               if (trimmedLine.length > 0) {
                                 return (
-                                  <p key={idx} className="mb-3 text-gray-800 leading-relaxed font-medium">
+                                  <p key={idx} className="mb-4 text-gray-800 leading-relaxed text-base">
                                     {trimmedLine}
                                   </p>
                                 );
@@ -1054,9 +1054,9 @@ export default function ReportsPage() {
                             const reportText = data.results || data.report || data.analysisResults || data.formattedReport || data.fullReport;
                             if (typeof reportText === 'string' && reportText.trim().length > 0) {
                               allSections.push(
-                                <div key="formatted-report" className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 p-8 shadow-lg">
+                                <div key="formatted-report" className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-300 p-8 shadow-lg mb-6">
                                   <div className="prose prose-lg max-w-none">
-                                    <div className="text-gray-800 leading-relaxed">
+                                    <div className="text-gray-800 leading-relaxed space-y-4">
                                       {formatTextAsReport(reportText)}
                                     </div>
                                   </div>
@@ -1068,8 +1068,8 @@ export default function ReportsPage() {
                           // Format soil analysis data
                           if (data.ph !== undefined || data.nitrogen !== undefined || data.phosphorus !== undefined || data.potassium !== undefined) {
                             allSections.push(
-                              <div key="soil-nutrients" className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                              <div key="soil-nutrients" className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
+                                <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
                                   {language === 'ms' ? 'Nilai Nutrien Tanah' : 'Soil Nutrient Values'}
                                 </h4>
                                 <div className="overflow-x-auto">
@@ -1211,11 +1211,11 @@ export default function ReportsPage() {
                               // If value is a string that looks like formatted text, format it as report
                               if (typeof value === 'string' && value.trim().length > 50 && !value.includes('{') && !value.includes('[')) {
                                 allSections.push(
-                                  <div key={key} className="bg-white rounded-xl border-2 border-gray-300 p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200 capitalize">
+                                  <div key={key} className="bg-white rounded-xl border-2 border-gray-300 p-6 shadow-sm mb-6">
+                                    <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300 capitalize">
                                       {key.replace(/([A-Z])/g, ' $1').replace(/_/g, ' ').trim()}
                                     </h4>
-                                    <div className="text-gray-800 leading-relaxed">
+                                    <div className="text-gray-800 leading-relaxed space-y-4">
                                       {formatTextAsReport(value)}
                                     </div>
                                   </div>
@@ -1233,8 +1233,8 @@ export default function ReportsPage() {
                                 const standards = value as any;
                                 if (standards && typeof standards === 'object') {
                                   allSections.push(
-                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+                                    <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
+                                      <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
                                         {language === 'ms' ? 'Piawaian MPOB' : 'MPOB Standards'}
                                       </h4>
                                       <div className="overflow-x-auto">
@@ -1295,10 +1295,10 @@ export default function ReportsPage() {
                                               const itemKeyLabel = formatKeyName(k);
                                               const itemValue = formatValueAsSentence(k, v);
                                               return (
-                                                <div key={k} className="pl-4 border-l-2 border-green-200">
-                                                  <p className="text-gray-800 leading-relaxed">
-                                                    <span className="font-semibold text-gray-900">{itemKeyLabel}: </span>
-                                                    <span className="font-medium">{itemValue || String(v)}</span>
+                                                <div key={k} className="pl-4 border-l-2 border-green-200 mb-3">
+                                                  <p className="text-gray-800 leading-relaxed text-base">
+                                                    <span className="font-bold text-gray-900">{itemKeyLabel}: </span>
+                                                    <span className="font-normal">{itemValue || String(v)}</span>
                                                   </p>
                                                 </div>
                                               );
@@ -1312,8 +1312,8 @@ export default function ReportsPage() {
                                   };
 
                                   allSections.push(
-                                    <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-300">
+                                    <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm mb-6">
+                                      <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-blue-300">
                                         {formatKeyName(key)}
                                       </h4>
                                       <ol className="space-y-4">
@@ -1348,8 +1348,8 @@ export default function ReportsPage() {
                                   if (isTabularData && objEntries.length > 2) {
                                     // Format as a table for better readability
                                     allSections.push(
-                                      <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
-                                        <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                      <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
+                                        <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-green-300">
                                           {formatKeyName(key)}
                                         </h4>
                                         <div className="overflow-x-auto">
@@ -1412,11 +1412,11 @@ export default function ReportsPage() {
                                   } else {
                                     // Format as readable paragraphs with sentences
                                     allSections.push(
-                                      <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
-                                        <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                      <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm mb-6">
+                                        <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-green-300">
                                           {formatKeyName(key)}
                                         </h4>
-                                        <div className="space-y-4">
+                                        <div className="space-y-5">
                                           {objEntries.map(([subKey, subValue]) => {
                                             const keyLabel = formatKeyName(subKey);
                                             const sentence = formatValueAsSentence(subKey, subValue);
@@ -1424,10 +1424,10 @@ export default function ReportsPage() {
                                             if (!sentence) return null;
                                             
                                             return (
-                                              <div key={subKey} className="bg-white py-3 px-4 rounded-lg border border-gray-100 shadow-sm">
-                                                <p className="text-gray-800 leading-relaxed text-base">
-                                                  <span className="font-semibold text-gray-900">{keyLabel}: </span>
-                                                  <span className="font-medium">{sentence}</span>
+                                              <div key={subKey} className="bg-white py-4 px-5 rounded-lg border border-gray-100 shadow-sm">
+                                                <p className="text-gray-800 leading-relaxed text-base mb-2">
+                                                  <span className="font-bold text-gray-900">{keyLabel}: </span>
+                                                  <span className="font-normal">{sentence}</span>
                                                 </p>
                                               </div>
                                             );
@@ -1444,11 +1444,11 @@ export default function ReportsPage() {
                                 const sentence = formatValueAsSentence(key, value);
                                 if (sentence) {
                                   allSections.push(
-                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm mb-6">
                                       <div className="bg-gradient-to-r from-gray-50 to-white py-4 px-5 rounded-lg border border-gray-100">
                                         <p className="text-gray-800 leading-relaxed text-base">
-                                          <span className="font-semibold text-gray-900">{keyLabel}: </span>
-                                          <span className="font-medium">{sentence}</span>
+                                          <span className="font-bold text-gray-900">{keyLabel}: </span>
+                                          <span className="font-normal">{sentence}</span>
                                         </p>
                                       </div>
                                     </div>
@@ -1473,8 +1473,8 @@ export default function ReportsPage() {
                               
                               if (Array.isArray(value) && value.length > 0) {
                                 fallbackSections.push(
-                                  <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm">
-                                    <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-blue-300">
+                                  <div key={key} className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border-2 border-blue-200 p-6 shadow-sm mb-6">
+                                    <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-blue-300">
                                       {keyLabel}
                                     </h4>
                                     <ol className="space-y-4">
@@ -1490,10 +1490,10 @@ export default function ReportsPage() {
                                                   return (
                                                     <div className="space-y-2">
                                                       {itemEntries.map(([k, v]) => (
-                                                        <div key={k} className="pl-4 border-l-2 border-blue-200">
-                                                          <p className="text-gray-800 leading-relaxed">
-                                                            <span className="font-semibold text-gray-900">{formatKeyName(k)}: </span>
-                                                            <span className="font-medium">{formatValueAsSentence(k, v)}</span>
+                                                        <div key={k} className="pl-4 border-l-2 border-blue-200 mb-3">
+                                                          <p className="text-gray-800 leading-relaxed text-base">
+                                                            <span className="font-bold text-gray-900">{formatKeyName(k)}: </span>
+                                                            <span className="font-normal">{formatValueAsSentence(k, v)}</span>
                                                           </p>
                                                         </div>
                                                       ))}
@@ -1511,19 +1511,19 @@ export default function ReportsPage() {
                                 const objEntries = Object.entries(value);
                                 if (objEntries.length > 0) {
                                   fallbackSections.push(
-                                    <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
-                                      <h4 className="text-lg font-bold text-gray-900 mb-4 pb-2 border-b-2 border-green-300">
+                                    <div key={key} className="bg-gradient-to-br from-gray-50 to-white rounded-xl border-2 border-gray-200 p-6 shadow-sm mb-6">
+                                      <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-green-300">
                                         {keyLabel}
                                       </h4>
-                                      <div className="space-y-4">
+                                      <div className="space-y-5">
                                         {objEntries.map(([subKey, subValue]) => {
                                           const subKeyLabel = formatKeyName(subKey);
                                           const sentence = formatValueAsSentence(subKey, subValue);
                                           return (
-                                            <div key={subKey} className="bg-white py-3 px-4 rounded-lg border border-gray-100 shadow-sm">
-                                              <p className="text-gray-800 leading-relaxed text-base">
-                                                <span className="font-semibold text-gray-900">{subKeyLabel}: </span>
-                                                <span className="font-medium">{sentence || String(subValue)}</span>
+                                            <div key={subKey} className="bg-white py-4 px-5 rounded-lg border border-gray-100 shadow-sm">
+                                              <p className="text-gray-800 leading-relaxed text-base mb-2">
+                                                <span className="font-bold text-gray-900">{subKeyLabel}: </span>
+                                                <span className="font-normal">{sentence || String(subValue)}</span>
                                               </p>
                                             </div>
                                           );
@@ -1536,11 +1536,11 @@ export default function ReportsPage() {
                                 const sentence = formatValueAsSentence(key, value);
                                 if (sentence) {
                                   fallbackSections.push(
-                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm">
+                                    <div key={key} className="bg-white rounded-xl border-2 border-gray-200 p-6 shadow-sm mb-6">
                                       <div className="bg-gradient-to-r from-gray-50 to-white py-4 px-5 rounded-lg border border-gray-100">
                                         <p className="text-gray-800 leading-relaxed text-base">
-                                          <span className="font-semibold text-gray-900">{keyLabel}: </span>
-                                          <span className="font-medium">{sentence}</span>
+                                          <span className="font-bold text-gray-900">{keyLabel}: </span>
+                                          <span className="font-normal">{sentence}</span>
                                         </p>
                                       </div>
                                     </div>
