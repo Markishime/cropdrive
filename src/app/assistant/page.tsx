@@ -111,11 +111,24 @@ export default function AssistantPage() {
   
   // Fetch analysis data when analysisId is present
   useEffect(() => {
-    if (!mounted || !analysisIdToLoad || !user?.uid || pendingAnalysisData) return;
+    if (!mounted || !analysisIdToLoad || pendingAnalysisData) return;
+    
+    // Wait for auth to be ready
+    if (authLoading) return;
+    
+    // Get current user from Firebase Auth (most reliable) or fallback to user hook
+    const firebaseUser = auth.currentUser;
+    const currentUserId = firebaseUser?.uid || user?.uid;
+    
+    if (!currentUserId) {
+      console.log('⏳ Waiting for user authentication...');
+      return;
+    }
     
     const fetchAnalysisData = async () => {
       try {
         console.log('📊 Fetching analysis data for ID:', analysisIdToLoad);
+        console.log('👤 Current user ID:', currentUserId);
         const analysisDoc = await getDoc(doc(db, 'analysis_results', analysisIdToLoad));
         
         if (!analysisDoc.exists()) {
@@ -126,14 +139,36 @@ export default function AssistantPage() {
         }
         
         const analysisData = analysisDoc.data();
+        console.log('📄 Analysis data userId:', analysisData.userId, 'user_id:', analysisData.user_id);
+        console.log('📄 Full analysis data keys:', Object.keys(analysisData));
         
         // Verify this analysis belongs to the current user
-        if (analysisData.userId !== user.uid) {
-          console.error('❌ Unauthorized access to analysis');
+        // Check both userId and user_id fields (some documents might use different field names)
+        const analysisUserId = analysisData.userId || analysisData.user_id;
+        if (!analysisUserId) {
+          console.error('❌ Analysis has no userId field');
+          toast.error(language === 'ms' ? 'Data analisis tidak sah' : 'Invalid analysis data');
+          setAnalysisIdToLoad(null);
+          return;
+        }
+        
+        // Compare as strings to handle any type mismatches
+        const analysisUserIdStr = String(analysisUserId);
+        const currentUserIdStr = String(currentUserId);
+        
+        if (analysisUserIdStr !== currentUserIdStr) {
+          console.error('❌ Unauthorized access to analysis', {
+            analysisUserId: analysisUserIdStr,
+            currentUserId: currentUserIdStr,
+            match: analysisUserIdStr === currentUserIdStr,
+            analysisDataKeys: Object.keys(analysisData)
+          });
           toast.error(language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
           setAnalysisIdToLoad(null);
           return;
         }
+        
+        console.log('✅ Authorization check passed');
         
         // Process Firestore data to handle Timestamps
         const processFirestoreValue = (value: any): any => {
@@ -168,7 +203,7 @@ export default function AssistantPage() {
     };
     
     fetchAnalysisData();
-  }, [mounted, analysisIdToLoad, user?.uid, pendingAnalysisData, language]);
+  }, [mounted, analysisIdToLoad, authLoading, pendingAnalysisData, language]);
   
   // Send analysis data to iframe when it's ready
   useEffect(() => {
