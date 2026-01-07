@@ -1006,6 +1006,8 @@ export default function AssistantPage() {
   const sendConfigToIframe = () => {
     if (iframeRef.current?.contentWindow && user) {
       const uploadLimitExceeded = isUploadLimitExceeded();
+      // Allow history viewing even if upload limit is exceeded (when viewing specific analysis)
+      const canViewHistory = true; // Always allow history viewing
       const config = {
         type: 'CONFIG',
         language: currentLang,
@@ -1017,6 +1019,8 @@ export default function AssistantPage() {
         uploadsLimit: user.uploadsLimit || 10,
         uploadLimitExceeded: uploadLimitExceeded,
         uploadsRemaining: uploadLimitExceeded ? 0 : (user.uploadsLimit === -1 ? Infinity : Math.max(0, user.uploadsLimit - (user.uploadsUsed || 0))),
+        canViewHistory: canViewHistory, // Always allow history viewing
+        canUploadNew: !uploadLimitExceeded, // Only allow new uploads if limit not exceeded
       };
       
       // Use '*' as target origin to avoid origin mismatch errors
@@ -1167,73 +1171,10 @@ export default function AssistantPage() {
     );
   }
 
-  // Show upload limit exceeded screen
-  if (uploadLimitExceeded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-900 via-orange-800 to-amber-900 px-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-lg w-full bg-white rounded-3xl p-8 shadow-2xl text-center"
-        >
-          <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <BarChart3 className="w-10 h-10 text-orange-600" />
-          </div>
-          
-          <h1 className="text-2xl font-black text-gray-900 mb-3">
-            {language === 'ms' ? 'Had Muat Naik Tercapai' : 'Upload Limit Reached'}
-          </h1>
-          
-          <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
-            <div className="flex items-center justify-center gap-4">
-              <div className="text-center">
-                <p className="text-3xl font-black text-orange-600">{uploadsUsed}</p>
-                <p className="text-xs text-gray-500">{language === 'ms' ? 'Digunakan' : 'Used'}</p>
-              </div>
-              <div className="text-2xl text-gray-400">/</div>
-              <div className="text-center">
-                <p className="text-3xl font-black text-orange-600">{uploadsLimit === -1 ? '∞' : uploadsLimit}</p>
-                <p className="text-xs text-gray-500">{language === 'ms' ? 'Had' : 'Limit'}</p>
-              </div>
-            </div>
-            <div className="w-full bg-orange-200 rounded-full h-3 mt-3 overflow-hidden">
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full" style={{ width: '100%' }}></div>
-            </div>
-          </div>
-          
-          <p className="text-gray-600 mb-6">
-            {language === 'ms' 
-              ? `Anda telah mencapai had ${uploadsLimit === -1 ? '∞' : uploadsLimit} analisis untuk pelan ${user.plan?.toUpperCase()} anda (${uploadsUsed}/${uploadsLimit}). ${subscriptionCancelled ? 'Walaupun langganan anda telah dibatalkan, had muat naik masih terpakai sehingga akhir tempoh pembayaran.' : 'Naik taraf pelan anda untuk terus menganalisis laporan makmal.'}` 
-              : `You've reached your ${uploadsLimit === -1 ? 'unlimited' : uploadsLimit} analysis limit for your ${user.plan?.toUpperCase()} plan (${uploadsUsed}/${uploadsLimit}). ${subscriptionCancelled ? 'Even though your subscription is cancelled, upload limits still apply until the end of your payment period.' : 'Upgrade your plan to continue analyzing lab reports.'}`}
-          </p>
-          
-          <div className="space-y-3">
-            <Link href="/pricing" className="block">
-              <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
-                <TrendingUp className="w-5 h-5 mr-2" />
-                {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
-              </Button>
-            </Link>
-            
-            <Link href="/reports" className="block">
-              <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
-                <FileText className="w-4 h-4 mr-2" />
-                {language === 'ms' ? 'Lihat Laporan Lepas' : 'View Past Reports'}
-              </Button>
-            </Link>
-          </div>
-          
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-            <p className="text-sm text-green-800 font-medium">
-              {language === 'ms' 
-                ? '💡 Petua: Pelan Smart menawarkan 50 analisis, dan pelan Precision menawarkan analisis tanpa had!' 
-                : '💡 Tip: Smart plan offers 50 analyses, and Precision plan offers unlimited analyses!'}
-            </p>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
+  // Note: We no longer block access when upload limit is exceeded
+  // Users can always access the assistant to view their history
+  // The iframe will receive canUploadNew: false and can handle showing history-only mode
+  // A warning banner will be shown above to inform users about the limit
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
@@ -1353,11 +1294,45 @@ export default function AssistantPage() {
         </motion.div>
       )}
 
+      {/* Upload Limit Warning Banner (if limit exceeded but viewing history) */}
+      {uploadLimitExceeded && analysisIdToLoad && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: subscriptionCancelled ? 0.3 : 0.2 }}
+          className="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
+        >
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="w-5 h-5 text-white flex-shrink-0" />
+                <p className="text-sm font-semibold">
+                  {language === 'ms' 
+                    ? `⚠️ Anda telah mencapai had muat naik (${uploadsUsed}/${uploadsLimit}). Anda masih boleh melihat sejarah analisis, tetapi tidak boleh memuat naik analisis baharu.`
+                    : `⚠️ You've reached your upload limit (${uploadsUsed}/${uploadsLimit}). You can still view your analysis history, but cannot upload new analyses.`
+                  }
+                </p>
+              </div>
+              <Link href="/pricing">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-sm shadow-md hover:bg-orange-50 transition"
+                >
+                  <TrendingUp className="w-4 h-4" />
+                  {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
+                </motion.button>
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Quick Guide Banner */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: subscriptionCancelled ? 0.3 : 0.2 }}
+        transition={{ duration: 0.5, delay: (subscriptionCancelled || (uploadLimitExceeded && analysisIdToLoad)) ? 0.4 : 0.2 }}
         className="bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
       >
         <div className="max-w-7xl mx-auto">

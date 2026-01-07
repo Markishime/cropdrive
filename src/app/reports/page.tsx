@@ -698,20 +698,12 @@ export default function ReportsPage() {
                       {/* Actions */}
                       <div className="flex items-center gap-3 flex-shrink-0">
                         <button
-                          onClick={() => handleViewReport(report)}
-                          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl"
-                        >
-                          <Eye className="w-5 h-5" />
-                          <span>{language === 'ms' ? 'Lihat' : 'View'}</span>
-                        </button>
-                        
-                        <button
                           onClick={() => router.push(`/assistant?analysisId=${report.id}`)}
                           className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl"
-                          title={language === 'ms' ? 'Buka dalam Pembantu AI' : 'Open in AI Assistant'}
+                          title={language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}
                         >
                           <MessageSquare className="w-5 h-5" />
-                          <span>{language === 'ms' ? 'Buka dalam AI' : 'Open in AI'}</span>
+                          <span>{language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}</span>
                         </button>
                         
                         <button
