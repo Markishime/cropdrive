@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
@@ -240,37 +239,6 @@ export default function GetStartedOrganizationsPage() {
                 <li>{language === 'ms' ? 'Melaporkan hasil kepada penderma dan program kebangsaan' : 'Report results to donors and national programs'}</li>
               </ul>
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Membership Plans Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
-              {language === 'ms' ? 'Pelan Keahlian dan' : 'Membership Plans and'} <span className="text-green-700">{language === 'ms' ? 'Harga' : 'Pricing'}</span>
-            </h2>
-            <p className="text-xl text-gray-600 mt-4">
-              {language === 'ms'
-                ? 'Pilih pelan yang sesuai dengan saiz dan keperluan organisasi anda'
-                : 'Choose the plan that fits your organization\'s size and needs'
-              }
-            </p>
-          </motion.div>
-
-          <div className="text-center">
-            <Link href="/pricing">
-              <button className="px-10 py-5 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide">
-                {language === 'ms' ? 'Lihat Pelan Harga' : 'View Pricing Plans'}
-              </button>
-            </Link>
           </div>
         </div>
       </section>
