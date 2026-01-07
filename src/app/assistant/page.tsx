@@ -214,20 +214,50 @@ export default function AssistantPage() {
     try {
       console.log('✅ Sending analysis data to iframe:', analysisIdToLoad);
       console.log('📊 Analysis data keys:', Object.keys(pendingAnalysisData));
+      console.log('📊 Analysis data sample:', {
+        title: pendingAnalysisData.title,
+        summary: pendingAnalysisData.summary,
+        hasAnalysisData: !!pendingAnalysisData.analysisData,
+        hasResults: !!pendingAnalysisData.results,
+        hasReport: !!pendingAnalysisData.report
+      });
       
-      iframeRef.current.contentWindow.postMessage({
+      // Send multiple message formats to increase compatibility
+      const message = {
         type: 'LOAD_ANALYSIS',
         analysisId: analysisIdToLoad,
         analysisData: pendingAnalysisData
+      };
+      
+      // Send the primary message format
+      iframeRef.current.contentWindow.postMessage(message, '*');
+      
+      // Also send as a nested format (some iframes might expect this)
+      iframeRef.current.contentWindow.postMessage({
+        type: 'MESSAGE',
+        message: message
       }, '*');
       
+      // Also send a simpler format
+      iframeRef.current.contentWindow.postMessage({
+        action: 'load_analysis',
+        data: {
+          id: analysisIdToLoad,
+          ...pendingAnalysisData
+        }
+      }, '*');
+      
+      console.log('✅ Sent analysis data in multiple formats');
       setAnalysisDataLoaded(true);
       toast.success(language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
       
-      // Clear URL parameter to keep URL clean
-      const url = new URL(window.location.href);
-      url.searchParams.delete('analysisId');
-      window.history.replaceState({}, '', url.toString());
+      // Don't clear URL parameter immediately - let iframe read it first
+      // Clear it after a delay
+      setTimeout(() => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('analysisId');
+        window.history.replaceState({}, '', url.toString());
+      }, 5000);
       
       return true;
     } catch (error) {
@@ -382,7 +412,7 @@ export default function AssistantPage() {
   }, [user, authLoading, router]);
 
   // Build iframe URL with parameters
-  const buildIframeUrl = () => {
+  const buildIframeUrl = (includeAnalysisId?: string) => {
     const envUrl = process.env.NEXT_PUBLIC_AI_ASSISTANT_URL;
     const defaultUrl = 'https://markishime-ags.hf.space/';
     const baseUrl = envUrl && envUrl.trim() !== '' ? envUrl : defaultUrl;
@@ -424,10 +454,16 @@ export default function AssistantPage() {
     const features = planFeatures[userPlan as keyof typeof planFeatures] || planFeatures.start;
     params.append('features', features.join(','));
     
+    // Add analysis ID if provided (for loading specific analysis)
+    if (includeAnalysisId) {
+      params.append('analysisId', includeAnalysisId);
+    }
+    
     return `${baseUrl}?${params.toString()}`;
   };
 
-  const AGS_AI_URL = buildIframeUrl();
+  // Build iframe URL with analysis ID if we have one
+  const AGS_AI_URL = buildIframeUrl(analysisIdToLoad || undefined);
 
   // Monitor connection status
   useEffect(() => {
@@ -1492,9 +1528,9 @@ export default function AssistantPage() {
         
         <iframe
           ref={iframeRef}
-          key={iframeKey}
+          key={`${iframeKey}-${analysisIdToLoad || 'default'}`}
           id="ags-iframe"
-          src={AGS_AI_URL}
+          src={buildIframeUrl(analysisIdToLoad || undefined)}
           className="w-full h-full border-0"
           title="CropDrive™ Oil Palm AI Advisor"
           onLoad={handleIframeLoad}
