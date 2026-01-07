@@ -3,9 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { auth } from '@/lib/firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 import { 
   MessageSquare, 
   RefreshCw,
@@ -31,8 +33,11 @@ export default function AssistantPage() {
   const [isLoading, setIsLoading] = useState(true);
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { language } = useTranslation(mounted ? currentLang : 'en');
+  const [analysisIdToLoad, setAnalysisIdToLoad] = useState<string | null>(null);
+  const [analysisDataLoaded, setAnalysisDataLoaded] = useState(false);
 
   // Check if user has exceeded their upload limit
   // Note: Upload limits apply even if subscription is cancelled (as long as within period end)
@@ -93,7 +98,104 @@ export default function AssistantPage() {
     setMounted(true);
     const lang = getCurrentLanguage();
     setCurrentLang(lang);
-  }, []);
+    
+    // Check for analysisId in URL params
+    const analysisId = searchParams?.get('analysisId');
+    if (analysisId) {
+      setAnalysisIdToLoad(analysisId);
+    }
+  }, [searchParams]);
+  
+  // Store analysis data to send when iframe is ready
+  const [pendingAnalysisData, setPendingAnalysisData] = useState<any>(null);
+  
+  // Fetch analysis data when analysisId is present
+  useEffect(() => {
+    if (!mounted || !analysisIdToLoad || !user?.uid || pendingAnalysisData) return;
+    
+    const fetchAnalysisData = async () => {
+      try {
+        console.log('📊 Fetching analysis data for ID:', analysisIdToLoad);
+        const analysisDoc = await getDoc(doc(db, 'analysis_results', analysisIdToLoad));
+        
+        if (!analysisDoc.exists()) {
+          console.error('❌ Analysis not found:', analysisIdToLoad);
+          toast.error(language === 'ms' ? 'Analisis tidak dijumpai' : 'Analysis not found');
+          setAnalysisIdToLoad(null);
+          return;
+        }
+        
+        const analysisData = analysisDoc.data();
+        
+        // Verify this analysis belongs to the current user
+        if (analysisData.userId !== user.uid) {
+          console.error('❌ Unauthorized access to analysis');
+          toast.error(language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
+          setAnalysisIdToLoad(null);
+          return;
+        }
+        
+        // Process Firestore data to handle Timestamps
+        const processFirestoreValue = (value: any): any => {
+          if (value === null || value === undefined) return value;
+          if (value && typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+            return value.toDate().toISOString();
+          }
+          if (value && typeof value === 'object' && 'seconds' in value && typeof value.seconds === 'number') {
+            return new Date(value.seconds * 1000).toISOString();
+          }
+          if (Array.isArray(value)) {
+            return value.map(item => processFirestoreValue(item));
+          }
+          if (typeof value === 'object' && value !== null) {
+            const processed: any = {};
+            for (const [k, v] of Object.entries(value)) {
+              processed[k] = processFirestoreValue(v);
+            }
+            return processed;
+          }
+          return value;
+        };
+        
+        const processedData = processFirestoreValue(analysisData);
+        setPendingAnalysisData(processedData);
+        console.log('✅ Analysis data fetched and processed');
+      } catch (error) {
+        console.error('❌ Error fetching analysis:', error);
+        toast.error(language === 'ms' ? 'Ralat memuatkan analisis' : 'Error loading analysis');
+        setAnalysisIdToLoad(null);
+      }
+    };
+    
+    fetchAnalysisData();
+  }, [mounted, analysisIdToLoad, user?.uid, pendingAnalysisData, language]);
+  
+  // Send analysis data to iframe when it's ready
+  useEffect(() => {
+    if (!pendingAnalysisData || !analysisIdToLoad || isLoading || !iframeRef.current?.contentWindow) return;
+    
+    // Wait a bit after iframe loads to ensure it's ready
+    const timer = setTimeout(() => {
+      if (iframeRef.current?.contentWindow) {
+        console.log('✅ Sending analysis data to iframe:', analysisIdToLoad);
+        iframeRef.current.contentWindow.postMessage({
+          type: 'LOAD_ANALYSIS',
+          analysisId: analysisIdToLoad,
+          analysisData: pendingAnalysisData
+        }, '*');
+        
+        setAnalysisDataLoaded(true);
+        toast.success(language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
+        
+        // Clear URL parameter to keep URL clean
+        const url = new URL(window.location.href);
+        url.searchParams.delete('analysisId');
+        window.history.replaceState({}, '', url.toString());
+      }
+    }, 1000); // Wait 1 second after iframe loads
+    
+    return () => clearTimeout(timer);
+  }, [pendingAnalysisData, analysisIdToLoad, isLoading, language]);
 
   // Listen for language changes - multiple methods to catch changes
   useEffect(() => {

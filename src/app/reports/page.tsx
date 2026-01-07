@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X, AlertTriangle } from 'lucide-react';
+import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X, AlertTriangle, MessageSquare } from 'lucide-react';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, getDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
@@ -703,6 +703,15 @@ export default function ReportsPage() {
                         >
                           <Eye className="w-5 h-5" />
                           <span>{language === 'ms' ? 'Lihat' : 'View'}</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => router.push(`/assistant?analysisId=${report.id}`)}
+                          className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl"
+                          title={language === 'ms' ? 'Buka dalam Pembantu AI' : 'Open in AI Assistant'}
+                        >
+                          <MessageSquare className="w-5 h-5" />
+                          <span>{language === 'ms' ? 'Buka dalam AI' : 'Open in AI'}</span>
                         </button>
                         
                         <button
