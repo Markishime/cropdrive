@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -205,32 +205,85 @@ export default function AssistantPage() {
     fetchAnalysisData();
   }, [mounted, analysisIdToLoad, authLoading, pendingAnalysisData, language]);
   
-  // Send analysis data to iframe when it's ready
+  // Function to send analysis data to iframe
+  const sendAnalysisToIframe = useCallback(() => {
+    if (!pendingAnalysisData || !analysisIdToLoad || !iframeRef.current?.contentWindow) {
+      return false;
+    }
+    
+    try {
+      console.log('✅ Sending analysis data to iframe:', analysisIdToLoad);
+      console.log('📊 Analysis data keys:', Object.keys(pendingAnalysisData));
+      
+      iframeRef.current.contentWindow.postMessage({
+        type: 'LOAD_ANALYSIS',
+        analysisId: analysisIdToLoad,
+        analysisData: pendingAnalysisData
+      }, '*');
+      
+      setAnalysisDataLoaded(true);
+      toast.success(language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
+      
+      // Clear URL parameter to keep URL clean
+      const url = new URL(window.location.href);
+      url.searchParams.delete('analysisId');
+      window.history.replaceState({}, '', url.toString());
+      
+      return true;
+    } catch (error) {
+      console.error('❌ Error sending analysis to iframe:', error);
+      return false;
+    }
+  }, [pendingAnalysisData, analysisIdToLoad, language]);
+  
+  // Send analysis data to iframe when it's ready (with retry logic)
   useEffect(() => {
-    if (!pendingAnalysisData || !analysisIdToLoad || isLoading || !iframeRef.current?.contentWindow) return;
+    if (!pendingAnalysisData || !analysisIdToLoad || analysisDataLoaded) return;
     
-    // Wait a bit after iframe loads to ensure it's ready
-    const timer = setTimeout(() => {
-      if (iframeRef.current?.contentWindow) {
-        console.log('✅ Sending analysis data to iframe:', analysisIdToLoad);
-        iframeRef.current.contentWindow.postMessage({
-          type: 'LOAD_ANALYSIS',
-          analysisId: analysisIdToLoad,
-          analysisData: pendingAnalysisData
-        }, '*');
-        
-        setAnalysisDataLoaded(true);
-        toast.success(language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
-        
-        // Clear URL parameter to keep URL clean
-        const url = new URL(window.location.href);
-        url.searchParams.delete('analysisId');
-        window.history.replaceState({}, '', url.toString());
+    // Wait for iframe to be loaded
+    if (isLoading) {
+      console.log('⏳ Waiting for iframe to load...');
+      return;
+    }
+    
+    if (!iframeRef.current?.contentWindow) {
+      console.log('⏳ Waiting for iframe contentWindow...');
+      return;
+    }
+    
+    console.log('🚀 Attempting to send analysis data to iframe...');
+    
+    // Try sending with multiple retries
+    let attemptCount = 0;
+    const maxAttempts = 5;
+    
+    const trySend = () => {
+      attemptCount++;
+      console.log(`📤 Attempt ${attemptCount}/${maxAttempts} to send analysis data`);
+      
+      if (iframeRef.current?.contentWindow && sendAnalysisToIframe()) {
+        console.log('✅ Successfully sent analysis data on attempt', attemptCount);
+        return; // Success
       }
-    }, 1000); // Wait 1 second after iframe loads
+      
+      // Retry if we haven't reached max attempts
+      if (attemptCount < maxAttempts) {
+        const delay = attemptCount * 1000; // Increasing delay: 1s, 2s, 3s, 4s
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        setTimeout(trySend, delay);
+      } else {
+        console.error('❌ Failed to send analysis data after', maxAttempts, 'attempts');
+        toast.error(language === 'ms' ? 'Gagal memuatkan analisis. Sila cuba lagi.' : 'Failed to load analysis. Please try again.');
+      }
+    };
     
-    return () => clearTimeout(timer);
-  }, [pendingAnalysisData, analysisIdToLoad, isLoading, language]);
+    // Start first attempt after initial delay
+    const initialTimer = setTimeout(() => {
+      trySend();
+    }, 2000); // Wait 2 seconds after iframe loads
+    
+    return () => clearTimeout(initialTimer);
+  }, [pendingAnalysisData, analysisIdToLoad, isLoading, analysisDataLoaded, sendAnalysisToIframe, language]);
 
   // Listen for language changes - multiple methods to catch changes
   useEffect(() => {
@@ -1032,10 +1085,17 @@ export default function AssistantPage() {
   }, [user, language, router]);
 
   // Send initial configuration to iframe when it loads
-  const handleIframeLoad = () => {
+  const handleIframeLoad = useCallback(() => {
     setIsLoading(false);
     sendConfigToIframe();
-  };
+    
+    // If we have pending analysis data, try to send it after a delay
+    if (pendingAnalysisData && analysisIdToLoad && !analysisDataLoaded) {
+      setTimeout(() => {
+        sendAnalysisToIframe();
+      }, 2000);
+    }
+  }, [pendingAnalysisData, analysisIdToLoad, analysisDataLoaded, sendAnalysisToIframe]);
 
   // Send CONFIG message to iframe (reusable function)
   const sendConfigToIframe = () => {
