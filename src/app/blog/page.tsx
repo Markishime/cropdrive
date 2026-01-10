@@ -355,54 +355,16 @@ export default function BlogPage() {
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-12">
               {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
             </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-              {featuredPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group"
-                >
-                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-white/80" />
-                    </div>
-                  </div>
-                  <div className="p-5 sm:p-6">
-                    <div className="flex items-center flex-wrap gap-2 mb-3">
-                      <span className="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                        {language === 'ms' ? post.categoryMs : post.category}
-                      </span>
-                      <span className="text-gray-400 text-xs">•</span>
-                      <span className="text-gray-500 text-xs">{formatDate(post.date)}</span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
-                      {language === 'ms' ? post.titleMs : post.title}
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                      {language === 'ms' ? post.excerptMs : post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
-                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="truncate max-w-[100px] sm:max-w-none">{language === 'ms' ? post.authorMs : post.author}</span>
-                        <span className="text-gray-400">•</span>
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>{language === 'ms' ? post.readTimeMs : post.readTime}</span>
-                      </div>
-                      <Link
-                        href={`/blog/${post.id}`}
-                        className="text-green-600 hover:text-green-700 font-semibold text-xs sm:text-sm flex items-center group-hover:gap-2 transition-all"
-                      >
-                        {language === 'ms' ? 'Baca Lagi' : 'Read More'}
-                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                      </Link>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+            <div className="bg-white rounded-xl shadow-lg p-16 sm:p-20 text-center border border-gray-100">
+              <h3 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
+                {language === 'ms' ? 'AKAN DATANG' : 'COMING SOON'}
+              </h3>
+              <p className="text-xl text-gray-600">
+                {language === 'ms'
+                  ? 'Kami sedang menyediakan kandungan blog yang menarik untuk anda. Sila kembali tidak lama lagi!'
+                  : 'We are preparing exciting blog content for you. Please check back soon!'
+                }
+              </p>
             </div>
           </motion.section>
         )}
@@ -423,70 +385,17 @@ export default function BlogPage() {
             </div>
           </div>
 
-          {filteredPosts.length === 0 ? (
-            <div className="text-center py-12 sm:py-16">
-              <BookOpen className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
-              <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-                {language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
-              </h3>
-              <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto">
-                {language === 'ms'
-                  ? 'Cuba cari dengan kata kunci yang berbeza atau kategori lain.'
-                  : 'Try searching with different keywords or select another category.'
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              {regularPosts.map((post, index) => (
-                <motion.div
-                  key={post.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.1 * index }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 group"
-                >
-                  <div className="aspect-video bg-gradient-to-br from-green-400 to-blue-500 relative overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                    <div className="absolute inset-0 bg-black/20"></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <BookOpen className="w-10 h-10 sm:w-12 sm:h-12 text-white/80" />
-                    </div>
-                  </div>
-                  <div className="p-5 sm:p-6">
-                    <div className="flex items-center flex-wrap gap-2 mb-3">
-                      <span className="px-2.5 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                        {language === 'ms' ? post.categoryMs : post.category}
-                      </span>
-                      <span className="text-gray-400 text-xs">•</span>
-                      <span className="text-gray-500 text-xs">{formatDate(post.date)}</span>
-                    </div>
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-700 transition-colors">
-                      {language === 'ms' ? post.titleMs : post.title}
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600 mb-4 line-clamp-3 leading-relaxed">
-                      {language === 'ms' ? post.excerptMs : post.excerpt}
-                    </p>
-                    <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                      <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-500">
-                        <User className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span className="truncate max-w-[100px] sm:max-w-none">{language === 'ms' ? post.authorMs : post.author}</span>
-                        <span className="text-gray-400">•</span>
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
-                        <span>{language === 'ms' ? post.readTimeMs : post.readTime}</span>
-                      </div>
-                      <Link
-                        href={`/blog/${post.id}`}
-                        className="text-green-600 hover:text-green-700 font-semibold text-xs sm:text-sm flex items-center group-hover:gap-2 transition-all"
-                      >
-                        {language === 'ms' ? 'Baca Lagi' : 'Read More'}
-                        <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 ml-1" />
-                      </Link>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
+          <div className="bg-white rounded-xl shadow-lg p-16 sm:p-20 text-center border border-gray-100">
+            <h3 className="text-4xl md:text-6xl font-black text-gray-900 mb-4">
+              {language === 'ms' ? 'AKAN DATANG' : 'COMING SOON'}
+            </h3>
+            <p className="text-xl text-gray-600">
+              {language === 'ms'
+                ? 'Kami sedang menyediakan kandungan blog yang menarik untuk anda. Sila kembali tidak lama lagi!'
+                : 'We are preparing exciting blog content for you. Please check back soon!'
+              }
+            </p>
+          </div>
         </motion.section>
 
         {/* Newsletter Signup */}

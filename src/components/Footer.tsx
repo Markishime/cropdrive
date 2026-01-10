@@ -109,8 +109,8 @@ export const Footer: React.FC = () => {
             </Link>
             <p className="text-secondary-300 mb-4">
               {language === 'ms'
-                ? 'Platform AI pintar untuk analisis ladang kelapa sawit di Malaysia.'
-                : 'Smart AI platform for palm oil farm analysis in Malaysia.'
+                ? 'Platform AI Pintar untuk Industri Kelapa Sawit di Malaysia.'
+                : 'Smart AI Platform for Oil Palm Industry in Malaysia.'
               }
             </p>
           </div>

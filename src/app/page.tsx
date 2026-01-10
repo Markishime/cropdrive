@@ -1969,19 +1969,6 @@ export default function HomePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            {/* Urgency Badge */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-              className="inline-block mb-6"
-            >
-              <div className="bg-yellow-400 text-green-900 px-6 py-2 rounded-full font-black text-sm uppercase tracking-wider shadow-lg">
-                {language === 'ms' ? '⚡ Tawaran Masa Terhad' : '⚡ Limited Time Offer'}
-              </div>
-            </motion.div>
-
             <h2 className="text-4xl md:text-6xl font-black mb-6 font-heading">
               {language === 'ms' ? 'Mulakan Transformasi Ladang Anda Hari Ini!' : 'Start Transforming Your Farm Today!'}
             </h2>
@@ -1995,8 +1982,8 @@ export default function HomePage() {
 
             <p className="text-lg text-yellow-300 mb-10 font-semibold">
               {language === 'ms'
-                ? '✓ Mula dalam 5 minit • ✓ Laporan dalam 5-8 minit • ✓ Jaminan wang dikembalikan'
-                : '✓ Start in 5 minutes • ✓ Reports in 5-8 minutes • ✓ Money-back guarantee'
+                ? '✓ Laporan dalam 5-8 minit'
+                : '✓ Reports in 5-8 minutes'
               }
             </p>
 
@@ -2021,16 +2008,8 @@ export default function HomePage() {
               className="flex flex-wrap justify-center gap-6 text-sm text-green-50"
             >
               <div className="flex items-center gap-2">
-                <span className="text-yellow-400 text-xl">★★★★★</span>
-                <span className="font-semibold">{language === 'ms' ? '4.9/5 Penilaian' : '4.9/5 Rating'}</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <span className="text-2xl">🔒</span>
                 <span className="font-semibold">{language === 'ms' ? 'Pembayaran Selamat' : 'Secure Payment'}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">✓</span>
-                <span className="font-semibold">{language === 'ms' ? 'Jaminan 30 Hari' : '30-Day Guarantee'}</span>
               </div>
             </motion.div>
           </motion.div>

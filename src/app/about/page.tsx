@@ -55,127 +55,107 @@ export default function AboutUsPage() {
       {/* About CropDrive Section */}
       <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+          {/* Top Intro Block */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="mb-16"
+            className="mb-12 xs:mb-16"
           >
-            <div className="max-w-4xl mx-auto">
-              <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-gray-700 leading-relaxed mb-6 xs:mb-8">
+            <div className="max-w-4xl mx-auto text-center">
+              <p className="text-base xs:text-lg sm:text-xl text-gray-700 leading-relaxed font-body">
                 {language === 'ms'
-                  ? 'CropDrive™ adalah platform agronomi digital yang dibangunkan oleh AGS – Agriculture Global Solutions, sebuah konsultansi pertanian yang berpangkalan di Jerman dan beroperasi di seluruh dunia.'
-                  : 'CropDrive™ is a digital agronomy platform developed by AGS – Agriculture Global Solutions, an agricultural consultancy based in Germany and operating globally.'
-                }
-              </p>
-              <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed mb-6 xs:mb-8">
-                {language === 'ms'
-                  ? 'Kami membangunkan alat praktikal yang didorong oleh AI yang membantu petani dan organisasi membuat keputusan agronomi dan pelaburan berdasarkan data. Fokus semasa kami adalah pada penyelesaian pertanian digital berasaskan AI untuk kelapa sawit di Malaysia, dengan perancangan pengembangan ke Indonesia dan negara tropika lain.'
-                  : 'We develop practical AI-driven tools that help farmers and organizations make data-based agronomic and investment decisions. Our current focus is on AI-based digital agriculture solutions for oil palm in Malaysia, with planned expansion to Indonesia and other tropical countries.'
+                  ? 'Petani kecil menghasilkan bahagian besar kelapa sawit Malaysia, namun hasil di banyak pekebun kecil kekal jauh di bawah apa yang tanaman ini boleh hasilkan. CropDrive Oil Palm Advisor™ wujud untuk menutup jurang hasil ini supaya petani memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Apabila produktiviti meningkat di kawasan yang sudah ditanam, industri mengurangkan tekanan untuk berkembang ke tanah baharu. Ini menyokong kelapa sawit lestari dan membantu mengurangkan penebangan hutan.'
+                  : 'Smallholder farmers produce a large share of Malaysia\'s oil palm, yet yields on many smallholdings stay far below what the crop can deliver. CropDrive Oil Palm Advisor™ exists to close this yield gap so farmers earn more from the land they already manage. When productivity rises on existing planted areas, the industry reduces pressure to expand into new land. This supports sustainable oil palm and helps reduce deforestation.'
                 }
               </p>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-16">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <Image
-                src="/images/our_first_product_optimized.jpg"
-                alt="Our First Product - Palm Oil Plantation"
-                width={800}
-                height={600}
-                className="rounded-2xl shadow-2xl w-full h-auto"
-              />
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 xs:mb-5 sm:mb-6 font-heading">
-                {language === 'ms' ? 'Produk Pertama Kami' : 'Our First Product'}
-              </h2>
-              <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-700 leading-relaxed mb-4 xs:mb-5 sm:mb-6">
-                {language === 'ms'
-                  ? 'Produk pertama kami, CropDrive AI Agronomist, menukar keputusan ujian tanah dan daun kepada cadangan tepat khusus lapangan yang mengurangkan pembaziran, meningkatkan hasil, dan membimbing pengurusan tanah jangka panjang.'
-                  : 'Our first product, the CropDrive AI Agronomist, turns soil and leaf test results into precise, field-specific recommendations that reduce waste, improve yields, and guide long-term soil management.'
-                }
-              </p>
-            </motion.div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center mb-16">
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-            >
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-                {language === 'ms' ? 'Pasukan Kami' : 'Our Team'}
-              </h2>
-              <p className="text-xl text-gray-700 leading-relaxed mb-6">
-                {language === 'ms'
-                  ? 'Pasukan kami menggabungkan pengalaman lapangan yang mendalam dalam agronomi tropika, kesuburan tanah, dan pertanian presisi dengan sains data maju. Kami bekerjasama dengan perniagaan pertanian, institusi penyelidikan, NGO, dan agensi pembangunan untuk menjadikan agronomi digital yang boleh dipercayai dapat diakses oleh ladang semua saiz.'
-                  : 'Our team combines deep field experience in tropical agronomy, soil fertility, and precision agriculture with advanced data science. We collaborate with agricultural businesses, research institutions, NGOs, and development agencies to make reliable digital agronomy accessible to farms of all sizes.'
-                }
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              viewport={{ once: true }}
-              className="relative"
-            >
-              <Image
-                src="/images/our_team_optimized.jpg"
-                alt="Our Agricultural Team"
-                width={800}
-                height={600}
-                className="rounded-2xl shadow-2xl w-full h-auto"
-              />
-            </motion.div>
-          </div>
-
+          {/* About-Us Image Container */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="max-w-6xl mx-auto"
+            className="mb-12 xs:mb-16"
           >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center bg-gradient-to-br from-green-50 to-white p-10 rounded-3xl shadow-xl overflow-hidden">
-              <div>
-                <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-6 font-heading">
-                  {language === 'ms' ? 'Masa Depan Kami' : 'Our Future'}
-                </h2>
-                <p className="text-xl text-gray-700 leading-relaxed mb-6">
-                  {language === 'ms'
-                    ? 'Semasa kami terus berkembang, portfolio tanaman CropDrive akan berkembang ke koko dan kopi, membawa pendekatan berasaskan sains yang sama ke tanaman tropika utama lain. Misi kami adalah untuk menghubungkan data sebenar dengan hasil sebenar, memastikan setiap cadangan membawa kepada peningkatan yang boleh diukur dalam produktiviti dan kemampanan.'
-                    : "As we continue to grow, CropDrive's crop portfolio will expand into cocoa and coffee, bringing the same science-based approach to other key tropical crops. Our mission is to connect real data with real results, ensuring every recommendation leads to measurable improvement in productivity and sustainability."
-                  }
-                </p>
+            <div className="max-w-3xl mx-auto">
+              <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-4 sm:p-6 shadow-lg border border-green-100">
+                <div className="relative rounded-xl overflow-hidden">
+                  <Image
+                    src="/images/About-Us.png"
+                    alt="About CropDrive"
+                    width={800}
+                    height={600}
+                    className="w-full h-auto object-cover rounded-lg"
+                  />
+                </div>
               </div>
-              <div className="relative">
-                <Image
-                  src="/images/our_future_optimized.jpg"
-                  alt="Our Future Vision"
-                  width={600}
-                  height={400}
-                  className="rounded-2xl shadow-lg w-full h-auto"
-                />
-              </div>
+            </div>
+          </motion.div>
+
+          {/* Our First Product */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12 xs:mb-16"
+          >
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
+                {language === 'ms' ? 'Produk Pertama Kami' : 'Our First Product'}
+              </h2>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
+                {language === 'ms'
+                  ? 'CropDrive Oil Palm Advisor™ dibina untuk keputusan ladang praktikal. Anda mendapat tindakan yang jelas dan khusus ladang untuk memperbaiki keadaan tanah, mengoptimumkan penggunaan baja, dan mengutamakan perubahan yang meningkatkan hasil. Matlamatnya adalah hasil yang lebih tinggi, pulangan yang lebih baik, dan kurang kehilangan nutrien kepada alam sekitar. Kami tidak menjual baja, jadi cadangan tidak didorong oleh jualan baja.'
+                  : 'CropDrive Oil Palm Advisor™ is built for practical farm decisions. You get clear, farm specific actions to improve soil conditions, optimise fertiliser use, and prioritise the changes that lift yield. The goal is higher yields, better returns, and less nutrient loss to the environment. We do not sell fertilisers, so recommendations are not driven by fertiliser sales.'
+                }
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Our Team */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12 xs:mb-16"
+          >
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
+                {language === 'ms' ? 'Pasukan Kami' : 'Our Team'}
+              </h2>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
+                {language === 'ms'
+                  ? 'CropDrive Oil Palm Advisor™ dibangunkan oleh AGS – Agriculture Global Solutions (https://www.agriglobalsolutions.com/), berpangkalan di Jerman dan beroperasi di seluruh dunia, dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Kami adalah satu pasukan antarabangsa yang bekerja di Jerman, Malaysia, Australia, dan Filipina, menggabungkan agronomi, pembangunan produk, kerja data, dan sokongan petani untuk meningkatkan hasil di tanah kelapa sawit sedia ada, meningkatkan pendapatan petani, dan mengukuhkan pengeluaran lestari dengan kurang tekanan untuk pengembangan tanah dan penebangan hutan.'
+                  : 'CropDrive Oil Palm Advisor™ is developed by AGS – Agriculture Global Solutions (https://www.agriglobalsolutions.com/), based in Germany and operating globally, and led and managed by Dr. Alexander Loladze. We are one international team working across Germany, Malaysia, Australia, and the Philippines, combining agronomy, product development, data work, and farmer support to improve yields on existing oil palm land, raise farmer income, and strengthen sustainable production with less pressure for land expansion and deforestation.'
+                }
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Our Future */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="mb-12 xs:mb-16"
+          >
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
+                {language === 'ms' ? 'Masa Depan Kami' : 'Our Future'}
+              </h2>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
+                {language === 'ms'
+                  ? 'Kami akan memperluaskan pendekatan yang sama yang memberi tumpuan kepada hasil kepada tanaman lain, bermula dengan koko dan kopi. Prinsipnya tetap sama, meningkatkan produktiviti di tanah pertanian sedia ada supaya petani kecil memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Ini menyokong pengeluaran lestari dan mengurangkan tekanan untuk pengembangan tanah dan penebangan hutan.'
+                  : 'We will extend the same yield focused approach to other crops, starting with cocoa and coffee. The principle stays the same, improve productivity on existing farmland so smallholder farmers earn more from the land they already manage. This supports sustainable production and reduces pressure for land expansion and deforestation.'
+                }
+              </p>
             </div>
           </motion.div>
         </div>
@@ -237,10 +217,10 @@ export default function AboutUsPage() {
                     className="object-contain"
                   />
                 </div>
-                <h3 className="text-2xl font-black text-gray-900 mb-4 font-heading">
+                <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-4 font-heading">
                   {value.title}
                 </h3>
-                <p className="text-gray-600 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-600 leading-relaxed font-body">
                   {value.desc}
                 </p>
               </motion.div>
@@ -261,7 +241,7 @@ export default function AboutUsPage() {
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
               {language === 'ms' ? 'Sertai Kami Hari Ini' : 'Join Us Today'}
             </h2>
-            <p className="text-xl text-gray-600 mb-8">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 font-body">
               {language === 'ms'
                 ? 'Jadilah sebahagian daripada revolusi pertanian pintar'
                 : 'Be part of the smart farming revolution'

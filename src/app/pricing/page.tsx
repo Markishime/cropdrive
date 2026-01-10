@@ -450,6 +450,38 @@ export default function PricingPage() {
                       </button>
                     );
                   })()}
+
+                  {/* Commitment Text - Only show for monthly installment plans */}
+                  {!isYearly && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <div className="text-xs text-gray-600 space-y-2 leading-relaxed">
+                        <p className="font-semibold">
+                          {language === 'ms' 
+                            ? `Jumlah komitmen: ${tier.monthlyPrice * 12} RM untuk 12 bulan`
+                            : `Total commitment: ${tier.monthlyPrice * 12} RM for 12 months`
+                          }
+                        </p>
+                        <p>
+                          {language === 'ms' 
+                            ? `Ditagih sebagai ${tier.monthlyPrice} RM sebulan untuk 12 bulan`
+                            : `Billed as ${tier.monthlyPrice} RM per month for 12 months`
+                          }
+                        </p>
+                        <p>
+                          {language === 'ms' 
+                            ? 'Pelan ini adalah perjanjian 12 bulan tetap.'
+                            : 'This plan is a fixed 12-month agreement.'
+                          }
+                        </p>
+                        <p>
+                          {language === 'ms' 
+                            ? 'Pembatalan awal menghentikan akses tetapi tidak membatalkan pembayaran baki.'
+                            : 'Early cancellation stops access but does not cancel remaining payments.'
+                          }
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </motion.div>
