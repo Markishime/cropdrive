@@ -129,12 +129,25 @@ export default function AboutUsPage() {
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
                 {language === 'ms' ? 'Pasukan Kami' : 'Our Team'}
               </h2>
-              <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body mb-6">
                 {language === 'ms'
-                  ? 'CropDrive Oil Palm Advisor™ dibangunkan oleh AGS – Agriculture Global Solutions (https://www.agriglobalsolutions.com/), berpangkalan di Jerman dan beroperasi di seluruh dunia, dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Kami adalah satu pasukan antarabangsa yang bekerja di Jerman, Malaysia, Australia, dan Filipina, menggabungkan agronomi, pembangunan produk, kerja data, dan sokongan petani untuk meningkatkan hasil di tanah kelapa sawit sedia ada, meningkatkan pendapatan petani, dan mengukuhkan pengeluaran lestari dengan kurang tekanan untuk pengembangan tanah dan penebangan hutan.'
-                  : 'CropDrive Oil Palm Advisor™ is developed by AGS – Agriculture Global Solutions (https://www.agriglobalsolutions.com/), based in Germany and operating globally, and led and managed by Dr. Alexander Loladze. We are one international team working across Germany, Malaysia, Australia, and the Philippines, combining agronomy, product development, data work, and farmer support to improve yields on existing oil palm land, raise farmer income, and strengthen sustainable production with less pressure for land expansion and deforestation.'
+                  ? 'CropDrive Oil Palm Advisor™ dibangunkan oleh AGS – Agriculture Global Solutions, berpangkalan di Jerman dan beroperasi di seluruh dunia, dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Kami adalah satu pasukan antarabangsa yang bekerja di Jerman, Malaysia, Australia, dan Filipina, menggabungkan agronomi, pembangunan produk, kerja data, dan sokongan petani untuk meningkatkan hasil di tanah kelapa sawit sedia ada, meningkatkan pendapatan petani, dan mengukuhkan pengeluaran lestari dengan kurang tekanan untuk pengembangan tanah dan penebangan hutan.'
+                  : 'CropDrive Oil Palm Advisor™ is developed by AGS – Agriculture Global Solutions, based in Germany and operating globally, and led and managed by Dr. Alexander Loladze. We are one international team working across Germany, Malaysia, Australia, and the Philippines, combining agronomy, product development, data work, and farmer support to improve yields on existing oil palm land, raise farmer income, and strengthen sustainable production with less pressure for land expansion and deforestation.'
                 }
               </p>
+              <div className="mt-6">
+                <a
+                  href="https://www.agriglobalsolutions.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+                >
+                  {language === 'ms' ? 'Lawati AGS – Agriculture Global Solutions' : 'Visit AGS – Agriculture Global Solutions'}
+                  <svg className="inline-block w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </motion.div>
 
