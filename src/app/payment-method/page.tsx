@@ -973,41 +973,41 @@ export default function PaymentMethodPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
-                <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <CreditCard className="w-6 h-6 text-green-900" />
+              <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-amber-400 to-amber-500 rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                      <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-green-900" />
                     </div>
-                    <div>
-                      <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
+                    <div className="min-w-0">
+                      <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight break-words">
                         {language === 'ms' ? 'Pengurusan' : 'Subscription'}
                       </h1>
-                      <span className="text-amber-400 text-3xl sm:text-4xl md:text-5xl font-black">
+                      <span className="text-amber-400 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black break-words">
                         {language === 'ms' ? 'Langganan' : 'Management'}
                       </span>
                     </div>
                   </div>
-                  <p className="text-lg text-white/80 flex items-center gap-2">
-                    <Shield className="w-5 h-5 text-amber-400" />
-                    {language === 'ms' ? 'Urus langganan dan bil anda dengan selamat' : 'Manage your subscriptions and billing securely'}
+                  <p className="text-sm sm:text-base lg:text-lg text-white/80 flex items-center gap-2">
+                    <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
+                    <span className="break-words">{language === 'ms' ? 'Urus langganan dan bil anda dengan selamat' : 'Manage your subscriptions and billing securely'}</span>
                   </p>
                 </div>
                 
                 {/* Quick Stats */}
-                <div className="flex flex-wrap gap-4">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/20">
+                <div className="flex flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/20 flex-1 sm:flex-none min-w-[140px]">
                     <p className="text-white/70 text-xs font-medium mb-1">
                       {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
                     </p>
-                    <p className="text-white font-black text-lg">{currentPlan?.name || 'N/A'}</p>
+                    <p className="text-white font-black text-base sm:text-lg truncate">{currentPlan?.name || 'N/A'}</p>
                   </div>
                   {daysUntilRenewal !== null && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-xl px-5 py-3 border border-white/20">
+                    <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/20 flex-1 sm:flex-none min-w-[140px]">
                       <p className="text-white/70 text-xs font-medium mb-1">
                         {language === 'ms' ? 'Pembaharuan Dalam' : 'Renews In'}
                       </p>
-                      <p className="text-amber-400 font-black text-lg">{daysUntilRenewal} {language === 'ms' ? 'hari' : 'days'}</p>
+                      <p className="text-amber-400 font-black text-base sm:text-lg">{daysUntilRenewal} {language === 'ms' ? 'hari' : 'days'}</p>
                     </div>
                   )}
                 </div>
@@ -1017,26 +1017,26 @@ export default function PaymentMethodPage() {
         </section>
 
         {/* Main Content */}
-        <section className="py-12">
+        <section className="py-6 sm:py-8 md:py-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
               {/* Left Column - Main Content */}
-              <div className="lg:col-span-2 space-y-8">
+              <div className="lg:col-span-2 space-y-4 sm:space-y-6 md:space-y-8">
                 {/* Current Plan Card */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100 overflow-hidden relative"
+                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100 overflow-hidden relative"
                 >
-                  <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-br from-green-100 to-transparent rounded-bl-full opacity-50"></div>
+                  <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-green-100 to-transparent rounded-bl-full opacity-50"></div>
                   
                   <div className="relative">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                        <Sparkles className="w-6 h-6 text-amber-500" />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
+                      <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3">
+                        <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
                         {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
                       </h2>
-                      <span className={`px-4 py-2 rounded-full text-sm font-bold ${
+                      <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold self-start sm:self-auto ${
                         subscription?.status === 'canceled' 
                           ? 'bg-amber-100 text-amber-700' 
                           : 'bg-green-100 text-green-700'
@@ -1048,17 +1048,17 @@ export default function PaymentMethodPage() {
                       </span>
                     </div>
 
-                    <div className="bg-gradient-to-br from-green-50 to-amber-50 p-6 rounded-2xl border-2 border-green-200 mb-6">
+                    <div className="bg-gradient-to-br from-green-50 to-amber-50 p-4 sm:p-5 md:p-6 rounded-xl sm:rounded-2xl border-2 border-green-200 mb-4 sm:mb-6">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
-                          <h3 className="text-3xl font-black text-gray-900 mb-1">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-1 break-words">
                             {language === 'ms' ? currentPlan?.nameMs : currentPlan?.name}
                           </h3>
-                          <p className="text-gray-600">
+                          <p className="text-sm sm:text-base text-gray-600 break-words">
                             {language === 'ms' ? currentPlan?.taglineMs : currentPlan?.tagline}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
-                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                            <span className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
                               billingCycle === 'yearly' 
                                 ? 'bg-amber-100 text-amber-700' 
                                 : 'bg-green-100 text-green-700'
@@ -1070,13 +1070,13 @@ export default function PaymentMethodPage() {
                             </span>
                           </div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right flex-shrink-0">
                           <div className="flex items-baseline gap-1">
-                            <span className="text-4xl font-black text-green-700">
+                            <span className="text-3xl sm:text-4xl font-black text-green-700">
                               RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
                             </span>
                           </div>
-                          <span className="text-gray-500">
+                          <span className="text-sm sm:text-base text-gray-500">
                             /{billingCycle === 'yearly' ? (language === 'ms' ? 'tahun' : 'year') : (language === 'ms' ? 'bulan' : 'month')}
                           </span>
                         </div>
@@ -1130,28 +1130,28 @@ export default function PaymentMethodPage() {
 
                     {/* Next Billing Info */}
                     {subscription && (
-                      <div className={`rounded-xl p-4 mb-6 ${
+                      <div className={`rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 ${
                         subscription.status === 'canceled' 
                           ? 'bg-amber-50 border-2 border-amber-200' 
                           : 'bg-gray-50'
                       }`}>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <Clock className={`w-5 h-5 ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`} />
-                            <div>
-                              <p className={`text-sm font-bold ${subscription.status === 'canceled' ? 'text-amber-700' : 'text-gray-700'}`}>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <Clock className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`} />
+                            <div className="min-w-0">
+                              <p className={`text-xs sm:text-sm font-bold ${subscription.status === 'canceled' ? 'text-amber-700' : 'text-gray-700'}`}>
                                 {subscription.status === 'canceled' 
                                   ? (language === 'ms' ? 'Akses Tamat' : 'Access Ends')
                                   : (language === 'ms' ? 'Bil Seterusnya' : 'Next Billing')
                                 }
                               </p>
-                              <p className={`text-xs ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`}>
+                              <p className={`text-xs ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'} break-words`}>
                                 {formatDate(subscription.currentPeriodEnd)}
                               </p>
                             </div>
                           </div>
                           {subscription.status !== 'canceled' && (
-                            <p className="text-lg font-black text-green-600">
+                            <p className="text-base sm:text-lg font-black text-green-600 sm:ml-4">
                               RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
                             </p>
                           )}
@@ -1164,23 +1164,23 @@ export default function PaymentMethodPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-amber-500 to-amber-600 rounded-xl p-4 mb-6 text-white"
+                        className="bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl p-4 sm:p-5 md:p-6 mb-6 text-white"
                       >
-                        <div className="flex items-start gap-3">
-                          <AlertCircle className="w-6 h-6 flex-shrink-0 mt-0.5" />
-                          <div className="flex-1">
-                            <p className="font-bold mb-1">
+                        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                          <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold mb-2 text-base sm:text-lg">
                               {language === 'ms' 
                                 ? 'Langganan Dibatalkan' 
                                 : 'Subscription Cancelled'}
                             </p>
-                            <p className="text-sm text-white/90 mb-3">
+                            <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed">
                               {language === 'ms' 
                                 ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription.currentPeriodEnd)} (akhir tempoh pembayaran tahun semasa). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
                                 : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.currentPeriodEnd)} (end of current payment year). To continue after this date, please subscribe to a new plan.`}
                             </p>
-                            <Link href="/pricing">
-                              <Button className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors mt-2">
+                            <Link href="/pricing" className="inline-block w-full sm:w-auto">
+                              <Button className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-2.5 px-5 sm:px-6 font-bold rounded-lg shadow-md text-sm sm:text-base transition-colors">
                                 {language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe to New Plan'}
                               </Button>
                             </Link>
@@ -1194,17 +1194,17 @@ export default function PaymentMethodPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-4 mb-6 text-white"
+                        className="bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl p-4 sm:p-5 md:p-6 mb-4 sm:mb-6 text-white"
                       >
-                        <div className="flex items-start gap-3">
-                          <Calendar className="w-6 h-6 flex-shrink-0 mt-0.5" />
-                          <div className="flex-1">
-                            <p className="font-bold mb-1">
+                        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                          <Calendar className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold mb-2 text-base sm:text-lg">
                               {language === 'ms' 
                                 ? 'Pembatalan Dijadualkan' 
                                 : 'Cancellation Scheduled'}
                             </p>
-                            <p className="text-sm text-white/90 mb-3">
+                            <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed break-words">
                               {language === 'ms' 
                                 ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir tahun kontrak), kemudian dibatalkan secara automatik.`
                                 : `Your subscription will continue with monthly installment payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of contract year), then be automatically cancelled.`}
@@ -1212,7 +1212,7 @@ export default function PaymentMethodPage() {
                             <Button
                               onClick={handleReactivateSubscription}
                               disabled={loading}
-                              className="bg-white text-blue-600 hover:bg-blue-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm"
+                              className="w-full sm:w-auto bg-white text-blue-600 hover:bg-blue-50 py-2.5 px-5 sm:px-6 font-bold rounded-lg shadow-md text-sm sm:text-base"
                             >
                               {loading ? (
                                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -1246,11 +1246,11 @@ export default function PaymentMethodPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
+                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100"
                 >
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
-                      <CreditCard className="w-6 h-6 text-violet-600" />
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3">
+                      <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />
                       {language === 'ms' ? 'Kaedah Bayaran' : 'Payment Method'}
                     </h2>
                     <button
@@ -1285,45 +1285,45 @@ export default function PaymentMethodPage() {
                     }
                     
                     return (
-                    <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-2xl p-6 text-white relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-                      <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
+                    <div className="bg-gradient-to-r from-violet-600 to-purple-700 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-white relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-24 h-24 sm:w-32 sm:h-32 bg-white/10 rounded-full -mr-12 -mt-12 sm:-mr-16 sm:-mt-16"></div>
+                      <div className="absolute bottom-0 left-0 w-16 h-16 sm:w-24 sm:h-24 bg-white/5 rounded-full -ml-8 -mb-8 sm:-ml-12 sm:-mb-12"></div>
                       
                       <div className="relative">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-12 h-8 bg-amber-400 rounded flex items-center justify-center">
-                              <div className="w-8 h-6 bg-amber-500 rounded-sm"></div>
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-10 h-6 sm:w-12 sm:h-8 bg-amber-400 rounded flex items-center justify-center flex-shrink-0">
+                              <div className="w-6 h-4 sm:w-8 sm:h-6 bg-amber-500 rounded-sm"></div>
                             </div>
-                            <span className="text-sm font-semibold opacity-90 capitalize">
+                            <span className="text-xs sm:text-sm font-semibold opacity-90 capitalize">
                                 {paymentMethod.brand}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">
+                          <div className="flex items-center gap-2 bg-white/20 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold self-start sm:self-auto">
                             <CheckCircle className="w-3 h-3" />
                             {language === 'ms' ? 'Disahkan' : 'Verified'}
                           </div>
                         </div>
                         
-                        <p className="text-xl font-mono mb-4 tracking-wider">
+                        <p className="text-lg sm:text-xl font-mono mb-3 sm:mb-4 tracking-wider break-all sm:break-normal">
                           {showCardDetails 
                               ? `•••• •••• •••• ${paymentMethod.last4}`
                             : '•••• •••• •••• ••••'
                           }
                         </p>
                         
-                        <div className="flex justify-between items-end">
-                          <div>
+                        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-0">
+                          <div className="min-w-0">
                             <p className="text-xs opacity-70 mb-1">
                               {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
                             </p>
-                            <p className="font-bold">{user.displayName || user.email}</p>
+                            <p className="font-bold text-sm sm:text-base truncate">{user.displayName || user.email}</p>
                           </div>
-                          <div className="text-right">
+                          <div className="text-left sm:text-right flex-shrink-0">
                             <p className="text-xs opacity-70 mb-1">
                               {language === 'ms' ? 'Tamat' : 'Expires'}
                             </p>
-                            <p className="font-bold">
+                            <p className="font-bold text-sm sm:text-base">
                               {showCardDetails 
                                   ? `${String(paymentMethod.expMonth).padStart(2, '0')}/${paymentMethod.expYear}`
                                 : '••/••'
@@ -1365,26 +1365,26 @@ export default function PaymentMethodPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="bg-white rounded-3xl p-8 shadow-xl border border-gray-100"
+                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100"
                 >
-                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 mb-6">
-                    <Settings className="w-6 h-6 text-gray-700" />
+                  <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
                     {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
                   </h2>
 
 
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {/* Auto Renewal Toggle */}
-                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-green-50 to-white rounded-2xl border border-green-100 hover:border-green-200 transition">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${autoRenewal ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <RefreshCw className={`w-6 h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-400'}`} />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-green-50 to-white rounded-xl sm:rounded-2xl border border-green-100 hover:border-green-200 transition">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${autoRenewal ? 'bg-green-100' : 'bg-gray-100'}`}>
+                          <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-400'}`} />
                         </div>
-                        <div>
-                          <p className="font-bold text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-gray-900 text-sm sm:text-base">
                             {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500 break-words">
                             {autoRenewal
                                 ? (subscriptionInterval === 'year'
                                     ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
@@ -1401,7 +1401,7 @@ export default function PaymentMethodPage() {
                         onClick={handleToggleAutoRenewal}
                         aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
                         title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                        className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer ${
+                        className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
                           updatingAutoRenewal
                             ? 'opacity-70' 
                             : ''
@@ -1419,16 +1419,16 @@ export default function PaymentMethodPage() {
                     </div>
 
                     {/* Email Notifications */}
-                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-blue-50 to-white rounded-2xl border border-blue-100 hover:border-blue-200 transition">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${emailNotifications ? 'bg-blue-100' : 'bg-gray-100'}`}>
-                          <Mail className={`w-6 h-6 ${emailNotifications ? 'text-blue-600' : 'text-gray-400'}`} />
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-white rounded-xl sm:rounded-2xl border border-blue-100 hover:border-blue-200 transition">
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${emailNotifications ? 'bg-blue-100' : 'bg-gray-100'}`}>
+                          <Mail className={`w-5 h-5 sm:w-6 sm:h-6 ${emailNotifications ? 'text-blue-600' : 'text-gray-400'}`} />
                         </div>
-                        <div>
-                          <p className="font-bold text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-gray-900 text-sm sm:text-base">
                             {language === 'ms' ? 'Pemberitahuan Email' : 'Email Notifications'}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500 break-words">
                             {language === 'ms' ? 'Terima invois & kemas kini bil melalui email' : 'Receive invoices & billing updates via email'}
                           </p>
                         </div>
@@ -1438,7 +1438,7 @@ export default function PaymentMethodPage() {
                         disabled={updatingEmailNotifications}
                         aria-label={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
                         title={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
-                        className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 ${
+                        className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 flex-shrink-0 ${
                           emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
                         }`}
                       >
@@ -1454,29 +1454,29 @@ export default function PaymentMethodPage() {
                     </div>
 
                     {/* Cancel Subscription Button */}
-                    <div className={`flex items-center justify-between p-5 rounded-2xl border transition ${
+                    <div className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 rounded-xl sm:rounded-2xl border transition ${
                       subscription?.pendingContractCancellation 
                         ? 'bg-gradient-to-r from-amber-50 to-white border-amber-200 hover:border-amber-300'
                         : 'bg-gradient-to-r from-red-50 to-white border-red-100 hover:border-red-200'
                     }`}>
-                      <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
                           subscription?.pendingContractCancellation ? 'bg-amber-100' : 'bg-red-100'
                         }`}>
                           {subscription?.pendingContractCancellation ? (
-                            <Clock className="w-6 h-6 text-amber-600" />
+                            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600" />
                           ) : (
-                            <X className="w-6 h-6 text-red-600" />
+                            <X className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" />
                           )}
                         </div>
-                        <div>
-                          <p className="font-bold text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <p className="font-bold text-gray-900 text-sm sm:text-base">
                             {subscription?.pendingContractCancellation
                               ? (language === 'ms' ? 'Pembatalan Dijadualkan' : 'Cancellation Scheduled')
                               : (language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription')
                             }
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-xs sm:text-sm text-gray-500 break-words">
                             {subscription?.pendingContractCancellation
                               ? (language === 'ms'
                                   ? `Langganan anda akan dibatalkan pada ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut dan anda masih boleh menggunakan semua perkhidmatan.`
@@ -1497,7 +1497,7 @@ export default function PaymentMethodPage() {
                           type="button"
                           onClick={handleReactivateSubscription}
                           disabled={loading || loadingSubscription}
-                          className="bg-green-600 text-white hover:bg-green-700 py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap disabled:opacity-70"
+                          className="w-full sm:w-auto bg-green-600 text-white hover:bg-green-700 py-2.5 px-5 sm:px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
                         >
                           {loading ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -1513,7 +1513,7 @@ export default function PaymentMethodPage() {
                           type="button"
                           onClick={() => setShowCancelModal(true)}
                           disabled={loading || loadingSubscription || subscription?.status === 'canceled'}
-                          className={`py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap disabled:opacity-70 ${
+                          className={`w-full sm:w-auto py-2.5 px-5 sm:px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors disabled:opacity-70 ${
                             subscription?.status === 'canceled'
                               ? 'bg-gray-400 text-white cursor-not-allowed'
                               : 'bg-red-600 text-white hover:bg-red-700'
