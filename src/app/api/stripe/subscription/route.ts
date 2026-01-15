@@ -307,6 +307,17 @@ export async function GET(req: NextRequest) {
 
     // Check if user can undo cancellation (within contract year)
     const canUndoCancellation = pendingContractCancellation && !isBeyondContractYear;
+    
+    // For monthly installment plans: auto-renewal cannot be toggled during contract year
+    // This ensures the 12-month commitment is honored
+    const isMonthlyInstallment = interval === 'month';
+    const canToggleAutoRenewal = !isMonthlyInstallment || isBeyondContractYear;
+    
+    // For monthly installment plans, the "access ends" date is the contract year end
+    // Not the monthly billing period end - user has access for the full year
+    const accessEndsDate = isMonthlyInstallment && !isBeyondContractYear
+      ? contractYearEnd.toISOString()
+      : safeTimestampToISO((subscription as any).current_period_end) || new Date().toISOString();
 
     return NextResponse.json({
       subscription: {
@@ -331,6 +342,10 @@ export async function GET(req: NextRequest) {
         pendingContractCancellation,
         contractCancellationDate: contractCancellationDate ? contractCancellationDate.toISOString() : null,
         canUndoCancellation,
+        // Monthly installment plan specific fields
+        isMonthlyInstallment,
+        canToggleAutoRenewal,
+        accessEndsDate, // This is the date when access actually ends (contract year end for monthly plans)
       },
     });
 

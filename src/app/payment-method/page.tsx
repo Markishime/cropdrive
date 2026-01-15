@@ -79,6 +79,10 @@ interface SubscriptionData {
   pendingContractCancellation?: boolean;
   contractCancellationDate?: string;
   canUndoCancellation?: boolean;
+  // Monthly installment plan specific
+  isMonthlyInstallment?: boolean;
+  canToggleAutoRenewal?: boolean;
+  accessEndsDate?: string; // The actual date when access ends (contract year end for monthly)
 }
 
 export default function PaymentMethodPage() {
@@ -1128,39 +1132,83 @@ export default function PaymentMethodPage() {
                       )}
                     </div>
 
-                    {/* Next Billing Info */}
+                    {/* Billing Info - Monthly installment plans show both next billing AND contract end */}
                     {subscription && (
-                      <div className={`rounded-xl p-3 sm:p-4 mb-4 sm:mb-6 ${
-                        subscription.status === 'canceled' 
-                          ? 'bg-amber-50 border-2 border-amber-200' 
-                          : 'bg-gray-50'
-                      }`}>
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <Clock className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'}`} />
-                            <div className="min-w-0">
-                              <p className={`text-xs sm:text-sm font-bold ${subscription.status === 'canceled' ? 'text-amber-700' : 'text-gray-700'}`}>
-                                {subscription.status === 'canceled' 
-                                  ? (language === 'ms' ? 'Akses Tamat' : 'Access Ends')
-                                  : (language === 'ms' ? 'Bil Seterusnya' : 'Next Billing')
-                                }
-                              </p>
-                              <p className={`text-xs ${subscription.status === 'canceled' ? 'text-amber-600' : 'text-gray-500'} break-words`}>
-                                {formatDate(subscription.currentPeriodEnd)}
+                      <div className="space-y-3 mb-4 sm:mb-6">
+                        {/* Next Billing (monthly payment) */}
+                        {subscription.status !== 'canceled' && (
+                          <div className="rounded-xl p-3 sm:p-4 bg-gray-50">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                              <div className="flex items-center gap-2 sm:gap-3">
+                                <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-500" />
+                                <div className="min-w-0">
+                                  <p className="text-xs sm:text-sm font-bold text-gray-700">
+                                    {language === 'ms' ? 'Bil Seterusnya' : 'Next Billing'}
+                                  </p>
+                                  <p className="text-xs text-gray-500 break-words">
+                                    {formatDate(subscription.currentPeriodEnd)}
+                                  </p>
+                                </div>
+                              </div>
+                              <p className="text-base sm:text-lg font-black text-green-600 sm:ml-4">
+                                RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
                               </p>
                             </div>
                           </div>
-                          {subscription.status !== 'canceled' && (
-                            <p className="text-base sm:text-lg font-black text-green-600 sm:ml-4">
-                              RM{billingCycle === 'yearly' ? currentPlan?.yearlyPrice : currentPlan?.monthlyPrice}
-                            </p>
-                          )}
-                        </div>
+                        )}
+                        
+                        {/* Access Ends - shows contract year end for monthly installment plans */}
+                        {subscription.isMonthlyInstallment && !subscription.isBeyondContractYear && (
+                          <div className={`rounded-xl p-3 sm:p-4 ${
+                            subscription.pendingContractCancellation 
+                              ? 'bg-amber-50 border-2 border-amber-200' 
+                              : 'bg-green-50 border border-green-200'
+                          }`}>
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Calendar className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${
+                                subscription.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
+                              }`} />
+                              <div className="min-w-0 flex-1">
+                                <p className={`text-xs sm:text-sm font-bold ${
+                                  subscription.pendingContractCancellation ? 'text-amber-700' : 'text-green-700'
+                                }`}>
+                                  {subscription.pendingContractCancellation
+                                    ? (language === 'ms' ? 'Akses Tamat (Pembatalan Dijadualkan)' : 'Access Ends (Cancellation Scheduled)')
+                                    : (language === 'ms' ? 'Akses Penuh Sehingga' : 'Full Access Until')
+                                  }
+                                </p>
+                                <p className={`text-xs ${
+                                  subscription.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
+                                } break-words`}>
+                                  {formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)}
+                                  {' '}({language === 'ms' ? 'akhir kontrak 12 bulan' : 'end of 12-month contract'})
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Cancelled subscription - show when access ends */}
+                        {subscription.status === 'canceled' && (
+                          <div className="rounded-xl p-3 sm:p-4 bg-amber-50 border-2 border-amber-200">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-amber-600" />
+                              <div className="min-w-0">
+                                <p className="text-xs sm:text-sm font-bold text-amber-700">
+                                  {language === 'ms' ? 'Akses Tamat' : 'Access Ends'}
+                                </p>
+                                <p className="text-xs text-amber-600 break-words">
+                                  {formatDate(subscription.accessEndsDate || subscription.currentPeriodEnd)}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {/* Subscription Cancelled - Service Continues Until Period End */}
-                    {subscription?.status === 'canceled' && subscription?.currentPeriodEnd && (
+                    {/* Subscription Cancelled - Service Continues Until Contract Year End */}
+                    {subscription?.status === 'canceled' && (subscription?.accessEndsDate || subscription?.currentPeriodEnd) && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1176,8 +1224,8 @@ export default function PaymentMethodPage() {
                             </p>
                             <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed">
                               {language === 'ms' 
-                                ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription.currentPeriodEnd)} (akhir tempoh pembayaran tahun semasa). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
-                                : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.currentPeriodEnd)} (end of current payment year). To continue after this date, please subscribe to a new plan.`}
+                                ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)} (akhir kontrak 12 bulan anda). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
+                                : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)} (end of your 12-month contract). To continue after this date, please subscribe to a new plan.`}
                             </p>
                             <Link href="/pricing" className="inline-block w-full sm:w-auto">
                               <Button className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-2.5 px-5 sm:px-6 font-bold rounded-lg shadow-md text-sm sm:text-base transition-colors">
@@ -1189,8 +1237,8 @@ export default function PaymentMethodPage() {
                       </motion.div>
                     )}
 
-                    {/* Pending Contract Cancellation Banner (for installment Option A) */}
-                    {subscription?.pendingContractCancellation && subscription?.contractCancellationDate && (
+                    {/* Pending Contract Cancellation Banner - User can still use services and can undo */}
+                    {subscription?.pendingContractCancellation && subscription?.contractCancellationDate && subscription?.status !== 'canceled' && (
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -1201,13 +1249,13 @@ export default function PaymentMethodPage() {
                           <div className="flex-1 min-w-0">
                             <p className="font-bold mb-2 text-base sm:text-lg">
                               {language === 'ms' 
-                                ? 'Pembatalan Dijadualkan' 
-                                : 'Cancellation Scheduled'}
+                                ? 'Pembatalan Dijadualkan - Perkhidmatan Masih Aktif' 
+                                : 'Cancellation Scheduled - Service Still Active'}
                             </p>
                             <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed break-words">
                               {language === 'ms' 
-                                ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir tahun kontrak), kemudian dibatalkan secara automatik.`
-                                : `Your subscription will continue with monthly installment payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of contract year), then be automatically cancelled.`}
+                                ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir kontrak 12 bulan). Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant. Pembatalan hanya menghentikan pembaharuan untuk tahun berikutnya.`
+                                : `Your subscription will continue with monthly installment payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of 12-month contract). You can still use all services including AI assistant. Cancellation only stops renewal for the following year.`}
                             </p>
                             <Button
                               onClick={handleReactivateSubscription}
@@ -1219,7 +1267,7 @@ export default function PaymentMethodPage() {
                               ) : (
                                 <RefreshCw className="w-4 h-4 mr-2" />
                               )}
-                              {language === 'ms' ? 'Batalkan Pembatalan' : 'Cancel Cancellation'}
+                              {language === 'ms' ? 'Batal Pembatalan & Teruskan' : 'Undo Cancellation & Continue'}
                             </Button>
                           </div>
                         </div>
@@ -1374,49 +1422,78 @@ export default function PaymentMethodPage() {
 
 
                   <div className="space-y-3 sm:space-y-4">
-                    {/* Auto Renewal Toggle */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-green-50 to-white rounded-xl sm:rounded-2xl border border-green-100 hover:border-green-200 transition">
-                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${autoRenewal ? 'bg-green-100' : 'bg-gray-100'}`}>
-                          <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-400'}`} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="font-bold text-gray-900 text-sm sm:text-base">
-                            {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
-                          </p>
-                          <p className="text-xs sm:text-sm text-gray-500 break-words">
-                            {autoRenewal
-                                ? (subscriptionInterval === 'year'
-                                    ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
-                                    : (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap bulan' : 'Subscription will renew automatically every month'))
-                                : (subscriptionInterval === 'year'
-                                    ? (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir tahun, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the year, but will not renew automatically after that')
-                                    : (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir bulan, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the month, but will not renew automatically after that'))
+                    {/* Auto Renewal / Monthly Billing Info */}
+                    {subscription?.isMonthlyInstallment && !subscription?.isBeyondContractYear ? (
+                      // For monthly installment plans within contract year - show info, no toggle
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-green-50 to-white rounded-xl sm:rounded-2xl border border-green-200">
+                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-green-100">
+                            <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-gray-900 text-sm sm:text-base">
+                              {language === 'ms' ? 'Pelan Ansuran 12 Bulan' : '12-Month Installment Plan'}
+                            </p>
+                            <p className="text-xs sm:text-sm text-gray-600 break-words">
+                              {language === 'ms' 
+                                ? 'Pembayaran bulanan akan diteruskan secara automatik sepanjang tempoh kontrak 12 bulan. Pembatalan awal akan menghentikan pembaharuan automatik untuk tahun berikutnya.'
+                                : 'Monthly payments will continue automatically throughout the 12-month contract period. Early cancellation stops auto-renewal for the following year.'
                               }
-                          </p>
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full flex-shrink-0">
+                          <CheckCircle className="w-4 h-4 text-green-600" />
+                          <span className="text-xs sm:text-sm font-bold text-green-700">
+                            {language === 'ms' ? 'Aktif' : 'Active'}
+                          </span>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={handleToggleAutoRenewal}
-                        aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                        title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                        className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
-                          updatingAutoRenewal
-                            ? 'opacity-70' 
-                            : ''
-                        } ${autoRenewal ? 'bg-green-600' : 'bg-gray-300'}`}
-                      >
-                        {updatingAutoRenewal ? (
-                          <Loader2 className="w-4 h-4 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
-                        ) : (
-                          <motion.div
-                            animate={{ x: autoRenewal ? 28 : 2 }}
-                            className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
-                          />
-                        )}
-                      </button>
-                    </div>
+                    ) : (
+                      // For yearly plans or beyond contract year - show toggle
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-green-50 to-white rounded-xl sm:rounded-2xl border border-green-100 hover:border-green-200 transition">
+                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${autoRenewal ? 'bg-green-100' : 'bg-gray-100'}`}>
+                            <RefreshCw className={`w-5 h-5 sm:w-6 sm:h-6 ${autoRenewal ? 'text-green-600' : 'text-gray-400'}`} />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-bold text-gray-900 text-sm sm:text-base">
+                              {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
+                            </p>
+                            <p className="text-xs sm:text-sm text-gray-500 break-words">
+                              {autoRenewal
+                                  ? (subscriptionInterval === 'year'
+                                      ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
+                                      : (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap bulan' : 'Subscription will renew automatically every month'))
+                                  : (subscriptionInterval === 'year'
+                                      ? (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir tahun, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the year, but will not renew automatically after that')
+                                      : (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir bulan, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the month, but will not renew automatically after that'))
+                                }
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleToggleAutoRenewal}
+                          aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                          title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                          className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
+                            updatingAutoRenewal
+                              ? 'opacity-70' 
+                              : ''
+                          } ${autoRenewal ? 'bg-green-600' : 'bg-gray-300'}`}
+                        >
+                          {updatingAutoRenewal ? (
+                            <Loader2 className="w-4 h-4 animate-spin absolute top-1.5 left-1/2 -translate-x-1/2 text-white" />
+                          ) : (
+                            <motion.div
+                              animate={{ x: autoRenewal ? 28 : 2 }}
+                              className="absolute top-1 w-5 h-5 bg-white rounded-full shadow-md"
+                            />
+                          )}
+                        </button>
+                      </div>
+                    )}
 
                     {/* Email Notifications */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 p-4 sm:p-5 bg-gradient-to-r from-blue-50 to-white rounded-xl sm:rounded-2xl border border-blue-100 hover:border-blue-200 transition">
