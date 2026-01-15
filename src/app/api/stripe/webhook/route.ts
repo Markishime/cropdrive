@@ -853,19 +853,36 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       console.log('✅ User plan updated from subscription:', userId, 'new plan:', planId, 'uploadsLimit:', limits.uploadsLimit, isUpgrade ? '(upgrade - uploadsUsed reset to 0)' : '');
     }
   }
-  // If subscription is unpaid (different from cancelled - no access)
+  // If subscription is unpaid (Stripe exhausted all payment retries - no access)
   else if (subscription.status === 'unpaid') {
     if (userId) {
+      // Downgrade to free plan - no access to AI services
       await firestoreWithRetry(
         () => adminDb.collection('users').doc(userId).update({
-          plan: 'start',
-          uploadsLimit: 10,
+          plan: 'none',
+          uploadsLimit: 0,
+          uploadsUsed: 0,
           subscriptionStatus: 'unpaid',
+          paymentFailedAt: admin.firestore.FieldValue.serverTimestamp(),
           updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         }),
-        'Downgrade user plan for unpaid'
+        'Downgrade user to free plan for unpaid'
       );
-      console.log('⬇️ Downgraded user to basic plan (unpaid):', userId);
+      console.log('⬇️ Downgraded user to FREE plan due to failed payments:', userId);
+    }
+  }
+  // If subscription is past_due (payment failed, retrying)
+  else if (subscription.status === 'past_due') {
+    if (userId) {
+      // Keep current plan but mark as past_due (grace period)
+      await firestoreWithRetry(
+        () => adminDb.collection('users').doc(userId).update({
+          subscriptionStatus: 'past_due',
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        }),
+        'Mark user as past_due'
+      );
+      console.log('⚠️ Subscription past_due (payment retrying):', userId);
     }
   }
 

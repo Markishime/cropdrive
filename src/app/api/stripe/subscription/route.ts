@@ -9,6 +9,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   timeout: 10000,
 });
 
+// Helper function to safely convert timestamp to ISO string
+const safeTimestampToISO = (timestamp: number | undefined | null): string | null => {
+  if (!timestamp) return null;
+  try {
+    const date = new Date(timestamp * 1000);
+    if (isNaN(date.getTime())) return null;
+    return date.toISOString();
+  } catch {
+    return null;
+  }
+};
+
 // GET - Fetch subscription details
 export async function GET(req: NextRequest) {
   try {
@@ -30,18 +42,32 @@ export async function GET(req: NextRequest) {
     const stripeSubscriptionId = userData?.stripeSubscriptionId;
 
     if (!stripeSubscriptionId) {
-    return NextResponse.json({ 
-      success: true,
-      status: 200,
-      subscription: null, 
-      message: 'No active subscription' 
-    }, { status: 200 });
+      return NextResponse.json({ 
+        success: true,
+        status: 200,
+        subscription: null, 
+        message: 'No active subscription' 
+      }, { status: 200 });
     }
 
     // Fetch subscription from Stripe with price details
-    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
-      expand: ['default_payment_method', 'latest_invoice', 'items.data.price', 'customer'],
-    });
+    let subscription: Stripe.Subscription;
+    try {
+      subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId, {
+        expand: ['default_payment_method', 'latest_invoice', 'items.data.price', 'customer'],
+      });
+    } catch (stripeError: any) {
+      console.error('Stripe subscription retrieval error:', stripeError.message);
+      // If subscription doesn't exist in Stripe, return null subscription
+      if (stripeError.code === 'resource_missing') {
+        return NextResponse.json({ 
+          success: true,
+          subscription: null, 
+          message: 'Subscription not found in Stripe' 
+        }, { status: 200 });
+      }
+      throw stripeError;
+    }
 
     // Get payment method details - check Firestore first, then Stripe
     let paymentMethod = null;
@@ -74,7 +100,6 @@ export async function GET(req: NextRequest) {
           let pm: Stripe.PaymentMethod;
           
           if (typeof (subscription as any).default_payment_method === 'string') {
-            // If it's just the ID, fetch the payment method
             pm = await stripe.paymentMethods.retrieve((subscription as any).default_payment_method);
           } else {
             pm = (subscription as any).default_payment_method as Stripe.PaymentMethod;
@@ -94,52 +119,32 @@ export async function GET(req: NextRequest) {
         }
       }
     
-    // If no payment method on subscription, try to get from customer's default payment method
-    if (!paymentMethod && subscription.customer) {
-      try {
-        const customerId = typeof subscription.customer === 'string'
-          ? subscription.customer
-          : subscription.customer.id;
+      // If no payment method on subscription, try to get from customer's default payment method
+      if (!paymentMethod && subscription.customer) {
+        try {
+          const customerId = typeof subscription.customer === 'string'
+            ? subscription.customer
+            : subscription.customer.id;
 
-        console.log('🔍 Checking customer default payment method:', customerId);
+          console.log('🔍 Checking customer default payment method:', customerId);
 
-        const customer = await stripe.customers.retrieve(customerId, {
-          expand: ['invoice_settings.default_payment_method'],
-        });
+          const customer = await stripe.customers.retrieve(customerId, {
+            expand: ['invoice_settings.default_payment_method'],
+          });
 
-        if (customer && !customer.deleted) {
-          const customerObj = customer as Stripe.Customer;
-          const defaultPm = customerObj.invoice_settings?.default_payment_method;
+          if (customer && !customer.deleted) {
+            const customerObj = customer as Stripe.Customer;
+            const defaultPm = customerObj.invoice_settings?.default_payment_method;
 
-          if (defaultPm) {
-            let pm: Stripe.PaymentMethod;
+            if (defaultPm) {
+              let pm: Stripe.PaymentMethod;
 
-            if (typeof defaultPm === 'string') {
-              pm = await stripe.paymentMethods.retrieve(defaultPm);
-            } else {
-              pm = defaultPm as Stripe.PaymentMethod;
-            }
+              if (typeof defaultPm === 'string') {
+                pm = await stripe.paymentMethods.retrieve(defaultPm);
+              } else {
+                pm = defaultPm as Stripe.PaymentMethod;
+              }
 
-            if (pm.card) {
-              paymentMethod = {
-                brand: pm.card.brand,
-                last4: pm.card.last4,
-                expMonth: pm.card.exp_month,
-                expYear: pm.card.exp_year,
-              };
-              console.log('✅ Found payment method from customer:', paymentMethod);
-            }
-          } else {
-            // If no default payment method set, check all customer's payment methods
-            console.log('🔍 No default payment method, checking all customer payment methods');
-            const paymentMethods = await stripe.paymentMethods.list({
-              customer: customerId,
-              type: 'card',
-            });
-
-            if (paymentMethods.data.length > 0) {
-              // Use the most recent payment method
-              const pm = paymentMethods.data[0];
               if (pm.card) {
                 paymentMethod = {
                   brand: pm.card.brand,
@@ -147,64 +152,83 @@ export async function GET(req: NextRequest) {
                   expMonth: pm.card.exp_month,
                   expYear: pm.card.exp_year,
                 };
-                console.log('✅ Found payment method from customer payment methods:', paymentMethod);
+                console.log('✅ Found payment method from customer:', paymentMethod);
+              }
+            } else {
+              // If no default payment method set, check all customer's payment methods
+              console.log('🔍 No default payment method, checking all customer payment methods');
+              const paymentMethods = await stripe.paymentMethods.list({
+                customer: customerId,
+                type: 'card',
+              });
+
+              if (paymentMethods.data.length > 0) {
+                const pm = paymentMethods.data[0];
+                if (pm.card) {
+                  paymentMethod = {
+                    brand: pm.card.brand,
+                    last4: pm.card.last4,
+                    expMonth: pm.card.exp_month,
+                    expYear: pm.card.exp_year,
+                  };
+                  console.log('✅ Found payment method from customer payment methods:', paymentMethod);
+                }
               }
             }
           }
+        } catch (error) {
+          console.error('Error fetching customer payment method:', error);
         }
-      } catch (error) {
-        console.error('Error fetching customer payment method:', error);
       }
-    }
     
-    // Last resort: try to get the payment method from the latest successful invoice
-    if (!paymentMethod && subscription.latest_invoice) {
-      try {
-        const invoiceId = typeof subscription.latest_invoice === 'string'
-          ? subscription.latest_invoice
-          : subscription.latest_invoice.id;
-        
-        console.log('🔍 Checking latest invoice for payment method:', invoiceId);
-        
-        const invoice = await stripe.invoices.retrieve(invoiceId, {
-          expand: ['payment_intent.payment_method'],
-        });
-        
-        if ((invoice as any).payment_intent) {
-          let pi: Stripe.PaymentIntent;
-
-          if (typeof (invoice as any).payment_intent === 'string') {
-            pi = await stripe.paymentIntents.retrieve((invoice as any).payment_intent, {
-              expand: ['payment_method'],
-            });
-          } else {
-            pi = (invoice as any).payment_intent as Stripe.PaymentIntent;
-          }
+      // Last resort: try to get the payment method from the latest successful invoice
+      if (!paymentMethod && subscription.latest_invoice) {
+        try {
+          const invoiceId = typeof subscription.latest_invoice === 'string'
+            ? subscription.latest_invoice
+            : subscription.latest_invoice.id;
           
-          if (pi.payment_method) {
-            let pm: Stripe.PaymentMethod;
-            
-            if (typeof pi.payment_method === 'string') {
-              pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+          console.log('🔍 Checking latest invoice for payment method:', invoiceId);
+          
+          const invoice = await stripe.invoices.retrieve(invoiceId, {
+            expand: ['payment_intent.payment_method'],
+          });
+          
+          if ((invoice as any).payment_intent) {
+            let pi: Stripe.PaymentIntent;
+
+            if (typeof (invoice as any).payment_intent === 'string') {
+              pi = await stripe.paymentIntents.retrieve((invoice as any).payment_intent, {
+                expand: ['payment_method'],
+              });
             } else {
-              pm = pi.payment_method as Stripe.PaymentMethod;
+              pi = (invoice as any).payment_intent as Stripe.PaymentIntent;
             }
             
-            if (pm.card) {
-              paymentMethod = {
-                brand: pm.card.brand,
-                last4: pm.card.last4,
-                expMonth: pm.card.exp_month,
-                expYear: pm.card.exp_year,
-              };
-              console.log('✅ Found payment method from invoice:', paymentMethod);
+            if (pi.payment_method) {
+              let pm: Stripe.PaymentMethod;
+              
+              if (typeof pi.payment_method === 'string') {
+                pm = await stripe.paymentMethods.retrieve(pi.payment_method);
+              } else {
+                pm = pi.payment_method as Stripe.PaymentMethod;
+              }
+              
+              if (pm.card) {
+                paymentMethod = {
+                  brand: pm.card.brand,
+                  last4: pm.card.last4,
+                  expMonth: pm.card.exp_month,
+                  expYear: pm.card.exp_year,
+                };
+                console.log('✅ Found payment method from invoice:', paymentMethod);
+              }
             }
           }
+        } catch (error) {
+          console.error('Error fetching invoice payment method:', error);
         }
-      } catch (error) {
-        console.error('Error fetching invoice payment method:', error);
       }
-    }
     }
     
     // If we fetched payment method from Stripe and it's not in Firestore, save it
@@ -230,7 +254,7 @@ export async function GET(req: NextRequest) {
         }
       }
       
-      // Always update user document with payment method (ensures it's always stored)
+      // Always update user document with payment method
       const userPaymentMethod = userData?.paymentMethod;
       if (!userPaymentMethod || JSON.stringify(userPaymentMethod) !== JSON.stringify(paymentMethod)) {
         console.log('💾 Saving payment method to user document');
@@ -249,27 +273,25 @@ export async function GET(req: NextRequest) {
     // Get price details for monthly plans
     const priceItem = subscription.items.data[0]?.price;
     const priceId = priceItem?.id || null;
-    const unitAmount = priceItem?.unit_amount || 0; // Amount in cents
+    const unitAmount = priceItem?.unit_amount || 0;
     const currency = priceItem?.currency || 'myr';
     const interval = priceItem?.recurring?.interval || 'month';
 
-    // Calculate subscription start date (first billing cycle start)
-    // For new subscriptions, start_date is available. For existing, use created timestamp
-    // Handle cases where start_date might be undefined/null by falling back to created
+    // Calculate subscription start date safely
     const startDateTimestamp = (subscription as any).start_date || subscription.created || Math.floor(Date.now() / 1000);
-    const subscriptionStartDate = new Date(startDateTimestamp * 1000);
+    let subscriptionStartDate = new Date(startDateTimestamp * 1000);
     
-    // Validate the date is valid before proceeding
+    // Validate the date
     if (isNaN(subscriptionStartDate.getTime())) {
       console.error('Invalid subscription start date, falling back to current time');
-      subscriptionStartDate.setTime(Date.now());
+      subscriptionStartDate = new Date();
     }
     
     // Calculate contract year end (12 months from subscription start)
     const contractYearEnd = new Date(subscriptionStartDate);
     contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
 
-    // Calculate months used (number of complete billing periods since start)
+    // Calculate months used
     const now = new Date();
     const monthsUsed = Math.floor(
       (now.getTime() - subscriptionStartDate.getTime()) / (1000 * 60 * 60 * 24 * 30.44)
@@ -278,22 +300,13 @@ export async function GET(req: NextRequest) {
     // Check if we're beyond the first contract year
     const isBeyondContractYear = now >= contractYearEnd;
 
-    // Check for pending contract cancellation in our database (reuse subscriptionDoc from earlier)
+    // Check for pending contract cancellation in our database
     const subscriptionData = subscriptionDoc.exists ? subscriptionDoc.data() : null;
-    const pendingContractCancellation = subscriptionData?.pendingContractCancellation || false;
-    const contractCancellationDate = subscriptionData?.contractCancellationDate?.toDate?.() || null;
+    const pendingContractCancellation = subscriptionData?.pendingContractCancellation || userData?.pendingContractCancellation || false;
+    const contractCancellationDate = subscriptionData?.contractCancellationDate?.toDate?.() || userData?.contractCancellationDate?.toDate?.() || null;
 
-    // Helper function to safely convert timestamp to ISO string
-    const safeTimestampToISO = (timestamp: number | undefined | null): string | null => {
-      if (!timestamp) return null;
-      try {
-        const date = new Date(timestamp * 1000);
-        if (isNaN(date.getTime())) return null;
-        return date.toISOString();
-      } catch {
-        return null;
-      }
-    };
+    // Check if user can undo cancellation (within contract year)
+    const canUndoCancellation = pendingContractCancellation && !isBeyondContractYear;
 
     return NextResponse.json({
       subscription: {
@@ -305,18 +318,19 @@ export async function GET(req: NextRequest) {
         cancelAt: safeTimestampToISO((subscription as any).cancel_at),
         billingCycle: interval,
         paymentMethod,
-        // New fields for monthly contract year logic
+        // Contract year fields
         subscriptionStartDate: subscriptionStartDate.toISOString(),
         contractYearEnd: contractYearEnd.toISOString(),
         monthsUsed: Math.max(0, monthsUsed),
         remainingMonths: Math.max(0, 12 - monthsUsed),
         isBeyondContractYear,
         priceId,
-        unitAmount, // Monthly price in cents
+        unitAmount,
         currency,
-        // Pending cancellation info from our database
+        // Pending cancellation info
         pendingContractCancellation,
         contractCancellationDate: contractCancellationDate ? contractCancellationDate.toISOString() : null,
+        canUndoCancellation,
       },
     });
 
@@ -357,10 +371,106 @@ export async function PATCH(req: NextRequest) {
     }
 
     if (action === 'toggle_auto_renewal') {
-      // Toggle auto-renewal (cancel_at_period_end)
-      const subscription = await stripe.subscriptions.update(stripeSubscriptionId, {
-        cancel_at_period_end: cancelAtPeriodEnd,
-      });
+      // First verify the subscription exists and is active in Stripe
+      let subscription: Stripe.Subscription;
+      try {
+        subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+        
+        // Check if subscription is in a state that can be updated
+        if (subscription.status === 'canceled') {
+          return NextResponse.json({ 
+            error: 'Subscription is already canceled. Please subscribe to a new plan.',
+            expired: true 
+          }, { status: 400 });
+        }
+      } catch (stripeError: any) {
+        console.error('Error retrieving subscription from Stripe:', stripeError.message);
+        if (stripeError.code === 'resource_missing') {
+          return NextResponse.json({ 
+            error: 'Subscription not found in Stripe. Please contact support.',
+            expired: true 
+          }, { status: 400 });
+        }
+        throw stripeError;
+      }
+
+      // For monthly subscriptions within contract year, we don't actually update Stripe
+      // We just track it in our database - Stripe keeps charging monthly
+      const priceItem = subscription.items?.data?.[0]?.price;
+      const interval = priceItem?.recurring?.interval;
+      const isMonthly = interval === 'month';
+
+      // Calculate if within contract year
+      const startDateTimestamp = (subscription as any).start_date || subscription.created || Math.floor(Date.now() / 1000);
+      const subscriptionStartDate = new Date(startDateTimestamp * 1000);
+      const contractYearEnd = new Date(subscriptionStartDate);
+      contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
+      const now = new Date();
+      const isWithinContractYear = now < contractYearEnd;
+
+      // For monthly subscriptions within contract year, DON'T update Stripe
+      // Just track in our database - billing continues
+      if (isMonthly && isWithinContractYear) {
+        console.log('📅 Monthly subscription within contract year - not updating Stripe, tracking in DB only');
+        
+        // Update Firestore subscriptions collection
+        const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
+        const subscriptionDoc = await subscriptionRef.get();
+        
+        const updateData = {
+          cancelAtPeriodEnd: cancelAtPeriodEnd,
+          pendingContractCancellation: cancelAtPeriodEnd,
+          contractCancellationDate: cancelAtPeriodEnd ? admin.firestore.Timestamp.fromDate(contractYearEnd) : admin.firestore.FieldValue.delete(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        };
+
+        if (subscriptionDoc.exists) {
+          await subscriptionRef.update(updateData);
+        } else {
+          await subscriptionRef.set({
+            userId,
+            stripeSubscriptionId,
+            ...updateData,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          });
+        }
+
+        // Update user document
+        await adminDb.collection('users').doc(userId).update({
+          cancelAtPeriodEnd: cancelAtPeriodEnd,
+          pendingContractCancellation: cancelAtPeriodEnd,
+          contractCancellationDate: cancelAtPeriodEnd ? admin.firestore.Timestamp.fromDate(contractYearEnd) : admin.firestore.FieldValue.delete(),
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        console.log('✅ Auto-renewal preference tracked (billing continues):', { 
+          subscriptionId: stripeSubscriptionId, 
+          pendingCancellation: cancelAtPeriodEnd,
+          contractEndDate: contractYearEnd.toISOString()
+        });
+
+        return NextResponse.json({
+          success: true,
+          status: 200,
+          cancelAtPeriodEnd: cancelAtPeriodEnd,
+          pendingContractCancellation: cancelAtPeriodEnd,
+          contractCancellationDate: cancelAtPeriodEnd ? contractYearEnd.toISOString() : null,
+          billingCycle: 'monthly',
+          message: cancelAtPeriodEnd 
+            ? `Cancellation scheduled. Your subscription will continue with monthly payments until ${contractYearEnd.toLocaleDateString()}, then be cancelled. You can undo this anytime before then.`
+            : 'Cancellation undone. Your subscription will continue normally with auto-renewal.',
+        }, { status: 200 });
+      }
+
+      // For yearly subscriptions or beyond contract year, update Stripe normally
+      try {
+        subscription = await stripe.subscriptions.update(stripeSubscriptionId, {
+          cancel_at_period_end: cancelAtPeriodEnd,
+        });
+      } catch (stripeError: any) {
+        console.error('Error updating subscription in Stripe:', stripeError.message);
+        throw stripeError;
+      }
 
       // Update Firestore subscriptions collection
       const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
@@ -381,21 +491,16 @@ export async function PATCH(req: NextRequest) {
         });
       }
 
-      // Get billing cycle to determine renewal period
-      const priceItem = subscription.items?.data?.[0]?.price;
-      const interval = priceItem?.recurring?.interval; // 'month' or 'year'
       const billingCycle = interval === 'year' ? 'yearly' : 'monthly';
       const renewalPeriod = interval === 'year' ? 'year' : 'month';
 
-      // Update user document - keep subscription status as 'active' even when auto-renewal is off
-      // The subscription remains active until the period ends, it just won't renew automatically
+      // Update user document
       await adminDb.collection('users').doc(userId).update({
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
-        // Don't change subscriptionStatus - subscription is still active, just won't auto-renew
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
 
-      console.log('✅ Auto-renewal toggled:', { 
+      console.log('✅ Auto-renewal toggled in Stripe:', { 
         subscriptionId: stripeSubscriptionId, 
         cancelAtPeriodEnd: subscription.cancel_at_period_end,
         billingCycle: billingCycle
@@ -423,7 +528,7 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
-// DELETE - Cancel subscription at period end
+// DELETE - Request cancellation (for 12-month contract, schedules cancellation at contract end)
 export async function DELETE(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -447,55 +552,138 @@ export async function DELETE(req: NextRequest) {
       return NextResponse.json({ error: 'No active subscription' }, { status: 400 });
     }
 
-    // Get subscription details before cancelling to preserve period end date
-    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
-    
-    // Cancel the subscription immediately (not at period end)
-    // Service access will continue until currentPeriodEnd
-    await stripe.subscriptions.cancel(stripeSubscriptionId);
+    // Get subscription details
+    let subscription: Stripe.Subscription;
+    try {
+      subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    } catch (stripeError: any) {
+      console.error('Error retrieving subscription:', stripeError.message);
+      if (stripeError.code === 'resource_missing') {
+        return NextResponse.json({ 
+          error: 'Subscription not found. It may have already been cancelled.',
+          expired: true 
+        }, { status: 400 });
+      }
+      throw stripeError;
+    }
 
-    // Update Firestore subscriptions collection - use set with merge to handle missing docs
+    // Check if already canceled
+    if (subscription.status === 'canceled') {
+      return NextResponse.json({ 
+        error: 'Subscription is already canceled.',
+        expired: true 
+      }, { status: 400 });
+    }
+
+    const priceItem = subscription.items?.data?.[0]?.price;
+    const interval = priceItem?.recurring?.interval;
+    const isMonthly = interval === 'month';
+
+    // Calculate contract year end
+    const startDateTimestamp = (subscription as any).start_date || subscription.created || Math.floor(Date.now() / 1000);
+    const subscriptionStartDate = new Date(startDateTimestamp * 1000);
+    const contractYearEnd = new Date(subscriptionStartDate);
+    contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
+    const now = new Date();
+    const isWithinContractYear = now < contractYearEnd;
+    const currentPeriodEnd = new Date((subscription as any).current_period_end * 1000);
+
+    if (isMonthly && isWithinContractYear) {
+      // For monthly subscriptions within contract year:
+      // Don't cancel in Stripe - just mark as pending cancellation
+      // Stripe will continue charging monthly until contract year ends
+      // Then we cancel via cron job
+      
+      console.log('📅 Monthly subscription within contract year - scheduling cancellation for:', contractYearEnd.toISOString());
+      
+      // Update Firestore subscriptions collection
+      const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
+      const subscriptionDoc = await subscriptionRef.get();
+      
+      const updateData = {
+        pendingContractCancellation: true,
+        contractCancellationDate: admin.firestore.Timestamp.fromDate(contractYearEnd),
+        cancellationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      };
+
+      if (subscriptionDoc.exists) {
+        await subscriptionRef.update(updateData);
+      } else {
+        await subscriptionRef.set({
+          userId,
+          stripeSubscriptionId,
+          status: 'active',
+          ...updateData,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Update user document
+      await adminDb.collection('users').doc(userId).update({
+        pendingContractCancellation: true,
+        contractCancellationDate: admin.firestore.Timestamp.fromDate(contractYearEnd),
+        cancellationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
+        // Keep subscription status as active - they still have access and billing continues
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      
+      console.log('✅ Cancellation scheduled for user:', userId, 'Contract ends:', contractYearEnd.toISOString());
+
+      return NextResponse.json({
+        success: true,
+        status: 200,
+        pendingContractCancellation: true,
+        contractCancellationDate: contractYearEnd.toISOString(),
+        message: `Cancellation scheduled. Your subscription will continue with monthly payments until ${contractYearEnd.toLocaleDateString()} (end of your 12-month contract). You can still use all services and can undo this cancellation anytime before then.`,
+        currentPeriodEnd: currentPeriodEnd.toISOString(),
+      }, { status: 200 });
+    }
+
+    // For yearly subscriptions or beyond contract year, cancel at period end
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    // Update Firestore subscriptions collection
     const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
     const subscriptionDoc = await subscriptionRef.get();
     
     if (subscriptionDoc.exists) {
       await subscriptionRef.update({
-        status: 'canceled',
-        cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+        cancelAtPeriodEnd: true,
+        cancellationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        // Preserve period end for access control
         currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       });
     } else {
-      // Create the document if it doesn't exist
       await subscriptionRef.set({
         userId,
         stripeSubscriptionId,
-        status: 'canceled',
-        cancelledAt: admin.firestore.FieldValue.serverTimestamp(),
+        cancelAtPeriodEnd: true,
+        cancellationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
         currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       });
     }
 
-    // Update user document - mark as cancelled but preserve plan and period end for access
+    // Update user document
     await adminDb.collection('users').doc(userId).update({
-      subscriptionStatus: 'canceled',
-      subscriptionCancelledAt: admin.firestore.FieldValue.serverTimestamp(),
-      // Keep currentPeriodEnd so service access continues until period end
+      cancelAtPeriodEnd: true,
+      cancellationRequestedAt: admin.firestore.FieldValue.serverTimestamp(),
       currentPeriodEnd: admin.firestore.Timestamp.fromDate(currentPeriodEnd),
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     
-    console.log('✅ Subscription cancelled immediately for user:', userId, 'Service access until:', currentPeriodEnd);
+    console.log('✅ Subscription set to cancel at period end for user:', userId, 'Period ends:', currentPeriodEnd);
 
     return NextResponse.json({
       success: true,
       status: 200,
-      message: 'Subscription cancelled. Service access continues until the end of the current billing period.',
-      currentPeriodEnd: currentPeriodEnd,
+      cancelAtPeriodEnd: true,
+      message: 'Subscription will be cancelled at the end of the current billing period. You can continue using all services until then.',
+      currentPeriodEnd: currentPeriodEnd.toISOString(),
     }, { status: 200 });
 
   } catch (error: any) {
@@ -507,8 +695,7 @@ export async function DELETE(req: NextRequest) {
   }
 }
 
-// POST - Reactivate a cancelled subscription (before period ends)
-// Note: Since subscriptions are cancelled immediately, reactivation requires creating a new subscription
+// POST - Reactivate/Undo cancellation
 export async function POST(req: NextRequest) {
   try {
     const authHeader = req.headers.get('authorization');
@@ -533,11 +720,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Try to retrieve the subscription
-    let currentSubscription;
+    let currentSubscription: Stripe.Subscription;
     try {
       currentSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
-    } catch (error: any) {
-      // Subscription doesn't exist or is already deleted
+    } catch (stripeError: any) {
       return NextResponse.json({ 
         error: 'Subscription has been cancelled. Please subscribe to a new plan.',
         expired: true
@@ -552,8 +738,29 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // If subscription is still active, reactivate by clearing cancellation flags
-    // Update Firestore subscriptions collection (also clear pending contract cancellation)
+    // Check if within contract year (can undo)
+    const startDateTimestamp = (currentSubscription as any).start_date || currentSubscription.created || Math.floor(Date.now() / 1000);
+    const subscriptionStartDate = new Date(startDateTimestamp * 1000);
+    const contractYearEnd = new Date(subscriptionStartDate);
+    contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
+    const now = new Date();
+    const isWithinContractYear = now < contractYearEnd;
+
+    if (!isWithinContractYear) {
+      return NextResponse.json({ 
+        error: 'Cannot undo cancellation after contract year has ended. Please subscribe to a new plan.',
+        expired: true
+      }, { status: 400 });
+    }
+
+    // If subscription has cancel_at_period_end set in Stripe, clear it
+    if (currentSubscription.cancel_at_period_end) {
+      await stripe.subscriptions.update(stripeSubscriptionId, {
+        cancel_at_period_end: false,
+      });
+    }
+
+    // Update Firestore subscriptions collection
     const subscriptionRef = adminDb.collection('subscriptions').doc(stripeSubscriptionId);
     const subscriptionDoc = await subscriptionRef.get();
     
@@ -568,7 +775,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Update user document (also clear pending contract cancellation)
+    // Update user document
     await adminDb.collection('users').doc(userId).update({
       subscriptionStatus: 'active',
       cancelAtPeriodEnd: false,
@@ -578,14 +785,16 @@ export async function POST(req: NextRequest) {
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    console.log('✅ Cancellation undone for user:', userId);
+
     return NextResponse.json({
       success: true,
       status: 200,
-      message: 'Subscription has been reactivated successfully!',
+      message: 'Subscription has been reactivated! Auto-renewal is now enabled and your subscription will continue normally.',
       subscription: {
         id: currentSubscription.id,
-        status: currentSubscription.status,
-        currentPeriodEnd: new Date((currentSubscription as any).current_period_end * 1000),
+        status: 'active',
+        currentPeriodEnd: new Date((currentSubscription as any).current_period_end * 1000).toISOString(),
       },
     }, { status: 200 });
 
@@ -597,4 +806,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-

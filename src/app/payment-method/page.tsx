@@ -78,6 +78,7 @@ interface SubscriptionData {
   currency?: string;
   pendingContractCancellation?: boolean;
   contractCancellationDate?: string;
+  canUndoCancellation?: boolean;
 }
 
 export default function PaymentMethodPage() {
@@ -765,25 +766,31 @@ export default function PaymentMethodPage() {
       });
       
       const data = await response.json();
-      console.log('📊 Cancel subscription response:', { ok: response.ok, status: response.status, success: data.success });
+      console.log('📊 Cancel subscription response:', { ok: response.ok, status: response.status, success: data.success, data });
       
       if (response.ok && data.success !== false) {
-        toast.success(
-          language === 'ms' 
-            ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
-            : '✅ Subscription will be cancelled at end of billing period',
-          {
-            duration: 4000,
-            style: {
-              borderRadius: '12px',
-              background: '#10b981',
-              color: '#fff',
-              padding: '16px',
-              fontSize: '14px',
-              fontWeight: '600',
-            },
-          }
+        // Use the message from API if available
+        const successMessage = data.message || (
+          data.pendingContractCancellation
+            ? (language === 'ms' 
+                ? `✅ Pembatalan dijadualkan untuk ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan.` 
+                : `✅ Cancellation scheduled for ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString() : 'contract end'}. Monthly payments will continue.`)
+            : (language === 'ms' 
+                ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
+                : '✅ Subscription will be cancelled at end of billing period')
         );
+        
+        toast.success(successMessage, {
+          duration: 5000,
+          style: {
+            borderRadius: '12px',
+            background: '#f59e0b',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        });
         
         // Refresh data
         await fetchSubscription();
@@ -852,25 +859,26 @@ export default function PaymentMethodPage() {
       });
       
       const data = await response.json();
-      console.log('📊 Reactivate subscription response:', { ok: response.ok, status: response.status, success: data.success });
+      console.log('📊 Reactivate subscription response:', { ok: response.ok, status: response.status, success: data.success, data });
       
       if (response.ok && data.success !== false) {
-        toast.success(
+        const successMessage = data.message || (
           language === 'ms' 
-            ? '🎉 Langganan telah diaktifkan semula!' 
-            : '🎉 Subscription has been reactivated!',
-          {
-            duration: 4000,
-            style: {
-              borderRadius: '12px',
-              background: '#10b981',
-              color: '#fff',
-              padding: '16px',
-              fontSize: '14px',
-              fontWeight: '600',
-            },
-          }
+            ? '🎉 Pembatalan telah dibatalkan! Langganan anda akan diteruskan seperti biasa.' 
+            : '🎉 Cancellation undone! Your subscription will continue normally.'
         );
+        
+        toast.success(successMessage, {
+          duration: 4000,
+          style: {
+            borderRadius: '12px',
+            background: '#10b981',
+            color: '#fff',
+            padding: '16px',
+            fontSize: '14px',
+            fontWeight: '600',
+          },
+        });
         
         // Refresh data
         await fetchSubscription();
@@ -1172,7 +1180,7 @@ export default function PaymentMethodPage() {
                                 : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.currentPeriodEnd)} (end of current payment year). To continue after this date, please subscribe to a new plan.`}
                             </p>
                             <Link href="/pricing">
-                              <Button className="bg-white text-amber-600 hover:bg-amber-50 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors mt-2">
+                              <Button className="bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-2 px-4 font-bold rounded-lg shadow-md text-sm transition-colors mt-2">
                                 {language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe to New Plan'}
                               </Button>
                             </Link>
@@ -1446,48 +1454,80 @@ export default function PaymentMethodPage() {
                     </div>
 
                     {/* Cancel Subscription Button */}
-                    <div className="flex items-center justify-between p-5 bg-gradient-to-r from-red-50 to-white rounded-2xl border border-red-100 hover:border-red-200 transition">
+                    <div className={`flex items-center justify-between p-5 rounded-2xl border transition ${
+                      subscription?.pendingContractCancellation 
+                        ? 'bg-gradient-to-r from-amber-50 to-white border-amber-200 hover:border-amber-300'
+                        : 'bg-gradient-to-r from-red-50 to-white border-red-100 hover:border-red-200'
+                    }`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-red-100">
-                          <X className="w-6 h-6 text-red-600" />
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                          subscription?.pendingContractCancellation ? 'bg-amber-100' : 'bg-red-100'
+                        }`}>
+                          {subscription?.pendingContractCancellation ? (
+                            <Clock className="w-6 h-6 text-amber-600" />
+                          ) : (
+                            <X className="w-6 h-6 text-red-600" />
+                          )}
                         </div>
                         <div>
                           <p className="font-bold text-gray-900">
-                            {language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription'}
+                            {subscription?.pendingContractCancellation
+                              ? (language === 'ms' ? 'Pembatalan Dijadualkan' : 'Cancellation Scheduled')
+                              : (language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription')
+                            }
                           </p>
                           <p className="text-sm text-gray-500">
                             {subscription?.pendingContractCancellation
                               ? (language === 'ms'
-                                  ? `Pembatalan dijadualkan untuk ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Anda masih perlu membayar ansuran bulanan sehingga akhir kontrak tetapi tidak boleh menggunakan pembantu AI.`
-                                  : `Cancellation scheduled for ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. You will still pay monthly installments until contract end but cannot use AI assistant.`)
+                                  ? `Langganan anda akan dibatalkan pada ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut dan anda masih boleh menggunakan semua perkhidmatan.`
+                                  : `Your subscription will be cancelled on ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. Monthly payments will continue until then and you can still use all services.`)
+                              : subscription?.cancelAtPeriodEnd
+                                ? (language === 'ms'
+                                    ? 'Langganan anda akan tamat pada akhir tempoh bil semasa.'
+                                    : 'Your subscription will end at the end of the current billing period.')
                                 : (language === 'ms'
-                                  ? 'Pembatalan akan menghentikan pembaharuan automatik untuk tahun berikutnya. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
-                                  : 'Cancellation will stop auto-renewal for the following year. Services will continue until the end of the current billing period.')
+                                    ? 'Pembatalan akan menjadualkan penamatan pada akhir tahun kontrak 12 bulan anda. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut.'
+                                    : 'Cancellation will schedule termination at the end of your 12-month contract year. Monthly payments will continue until then.')
                             }
                           </p>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                            setShowCancelModal(true);
-                        }}
-                        className={`bg-red-600 text-white hover:bg-red-700 py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap ${
-                          loading || loadingSubscription || subscription?.pendingContractCancellation
-                            ? 'opacity-70'
-                            : ''
-                        }`}
-                      >
-                        {loading || loadingSubscription ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : subscription?.pendingContractCancellation ? (
-                          language === 'ms' ? 'Dijadualkan' : 'Scheduled'
-                        ) : subscription?.status === 'canceled' ? (
-                          language === 'ms' ? 'Dibatalkan' : 'Cancelled'
-                        ) : (
-                          language === 'ms' ? 'Batal' : 'Cancel'
-                        )}
-                      </button>
+                      {subscription?.pendingContractCancellation || subscription?.cancelAtPeriodEnd ? (
+                        <button
+                          type="button"
+                          onClick={handleReactivateSubscription}
+                          disabled={loading || loadingSubscription}
+                          className="bg-green-600 text-white hover:bg-green-700 py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap disabled:opacity-70"
+                        >
+                          {loading ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <>
+                              <RefreshCw className="w-4 h-4" />
+                              {language === 'ms' ? 'Batal Pembatalan' : 'Undo Cancellation'}
+                            </>
+                          )}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setShowCancelModal(true)}
+                          disabled={loading || loadingSubscription || subscription?.status === 'canceled'}
+                          className={`py-2.5 px-6 font-bold rounded-xl shadow-md flex items-center justify-center gap-2 transition-colors whitespace-nowrap disabled:opacity-70 ${
+                            subscription?.status === 'canceled'
+                              ? 'bg-gray-400 text-white cursor-not-allowed'
+                              : 'bg-red-600 text-white hover:bg-red-700'
+                          }`}
+                        >
+                          {loading || loadingSubscription ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : subscription?.status === 'canceled' ? (
+                            language === 'ms' ? 'Dibatalkan' : 'Cancelled'
+                          ) : (
+                            language === 'ms' ? 'Batal' : 'Cancel'
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -1699,21 +1739,60 @@ export default function PaymentMethodPage() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 onClick={(e) => e.stopPropagation()}
-                className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+                className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl"
               >
                 <div className="text-center mb-6">
-                  <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="w-8 h-8 text-red-600" />
+                  <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <AlertCircle className="w-8 h-8 text-amber-600" />
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 mb-2">
-                    {language === 'ms' ? 'Batalkan Langganan?' : 'Cancel Subscription?'}
+                    {language === 'ms' ? 'Jadualkan Pembatalan?' : 'Schedule Cancellation?'}
                   </h3>
-                  <p className="text-gray-600 mb-4">
-                    {language === 'ms'
-                          ? 'Pembatalan akan berkuat kuasa serta-merta. Perkhidmatan akan berterusan sehingga akhir tempoh bil semasa.'
-                      : 'Cancellation will take effect immediately. Services will continue until the end of the current billing period.'
-                        }
+                  
+                  {isMonthlySubscription && subscription && !subscription.isBeyondContractYear ? (
+                    <div className="text-left bg-amber-50 rounded-xl p-4 mb-4 border border-amber-200">
+                      <p className="text-gray-700 font-semibold mb-2">
+                        {language === 'ms' ? '📋 Butiran Kontrak 12 Bulan:' : '📋 12-Month Contract Details:'}
                       </p>
+                      <ul className="text-sm text-gray-600 space-y-2">
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-500 mt-0.5">•</span>
+                          {language === 'ms' 
+                            ? `Pembayaran bulanan akan diteruskan sehingga ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString('ms-MY') : 'akhir kontrak'}`
+                            : `Monthly payments will continue until ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString() : 'contract end'}`
+                          }
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-green-500 mt-0.5">•</span>
+                          {language === 'ms' 
+                            ? 'Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant'
+                            : 'You can still use all services including AI assistant'
+                          }
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-500 mt-0.5">•</span>
+                          {language === 'ms' 
+                            ? 'Anda boleh membatalkan pembatalan ini bila-bila masa sebelum akhir kontrak'
+                            : 'You can undo this cancellation anytime before contract end'
+                          }
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-gray-500 mt-0.5">•</span>
+                          {language === 'ms' 
+                            ? `Baki bulan dalam kontrak: ${subscription.remainingMonths || 0} bulan`
+                            : `Remaining months in contract: ${subscription.remainingMonths || 0} months`
+                          }
+                        </li>
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="text-gray-600 mb-4">
+                      {language === 'ms'
+                        ? 'Pembatalan akan berkuat kuasa pada akhir tempoh bil semasa. Perkhidmatan akan berterusan sehingga tarikh tersebut.'
+                        : 'Cancellation will take effect at the end of the current billing period. Services will continue until then.'
+                      }
+                    </p>
+                  )}
                 </div>
                 
                 <div className="flex gap-3">
@@ -1726,12 +1805,12 @@ export default function PaymentMethodPage() {
                   <Button
                     onClick={handleCancelSubscription}
                     disabled={loading}
-                    className="flex-1 bg-red-600 text-white hover:bg-red-700 py-3 font-bold rounded-xl"
+                    className="flex-1 bg-amber-600 text-white hover:bg-amber-700 py-3 font-bold rounded-xl"
                   >
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      language === 'ms' ? 'Ya, Batalkan' : 'Yes, Cancel'
+                      language === 'ms' ? 'Ya, Jadualkan' : 'Yes, Schedule'
                     )}
                   </Button>
                 </div>
