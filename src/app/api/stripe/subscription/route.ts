@@ -255,7 +255,15 @@ export async function GET(req: NextRequest) {
 
     // Calculate subscription start date (first billing cycle start)
     // For new subscriptions, start_date is available. For existing, use created timestamp
-    const subscriptionStartDate = new Date((subscription as any).start_date * 1000);
+    // Handle cases where start_date might be undefined/null by falling back to created
+    const startDateTimestamp = (subscription as any).start_date || subscription.created || Math.floor(Date.now() / 1000);
+    const subscriptionStartDate = new Date(startDateTimestamp * 1000);
+    
+    // Validate the date is valid before proceeding
+    if (isNaN(subscriptionStartDate.getTime())) {
+      console.error('Invalid subscription start date, falling back to current time');
+      subscriptionStartDate.setTime(Date.now());
+    }
     
     // Calculate contract year end (12 months from subscription start)
     const contractYearEnd = new Date(subscriptionStartDate);
@@ -275,14 +283,26 @@ export async function GET(req: NextRequest) {
     const pendingContractCancellation = subscriptionData?.pendingContractCancellation || false;
     const contractCancellationDate = subscriptionData?.contractCancellationDate?.toDate?.() || null;
 
+    // Helper function to safely convert timestamp to ISO string
+    const safeTimestampToISO = (timestamp: number | undefined | null): string | null => {
+      if (!timestamp) return null;
+      try {
+        const date = new Date(timestamp * 1000);
+        if (isNaN(date.getTime())) return null;
+        return date.toISOString();
+      } catch {
+        return null;
+      }
+    };
+
     return NextResponse.json({
       subscription: {
         id: subscription.id,
         status: subscription.status,
-        currentPeriodStart: new Date((subscription as any).current_period_start * 1000).toISOString(),
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        currentPeriodStart: safeTimestampToISO((subscription as any).current_period_start) || new Date().toISOString(),
+        currentPeriodEnd: safeTimestampToISO((subscription as any).current_period_end) || new Date().toISOString(),
         cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
-        cancelAt: (subscription as any).cancel_at ? new Date((subscription as any).cancel_at * 1000).toISOString() : null,
+        cancelAt: safeTimestampToISO((subscription as any).cancel_at),
         billingCycle: interval,
         paymentMethod,
         // New fields for monthly contract year logic
