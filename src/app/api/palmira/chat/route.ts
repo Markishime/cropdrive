@@ -315,9 +315,28 @@ function buildSystemPrompt(
 ): string {
   const language = onboardingData?.language || 'en';
   const userType = onboardingData?.userType || 'farmer';
-  const conversationStyle = onboardingData?.conversationStyle || 'short_direct';
+  const conversationStyle = onboardingData?.conversationStyle || 'professional_detailed';
 
   const styleInstructions = {
+    professional_detailed: language === 'ms'
+      ? `GAYA PERBUALAN DEFAULT (PROFESIONAL, MESRA, TERPERINCI):
+1. Mulakan terus dengan ayat yang merujuk permintaan/soalan pengguna (tiada frasa pengisi).
+2. Berikan jawapan yang jelas dan mudah difahami, dengan penerangan ringkas "mengapa" + langkah "apa perlu buat".
+3. Gunakan struktur yang kemas:
+   - Ringkasan 1 ayat (jawapan utama)
+   - 3–7 poin tindakan/penjelasan (bergantung pada soalan)
+   - Jika perlu: soalan susulan 1–2 sahaja untuk maklumat yang betul-betul diperlukan
+4. Kekal relevan pada soalan pengguna. Jangan tambah topik yang tidak diminta.
+5. Jika pengguna beri data (laporan/PDF), petik fakta/nombor yang relevan dan jelaskan maksudnya.`
+      : `DEFAULT STYLE (PROFESSIONAL, FRIENDLY, DETAILED):
+1. Start immediately by referencing the user's request (no filler openers).
+2. Give a clear, easy-to-understand answer with a brief "why" + actionable "what to do".
+3. Use a clean structure:
+   - 1-sentence summary (main answer)
+   - 3–7 bullets of actions/explanations (based on the question)
+   - If needed: only 1–2 follow-up questions for missing critical info
+4. Stay tightly scoped to the user's question/request (no unnecessary extras).
+5. If the user provided data (report/PDF), quote relevant facts/numbers and explain what they mean.`,
     diagnostic_interview: language === 'ms'
       ? `GAYA PERBUALAN WAJIB: Anda MESTI menggunakan gaya "diagnostic interview". Ini bermakna:
 1. MULA dengan bertanya 2-3 soalan untuk memahami situasi pengguna dengan lebih baik
@@ -549,6 +568,11 @@ I will always:
        userType === 'researcher' ? 'penyelidik' : 'pengguna')
     : userType;
 
+  const resolvedStyle =
+    (conversationStyle && styleInstructions[conversationStyle as keyof typeof styleInstructions])
+      ? conversationStyle
+      : 'professional_detailed';
+
   let prompt = language === 'ms'
     ? `Anda adalah Palmira, pembantu agronomi CropDrive untuk petani kelapa sawit Malaysia.
 
@@ -561,7 +585,7 @@ KERAHSIAAN (WAJIB):
 
 PENGENALAN PENGGUNA: Pengguna ini adalah ${userTypeLabel}.
 
-${styleInstructions[conversationStyle as keyof typeof styleInstructions]}
+${styleInstructions[resolvedStyle as keyof typeof styleInstructions]}
 
 PERATURAN FORMAT (WAJIB):
 - JANGAN gunakan tajuk markdown seperti "#", "##", atau "###".
@@ -599,7 +623,7 @@ CONFIDENTIALITY (MANDATORY):
 
 USER PROFILE: This user is a ${userTypeLabel}.
 
-${styleInstructions[conversationStyle as keyof typeof styleInstructions]}
+${styleInstructions[resolvedStyle as keyof typeof styleInstructions]}
 
 FORMAT RULES (MANDATORY):
 - Do NOT use markdown headings like "#", "##", or "###".
