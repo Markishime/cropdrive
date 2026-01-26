@@ -83,6 +83,75 @@ function stripPersonaClaims(text: string): string {
   return out;
 }
 
+function normalizeChecklistFormattingOutsideCodeBlocks(text: string): string {
+  if (!text) return text;
+
+  // Preserve fenced code blocks exactly.
+  const parts = text.split(/```[\s\S]*?```/g);
+  const fences = text.match(/```[\s\S]*?```/g) || [];
+  const out: string[] = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    const segment = parts[i];
+    const lines = segment.split('\n');
+
+    let inChecklistBlock = false;
+    let seenFirstInBlock = false;
+
+    const rewritten = lines.map((line) => {
+      const original = line;
+      const trimmed = line.trim();
+
+      // Reset block on blank lines.
+      if (trimmed.length === 0) {
+        inChecklistBlock = false;
+        seenFirstInBlock = false;
+        return original;
+      }
+
+      // Normalize common "✓ 1." / "✓ 1)" / "✓ 1:" → "✓ Item 1:"
+      const m = trimmed.match(/^✓\s*(\d+)\s*[\.\)\:]\s*(.*)$/);
+      if (m) {
+        const n = m[1];
+        const rest = m[2] || '';
+        inChecklistBlock = true;
+        const prefix = seenFirstInBlock ? '  ✓ ' : '✓ ';
+        seenFirstInBlock = true;
+        return `${prefix}Item ${n}: ${rest}`.trimEnd();
+      }
+
+      // Normalize "✓ Item 1 ..." → enforce ":" after the number
+      const m2 = trimmed.match(/^✓\s*Item\s*(\d+)\s*[:\-]?\s*(.*)$/i);
+      if (m2) {
+        const n = m2[1];
+        const rest = m2[2] || '';
+        inChecklistBlock = true;
+        const prefix = seenFirstInBlock ? '  ✓ ' : '✓ ';
+        seenFirstInBlock = true;
+        return `${prefix}Item ${n}: ${rest}`.trimEnd();
+      }
+
+      // If we're in a checklist block and we see another "✓ ..." line, treat it as next item
+      // (best-effort when model forgets numbering).
+      const m3 = trimmed.match(/^✓\s*(.*)$/);
+      if (m3 && inChecklistBlock) {
+        const rest = m3[1] || '';
+        const prefix = seenFirstInBlock ? '  ✓ ' : '✓ ';
+        seenFirstInBlock = true;
+        return `${prefix}${rest}`.trimEnd();
+      }
+
+      // Otherwise keep line as-is.
+      return original;
+    });
+
+    out.push(rewritten.join('\n'));
+    if (i < fences.length) out.push(fences[i]);
+  }
+
+  return out.join('');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -245,7 +314,9 @@ export async function POST(request: NextRequest) {
     const aiResponse = {
       ...aiResponseRaw,
       content: stripPersonaClaims(
-        stripLeadingFiller(stripMarkdownHeadingsOutsideCodeBlocks(aiResponseRaw.content))
+        normalizeChecklistFormattingOutsideCodeBlocks(
+          stripLeadingFiller(stripMarkdownHeadingsOutsideCodeBlocks(aiResponseRaw.content))
+        )
       ),
     };
 
@@ -593,6 +664,12 @@ PERATURAN FORMAT (WAJIB):
 - JANGAN mulakan jawapan dengan frasa pengisi seperti "Of course!", "Sure!", "Absolutely!", "Baik!", atau "Ya!".
 - AYAT PERTAMA mesti terus merujuk kepada permintaan/soalan pengguna dan mula menjawabnya (bukan ayat pengenalan umum).
 - JANGAN perkenalkan diri dengan pencapaian/kelayakan/pengalaman; cukup sebut nama "Palmira" secara ringkas jika perlu.
+- FORMAT CHECKLIST (WAJIB):
+  - Gunakan format tepat ini untuk item checklist:
+    ✓ Item 1: ...
+      ✓ Item 2: ...
+      ✓ Item 3: ...
+  - Jangan guna bullet "-" untuk poin utama; jadikan poin utama sebagai item checklist di atas.
 
 PERATURAN PROFESIONAL PALMIRA:
 - Anda MESTI mengikuti gaya perbualan yang ditetapkan di atas dengan TEPAT
@@ -631,6 +708,12 @@ FORMAT RULES (MANDATORY):
 - Do NOT start replies with filler like "Of course!", "Sure!", "Absolutely!", or "No problem!".
 - The FIRST sentence must immediately reference the user's request and begin answering it (no generic preface).
 - Do NOT introduce yourself with achievements/credentials/experience; only use the name "Palmira" briefly if needed.
+- CHECKLIST FORMAT (MANDATORY):
+  - Use this exact format for checklist items:
+    ✓ Item 1: ...
+      ✓ Item 2: ...
+      ✓ Item 3: ...
+  - Do not use "-" bullets for main points; keep main points as the checklist items above.
 
 PALMIRA'S PROFESSIONAL RULES:
 - You MUST follow the conversation style specified above EXACTLY
