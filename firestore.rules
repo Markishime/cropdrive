@@ -137,5 +137,57 @@ service cloud.firestore {
       allow read: if true;
       allow write: if false;
     }
+
+    // Palmira Onboarding - users can read/write their own onboarding data
+    match /palmira_onboarding/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Palmira Preferences - users can read/write their own preferences
+    match /palmira_preferences/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Palmira Farm Profiles - users can read/write their own farm profiles
+    match /palmira_farm_profiles/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Palmira Chats - users can read/write their own chats
+    match /palmira_chats/{chatId} {
+      allow read, write: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Palmira Chat Messages - users can read/write messages in their own chats
+    match /palmira_chats/{chatId}/messages/{messageId} {
+      allow read, write: if isAuthenticated() && 
+        get(/databases/$(database)/documents/palmira_chats/$(chatId)).data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && 
+        get(/databases/$(database)/documents/palmira_chats/$(chatId)).data.userId == request.auth.uid;
+    }
+
+    // Allow querying Palmira chats by userId
+    match /palmira_chats {
+      allow read: if isAuthenticated() &&
+        request.query.where('userId', '==', request.auth.uid).size() >= 1;
+    }
+
+    // Palmira Knowledge Base - read-only for authenticated users, write-only for admins (server-side)
+    match /palmira_knowledge_base/{documentId} {
+      allow read: if isAuthenticated();
+      allow write: if false; // Only server-side/admin access
+    }
+
+    // Allow querying Palmira knowledge base
+    match /palmira_knowledge_base {
+      allow read: if isAuthenticated();
+    }
+
+    // Palmira Reports - users can read their own reports (references to analysis_results)
+    match /palmira_reports/{reportId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow write: if false; // Only server-side access
+    }
   }
 }

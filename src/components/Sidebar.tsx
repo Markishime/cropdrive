@@ -18,7 +18,9 @@ import {
   ChevronLeft,
   HelpCircle,
   FileText,
-  Home
+  Home,
+  Bot,
+  Shield
 } from 'lucide-react';
 
 interface SidebarItemProps {
@@ -77,6 +79,7 @@ export const Sidebar: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useAuth();
   const pathname = usePathname();
 
@@ -88,7 +91,37 @@ export const Sidebar: React.FC = () => {
     // Load collapsed state from localStorage
     const savedCollapsed = localStorage.getItem('sidebar-collapsed');
     setIsCollapsed(savedCollapsed === 'true');
-  }, []);
+    
+    // Check admin status
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
+
+  const checkAdminStatus = async () => {
+    const { auth } = await import('@/lib/firebase');
+    if (!auth.currentUser) return;
+    
+    try {
+      const token = await auth.currentUser.getIdToken();
+      // Use dedicated admin check endpoint (avoid 403 spam on KB routes)
+      const response = await fetch('/api/admin/check', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) {
+        setIsAdmin(false);
+        return;
+      }
+
+      const result = await response.json();
+      setIsAdmin(!!result?.isAdmin);
+    } catch (err) {
+      setIsAdmin(false);
+    }
+  };
 
   const { language } = useTranslation(currentLang);
 
@@ -140,6 +173,15 @@ export const Sidebar: React.FC = () => {
       showAlways: false,
       requiresPlan: true
     },
+    // Palmira Chatbot - only for users with plans
+    {
+      href: '/palmira',
+      icon: <Bot className="w-5 h-5" />,
+      label: 'Palmira',
+      labelMs: 'Palmira',
+      showAlways: false,
+      requiresPlan: true
+    },
     // Reports - only for users with plans
     {
       href: '/reports',
@@ -184,8 +226,13 @@ export const Sidebar: React.FC = () => {
       labelMs: 'Sokongan',
       showAlways: false,
       requiresPlan: true
-    }
-  ].filter(item => item.showAlways || (item.requiresPlan && hasPlan));
+    },
+  ].filter(item => {
+    if (item.showAlways) return true;
+    if (item.requiresPlan && hasPlan) return true;
+    // if (item.requiresAdmin && isAdmin) return true;
+    return false;
+  });
 
   const SidebarContent = () => (
     <div className="h-full flex flex-col min-h-screen lg:min-h-0">

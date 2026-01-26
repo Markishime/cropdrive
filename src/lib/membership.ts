@@ -217,3 +217,67 @@ export function isMembershipActive(membership: Membership | null): boolean {
   const status = getMembershipStatus(membership);
   return status === 'active' || status === 'trialing';
 }
+
+/**
+ * Check if user has full access (active, trialing, or cancelled but still within contract period)
+ * This allows access to all features except AI assistant for cancelled users
+ */
+export function hasFullAccess(membership: Membership | null): boolean {
+  if (!membership) return false;
+
+  const status = getMembershipStatus(membership);
+  const now = new Date();
+
+  // Active and trialing users always have full access
+  if (status === 'active' || status === 'trialing') {
+    return true;
+  }
+
+  // Cancelled users have full access if they're still within their contract period
+  if (status === 'canceled' && membership.currentPeriodEnd > now) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Check if user can access AI assistant/chatbot functionality
+ * Only active and trialing users can use AI assistant
+ */
+export function canAccessAIAssistant(membership: Membership | null): boolean {
+  const status = getMembershipStatus(membership);
+  return status === 'active' || status === 'trialing';
+}
+
+/**
+ * Get a user-friendly membership status message
+ */
+export function getMembershipStatusMessage(membership: Membership | null): string {
+  if (!membership) {
+    return 'No membership';
+  }
+
+  const status = getMembershipStatus(membership);
+  const now = new Date();
+
+  switch (status) {
+    case 'active':
+      return 'Active membership';
+    case 'trialing':
+      return 'Trial period';
+    case 'canceled':
+      if (membership.currentPeriodEnd > now) {
+        const endDate = membership.currentPeriodEnd.toLocaleDateString();
+        return `Full access until ${endDate} (cancelled)`;
+      } else {
+        return 'Membership expired';
+      }
+    case 'past_due':
+      return 'Payment past due';
+    case 'expired':
+      return 'Membership expired';
+    default:
+      return 'Unknown status';
+  }
+}

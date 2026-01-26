@@ -46,6 +46,30 @@
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
   }
+
+  /* Custom scrollbar for Palmira dashboard */
+  .palmira-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #16a34a #e5e7eb;
+  }
+
+  .palmira-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .palmira-scrollbar::-webkit-scrollbar-track {
+    background: #e5e7eb;
+    border-radius: 4px;
+  }
+
+  .palmira-scrollbar::-webkit-scrollbar-thumb {
+    background: #16a34a;
+    border-radius: 4px;
+  }
+
+  .palmira-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #15803d;
+  }
 }
 
 @layer utilities {
@@ -86,6 +110,33 @@
 
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
+  }
+
+  .bounce-delay-0 {
+    animation-delay: 0ms;
+  }
+
+  .bounce-delay-150 {
+    animation-delay: 150ms;
+  }
+
+  .bounce-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  /* Toggle switch styles */
+  .toggle-switch {
+    @apply w-12 h-6 rounded-full appearance-none cursor-pointer transition-colors relative;
+  }
+
+  .toggle-switch:checked {
+    @apply bg-green-600;
+    background-color: #16a34a !important;
+  }
+
+  .toggle-switch:not(:checked) {
+    @apply bg-gray-300;
+    background-color: #d1d5db !important;
   }
 }
 

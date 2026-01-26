@@ -5,7 +5,12 @@ import { Analytics } from '@vercel/analytics/next';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import CookieConsent from '@/components/CookieConsent';
 import { Toaster } from 'react-hot-toast';
+import { config } from '@fortawesome/fontawesome-svg-core';
+import '@fortawesome/fontawesome-svg-core/styles.css';
 import '@/styles/globals.css';
+
+// FontAwesome configuration
+config.autoAddCss = false;
 
 const inter = Inter({
   subsets: ['latin'],

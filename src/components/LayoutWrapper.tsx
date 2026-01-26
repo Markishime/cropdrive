@@ -7,6 +7,7 @@ import Navbar from './Navbar';
 import AuthenticatedNavbar from './AuthenticatedNavbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
+import PalmiraFloatingAvatar from './PalmiraFloatingAvatar';
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -44,7 +45,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   if (user) {
     // Dashboard pages (protected routes) - show sidebar and authenticated navbar
     // When logged in, these pages show sidebar + authenticated navbar (like tutorials)
-    const dashboardPages = ['/dashboard', '/assistant', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing'];
+    const dashboardPages = ['/dashboard', '/assistant', '/palmira', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing'];
 
     // Check if pathname matches dashboard pages (handles both regular and locale-prefixed routes)
     const isDashboardPage = dashboardPages.some(page => {
@@ -88,6 +89,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   }
 
   // If user is NOT logged in - show Navbar + Footer
+  // Don't show floating avatar on palmira page itself
+  const showFloatingAvatar = pathname !== '/palmira' && !pathname.startsWith('/palmira/');
+  
   return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
@@ -95,6 +99,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         {children}
       </main>
       <Footer />
+      {showFloatingAvatar && <PalmiraFloatingAvatar />}
     </div>
   );
 }
