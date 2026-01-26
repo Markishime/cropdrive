@@ -92,7 +92,10 @@ function normalizeChecklistFormattingOutsideCodeBlocks(text: string): string {
   const out: string[] = [];
 
   for (let i = 0; i < parts.length; i++) {
-    const segment = parts[i];
+    // Ensure checklist markers don't stay inline in a paragraph.
+    // Example: "... request. ✓ Item 1: ..." -> "... request.\n✓ Item 1: ..."
+    // Also splits inline sub-items: "... severe: ✓ Copper ..." -> "... severe:\n✓ Copper ..."
+    const segment = parts[i].replace(/(\S)\s+✓\s+/g, '$1\n✓ ');
     const lines = segment.split('\n');
 
     let inChecklistBlock = false;
