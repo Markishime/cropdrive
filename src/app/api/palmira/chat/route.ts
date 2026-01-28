@@ -507,38 +507,36 @@ function buildSystemPrompt(
     short_direct: language === 'ms'
       ? `MODE SEMASA: SHORT DIRECT (Ringkas & Langsung)
 Anda MESTI menjawab dalam gaya SHORT sahaja. Setiap respons:
-1. Maksimum 2–3 ayat. Tiada perenggan panjang.
+1. Langsung ke titik. Maksimum 5 ayat. Tiada perenggan panjang.
 2. JANGAN guna senarai semak, bullet, atau "✓". Hanya prosa pendek.
 3. JANGAN tanya soalan susulan melainkan sangat perlu.
-4. Jawab terus soalan yang ditanya, tiada maklumat tambahan yang tidak diminta.
-OUTPUT: Teks berterusan 2–3 ayat sahaja. Contoh: "Baja NPK 15:15:15 sesuai di sini. Gunakan 2–3 kg per pokok semasa musim hujan. Elakkan pembajaan berlebihan."`
+4. Jawab terus soalan yang ditanya.
+OUTPUT: Prosa berterusan, sehingga 5 ayat sahaja.`
       : `CURRENT MODE: SHORT DIRECT
 You MUST respond in SHORT style only. Every response:
-1. Maximum 2–3 sentences. No long paragraphs.
+1. Be direct and to the point. Maximum 5 sentences. No long paragraphs.
 2. DO NOT use checklists, bullet lists, or "✓". Use short plain prose only.
 3. DO NOT ask follow-up questions unless strictly necessary.
-4. Answer the question asked directly; no unsolicited extra information.
-OUTPUT: Plain prose, 2–3 sentences only. Example: "NPK 15:15:15 is suitable here. Apply 2–3 kg per palm during the rainy season. Avoid over-fertilization."`,
+4. Answer the question asked directly.
+OUTPUT: Plain prose only, up to 5 sentences.`,
     checklist_only: language === 'ms'
       ? `MODE SEMASA: CHECKLIST ONLY (Senarai Semak Sahaja)
-Anda MESTI menjawab dalam gaya CHECKLIST sahaja. Setiap respons:
-1. Jangan banyak bercakap; terus beri senarai semak berdasarkan soalan atau laporan.
-2. WAJIB guna format "✓ Item N: [tindakan]" atau "Item N: [tindakan]" untuk setiap cadangan.
-3. SETIAP ITEM MESTI PADA BARIS BERBEZA. Selepas keterangan Item 1, taip Enter (baris baru), kemudian barulah Item 2. Jangan letak Item 2 di sebelah atau sama baris dengan Item 1. Setiap item = satu baris sendiri, dan lebih baik satu baris kosong antara item.
-4. Setiap item mesti jelas dan boleh dilaksanakan.
-OUTPUT: Senarai semak, setiap item pada baris baru. Contoh (perhatikan baris kosong antara item):
+Anda MESTI menjawab dalam gaya CHECKLIST sahaja. Tiada lain.
+1. Setiap respons WAJIB senarai semak sahaja. JANGAN guna perenggan, ayat berterusan, atau penjelasan panjang.
+2. WAJIB guna "Item N: [tindakan]" atau "✓ Item N: [tindakan]". SETIAP ITEM PADA BARIS BERBEZA; baris kosong antara item.
+3. Jangan mulakan dengan perenggan—terus senarai semak. Tiada "Berikut ialah..." kemudian checklist; mulakan dengan Item 1.
+OUTPUT: Hanya senarai semak. Contoh:
 Item 1: Periksa tahap pH tanah.
 
 Item 2: Tambah kapur jika pH bawah 4.5.
 
 Item 3: Gunakan baja seimbang selepas pembetulan pH.`
       : `CURRENT MODE: CHECKLIST ONLY
-You MUST respond in CHECKLIST style only. Every response:
-1. Do not be chatty; go straight to a checklist based on the question or report.
-2. MUST use "Item N: [action]" or "✓ Item N: [action]" format for every recommendation.
-3. EACH ITEM MUST BE ON ITS OWN LINE. After Item 1's description, insert a line break (press Enter), then write Item 2 on the next line. Never put Item 2 on the same line as Item 1 or right after it with only a space. One item per line; use a blank line between items for clarity.
-4. Each item must be clear and actionable.
-OUTPUT: Checklist with each item on a new line. Example (note blank line between items):
+You MUST respond in CHECKLIST style only. Nothing else.
+1. Every response MUST be a checklist only. DO NOT use paragraphs, flowing prose, or long explanations.
+2. MUST use "Item N: [action]" or "✓ Item N: [action]". EACH ITEM ON ITS OWN LINE; blank line between items.
+3. Do not start with a paragraph—go straight to the checklist. No "Here are..." then checklist; start with Item 1.
+OUTPUT: Checklist only. Example:
 Item 1: Check soil pH level.
 
 Item 2: Add lime if pH is below 4.5.
@@ -547,16 +545,16 @@ Item 3: Apply balanced fertilizer after pH correction.`,
     diagnostic_interview: language === 'ms'
       ? `MODE SEMASA: DIAGNOSTIC INTERVIEW (Temu Bual Diagnostik)
 Anda MESTI menjawab dalam gaya DIAGNOSTIC sahaja. Setiap respons mestilah salah satu:
-A) SATU soalan sahaja – untuk mendapatkan maklumat (jangan tanya lebih daripada satu soalan dalam satu mesej).
-B) Selepas cukup maklumat – beri senarai semak terstruktur. Setiap item mesti pada baris sendiri; gunakan baris kosong antara "Item 1:", "Item 2:", "Item 3:" (jangan letak item sebelah-menyebelah).
-JANGAN campur: jangan beri checklist jika anda belum bertanya; jangan tanya beberapa soalan sekaligus.
-Aliran: Tanya satu soalan → tunggu jawapan → sama ada soalan susulan ATAU senarai semak berdasarkan jawapan.`
+A) SATU soalan sahaja – untuk mendapat maklumat (jangan tanya lebih satu soalan dalam satu mesej).
+B) Selepas pengguna jawab – beri penjelasan atau cadangan dalam BENTUK PERENGGAN (paragraph). JANGAN guna senarai semak. Tulis dalam ayat berterusan yang jelas; terangkan jawapan anda dalam perenggan.
+Dalam mod diagnostik, apabila anda memberi penjelasan atau menjawab soalan pengguna, GUNA PERENGGAN SAHAJA. Jangan tukar ke checklist.
+Aliran: Tanya satu soalan → tunggu jawapan → sama ada satu soalan susulan ATAU jawapan dalam perenggan (bukan checklist).`
       : `CURRENT MODE: DIAGNOSTIC INTERVIEW
-You MUST respond in DIAGNOSTIC style only. Each response must be either:
+You MUST respond in DIAGNOSTIC style only. Each response must be exactly one of:
 A) ONE question only – to gather information (do not ask more than one question per message).
-B) After you have enough information – give a structured checklist. Put each item on its own line; use a blank line between Item 1:, Item 2:, Item 3: (do not put items side by side on the same line).
-DO NOT mix: do not give a checklist before you have asked clarifying questions; do not ask multiple questions at once.
-Flow: Ask one question → wait for answer → either one follow-up question OR a checklist based on their answers.`,
+B) After the user has answered – give your explanation or recommendations in PARAGRAPH form. DO NOT use a checklist. Write in clear, flowing sentences; explain your answer in paragraphs.
+In diagnostic mode, when you are explaining or answering the user's question, use PARAGRAPHS only. Do not switch to checklist format.
+Flow: Ask one question → wait for answer → either one follow-up question OR your answer in paragraph form (never checklist).`,
   };
   const styleBlock = (styleInstructions[conversationStyle] ?? styleInstructions.short_direct)
     + (language === 'ms'
@@ -565,12 +563,16 @@ Flow: Ask one question → wait for answer → either one follow-up question OR 
 
   const formatRulesMs =
     conversationStyle === 'short_direct'
-      ? 'PERATURAN FORMAT (WAJIB):\n- JANGAN gunakan tajuk markdown. Gunakan prosa pendek 2-3 ayat sahaja. JANGAN guna checklist atau bullet.'
-      : 'PERATURAN FORMAT (WAJIB):\n- JANGAN gunakan tajuk markdown seperti "#", "##", atau "###". Gunakan teks biasa dan format checklist (✓) bila dalam mod checklist/diagnostik.';
+      ? 'PERATURAN FORMAT (WAJIB):\n- JANGAN gunakan tajuk markdown. Prosa sahaja, sehingga 5 ayat. JANGAN guna checklist atau bullet.'
+      : conversationStyle === 'diagnostic_interview'
+      ? 'PERATURAN FORMAT (WAJIB):\n- JANGAN gunakan tajuk markdown. Bila memberi penjelasan atau jawapan, guna perenggan (ayat berterusan). JANGAN guna checklist dalam mod diagnostik.'
+      : 'PERATURAN FORMAT (WAJIB):\n- JANGAN gunakan tajuk markdown. Dalam mod checklist, output WAJIB senarai semak "Item N: ..." sahaja.';
   const formatRulesEn =
     conversationStyle === 'short_direct'
-      ? 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings. Use short prose, 2-3 sentences only. DO NOT use checklists or bullets.'
-      : 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings like "#", "##", or "###". Use plain text and checklist (✓) format when in checklist or diagnostic mode.';
+      ? 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings. Prose only, up to 5 sentences. DO NOT use checklists or bullets.'
+      : conversationStyle === 'diagnostic_interview'
+      ? 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings. When giving explanations or answers, use paragraphs (flowing prose). DO NOT use checklist format in diagnostic mode.'
+      : 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings. In checklist mode, output MUST be checklist "Item N: ..." only.';
 
   // Comprehensive knowledge base about CropDrive system
   const systemKnowledge = language === 'ms'
@@ -793,7 +795,7 @@ PERATURAN PROFESIONAL PALMIRA:
 - Fokus pada konteks Malaysia dan keadaan tempatan
 - Gunakan bahasa yang profesional tetapi mesra dan mudah difahami
 - Berikan penjelasan saintifik apabila relevan, tetapi pastikan ia praktikal dan boleh dilaksanakan
-- Ikut format MODE di atas (ringkas = prosa sahaja; checklist = ✓; diagnostik = satu soalan atau ✓)
+- Ikut format MODE di atas (ringkas = prosa sehingga 5 ayat; checklist = senarai semak sahaja; diagnostik = satu soalan atau jawapan perenggan)
 - Jangan berikan nasihat kewangan, perubatan, atau undang-undang
 - Jika soalan di luar skop, tolak dengan sopan dan cadangkan topik yang relevan
 - Ingat: Gaya perbualan adalah WAJIB - anda mesti mengikutinya dalam setiap respons
@@ -828,7 +830,7 @@ PALMIRA'S PROFESSIONAL RULES:
 - Focus on Malaysian context and local conditions
 - Use professional yet friendly and accessible language
 - Provide scientific explanations when relevant, but ensure they are practical and actionable
-- Follow the MODE format above (short = prose only; checklist = ✓; diagnostic = one question or ✓)
+- Follow the MODE format above (short = prose up to 5 sentences; checklist = checklist only; diagnostic = one question or paragraph answer)
 - Do not provide financial, medical, or legal advice
 - If questions are out of scope, politely decline and suggest relevant topics
 - Remember: Conversation style is MANDATORY - you must follow it in every response
@@ -977,7 +979,7 @@ async function generateAIResponse(
     const chat = model.startChat({
       history: chatHistory,
       generationConfig: {
-        temperature: 0.0,
+        temperature: 0.7,
         maxOutputTokens: 8192,
       }
     });
