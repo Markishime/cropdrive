@@ -4,7 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { MessageSquare, X, Sparkles } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWandSparkles } from '@fortawesome/free-solid-svg-icons';
+import Image from 'next/image';
 
 interface PalmiraFloatingAvatarProps {
   language?: 'en' | 'ms';
@@ -63,7 +65,7 @@ export default function PalmiraFloatingAvatar({ language = 'en' }: PalmiraFloati
         onClick={handleClick}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
-        className="relative w-16 h-16 bg-gradient-to-br from-green-800 to-green-900 rounded-full shadow-2xl flex items-center justify-center cursor-pointer group"
+        className="relative w-16 h-16 rounded-full shadow-2xl flex items-center justify-center cursor-pointer group overflow-hidden"
       >
         {/* Pulsing ring effect */}
         <motion.div
@@ -81,7 +83,7 @@ export default function PalmiraFloatingAvatar({ language = 'en' }: PalmiraFloati
 
         {/* Sparkle effect */}
         <motion.div
-          className="absolute -top-1 -right-1"
+          className="absolute -top-1 -right-1 z-20"
           animate={{
             rotate: [0, 360],
             scale: [1, 1.2, 1],
@@ -92,14 +94,17 @@ export default function PalmiraFloatingAvatar({ language = 'en' }: PalmiraFloati
             ease: 'linear',
           }}
         >
-          <Sparkles className="w-4 h-4 text-yellow-400" />
+          <FontAwesomeIcon icon={faWandSparkles} className="w-4 h-4 text-yellow-400" />
         </motion.div>
 
-        {/* Main icon */}
-        <MessageSquare className="w-8 h-8 text-white relative z-10" />
-
-        {/* Notification badge (if needed) */}
-        {/* <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full border-2 border-white"></div> */}
+        {/* Palmira Avatar */}
+        <Image
+          src="/images/Palmira.png"
+          alt="Palmira"
+          width={64}
+          height={64}
+          className="w-full h-full object-cover relative z-10"
+        />
       </motion.button>
     </motion.div>
   );

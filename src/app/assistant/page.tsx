@@ -8,20 +8,19 @@ import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { 
-  MessageSquare, 
-  RefreshCw,
-  Maximize2,
-  Info,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  CreditCard,
-  TrendingUp,
-  FileText,
-  BarChart3
-} from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMessage,
+  faArrowsRotate,
+  faMaximize,
+  faCircleInfo,
+  faBolt,
+  faCircleCheck,
+  faTriangleExclamation,
+  faCircleXmark,
+  faCreditCard,
+  faChartLine,
+} from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
@@ -62,6 +61,9 @@ export default function AssistantPage() {
   const uploadsLimit = user?.uploadsLimit ?? 0;
   const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'unknown'>('unknown');
+  const [membershipChecked, setMembershipChecked] = useState(false);
+  const [isWithinContract, setIsWithinContract] = useState(true);
+  const [contractEndDate, setContractEndDate] = useState<Date | null>(null);
 
   // Get iframe origin from the iframe src if available, otherwise from env/default
   const getIframeOrigin = () => {
@@ -105,6 +107,42 @@ export default function AssistantPage() {
       setAnalysisIdToLoad(analysisId);
     }
   }, [searchParams]);
+
+  // Check membership using the API (same logic as Palmira page - uses Stripe contract year end)
+  useEffect(() => {
+    if (authLoading || !user) return;
+    
+    const checkMembership = async () => {
+      try {
+        const firebaseUser = auth.currentUser;
+        if (!firebaseUser) return;
+        
+        const token = await firebaseUser.getIdToken();
+        const response = await fetch('/api/membership', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await response.json();
+        
+        if (result?.success) {
+          setIsWithinContract(result.data.isWithinContract);
+          if (result.data.contractEndDate) {
+            setContractEndDate(new Date(result.data.contractEndDate));
+          }
+        } else {
+          // If API fails, fallback to local check
+          setIsWithinContract(true);
+        }
+      } catch (error) {
+        console.error('Error checking membership:', error);
+        // Fallback to allowing access if API fails
+        setIsWithinContract(true);
+      } finally {
+        setMembershipChecked(true);
+      }
+    };
+    
+    checkMembership();
+  }, [user, authLoading]);
   
   // Store analysis data to send when iframe is ready
   const [pendingAnalysisData, setPendingAnalysisData] = useState<any>(null);
@@ -376,29 +414,24 @@ export default function AssistantPage() {
     };
   }, [currentLang, mounted]);
 
-  // Check if subscription has expired
-  // Note: Even if subscription is cancelled, service access continues until currentPeriodEnd
+  // Check if subscription has expired using contract year end from API
+  // Note: This now uses the Stripe contract year end (same as "Full Access Until" on payment page)
   const isSubscriptionExpired = (): boolean => {
     if (!user) return false;
     
     // If user has no plan or plan is 'none', they need to subscribe
     if (!user.plan || user.plan === 'none') return true;
     
-    // Check if current period has ended - this is the only check that matters for access
-    // Even if subscription is cancelled, access continues until period end
-    if (user.currentPeriodEnd) {
-      const periodEnd = new Date(user.currentPeriodEnd);
-      const now = new Date();
-      if (now >= periodEnd) return true;
-    } else {
-      // If no period end date and subscription is cancelled, block access
-      if (user.subscriptionStatus === 'canceled') return true;
+    // Use contract-based check from API if available
+    if (membershipChecked) {
+      return !isWithinContract;
     }
     
+    // Fallback to local check while API is loading (be permissive)
     return false;
   };
 
-  const subscriptionExpired = user ? isSubscriptionExpired() : false;
+  const subscriptionExpired = user && membershipChecked ? isSubscriptionExpired() : false;
   const subscriptionCancelled = user?.subscriptionStatus === 'canceled';
 
   useEffect(() => {
@@ -1242,7 +1275,7 @@ export default function AssistantPage() {
           className="max-w-lg w-full bg-white rounded-3xl p-8 shadow-2xl text-center"
         >
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <XCircle className="w-10 h-10 text-red-600" />
+            <FontAwesomeIcon icon={faCircleXmark} className="w-10 h-10 text-red-600" />
           </div>
           
           <h1 className="text-2xl font-black text-gray-900 mb-3">
@@ -1265,7 +1298,7 @@ export default function AssistantPage() {
               <>
                 <Link href="/payment-method" className="block">
                   <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-4 font-bold rounded-xl shadow-lg text-lg">
-                    <RefreshCw className="w-5 h-5 mr-2" />
+                    <FontAwesomeIcon icon={faArrowsRotate} className="w-5 h-5 mr-2" />
                     {language === 'ms' ? 'Buka Semula Langganan' : 'Re-open Subscription'}
                   </Button>
                 </Link>
@@ -1279,7 +1312,7 @@ export default function AssistantPage() {
               <>
                 <Link href="/pricing" className="block">
                   <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
-                    <CreditCard className="w-5 h-5 mr-2" />
+                    <FontAwesomeIcon icon={faCreditCard} className="w-5 h-5 mr-2" />
                     {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
                   </Button>
                 </Link>
@@ -1324,12 +1357,12 @@ export default function AssistantPage() {
                 whileHover={{ scale: 1.1, rotate: 5 }}
                 transition={{ type: "spring", stiffness: 400 }}
               >
-                <MessageSquare className="w-7 h-7 text-green-900" />
+                <FontAwesomeIcon icon={faMessage} className="w-7 h-7 text-green-900" />
               </motion.div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
                   {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}
-                  <Zap className="w-5 h-5 text-yellow-400" />
+                  <FontAwesomeIcon icon={faBolt} className="w-5 h-5 text-yellow-400" />
                 </h1>
                 <p className="text-sm text-white/80 font-medium">
                   {language === 'ms' 
@@ -1367,7 +1400,7 @@ export default function AssistantPage() {
                 className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
                 title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
               >
-                <RefreshCw className="w-4 h-4" />
+                <FontAwesomeIcon icon={faArrowsRotate} className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm">
                   {language === 'ms' ? 'Muat Semula' : 'Refresh'}
                 </span>
@@ -1380,7 +1413,7 @@ export default function AssistantPage() {
                 className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
                 title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
               >
-                <Maximize2 className="w-4 h-4" />
+                <FontAwesomeIcon icon={faMaximize} className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm">
                   {language === 'ms' ? 'Penuh' : 'Full'}
                 </span>
@@ -1402,7 +1435,7 @@ export default function AssistantPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5 text-white flex-shrink-0" />
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 text-white flex-shrink-0" />
                 <p className="text-sm font-semibold">
                   {language === 'ms' 
                     ? `⚠️ Langganan anda telah dibatalkan. Akses akan tamat pada ${new Date(user.currentPeriodEnd).toLocaleDateString('ms-MY', { dateStyle: 'long' })}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
@@ -1416,7 +1449,7 @@ export default function AssistantPage() {
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center gap-2 px-4 py-2 bg-white text-amber-600 rounded-xl font-bold text-sm shadow-md hover:bg-amber-50 transition"
                 >
-                  <RefreshCw className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faArrowsRotate} className="w-4 h-4" />
                   {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
                 </motion.button>
               </Link>
@@ -1436,7 +1469,7 @@ export default function AssistantPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <AlertTriangle className="w-5 h-5 text-white flex-shrink-0" />
+                <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 text-white flex-shrink-0" />
                 <p className="text-sm font-semibold">
                   {language === 'ms' 
                     ? `⚠️ Anda telah mencapai had muat naik (${uploadsUsed}/${uploadsLimit}). Anda masih boleh melihat sejarah analisis, tetapi tidak boleh memuat naik analisis baharu.`
@@ -1450,7 +1483,7 @@ export default function AssistantPage() {
                   whileTap={{ scale: 0.95 }}
                   className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-sm shadow-md hover:bg-orange-50 transition"
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <FontAwesomeIcon icon={faChartLine} className="w-4 h-4" />
                   {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
                 </motion.button>
               </Link>
@@ -1469,7 +1502,7 @@ export default function AssistantPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3">
-              <Info className="w-5 h-5 text-blue-200 flex-shrink-0" />
+              <FontAwesomeIcon icon={faCircleInfo} className="w-5 h-5 text-blue-200 flex-shrink-0" />
               <p className="text-sm font-semibold">
                 {language === 'ms' 
                   ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) → Tunggu 5-8 minit → Dapatkan analisis terperinci!'
@@ -1478,7 +1511,7 @@ export default function AssistantPage() {
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
-              <CheckCircle2 className="w-4 h-4" />
+              <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4" />
               <span>
                 {language === 'ms'
                   ? 'Cadangan berpandukan garis panduan MPOB & Amalan Pertanian Baik (GAP) global'

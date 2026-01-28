@@ -1,6 +1,21 @@
 import { doc, getDoc, collection, query, where, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from './firebase';
 
+/** Get upload limit for a given plan */
+function getUploadLimitForPlan(planId: string): number {
+  const plan = planId?.toLowerCase().trim();
+  switch (plan) {
+    case 'start':
+      return 2;
+    case 'smart':
+      return 5;
+    case 'precision':
+      return -1; // Unlimited
+    default:
+      return 2;
+  }
+}
+
 export interface Membership {
   userId: string;
   planId: string;
@@ -9,9 +24,15 @@ export interface Membership {
   stripeCustomerId?: string;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
+  /** The 1-year contract end date (subscription start + 1 year) */
+  contractEndDate: Date;
   cancelAtPeriodEnd: boolean;
   createdAt: Date;
   updatedAt: Date;
+  /** Current month's upload count */
+  uploadsUsedThisMonth?: number;
+  /** Plan's monthly upload limit */
+  uploadLimit?: number;
 }
 
 // Helper function to find active subscription for a user
@@ -110,6 +131,11 @@ export async function getMembership(userId: string): Promise<Membership | null> 
 
         if (subscriptionSnap.exists()) {
           const subscriptionData = subscriptionSnap.data();
+          const createdAt = subscriptionData.createdAt?.toDate ? subscriptionData.createdAt.toDate() : new Date();
+          // Contract end date is 1 year from subscription creation
+          const contractEndDate = subscriptionData.contractEndDate?.toDate 
+            ? subscriptionData.contractEndDate.toDate() 
+            : new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000);
           return {
             userId: userData.uid || userId,
             planId: subscriptionData.planId || userData.plan || 'start',
@@ -118,9 +144,12 @@ export async function getMembership(userId: string): Promise<Membership | null> 
             stripeCustomerId: subscriptionData.stripeCustomerId,
             currentPeriodStart: subscriptionData.currentPeriodStart?.toDate ? subscriptionData.currentPeriodStart.toDate() : new Date(),
             currentPeriodEnd: subscriptionData.currentPeriodEnd?.toDate ? subscriptionData.currentPeriodEnd.toDate() : new Date(),
+            contractEndDate,
             cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd || false,
-            createdAt: subscriptionData.createdAt?.toDate ? subscriptionData.createdAt.toDate() : new Date(),
+            createdAt,
             updatedAt: subscriptionData.updatedAt?.toDate ? subscriptionData.updatedAt.toDate() : new Date(),
+            uploadsUsedThisMonth: userData.uploadsUsedThisMonth || 0,
+            uploadLimit: getUploadLimitForPlan(subscriptionData.planId || userData.plan || 'start'),
           } as Membership;
         }
       } catch (subError) {
@@ -134,17 +163,25 @@ export async function getMembership(userId: string): Promise<Membership | null> 
       try {
         const activeSubscription = await findActiveSubscription(userId);
         if (activeSubscription) {
+          const createdAt = activeSubscription.createdAt?.toDate ? activeSubscription.createdAt.toDate() : new Date();
+          const contractEndDate = activeSubscription.contractEndDate?.toDate 
+            ? activeSubscription.contractEndDate.toDate() 
+            : new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000);
+          const planId = activeSubscription.planId || userData.plan || 'start';
           return {
             userId: userData.uid || userId,
-            planId: activeSubscription.planId || userData.plan || 'start',
+            planId,
             status: activeSubscription.status || 'active',
             stripeSubscriptionId: activeSubscription.stripeSubscriptionId,
             stripeCustomerId: activeSubscription.stripeCustomerId,
             currentPeriodStart: activeSubscription.currentPeriodStart?.toDate ? activeSubscription.currentPeriodStart.toDate() : new Date(),
             currentPeriodEnd: activeSubscription.currentPeriodEnd?.toDate ? activeSubscription.currentPeriodEnd.toDate() : new Date(),
+            contractEndDate,
             cancelAtPeriodEnd: activeSubscription.cancelAtPeriodEnd || false,
-            createdAt: activeSubscription.createdAt?.toDate ? activeSubscription.createdAt.toDate() : new Date(),
+            createdAt,
             updatedAt: activeSubscription.updatedAt?.toDate ? activeSubscription.updatedAt.toDate() : new Date(),
+            uploadsUsedThisMonth: userData.uploadsUsedThisMonth || 0,
+            uploadLimit: getUploadLimitForPlan(planId),
           } as Membership;
         }
       } catch (queryError) {
@@ -166,6 +203,12 @@ export async function getMembership(userId: string): Promise<Membership | null> 
       // User has paid plan but subscription might still be processing
       membershipStatus = 'active';
     }
+
+    const createdAt = userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date();
+    // Contract end date is 1 year from account/subscription creation
+    const contractEndDate = userData.contractEndDate?.toDate 
+      ? userData.contractEndDate.toDate() 
+      : new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000);
     
     return {
       userId: userData.uid || userId,
@@ -173,11 +216,16 @@ export async function getMembership(userId: string): Promise<Membership | null> 
       status: membershipStatus,
       stripeSubscriptionId: userData.stripeSubscriptionId,
       stripeCustomerId: userData.stripeCustomerId,
-      currentPeriodStart: userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(),
-      currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+      currentPeriodStart: createdAt,
+      currentPeriodEnd: userPlan === 'start'
+        ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // 10 years for start plan
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days for paid plans
+      contractEndDate,
       cancelAtPeriodEnd: false,
-      createdAt: userData.createdAt?.toDate ? userData.createdAt.toDate() : new Date(),
+      createdAt,
       updatedAt: userData.updatedAt?.toDate ? userData.updatedAt.toDate() : new Date(),
+      uploadsUsedThisMonth: userData.uploadsUsedThisMonth || 0,
+      uploadLimit: getUploadLimitForPlan(userPlan),
     } as Membership;
   } catch (error: any) {
     // Don't log Firestore internal assertion errors as they're often transient
@@ -219,6 +267,17 @@ export function isMembershipActive(membership: Membership | null): boolean {
 }
 
 /**
+ * Check if user is within their 1-year contract period.
+ * Even if monthly payment has expired, they can still access features
+ * within the contract period.
+ */
+export function isWithinContractPeriod(membership: Membership | null): boolean {
+  if (!membership) return false;
+  const now = new Date();
+  return membership.contractEndDate > now;
+}
+
+/**
  * Check if user has full access (active, trialing, or cancelled but still within contract period)
  * This allows access to all features except AI assistant for cancelled users
  */
@@ -233,6 +292,11 @@ export function hasFullAccess(membership: Membership | null): boolean {
     return true;
   }
 
+  // Users within their contract period have full access
+  if (isWithinContractPeriod(membership)) {
+    return true;
+  }
+
   // Cancelled users have full access if they're still within their contract period
   if (status === 'canceled' && membership.currentPeriodEnd > now) {
     return true;
@@ -243,11 +307,17 @@ export function hasFullAccess(membership: Membership | null): boolean {
 
 /**
  * Check if user can access AI assistant/chatbot functionality
- * Only active and trialing users can use AI assistant
+ * Users within their 1-year contract can access AI assistant
  */
 export function canAccessAIAssistant(membership: Membership | null): boolean {
-  const status = getMembershipStatus(membership);
-  return status === 'active' || status === 'trialing';
+  if (!membership) return false;
+  const planId = String(membership.planId || '').toLowerCase().trim();
+  
+  // Must have a valid plan
+  if (planId === '' || planId === 'none') return false;
+  
+  // Check if within 1-year contract period
+  return isWithinContractPeriod(membership);
 }
 
 /**
@@ -259,25 +329,40 @@ export function getMembershipStatusMessage(membership: Membership | null): strin
   }
 
   const status = getMembershipStatus(membership);
-  const now = new Date();
+  const withinContract = isWithinContractPeriod(membership);
 
+  // If within contract period, show positive message even if billing has issues
+  if (withinContract) {
+    const contractEndStr = membership.contractEndDate.toLocaleDateString();
+    
+    if (status === 'active' || status === 'trialing') {
+      return `Active membership (contract until ${contractEndStr})`;
+    }
+    
+    if (status === 'past_due') {
+      return `Payment past due - access continues until ${contractEndStr}`;
+    }
+    
+    if (status === 'canceled') {
+      return `Cancelled - access continues until ${contractEndStr}`;
+    }
+    
+    return `Access until ${contractEndStr}`;
+  }
+
+  // Contract has ended
   switch (status) {
     case 'active':
       return 'Active membership';
     case 'trialing':
       return 'Trial period';
     case 'canceled':
-      if (membership.currentPeriodEnd > now) {
-        const endDate = membership.currentPeriodEnd.toLocaleDateString();
-        return `Full access until ${endDate} (cancelled)`;
-      } else {
-        return 'Membership expired';
-      }
+      return 'Subscription expired';
     case 'past_due':
-      return 'Payment past due';
+      return 'Subscription expired - payment past due';
     case 'expired':
-      return 'Membership expired';
+      return 'Subscription expired';
     default:
-      return 'Unknown status';
+      return 'Subscription expired';
   }
 }

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
@@ -83,6 +84,12 @@ interface Farm {
   location?: string;
 }
 
+const CONVERSATION_STYLES = [
+  { id: 'short_direct', labelEn: 'Short', labelMs: 'Ringkas', descEn: 'Brief answers', descMs: 'Jawapan ringkas' },
+  { id: 'checklist_only', labelEn: 'Checklist only', labelMs: 'Senarai semak sahaja', descEn: 'Structured checklist', descMs: 'Senarai semak berstruktur' },
+  { id: 'diagnostic_interview', labelEn: 'Diagnostic', labelMs: 'Diagnostik', descEn: 'Questions then checklist', descMs: 'Soalan kemudian senarai semak' },
+] as const;
+
 interface PalmiraDashboardProps {
   language: 'en' | 'ms';
 }
@@ -113,6 +120,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
   const [showFarmProfile, setShowFarmProfile] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canPerformAnalysis, setCanPerformAnalysis] = useState(true);
+  const [hasReachedUploadLimit, setHasReachedUploadLimit] = useState(false);
+  const [uploadsUsedThisMonth, setUploadsUsedThisMonth] = useState(0);
+  const [uploadLimit, setUploadLimit] = useState(2);
   const [onboardingData, setOnboardingData] = useState<any>(null);
   const [farmProfileLoading, setFarmProfileLoading] = useState(false);
   const [feedback, setFeedback] = useState<Record<string, 'like' | 'dislike' | null>>({});
@@ -126,20 +137,83 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
     pages: number;
     charCount: number;
   } | null>(null);
+  const [conversationStyle, setConversationStyle] = useState<string>('short_direct');
+  const [savingConversationStyle, setSavingConversationStyle] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Load chats, reports, and farms
+  // Load chats, reports, farms, and Palmira conversation style
   useEffect(() => {
     if (user) {
       loadChats();
       loadReports();
       loadFarms();
+      loadPalmiraSettings();
       checkAIAccess();
       checkAdminStatus();
     }
   }, [user]);
+
+  const loadPalmiraSettings = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken();
+      const res = await fetch('/api/palmira/settings', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await res.json();
+      if (result.success && result.data?.conversationStyle) {
+        setConversationStyle(result.data.conversationStyle);
+      }
+    } catch (e) {
+      console.error('Error loading Palmira settings:', e);
+    }
+  };
+
+  const saveConversationStyle = async (styleId: string, assistantMessageId?: string) => {
+    if (savingConversationStyle || styleId === conversationStyle) return;
+    setSavingConversationStyle(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken();
+      const res = await fetch('/api/palmira/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ conversationStyle: styleId }),
+      });
+      const result = await res.json();
+      if (result.success) {
+        setConversationStyle(styleId);
+        setOnboardingData((prev: any) => (prev ? { ...prev, conversationStyle: styleId } : prev));
+        setSavingConversationStyle(false);
+        if (assistantMessageId) {
+          toast.success(
+            language === 'ms'
+              ? 'Menjana semula respons dengan gaya baru…'
+              : 'Regenerating response with new style…'
+          );
+          handleRegenerate(assistantMessageId);
+        } else {
+          toast.success(
+            language === 'ms' ? 'Gaya jawapan dikemas kini' : 'Answer style updated'
+          );
+        }
+      } else throw new Error(result.error);
+    } catch (err: any) {
+      console.error('Error saving conversation style:', err);
+      toast.error(
+        language === 'ms' ? 'Ralat menyimpan gaya' : 'Error saving style'
+      );
+    } finally {
+      setSavingConversationStyle(false);
+    }
+  };
 
   const checkAdminStatus = async () => {
     try {
@@ -190,6 +264,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       const currentUser = auth.currentUser;
       if (!currentUser) {
         setCanAccessAI(false);
+        setCanPerformAnalysis(false);
         return;
       }
 
@@ -200,14 +275,21 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
 
       const result = await response.json();
       if (result.success) {
-        // Palmira should be usable for any authenticated user with a plan.
+        // User can access Palmira if within contract period
         setCanAccessAI(result.data.canAccessPalmira);
+        // User can perform new analysis if within contract AND has uploads remaining
+        setCanPerformAnalysis(result.data.canPerformAnalysis);
+        setHasReachedUploadLimit(result.data.hasReachedUploadLimit);
+        setUploadsUsedThisMonth(result.data.uploadsUsedThisMonth || 0);
+        setUploadLimit(result.data.uploadLimit || 2);
       } else {
         setCanAccessAI(false);
+        setCanPerformAnalysis(false);
       }
     } catch (error) {
       console.error('Error checking AI access:', error);
       setCanAccessAI(false);
+      setCanPerformAnalysis(false);
     }
   };
 
@@ -343,8 +425,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       const result = await response.json();
       if (result.success) {
         setCurrentChatId(result.data.id);
-        setMessages([]);
         setShowHomepage(false);
+        setMessages([]);
         loadChats();
       }
     } catch (error) {
@@ -816,15 +898,27 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <div className="p-4 border-b border-gray-200 flex items-center justify-between">
                 {!sidebarCollapsed && (
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-800 rounded-xl flex items-center justify-center">
-                      <span className="text-xl">🌴</span>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
+                      <Image
+                        src="/images/Palmira.png"
+                        alt="Palmira"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
                     </div>
                     <span className="font-black text-green-900 text-lg font-heading">Palmira</span>
                   </div>
                 )}
                 {sidebarCollapsed && (
-                  <div className="w-10 h-10 bg-green-800 rounded-xl flex items-center justify-center mx-auto">
-                    <span className="text-xl">🌴</span>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto overflow-hidden">
+                    <Image
+                      src="/images/Palmira.png"
+                      alt="Palmira"
+                      width={40}
+                      height={40}
+                      className="object-cover"
+                    />
                   </div>
                 )}
                 <button
@@ -1119,31 +1213,47 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             >
               <div className="text-center max-w-2xl mx-auto">
                 <motion.div
-                  className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg"
+                  className="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg overflow-hidden bg-gradient-to-br from-green-100 to-green-200 border-2 border-white ring-2 ring-green-200"
                   initial={{ scale: 0.8, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ delay: 0.2, duration: 0.5, type: "spring", stiffness: 200 }}
                 >
-                  <FontAwesomeIcon icon={faUser} className="w-10 h-10 text-green-600" />
+                  {user?.profilePictureUrl ? (
+                    <img
+                      src={user.profilePictureUrl}
+                      alt={user?.displayName || 'You'}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <FontAwesomeIcon icon={faUser} className="w-12 h-12 text-green-600" />
+                  )}
                 </motion.div>
                 <motion.h1
-                  className="text-3xl font-black text-gray-900 mb-4 font-heading"
+                  className="text-3xl sm:text-4xl font-black text-gray-900 mb-2 font-heading"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  {language === 'ms' ? 'Selamat Datang,' : 'Welcome,'} {user?.displayName || user?.email?.split('@')[0] || 'User'}!
+                  {language === 'ms' ? 'Selamat Datang,' : 'Welcome back,'} {user?.displayName || user?.email?.split('@')[0] || 'User'}!
                 </motion.h1>
                 <motion.p
-                  className="text-lg text-gray-600 mb-8"
+                  className="text-base text-green-700 font-medium mb-1"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35, duration: 0.5 }}
+                >
+                  {language === 'ms' ? 'Palmira sedia membantu anda.' : 'Palmira is ready to help.'}
+                </motion.p>
+                <motion.p
+                  className="text-lg text-gray-600 mb-8 max-w-lg mx-auto"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
                   {canAccessAI
                     ? (language === 'ms'
-                        ? 'Anda boleh menggunakan Palmira untuk mendapatkan bantuan dengan analisis tanah dan daun anda.'
-                        : 'You can use Palmira to get help with your soil and leaf analysis.')
+                        ? 'Dapatkan pandangan segera tentang laporan tanah dan daun anda, nasihat baja, dan tip praktikal untuk ladang kelapa sawit—semua dalam satu tempat.'
+                        : 'Get instant insights on your soil and leaf reports, fertilizer recommendations, and practical tips for your oil palm farm—all in one place.')
                     : (language === 'ms'
                         ? 'Anda boleh melihat laporan dan sejarah sembang anda. Keahlian diperlukan untuk menggunakan Palmira.'
                         : 'You can view your reports and chat history. Membership is required to use Palmira.')}
@@ -1178,8 +1288,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       </h3>
                       <p className="text-sm text-gray-600">
                         {language === 'ms'
-                          ? 'Tanya soalan tentang laporan anda'
-                          : 'Ask questions about your reports'}
+                          ? 'Tanya Palmira tentang nutrien, cadangan baja, atau langkah seterusnya—dapatkan jawapan serta-merta.'
+                          : 'Ask Palmira about nutrients, fertilizer advice, or next steps—get answers in seconds.'}
                       </p>
                     </motion.button>
                   ) : (
@@ -1221,8 +1331,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     </h3>
                     <p className="text-sm text-gray-600">
                       {language === 'ms'
-                        ? 'Semak analisis terdahulu anda'
-                        : 'Review your previous analyses'}
+                        ? 'Semak dan bandingkan analisis tanah dan daun anda—semua dalam satu tempat.'
+                        : 'Review and compare your soil and leaf analyses—all in one place.'}
                     </p>
                   </motion.button>
                 </motion.div>
@@ -1237,7 +1347,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, type: "spring", stiffness: 300 }}
                 >
-                  <div className="text-center text-gray-500 max-w-md mx-auto">
+                  <div className="text-center text-gray-500 max-w-md mx-auto flex flex-col items-center">
                     <motion.div
                       animate={{
                         scale: [1, 1.1, 1],
@@ -1248,8 +1358,15 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         repeat: Infinity,
                         ease: "easeInOut"
                       }}
+                      className="mb-6 flex justify-center"
                     >
-                      <span className="text-8xl mb-6">🌴</span>
+                      <Image
+                        src="/images/Palmira.png"
+                        alt="Palmira"
+                        width={128}
+                        height={128}
+                        className="rounded-full"
+                      />
                     </motion.div>
                     <motion.h2
                       className="text-2xl font-black mb-3 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent font-heading"
@@ -1312,11 +1429,17 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 >
                   {message.role === 'assistant' && (
                     <motion.div
-                      className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center flex-shrink-0 shadow-md"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden"
                       whileHover={{ scale: 1.1, rotate: 5 }}
                       transition={{ type: "spring", stiffness: 400 }}
                     >
-                      <span className="text-2xl">🌴</span>
+                      <Image
+                        src="/images/Palmira.png"
+                        alt="Palmira"
+                        width={40}
+                        height={40}
+                        className="object-cover"
+                      />
                     </motion.div>
                   )}
                   <motion.div
@@ -1344,106 +1467,138 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         .replace(/\\u00A0/g, '') // Remove \u00A0 characters
                         .replace(/\u00A0/g, '') // Remove actual non-breaking spaces
                         .split('\n')
-                        .filter(line => line.trim().length > 0 || line.includes('-')) // Filter out empty lines
                         .map((line, idx) => {
+                          const trimmed = line.trim();
+                          // Preserve blank lines as vertical spacing (e.g. between checklist items)
+                          if (trimmed.length === 0) {
+                            return <div key={idx} className="h-2 shrink-0" aria-hidden />;
+                          }
                           // Clean up asterisks and number signs
                           let cleanedLine = line
                             .replace(/\*\*/g, '') // Remove bold markers
                             .replace(/\*/g, '') // Remove asterisks
                             .replace(/^\d+\.\s*/g, '') // Remove numbered list format (1. 2. 3.)
                             .trim();
-                          
-                          // Format content
-                          const trimmed = cleanedLine;
-                          if (trimmed.startsWith('-')) {
+                          if (cleanedLine.startsWith('-')) {
                             return <div key={idx} className="ml-4 my-1">{cleanedLine}</div>;
-                          }
-                          if (trimmed.length === 0) {
-                            return null; // Don't render empty lines
                           }
                           return <div key={idx} className="my-1">{cleanedLine}</div>;
                         })
-                        .filter(Boolean) // Remove null entries
                       }
                     </div>
-                    {message.role === 'assistant' && (
-                      <motion.div
-                        className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        transition={{ delay: 0.2 }}
-                      >
-                        <motion.button
-                          whileHover={{ scale: 1.1, backgroundColor: '#f3f4f6' }}
-                          whileTap={{ scale: 0.95 }}
-                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                          title={language === 'ms' ? 'Salin' : 'Copy'}
-                          aria-label={language === 'ms' ? 'Salin' : 'Copy'}
-                          onClick={() => {
-                            navigator.clipboard.writeText(message.content);
-                            toast.success(language === 'ms' ? 'Disalin ke papan keratan' : 'Copied to clipboard');
-                          }}
+                    {message.role === 'assistant' && !String(message.id).startsWith('intro-') && (
+                      <>
+                        <motion.div
+                          className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ delay: 0.2 }}
                         >
-                          <FontAwesomeIcon icon={faCopy} className="w-4 h-4 text-gray-600" />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1, backgroundColor: '#dcfce7' }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`p-2 rounded-lg transition-colors ${
-                            feedback[message.id] === 'like' ? 'bg-green-100' : 'hover:bg-green-100'
-                          }`}
-                          title={language === 'ms' ? 'Suka' : 'Like'}
-                          aria-label={language === 'ms' ? 'Suka' : 'Like'}
-                          onClick={() => handleLikeMessage(message.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faThumbsUp}
-                            className={`w-4 h-4 ${
-                              feedback[message.id] === 'like' ? 'text-green-700' : 'text-green-600'
+                          <motion.button
+                            whileHover={{ scale: 1.1, backgroundColor: '#f3f4f6' }}
+                            whileTap={{ scale: 0.95 }}
+                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            title={language === 'ms' ? 'Salin' : 'Copy'}
+                            aria-label={language === 'ms' ? 'Salin' : 'Copy'}
+                            onClick={() => {
+                              navigator.clipboard.writeText(message.content);
+                              toast.success(language === 'ms' ? 'Disalin ke papan keratan' : 'Copied to clipboard');
+                            }}
+                          >
+                            <FontAwesomeIcon icon={faCopy} className="w-4 h-4 text-gray-600" />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1, backgroundColor: '#dcfce7' }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`p-2 rounded-lg transition-colors ${
+                              feedback[message.id] === 'like' ? 'bg-green-100' : 'hover:bg-green-100'
                             }`}
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1, backgroundColor: '#fee2e2' }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`p-2 rounded-lg transition-colors ${
-                            feedback[message.id] === 'dislike'
-                              ? 'bg-red-100'
-                              : 'hover:bg-red-100'
-                          }`}
-                          title={language === 'ms' ? 'Tidak suka' : 'Dislike'}
-                          aria-label={language === 'ms' ? 'Tidak suka' : 'Dislike'}
-                          onClick={() => handleDislikeMessage(message.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faThumbsDown}
-                            className={`w-4 h-4 ${
-                              feedback[message.id] === 'dislike' ? 'text-red-700' : 'text-red-600'
+                            title={language === 'ms' ? 'Suka' : 'Like'}
+                            aria-label={language === 'ms' ? 'Suka' : 'Like'}
+                            onClick={() => handleLikeMessage(message.id)}
+                          >
+                            <FontAwesomeIcon
+                              icon={faThumbsUp}
+                              className={`w-4 h-4 ${
+                                feedback[message.id] === 'like' ? 'text-green-700' : 'text-green-600'
+                              }`}
+                            />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1, backgroundColor: '#fee2e2' }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`p-2 rounded-lg transition-colors ${
+                              feedback[message.id] === 'dislike'
+                                ? 'bg-red-100'
+                                : 'hover:bg-red-100'
                             }`}
-                          />
-                        </motion.button>
-                        <motion.button
-                          whileHover={{ scale: 1.1, backgroundColor: '#e0f2fe' }}
-                          whileTap={{ scale: 0.95 }}
-                          className="p-2 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title={language === 'ms' ? 'Muat semula' : 'Regenerate'}
-                          aria-label={language === 'ms' ? 'Muat semula' : 'Regenerate'}
-                          disabled={loading && regeneratingMessageId === message.id}
-                          onClick={() => handleRegenerate(message.id)}
-                        >
-                          <FontAwesomeIcon
-                            icon={faRedo}
-                            className={`w-4 h-4 ${
-                              regeneratingMessageId === message.id ? 'text-blue-800' : 'text-blue-600'
-                            }`}
-                          />
-                        </motion.button>
-                      </motion.div>
+                            title={language === 'ms' ? 'Tidak suka' : 'Dislike'}
+                            aria-label={language === 'ms' ? 'Tidak suka' : 'Dislike'}
+                            onClick={() => handleDislikeMessage(message.id)}
+                          >
+                            <FontAwesomeIcon
+                              icon={faThumbsDown}
+                              className={`w-4 h-4 ${
+                                feedback[message.id] === 'dislike' ? 'text-red-700' : 'text-red-600'
+                              }`}
+                            />
+                          </motion.button>
+                          <motion.button
+                            whileHover={{ scale: 1.1, backgroundColor: '#e0f2fe' }}
+                            whileTap={{ scale: 0.95 }}
+                            className="p-2 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={language === 'ms' ? 'Muat semula' : 'Regenerate'}
+                            aria-label={language === 'ms' ? 'Muat semula' : 'Regenerate'}
+                            disabled={loading && regeneratingMessageId === message.id}
+                            onClick={() => handleRegenerate(message.id)}
+                          >
+                            <FontAwesomeIcon
+                              icon={faRedo}
+                              className={`w-4 h-4 ${
+                                regeneratingMessageId === message.id ? 'text-blue-800' : 'text-blue-600'
+                              }`}
+                            />
+                          </motion.button>
+                        </motion.div>
+                        <div className="mt-2 pt-2 border-t border-gray-100">
+                          <p className="text-xs text-gray-500 mb-1.5">
+                            {language === 'ms' ? 'Gaya jawapan:' : 'Answer style:'}
+                          </p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {CONVERSATION_STYLES.map((style) => (
+                              <motion.button
+                                key={style.id}
+                                type="button"
+                                disabled={savingConversationStyle || (loading && regeneratingMessageId === message.id)}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => saveConversationStyle(style.id, message.id)}
+                                className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                  conversationStyle === style.id
+                                    ? 'bg-green-600 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                } disabled:opacity-60`}
+                                title={language === 'ms' ? style.descMs : style.descEn}
+                              >
+                                {language === 'ms' ? style.labelMs : style.labelEn}
+                              </motion.button>
+                            ))}
+                          </div>
+                        </div>
+                      </>
                     )}
                   </motion.div>
                   {message.role === 'user' && (
-                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
-                      <FontAwesomeIcon icon={faUser} className="w-6 h-6 text-gray-600" />
+                    <div className="w-10 h-10 rounded-full flex-shrink-0 overflow-hidden bg-gray-300 flex items-center justify-center">
+                      {user?.profilePictureUrl ? (
+                        <img
+                          src={user.profilePictureUrl}
+                          alt={user.displayName || 'You'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <FontAwesomeIcon icon={faUser} className="w-6 h-6 text-gray-600" />
+                      )}
                     </div>
                   )}
                 </motion.div>
@@ -1457,7 +1612,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <motion.div
-                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-600 to-green-700 flex items-center justify-center shadow-md flex-shrink-0"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden"
                     animate={{
                       scale: [1, 1.1, 1],
                       rotate: [0, 5, -5, 0]
@@ -1468,7 +1623,13 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       ease: "easeInOut"
                     }}
                   >
-                    <span className="text-xl">🌴</span>
+                    <Image
+                      src="/images/Palmira.png"
+                      alt="Palmira"
+                      width={40}
+                      height={40}
+                      className="object-cover"
+                    />
                   </motion.div>
                   <motion.div
                     className="bg-white rounded-2xl px-4 py-3 border border-gray-200 shadow-sm"
@@ -1517,7 +1678,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             transition={{ type: "spring", stiffness: 300 }}
           >
             <div className="max-w-4xl mx-auto">
-              {canAccessAI ? (
+              {canAccessAI && canPerformAnalysis ? (
               <>
                 <motion.div
                   className="flex items-end gap-3 p-2 bg-gray-50 rounded-2xl border border-gray-200"
@@ -1643,6 +1804,46 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   </p>
                 </motion.div>
               </>
+            ) : canAccessAI && hasReachedUploadLimit ? (
+              <motion.div
+                className="text-center py-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <motion.div
+                  className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFileAlt} className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+                  </motion.div>
+                  <h3 className="font-bold text-blue-800 mb-3 text-lg font-heading">
+                    {language === 'ms' ? 'Had Muat Naik Dicapai' : 'Upload Limit Reached'}
+                  </h3>
+                  <p className="text-sm text-blue-700 leading-relaxed mb-3">
+                    {language === 'ms'
+                      ? `Anda telah menggunakan ${uploadsUsedThisMonth} daripada ${uploadLimit === -1 ? 'tanpa had' : uploadLimit} muat naik bulan ini. Anda masih boleh melihat sejarah analisis dan sembang anda.`
+                      : `You have used ${uploadsUsedThisMonth} of ${uploadLimit === -1 ? 'unlimited' : uploadLimit} uploads this month. You can still view your analysis history and chats.`}
+                  </p>
+                  <button
+                    onClick={() => router.push('/pricing')}
+                    className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
+                  </button>
+                </motion.div>
+              </motion.div>
             ) : (
               <motion.div
                 className="text-center py-6"

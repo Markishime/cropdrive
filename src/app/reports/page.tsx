@@ -5,7 +5,19 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { FileText, Eye, Calendar, Search, Trash2, Plus, RefreshCw, X, AlertTriangle, MessageSquare } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faFileAlt,
+  faEye,
+  faCalendar,
+  faMagnifyingGlass,
+  faTrash,
+  faPlus,
+  faArrowsRotate,
+  faXmark,
+  faTriangleExclamation,
+  faMessage,
+} from '@fortawesome/free-solid-svg-icons';
 import { collection, query, where, orderBy, getDocs, doc, deleteDoc, getDoc, Timestamp, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { getAuth } from 'firebase/auth';
@@ -577,7 +589,7 @@ export default function ReportsPage() {
                 className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
                 title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
               >
-                <RefreshCw className={`w-5 h-5 ${loadingReports ? 'animate-spin' : ''}`} />
+                <FontAwesomeIcon icon={faArrowsRotate} className={`w-5 h-5 ${loadingReports ? 'animate-spin' : ''}`} spin={loadingReports} />
                 {language === 'ms' ? 'Muat Semula' : 'Refresh'}
               </motion.button>
               <motion.button
@@ -586,7 +598,7 @@ export default function ReportsPage() {
                 onClick={() => router.push('/assistant')}
                 className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 px-6 py-3 rounded-lg font-black flex items-center gap-2 transition shadow-lg hover:shadow-xl"
               >
-                <Plus className="w-5 h-5" />
+                <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
                 {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
               </motion.button>
             </div>
@@ -610,7 +622,7 @@ export default function ReportsPage() {
                   {language === 'ms' ? 'Cari Laporan' : 'Search Reports'}
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="reports-search"
                     name="reports-search"
@@ -636,7 +648,7 @@ export default function ReportsPage() {
           {filteredReports.length === 0 ? (
             <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 sm:p-16 text-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl mx-auto mb-6 flex items-center justify-center">
-                <FileText className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
+                <FontAwesomeIcon icon={faFileAlt} className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4">
                 {language === 'ms' ? 'Tiada Laporan Dijumpai' : 'No Reports Found'}
@@ -651,7 +663,7 @@ export default function ReportsPage() {
                 onClick={() => router.push('/assistant')}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl"
               >
-                <Plus className="w-5 h-5" />
+                <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
                 {language === 'ms' ? 'Muat Naik Laporan' : 'Upload Report'}
               </button>
             </div>
@@ -670,7 +682,7 @@ export default function ReportsPage() {
                       {/* Report Info */}
                       <div className="flex items-start gap-4 flex-1">
                         <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
-                          <FileText className="w-6 h-6 sm:w-7 sm:h-7 text-green-700" />
+                          <FontAwesomeIcon icon={faFileAlt} className="w-6 h-6 sm:w-7 sm:h-7 text-green-700" />
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -684,7 +696,7 @@ export default function ReportsPage() {
                           
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-2">
-                              <Calendar className="w-4 h-4" />
+                              <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" />
                               {new Date(report.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
                                 year: 'numeric',
                                 month: 'long',
@@ -702,7 +714,7 @@ export default function ReportsPage() {
                           className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl"
                           title={language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}
                         >
-                          <MessageSquare className="w-5 h-5" />
+                          <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />
                           <span>{language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}</span>
                         </button>
                         
@@ -715,7 +727,7 @@ export default function ReportsPage() {
                           {deletingId === report.id ? (
                             <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                           ) : (
-                            <Trash2 className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faTrash} className="w-5 h-5" />
                           )}
                         </button>
                       </div>
@@ -746,7 +758,7 @@ export default function ReportsPage() {
                 aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                 title={language === 'ms' ? 'Tutup' : 'Close'}
               >
-                <X className="w-6 h-6" />
+                <FontAwesomeIcon icon={faXmark} className="w-6 h-6" />
               </button>
             </div>
             <div className="p-6 sm:p-8 overflow-y-auto flex-1">
@@ -1777,7 +1789,7 @@ export default function ReportsPage() {
                           className="text-green-600 hover:text-green-700 font-semibold underline flex items-center gap-2"
                         >
                           {language === 'ms' ? 'Lihat Fail' : 'View File'}
-                          <Eye className="w-4 h-4" />
+                          <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
                         </a>
                       </div>
                     </div>
@@ -1806,7 +1818,7 @@ export default function ReportsPage() {
             <div className="p-6">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
-                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                  <FontAwesomeIcon icon={faTriangleExclamation} className="w-6 h-6 text-red-600" />
                 </div>
                 <div className="flex-1">
                   <h3 className="text-xl font-black text-gray-900 mb-1">
@@ -1853,7 +1865,7 @@ export default function ReportsPage() {
                     </>
                   ) : (
                     <>
-                      <Trash2 className="w-4 h-4" />
+                      <FontAwesomeIcon icon={faTrash} className="w-4 h-4" />
                       {language === 'ms' ? 'Padam' : 'Delete'}
                     </>
                   )}

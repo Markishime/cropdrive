@@ -10,23 +10,8 @@ import { getPlanById } from '@/lib/subscriptions';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import toast from 'react-hot-toast';
-import { 
-  Sparkles, 
-  TrendingUp, 
-  TrendingDown, 
-  Award,
-  Target,
-  Activity,
-  Calendar,
-  ChevronRight,
-  ExternalLink,
-  Eye,
-  EyeOff,
-  BarChart2,
-  PieChart,
-  LineChart,
-  Zap
-} from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWandSparkles, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 
@@ -320,7 +305,7 @@ export default function DashboardPage() {
                     transition={{ duration: 0.8, delay: 0.4 }}
                     className="text-lg sm:text-xl text-white/90 max-w-2xl flex items-center gap-2"
                   >
-                    <Sparkles className="w-5 h-5 text-yellow-400" />
+                    <FontAwesomeIcon icon={faWandSparkles} className="w-5 h-5 text-yellow-400" />
                     {language === 'ms' ? 'Papan pemuka analisis ladang AI anda' : 'Your AI farm analysis dashboard'}
                   </motion.p>
                 </div>
@@ -372,7 +357,7 @@ export default function DashboardPage() {
                           className="bg-yellow-400 hover:bg-yellow-500 text-green-900 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition"
                         >
                           {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
-                          <ChevronRight className="w-4 h-4" />
+                          <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
                         </motion.button>
                       </Link>
                     </div>

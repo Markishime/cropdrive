@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import PalmiraOnboarding from '@/components/PalmiraOnboarding';
 import PalmiraDashboard from '@/components/PalmiraDashboard';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner, faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
@@ -19,6 +20,8 @@ export default function PalmiraPage() {
   const [loadingOnboarding, setLoadingOnboarding] = useState(true);
   const [membershipActive, setMembershipActive] = useState(false);
   const [loadingMembership, setLoadingMembership] = useState(true);
+  const [isContractExpired, setIsContractExpired] = useState(false);
+  const [contractEndDate, setContractEndDate] = useState<Date | null>(null);
   const isMountedRef = useRef(false);
 
   useEffect(() => {
@@ -73,11 +76,30 @@ export default function PalmiraPage() {
       });
       const result = await response.json();
 
-      // Palmira should be available for any authenticated user with a plan.
-      const active = !!result?.success && !!result?.data?.canAccessPalmira;
-      if (isMountedRef.current) setMembershipActive(active);
+      // Check if user is within their 1-year contract period
+      const withinContract = !!result?.success && !!result?.data?.isWithinContract;
+      const contractExpired = !!result?.success && !!result?.data?.isContractExpired;
       
-      if (!active) {
+      if (isMountedRef.current) {
+        setMembershipActive(withinContract);
+        setIsContractExpired(contractExpired);
+        if (result?.data?.contractEndDate) {
+          setContractEndDate(new Date(result.data.contractEndDate));
+        }
+      }
+      
+      // Only show "Subscription Expired" if contract has ended (after 1 year)
+      if (contractExpired) {
+        toast.error(
+          currentLang === 'ms'
+            ? 'Langganan anda telah tamat. Sila langgan pelan baharu.'
+            : 'Your subscription has expired. Please subscribe to a new plan.'
+        );
+        setTimeout(() => {
+          router.push('/pricing');
+        }, 2000);
+      } else if (!withinContract) {
+        // No plan at all
         toast.error(
           currentLang === 'ms'
             ? 'Pelan diperlukan untuk menggunakan Palmira'
@@ -129,7 +151,7 @@ export default function PalmiraPage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-green-50">
         <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="w-12 h-12 animate-spin text-green-600" />
+          <FontAwesomeIcon icon={faSpinner} className="w-12 h-12 animate-spin text-green-600" spin />
           <p className="text-gray-600 font-medium">
             {currentLang === 'ms' ? 'Memuatkan...' : 'Loading...'}
           </p>
@@ -143,7 +165,7 @@ export default function PalmiraPage() {
     return null;
   }
 
-  // Membership not active
+  // Membership not active - show different message for contract expired vs no plan
   if (!membershipActive) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-green-50 px-4">
@@ -153,21 +175,29 @@ export default function PalmiraPage() {
           className="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 text-center"
         >
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <AlertCircle className="w-10 h-10 text-red-600" />
+            <FontAwesomeIcon icon={faCircleExclamation} className="w-10 h-10 text-red-600" />
           </div>
           <h1 className="text-2xl font-black text-gray-900 mb-3">
-            {currentLang === 'ms' ? 'Pelan Diperlukan' : 'Plan Required'}
+            {isContractExpired
+              ? (currentLang === 'ms' ? 'Langganan Tamat' : 'Subscription Expired')
+              : (currentLang === 'ms' ? 'Pelan Diperlukan' : 'Plan Required')}
           </h1>
           <p className="text-gray-600 mb-6">
-            {currentLang === 'ms'
-              ? 'Palmira tersedia untuk pengguna yang mempunyai pelan. Sila langgan pelan untuk mengakses ciri ini.'
-              : 'Palmira is available for users with a plan. Please subscribe to a plan to access this feature.'}
+            {isContractExpired
+              ? (currentLang === 'ms'
+                  ? 'Langganan anda telah tamat. Sila langgan pelan baharu untuk terus menggunakan CropDrive AI Assistant.'
+                  : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.')
+              : (currentLang === 'ms'
+                  ? 'Palmira tersedia untuk pengguna yang mempunyai pelan. Sila langgan pelan untuk mengakses ciri ini.'
+                  : 'Palmira is available for users with a plan. Please subscribe to a plan to access this feature.')}
           </p>
           <button
             onClick={() => router.push('/pricing')}
             className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition"
           >
-            {currentLang === 'ms' ? 'Lihat Pelan' : 'View Plans'}
+            {isContractExpired
+              ? (currentLang === 'ms' ? 'Langgan Semula' : 'Subscribe Again')
+              : (currentLang === 'ms' ? 'Lihat Pelan' : 'View Plans')}
           </button>
         </motion.div>
       </div>

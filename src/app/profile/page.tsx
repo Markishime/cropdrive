@@ -7,7 +7,30 @@ import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { User, Mail, Phone, MapPin, Calendar, Edit, Save, XCircle, Leaf, Sparkles, TrendingUp, Upload, Award, Activity, Camera, Shield, Key, AlertCircle, Bell, Trash2 } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUser,
+  faEnvelope,
+  faPhone,
+  faLocationDot,
+  faCalendar,
+  faPen,
+  faFloppyDisk,
+  faCircleXmark,
+  faLeaf,
+  faWandSparkles,
+  faChartLine,
+  faUpload,
+  faAward,
+  faPersonRunning,
+  faCamera,
+  faShieldHalved,
+  faKey,
+  faCircleExclamation,
+  faBell,
+  faTrash,
+  faMessage,
+} from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import { doc, updateDoc, deleteDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { db, auth, storage } from '@/lib/firebase';
@@ -510,7 +533,7 @@ export default function ProfilePage() {
                       variant="outline"
                       className="flex items-center space-x-2"
                     >
-                      <XCircle className="w-4 h-4" />
+                      <FontAwesomeIcon icon={faCircleXmark} className="w-4 h-4" />
                       <span>{language === 'ms' ? 'Batal' : 'Cancel'}</span>
                     </Button>
                   )}
@@ -526,12 +549,12 @@ export default function ProfilePage() {
                       </>
                     ) : isEditing ? (
                       <>
-                        <Save className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Simpan' : 'Save'}</span>
                       </>
                     ) : (
                       <>
-                        <Edit className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faPen} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Edit' : 'Edit'}</span>
                       </>
                     )}
@@ -552,7 +575,7 @@ export default function ProfilePage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="text-lg sm:text-xl text-white/90 max-w-2xl flex items-center gap-2"
               >
-                <Sparkles className="w-5 h-5 text-yellow-400" />
+                <FontAwesomeIcon icon={faWandSparkles} className="w-5 h-5 text-yellow-400" />
                 {language === 'ms' ? 'Urus maklumat peribadi anda' : 'Manage your personal information'}
               </motion.p>
             </motion.div>
@@ -587,7 +610,7 @@ export default function ProfilePage() {
                       </div>
                       {isEditing && (
                         <label className="absolute bottom-0 right-0 w-10 h-10 bg-green-600 rounded-full flex items-center justify-center cursor-pointer shadow-lg hover:bg-green-700 transition-colors">
-                          <Camera className="w-5 h-5 text-white" />
+                          <FontAwesomeIcon icon={faCamera} className="w-5 h-5 text-white" />
                           <input
                             type="file"
                             accept="image/*"
@@ -610,11 +633,11 @@ export default function ProfilePage() {
                         {formData.displayName || user.displayName || 'User'}
                       </h2>
                       <p className="text-gray-600 mb-2 flex items-center justify-center md:justify-start gap-2">
-                        <Mail className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4" />
                         {user.email}
                       </p>
                       <p className="text-sm text-gray-500 flex items-center justify-center md:justify-start gap-2">
-                        <Calendar className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" />
                         {language === 'ms' ? 'Ahli sejak' : 'Member since'}{' '}
                         {userData?.registrationDate 
                           ? new Date(userData.registrationDate.toDate ? userData.registrationDate.toDate() : userData.registrationDate).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
@@ -626,6 +649,12 @@ export default function ProfilePage() {
                               year: 'numeric'
                             })
                         }
+                      </p>
+                      <p className="text-xs text-green-600 mt-2 flex items-center justify-center md:justify-start gap-1.5">
+                        <FontAwesomeIcon icon={faMessage} className="w-3.5 h-3.5" />
+                        {language === 'ms'
+                          ? 'Gambar ini dipaparkan di sebelah mesej anda dalam Palmira'
+                          : 'This photo will also be shown next to your messages in Palmira chat'}
                       </p>
                     </div>
                   </div>
@@ -640,7 +669,7 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                      <User className="w-6 h-6 text-white" />
+                      <FontAwesomeIcon icon={faUser} className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">
                       {language === 'ms' ? 'Maklumat Peribadi' : 'Personal Information'}
@@ -649,7 +678,7 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <User className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faUser} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Nama Penuh' : 'Full Name'}</span>
                       </label>
                       {isEditing ? (
@@ -668,7 +697,7 @@ export default function ProfilePage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <Mail className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faEnvelope} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Emel' : 'Email'}</span>
                       </label>
                       <p className="text-gray-900 py-3 font-medium">{user.email}</p>
@@ -679,7 +708,7 @@ export default function ProfilePage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <Phone className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faPhone} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'No. Telefon' : 'Phone Number'}</span>
                       </label>
                       {isEditing ? (
@@ -697,7 +726,7 @@ export default function ProfilePage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <Calendar className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Tarikh Mendaftar' : 'Registration Date'}</span>
                       </label>
                       <p className="text-gray-900 py-3 font-medium">
@@ -719,7 +748,7 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
-                      <Leaf className="w-6 h-6 text-white" />
+                      <FontAwesomeIcon icon={faLeaf} className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">
                       {language === 'ms' ? 'Maklumat Ladang' : 'Farm Information'}
@@ -745,7 +774,7 @@ export default function ProfilePage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <MapPin className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Lokasi Ladang' : 'Farm Location'}</span>
                       </label>
                       {isEditing ? (
@@ -763,7 +792,7 @@ export default function ProfilePage() {
 
                     <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
-                        <Leaf className="w-4 h-4" />
+                        <FontAwesomeIcon icon={faLeaf} className="w-4 h-4" />
                         <span>{language === 'ms' ? 'Saiz Ladang (Hektar)' : 'Farm Size (Hectares)'}</span>
                       </label>
                       {isEditing ? (
@@ -790,7 +819,7 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-white" />
+                      <FontAwesomeIcon icon={faShieldHalved} className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">
                       {language === 'ms' ? 'Keselamatan' : 'Security'}
@@ -861,7 +890,7 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
-                      <Bell className="w-6 h-6 text-white" />
+                      <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-white" />
                     </div>
                     <h2 className="text-2xl font-black text-gray-900">
                       {language === 'ms' ? 'Notifikasi' : 'Notifications'}
@@ -928,7 +957,7 @@ export default function ProfilePage() {
                         </>
                       ) : (
                         <>
-                          <Save className="w-4 h-4 mr-2" />
+                          <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
                           {language === 'ms' ? 'Simpan Tetapan' : 'Save Settings'}
                         </>
                       )}
@@ -945,7 +974,7 @@ export default function ProfilePage() {
                 >
                   <div className="flex items-center space-x-3 mb-6">
                     <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                      <AlertCircle className="w-6 h-6 text-white" />
+                      <FontAwesomeIcon icon={faCircleExclamation} className="w-6 h-6 text-white" />
                     </div>
                     <div>
                       <h2 className="text-2xl font-black text-red-900">
@@ -974,7 +1003,7 @@ export default function ProfilePage() {
                       className="border-red-600 text-red-600 hover:bg-red-50 font-bold" 
                       onClick={() => setShowDeleteModal(true)}
                     >
-                      <Trash2 className="w-4 h-4 mr-2" />
+                      <FontAwesomeIcon icon={faTrash} className="w-4 h-4 mr-2" />
                       {language === 'ms' ? 'Padamkan Akaun' : 'Delete Account'}
                     </Button>
                   </div>
@@ -995,7 +1024,7 @@ export default function ProfilePage() {
                   <div className="space-y-4">
                     <div className="p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200">
                       <div className="flex items-center justify-between mb-2">
-                        <Upload className="w-5 h-5 text-blue-600" />
+                        <FontAwesomeIcon icon={faUpload} className="w-5 h-5 text-blue-600" />
                         <span className="text-3xl font-black text-blue-600">{user.uploadsUsed || 0}</span>
                       </div>
                       <p className="text-sm font-bold text-gray-700">
@@ -1005,7 +1034,7 @@ export default function ProfilePage() {
 
                     <div className="p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border-2 border-green-200">
                       <div className="flex items-center justify-between mb-2">
-                        <TrendingUp className="w-5 h-5 text-green-600" />
+                        <FontAwesomeIcon icon={faChartLine} className="w-5 h-5 text-green-600" />
                         <span className="text-3xl font-black text-green-600">
                           {user.uploadsLimit === -1 ? '∞' : (user.uploadsLimit - user.uploadsUsed)}
                         </span>
@@ -1017,7 +1046,7 @@ export default function ProfilePage() {
 
                     <div className="p-4 bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl border-2 border-yellow-200">
                       <div className="flex items-center justify-between mb-2">
-                        <Award className="w-5 h-5 text-yellow-600" />
+                        <FontAwesomeIcon icon={faAward} className="w-5 h-5 text-yellow-600" />
                         <span className="text-2xl font-black text-yellow-600">
                           {userPlan ? (language === 'ms' ? userPlan.nameMs : userPlan.name) : (user.plan?.toUpperCase() || 'NONE')}
                         </span>
@@ -1029,7 +1058,7 @@ export default function ProfilePage() {
 
                     <div className="p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200">
                       <div className="flex items-center justify-between mb-2">
-                        <Activity className="w-5 h-5 text-purple-600" />
+                        <FontAwesomeIcon icon={faPersonRunning} className="w-5 h-5 text-purple-600" />
                         <span className="text-3xl font-black text-purple-600">{daysActive}</span>
                       </div>
                       <p className="text-sm font-bold text-gray-700">
@@ -1063,7 +1092,7 @@ export default function ProfilePage() {
                     aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                     title={language === 'ms' ? 'Tutup' : 'Close'}
                   >
-                    <XCircle className="w-6 h-6" />
+                    <FontAwesomeIcon icon={faCircleXmark} className="w-6 h-6" />
                   </button>
                 </div>
 
@@ -1108,7 +1137,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="flex items-start space-x-2 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <FontAwesomeIcon icon={faCircleExclamation} className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-yellow-800">
                       {language === 'ms'
                         ? 'Kata laluan mestilah sekurang-kurangnya 6 aksara.'
@@ -1172,7 +1201,7 @@ export default function ProfilePage() {
                     aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                     title={language === 'ms' ? 'Tutup' : 'Close'}
                   >
-                    <XCircle className="w-6 h-6" />
+                    <FontAwesomeIcon icon={faCircleXmark} className="w-6 h-6" />
                   </button>
                 </div>
 
@@ -1214,7 +1243,7 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="flex items-start space-x-2 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <FontAwesomeIcon icon={faCircleExclamation} className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-blue-800">
                       {language === 'ms'
                         ? 'Selepas mengimbas kod QR, masukkan kod 6 digit dari aplikasi autentikasi anda untuk mengesahkan.'
@@ -1271,7 +1300,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                      <AlertCircle className="w-6 h-6 text-red-600" />
+                      <FontAwesomeIcon icon={faCircleExclamation} className="w-6 h-6 text-red-600" />
                     </div>
                     <h3 className="text-2xl font-black text-red-900">
                       {language === 'ms' ? 'Padamkan Akaun' : 'Delete Account'}
@@ -1287,7 +1316,7 @@ export default function ProfilePage() {
                     title={language === 'ms' ? 'Tutup' : 'Close'}
                     disabled={deletingAccount}
                   >
-                    <XCircle className="w-6 h-6" />
+                    <FontAwesomeIcon icon={faCircleXmark} className="w-6 h-6" />
                   </button>
                 </div>
 
@@ -1346,7 +1375,7 @@ export default function ProfilePage() {
                         </>
                       ) : (
                         <>
-                          <Trash2 className="w-4 h-4 mr-2" />
+                          <FontAwesomeIcon icon={faTrash} className="w-4 h-4 mr-2" />
                           {language === 'ms' ? 'Padamkan Akaun' : 'Delete Account'}
                         </>
                       )}

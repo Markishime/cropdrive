@@ -1,6 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
-import { canAccessAIAssistant, canAccessPalmira, hasFullAccess, getMembershipStatusMessage } from '@/lib/membership-admin';
+import Stripe from 'stripe';
+import { 
+  canAccessAIAssistant, 
+  canAccessPalmira, 
+  hasFullAccess, 
+  getMembershipStatusMessage,
+  isWithinContractPeriod,
+  hasReachedUploadLimit,
+  canPerformAnalysis,
+  isContractExpired
+} from '@/lib/membership-admin';
+import type { Membership } from '@/lib/membership-admin';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-12-15.clover' as any,
+});
+
+/** Compute contract year end from Stripe subscription (same logic as payment-method "Full Access Until") */
+async function getContractYearEndFromStripe(stripeSubscriptionId: string): Promise<Date | null> {
+  try {
+    const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+    const startTimestamp = (subscription as any).start_date ?? subscription.created ?? Math.floor(Date.now() / 1000);
+    const startDate = new Date(startTimestamp * 1000);
+    if (isNaN(startDate.getTime())) return null;
+    const contractYearEnd = new Date(startDate);
+    contractYearEnd.setMonth(contractYearEnd.getMonth() + 12);
+    return contractYearEnd;
+  } catch {
+    return null;
+  }
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -17,10 +47,23 @@ export async function GET(request: NextRequest) {
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    // Import the admin membership function here to avoid client-side bundling
     const { getMembershipAdmin } = await import('@/lib/membership-admin');
 
-    const membership = await getMembershipAdmin(userId);
+    let membership = await getMembershipAdmin(userId);
+
+    // Use Stripe contract year end when available (same as "Full Access Until" on payment page)
+    if (membership?.stripeSubscriptionId) {
+      const stripeContractEnd = await getContractYearEndFromStripe(membership.stripeSubscriptionId);
+      if (stripeContractEnd) {
+        const existingEnd = membership.contractEndDate ? new Date(membership.contractEndDate) : null;
+        // Use the later of the two so we never shorten access; Stripe is source of truth for "full access until"
+        const effectiveEnd = !existingEnd || stripeContractEnd > existingEnd ? stripeContractEnd : existingEnd;
+        membership = {
+          ...membership,
+          contractEndDate: effectiveEnd,
+        } as Membership;
+      }
+    }
 
     return NextResponse.json({
       success: true,
@@ -29,6 +72,13 @@ export async function GET(request: NextRequest) {
         canAccessPalmira: canAccessPalmira(membership),
         hasFullAccess: hasFullAccess(membership),
         statusMessage: getMembershipStatusMessage(membership),
+        isWithinContract: isWithinContractPeriod(membership),
+        isContractExpired: isContractExpired(membership),
+        canPerformAnalysis: canPerformAnalysis(membership),
+        hasReachedUploadLimit: hasReachedUploadLimit(membership),
+        uploadsUsedThisMonth: membership?.uploadsUsedThisMonth || 0,
+        uploadLimit: membership?.uploadLimit || 2,
+        contractEndDate: membership?.contractEndDate?.toISOString() || null,
         membership: membership
       }
     });

@@ -8,9 +8,15 @@ export interface Membership {
   stripeCustomerId?: string;
   currentPeriodStart: Date;
   currentPeriodEnd: Date;
+  /** The 1-year contract end date (subscription start + 1 year) */
+  contractEndDate: Date;
   cancelAtPeriodEnd: boolean;
   createdAt: Date;
   updatedAt: Date;
+  /** Current month's upload count */
+  uploadsUsedThisMonth?: number;
+  /** Plan's monthly upload limit */
+  uploadLimit?: number;
 }
 
 function parseDate(value: any, fallback: Date): Date {
@@ -27,6 +33,21 @@ function parseDate(value: any, fallback: Date): Date {
     return isNaN(d.getTime()) ? fallback : d;
   }
   return fallback;
+}
+
+/** Get upload limit for a given plan */
+function getUploadLimitForPlan(planId: string): number {
+  const plan = planId?.toLowerCase().trim();
+  switch (plan) {
+    case 'start':
+      return 2;
+    case 'smart':
+      return 5;
+    case 'precision':
+      return -1; // Unlimited
+    default:
+      return 2;
+  }
 }
 
 /**
@@ -59,17 +80,27 @@ export async function getMembershipAdmin(userId: string): Promise<Membership | n
 
         if (subscriptionDoc.exists) {
           const subscriptionData = subscriptionDoc.data();
+          const createdAt = parseDate(subscriptionData?.createdAt, new Date());
+          // Contract end date is 1 year from subscription creation
+          const contractEndDate = parseDate(
+            subscriptionData?.contractEndDate,
+            new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000)
+          );
+          const planId = subscriptionData?.planId || userData?.plan || 'start';
           return {
             userId: userData.uid || userId,
-            planId: subscriptionData?.planId || userData?.plan || 'start',
+            planId,
             status: subscriptionData?.status || 'active',
             stripeSubscriptionId: subscriptionData?.stripeSubscriptionId || userData.stripeSubscriptionId,
             stripeCustomerId: subscriptionData?.stripeCustomerId || userData.stripeCustomerId,
             currentPeriodStart: parseDate(subscriptionData?.currentPeriodStart, new Date()),
             currentPeriodEnd: parseDate(subscriptionData?.currentPeriodEnd, new Date()),
+            contractEndDate,
             cancelAtPeriodEnd: subscriptionData?.cancelAtPeriodEnd || false,
-            createdAt: parseDate(subscriptionData?.createdAt, new Date()),
+            createdAt,
             updatedAt: parseDate(subscriptionData?.updatedAt, new Date()),
+            uploadsUsedThisMonth: userData?.uploadsUsedThisMonth || 0,
+            uploadLimit: getUploadLimitForPlan(planId),
           } as Membership;
         }
       } catch (subError) {
@@ -88,6 +119,13 @@ export async function getMembershipAdmin(userId: string): Promise<Membership | n
     } else if (isPaidPlan) {
       membershipStatus = 'active'; // User has paid plan but subscription might still be processing
     }
+
+    const createdAt = parseDate(userData?.createdAt, new Date());
+    // Contract end date is 1 year from account/subscription creation
+    const contractEndDate = parseDate(
+      userData?.contractEndDate,
+      new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000)
+    );
     
     return {
       userId: userData?.uid || userId,
@@ -103,9 +141,12 @@ export async function getMembershipAdmin(userId: string): Promise<Membership | n
           ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // 10 years
           : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
       ),
+      contractEndDate,
       cancelAtPeriodEnd: false,
-      createdAt: parseDate(userData?.createdAt, new Date()),
+      createdAt,
       updatedAt: parseDate(userData?.updatedAt, new Date()),
+      uploadsUsedThisMonth: userData?.uploadsUsedThisMonth || 0,
+      uploadLimit: getUploadLimitForPlan(userPlan),
     } as Membership;
   } catch (error: any) {
     console.error('Error getting membership (admin):', error);
@@ -126,9 +167,12 @@ export async function getMembershipAdmin(userId: string): Promise<Membership | n
         status: 'active',
         currentPeriodStart: new Date(),
         currentPeriodEnd: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000),
+        contractEndDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
         cancelAtPeriodEnd: false,
         createdAt: new Date(),
         updatedAt: new Date(),
+        uploadsUsedThisMonth: 0,
+        uploadLimit: 2,
       } as Membership;
     }
 
@@ -188,25 +232,80 @@ export function hasFullAccess(membership: Membership | null): boolean {
 }
 
 /**
+ * Check if user is within their 1-year contract period.
+ * Even if monthly payment has expired, they can still access features
+ * within the contract period.
+ */
+export function isWithinContractPeriod(membership: Membership | null): boolean {
+  if (!membership) return false;
+  const now = new Date();
+  return membership.contractEndDate > now;
+}
+
+/**
+ * Check if user has reached their upload limit for the current month.
+ */
+export function hasReachedUploadLimit(membership: Membership | null): boolean {
+  if (!membership) return true;
+  // -1 means unlimited
+  if (membership.uploadLimit === -1) return false;
+  const used = membership.uploadsUsedThisMonth || 0;
+  const limit = membership.uploadLimit || 2;
+  return used >= limit;
+}
+
+/**
  * Palmira access gate.
  *
- * Product requirement: any authenticated user with a plan (planId !== 'none')
- * can access Palmira. This is intentionally less strict than `hasFullAccess`,
- * which is used for broader "paid period" checks in other parts of the app.
+ * Product requirement: Users within their 1-year contract period can access 
+ * the AI assistant to view their history and reports. The "Subscription Expired"
+ * message only shows after the 1-year contract ends.
+ * 
+ * For users with no plan at all, they cannot access Palmira.
  */
 export function canAccessPalmira(membership: Membership | null): boolean {
   if (!membership) return false;
   const planId = String(membership.planId || '').toLowerCase().trim();
-  return planId !== '' && planId !== 'none';
+  
+  // Must have a valid plan
+  if (planId === '' || planId === 'none') return false;
+  
+  // Check if within 1-year contract period
+  return isWithinContractPeriod(membership);
 }
 
 /**
- * Check if user can access AI assistant/chatbot functionality
- * Only active and trialing users can use AI assistant
+ * Check if user can perform new analysis (upload new files for AI analysis).
+ * Requires being within contract AND not having reached upload limit.
+ */
+export function canPerformAnalysis(membership: Membership | null): boolean {
+  if (!membership) return false;
+  
+  // Must be within contract period
+  if (!isWithinContractPeriod(membership)) return false;
+  
+  // Must not have reached upload limit
+  if (hasReachedUploadLimit(membership)) return false;
+  
+  return true;
+}
+
+/**
+ * Check if the subscription has fully expired (contract period ended).
+ * This is when we show the "Subscription Expired" message.
+ */
+export function isContractExpired(membership: Membership | null): boolean {
+  if (!membership) return true;
+  return !isWithinContractPeriod(membership);
+}
+
+/**
+ * Check if user can access AI assistant/chatbot functionality.
+ * Users within contract can access AI assistant; only after contract expires
+ * do they lose access.
  */
 export function canAccessAIAssistant(membership: Membership | null): boolean {
-  const status = getMembershipStatus(membership);
-  return status === 'active' || status === 'trialing';
+  return canAccessPalmira(membership);
 }
 
 /**
@@ -219,24 +318,40 @@ export function getMembershipStatusMessage(membership: Membership | null): strin
 
   const status = getMembershipStatus(membership);
   const now = new Date();
+  const withinContract = isWithinContractPeriod(membership);
 
+  // If within contract period, show positive message even if billing has issues
+  if (withinContract) {
+    const contractEndStr = membership.contractEndDate.toLocaleDateString();
+    
+    if (status === 'active' || status === 'trialing') {
+      return `Active membership (contract until ${contractEndStr})`;
+    }
+    
+    if (status === 'past_due') {
+      return `Payment past due - access continues until ${contractEndStr}`;
+    }
+    
+    if (status === 'canceled') {
+      return `Cancelled - access continues until ${contractEndStr}`;
+    }
+    
+    return `Access until ${contractEndStr}`;
+  }
+
+  // Contract has ended
   switch (status) {
     case 'active':
       return 'Active membership';
     case 'trialing':
       return 'Trial period';
     case 'canceled':
-      if (membership.currentPeriodEnd > now) {
-        const endDate = membership.currentPeriodEnd.toLocaleDateString();
-        return `Full access until ${endDate} (cancelled)`;
-      } else {
-        return 'Membership expired';
-      }
+      return 'Subscription expired';
     case 'past_due':
-      return 'Payment past due';
+      return 'Subscription expired - payment past due';
     case 'expired':
-      return 'Membership expired';
+      return 'Subscription expired';
     default:
-      return 'Unknown status';
+      return 'Subscription expired';
   }
 }

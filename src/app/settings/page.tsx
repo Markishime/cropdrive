@@ -7,7 +7,19 @@ import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage, setLanguage } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Settings, Bell, Shield, Key, Mail, XCircle, AlertCircle, Sparkles, CheckCircle2, Save } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faGear,
+  faBell,
+  faShieldHalved,
+  faKey,
+  faEnvelope,
+  faCircleXmark,
+  faCircleExclamation,
+  faWandSparkles,
+  faCircleCheck,
+  faFloppyDisk,
+} from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import { doc, updateDoc, deleteDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
@@ -193,10 +205,7 @@ export default function SettingsPage() {
         {/* Hero Header - Matching Dashboard Style */}
         <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
           <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
+            <div className="absolute inset-0 bg-dot-grid" aria-hidden />
           </div>
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
@@ -229,7 +238,7 @@ export default function SettingsPage() {
                 transition={{ duration: 0.8, delay: 0.4 }}
                 className="text-lg sm:text-xl text-white/90 max-w-2xl flex items-center gap-2"
               >
-                <Sparkles className="w-5 h-5 text-yellow-400" />
+                <FontAwesomeIcon icon={faWandSparkles} className="w-5 h-5 text-yellow-400" />
                 {language === 'ms' ? 'Tetapan dan keutamaan akaun anda' : 'Your account settings and preferences'}
               </motion.p>
             </motion.div>
@@ -249,7 +258,7 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center">
-                    <Bell className="w-6 h-6 text-white" />
+                    <FontAwesomeIcon icon={faBell} className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-gray-900">
@@ -273,14 +282,17 @@ export default function SettingsPage() {
                         }
                       </p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex items-center cursor-pointer" htmlFor="push-notifications">
+                      <span className="sr-only">{language === 'ms' ? 'Notifikasi Push' : 'Push Notifications'}</span>
                       <input
+                        id="push-notifications"
                         type="checkbox"
                         checked={notifications}
                         onChange={(e) => setNotifications(e.target.checked)}
                         className="sr-only peer"
+                        aria-label={language === 'ms' ? 'Notifikasi Push' : 'Push Notifications'}
                       />
-                      <div className="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
+                      <span className="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600 block" aria-hidden />
                     </label>
                   </div>
 
@@ -296,14 +308,17 @@ export default function SettingsPage() {
                         }
                       </p>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
+                    <label className="relative inline-flex items-center cursor-pointer" htmlFor="email-notifications">
+                      <span className="sr-only">{language === 'ms' ? 'Notifikasi Email' : 'Email Notifications'}</span>
                       <input
+                        id="email-notifications"
                         type="checkbox"
                         checked={emailNotifications}
                         onChange={(e) => setEmailNotifications(e.target.checked)}
                         className="sr-only peer"
+                        aria-label={language === 'ms' ? 'Notifikasi Email' : 'Email Notifications'}
                       />
-                      <div className="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600"></div>
+                      <span className="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-600 block" aria-hidden />
                     </label>
                   </div>
 
@@ -319,7 +334,7 @@ export default function SettingsPage() {
                       </>
                     ) : (
                       <>
-                        <Save className="w-4 h-4 mr-2" />
+                        <FontAwesomeIcon icon={faFloppyDisk} className="w-4 h-4 mr-2" />
                         {language === 'ms' ? 'Simpan Tetapan' : 'Save Settings'}
                       </>
                     )}
@@ -336,7 +351,7 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-white" />
+                    <FontAwesomeIcon icon={faShieldHalved} className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-gray-900">
@@ -393,7 +408,7 @@ export default function SettingsPage() {
               >
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-12 h-12 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                    <AlertCircle className="w-6 h-6 text-white" />
+                    <FontAwesomeIcon icon={faCircleExclamation} className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h2 className="text-2xl font-black text-red-900">
@@ -445,10 +460,13 @@ export default function SettingsPage() {
                     {language === 'ms' ? 'Tukar Kata Laluan' : 'Change Password'}
                   </h3>
                   <button
+                    type="button"
                     onClick={() => setShowPasswordModal(false)}
                     className="text-gray-400 hover:text-gray-600 transition"
+                    aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                    title={language === 'ms' ? 'Tutup' : 'Close'}
                   >
-                    <XCircle className="w-6 h-6" />
+                    <FontAwesomeIcon icon={faCircleXmark} className="w-6 h-6" aria-hidden />
                   </button>
                 </div>
 
@@ -493,7 +511,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex items-start space-x-2 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                    <FontAwesomeIcon icon={faCircleExclamation} className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-yellow-800">
                       {language === 'ms'
                         ? 'Kata laluan mestilah sekurang-kurangnya 6 aksara.'

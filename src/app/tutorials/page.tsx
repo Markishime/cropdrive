@@ -6,7 +6,14 @@ import { motion } from 'framer-motion';
 import { useTranslation } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import Card, { CardContent } from '@/components/ui/Card';
-import { Play, BookOpen, Video, CheckCircle2, Lock, Crown, Zap, GraduationCap, Clock, Users } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faBookOpen,
+  faCircleCheck,
+  faCrown,
+  faBolt,
+  faGraduationCap,
+} from '@fortawesome/free-solid-svg-icons';
 
 export default function TutorialsPage() {
   const [mounted, setMounted] = useState(false);
@@ -45,7 +52,7 @@ export default function TutorialsPage() {
         ? 'Daftar dengan email anda dan sahkan akaun melalui email pengesahan'
         : 'Sign up with your email and verify your account via confirmation email',
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop',
-      icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
+      icon: <FontAwesomeIcon icon={faCircleCheck} className="w-8 h-8 text-green-600" />
     },
     {
       step: 2,
@@ -54,7 +61,7 @@ export default function TutorialsPage() {
         ? 'Pilih pelan yang sesuai dengan saiz ladang dan keperluan anda'
         : 'Select the plan that fits your farm size and requirements',
       image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop',
-      icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
+      icon: <FontAwesomeIcon icon={faCircleCheck} className="w-8 h-8 text-green-600" />
     },
     {
       step: 3,
@@ -63,7 +70,7 @@ export default function TutorialsPage() {
         ? 'Muat naik laporan makmal tanah atau daun dalam format PDF, JPG, atau PNG'
         : 'Upload soil or leaf lab reports in PDF, JPG, or PNG format',
       image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=400&fit=crop',
-      icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
+      icon: <FontAwesomeIcon icon={faCircleCheck} className="w-8 h-8 text-green-600" />
     },
     {
       step: 4,
@@ -72,7 +79,7 @@ export default function TutorialsPage() {
         ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 5-8 minit'
         : 'Our AI will analyze your report and provide recommendations within 5-8 minutes',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
-      icon: <CheckCircle2 className="w-8 h-8 text-green-600" />
+      icon: <FontAwesomeIcon icon={faCircleCheck} className="w-8 h-8 text-green-600" />
     }
   ];
 
@@ -137,7 +144,7 @@ export default function TutorialsPage() {
                   {language === 'ms' ? 'Tutorial &' : 'Tutorials &'} <span className="text-yellow-400">{language === 'ms' ? 'Panduan' : 'Guides'}</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-white/90 flex items-center justify-center sm:justify-start gap-2">
-                  <GraduationCap className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faGraduationCap} className="w-5 h-5" />
                   {language === 'ms'
                     ? 'Belajar cara maksimumkan penggunaan CropDrive AI'
                     : 'Learn how to maximize CropDrive AI usage'
@@ -170,7 +177,7 @@ export default function TutorialsPage() {
                   <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                     <div className="flex-1 text-center md:text-left">
                       <div className="flex items-center justify-center md:justify-start space-x-2 mb-3">
-                        <Crown className="w-6 h-6 text-yellow-600" />
+                        <FontAwesomeIcon icon={faCrown} className="w-6 h-6 text-yellow-600" />
                         <span className="text-yellow-700 font-bold text-sm uppercase tracking-wide">
                           {language === 'ms' ? 'Tingkatkan Akaun Anda' : 'Upgrade Your Account'}
                         </span>
@@ -189,19 +196,19 @@ export default function TutorialsPage() {
                       </p>
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
                         <div className="flex items-center space-x-2 text-green-700">
-                          <CheckCircle2 className="w-5 h-5" />
+                          <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
                             {language === 'ms' ? 'Analisis 5-8 minit' : '5-8 min analysis'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-green-700">
-                          <CheckCircle2 className="w-5 h-5" />
+                          <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
                             {language === 'ms' ? 'Laporan terperinci' : 'Detailed reports'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-green-700">
-                          <CheckCircle2 className="w-5 h-5" />
+                          <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
                             {language === 'ms' ? 'Sokongan 24/7' : '24/7 support'}
                           </span>
@@ -211,7 +218,7 @@ export default function TutorialsPage() {
                     <div className="flex flex-col items-center space-y-3">
                       <Link href="/pricing">
                         <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
-                          <Zap className="w-5 h-5" />
+                          <FontAwesomeIcon icon={faBolt} className="w-5 h-5" />
                           <span>{language === 'ms' ? 'Pilih Pelan Sekarang' : 'Choose Plan Now'}</span>
                         </button>
                       </Link>
@@ -235,7 +242,7 @@ export default function TutorialsPage() {
         >
           <div className="flex items-center space-x-3 mb-8">
             <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-6 h-6 text-green-900" />
+              <FontAwesomeIcon icon={faBookOpen} className="w-6 h-6 text-green-900" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900">
               {language === 'ms' ? 'Panduan Langkah Demi Langkah' : 'Step-by-Step Guide'}

@@ -4,21 +4,16 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  Calendar,
-  Clock,
-  User,
-  ArrowRight,
-  Search,
-  Tag,
-  Leaf,
-  TrendingUp,
-  Zap,
-  BarChart3,
-  BookOpen,
-  ChevronRight,
-  Eye
-} from 'lucide-react';
+  faMagnifyingGlass,
+  faBookOpen,
+  faBolt,
+  faLeaf,
+  faChartLine,
+  faChartColumn,
+  faEye,
+} from '@fortawesome/free-solid-svg-icons';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 
 interface BlogPost {
@@ -163,12 +158,12 @@ const blogPosts: BlogPost[] = [
 ];
 
 const categories = [
-  { id: 'all', label: 'All Posts', labelMs: 'Semua Pos', icon: BookOpen },
-  { id: 'technology', label: 'Technology', labelMs: 'Teknologi', icon: Zap },
-  { id: 'agriculture', label: 'Agriculture', labelMs: 'Pertanian', icon: Leaf },
-  { id: 'sustainability', label: 'Sustainability', labelMs: 'Kelestarian', icon: TrendingUp },
-  { id: 'farming', label: 'Farming', labelMs: 'Pertanian', icon: BarChart3 },
-  { id: 'innovation', label: 'Innovation', labelMs: 'Inovasi', icon: Eye }
+  { id: 'all', label: 'All Posts', labelMs: 'Semua Pos', icon: faBookOpen },
+  { id: 'technology', label: 'Technology', labelMs: 'Teknologi', icon: faBolt },
+  { id: 'agriculture', label: 'Agriculture', labelMs: 'Pertanian', icon: faLeaf },
+  { id: 'sustainability', label: 'Sustainability', labelMs: 'Kelestarian', icon: faChartLine },
+  { id: 'farming', label: 'Farming', labelMs: 'Pertanian', icon: faChartColumn },
+  { id: 'innovation', label: 'Innovation', labelMs: 'Inovasi', icon: faEye }
 ];
 
 export default function BlogPage() {
@@ -286,7 +281,7 @@ export default function BlogPage() {
                   {language === 'ms' ? 'Cari Artikel' : 'Search Articles'}
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="blog-search"
                     type="text"

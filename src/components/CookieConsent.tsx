@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { safeGetLocalStorage, safeSetLocalStorage } from '@/utils/browser-compat';
-import { X, Cookie } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faXmark, faCookieBite } from '@fortawesome/free-solid-svg-icons';
 
 export default function CookieConsent() {
   const [mounted, setMounted] = useState(false);
@@ -87,7 +88,7 @@ export default function CookieConsent() {
               {/* Cookie Icon */}
               <div className="flex-shrink-0">
                 <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <Cookie className="w-6 h-6 text-green-600" />
+                  <FontAwesomeIcon icon={faCookieBite} className="w-6 h-6 text-green-600" />
                 </div>
               </div>
 
@@ -137,7 +138,7 @@ export default function CookieConsent() {
                   className="absolute top-4 right-4 sm:relative sm:top-0 sm:right-0 p-2 text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
                   aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                 >
-                  <X className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faXmark} className="w-5 h-5" />
                 </button>
               </div>
             </div>

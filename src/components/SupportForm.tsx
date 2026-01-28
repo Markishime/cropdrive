@@ -5,17 +5,18 @@ import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { getIdToken } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  MessageSquare,
-  Send,
-  AlertCircle,
-  CheckCircle2,
-  Crown,
-  Loader2,
-  User,
-  Mail,
-  FileText
-} from 'lucide-react';
+  faMessage,
+  faPaperPlane,
+  faCircleExclamation,
+  faCircleCheck,
+  faCrown,
+  faSpinner,
+  faUser,
+  faEnvelope,
+  faFileAlt,
+} from '@fortawesome/free-solid-svg-icons';
 import Button from './ui/Button';
 import toast from 'react-hot-toast';
 
@@ -211,7 +212,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
   if (isCheckingLimit) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="w-8 h-8 animate-spin text-palm-600" />
+        <FontAwesomeIcon icon={faSpinner} className="w-8 h-8 animate-spin text-palm-600" spin />
         <span className="ml-3 text-soil-600">
           {locale === 'ms' ? 'Memeriksa had mesej...' : 'Checking message limit...'}
         </span>
@@ -222,7 +223,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
   if (!limitStatus) {
     return (
       <div className="text-center py-12">
-        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+        <FontAwesomeIcon icon={faCircleExclamation} className="w-12 h-12 text-red-500 mx-auto mb-4" />
         <p className="text-soil-600">
           {locale === 'ms' ? 'Gagal memuatkan status had' : 'Failed to load limit status'}
         </p>
@@ -239,7 +240,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
         className="bg-gradient-to-br from-gold-50 to-palm-50 backdrop-blur-xl border-l-4 border-gold-500 rounded-2xl p-8 shadow-lg"
       >
         <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-gold-600 mx-auto mb-4" />
+          <FontAwesomeIcon icon={faCircleExclamation} className="w-16 h-16 text-gold-600 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-brown-900 mb-4">
             {locale === 'ms' ? 'Had Bulanan Dicapai' : 'Monthly Limit Reached'}
           </h3>
@@ -277,7 +278,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
                 onClick={handleUpgrade}
                 className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-8 py-3 rounded-xl font-bold shadow-lg flex items-center justify-center"
               >
-                <Crown className="w-5 h-5 mr-2 text-white" />
+                <FontAwesomeIcon icon={faCrown} className="w-5 h-5 mr-2 text-white" />
                 <span className="text-white">
                   {locale === 'ms' ? 'Naik Taraf ke Precision' : 'Upgrade to Precision'}
                 </span>
@@ -297,7 +298,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
         animate={{ opacity: 1, scale: 1 }}
         className="text-center py-12"
       >
-        <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
+        <FontAwesomeIcon icon={faCircleCheck} className="w-16 h-16 text-green-600 mx-auto mb-4" />
         <h3 className="text-2xl font-bold text-brown-900 mb-4">
           {locale === 'ms' ? 'Mesej Dihantar!' : 'Message Sent!'}
         </h3>
@@ -350,7 +351,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
       <div className="bg-earth-50 rounded-lg p-3 mb-6 border border-earth-200">
         <div className="flex items-center justify-between text-sm">
           <span className="text-soil-600 flex items-center">
-            <MessageSquare className="w-4 h-4 mr-2" />
+            <FontAwesomeIcon icon={faMessage} className="w-4 h-4 mr-2" />
             {locale === 'ms' ? 'Mesej bulan ini:' : 'Messages this month:'}
           </span>
           <span className="font-bold text-brown-900">
@@ -364,7 +365,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
         {/* Subject Field (Optional) */}
         <div>
           <label className="block text-sm font-bold text-brown-900 mb-2 flex items-center">
-            <FileText className="w-4 h-4 mr-2 text-palm-600" />
+            <FontAwesomeIcon icon={faFileAlt} className="w-4 h-4 mr-2 text-palm-600" />
             {locale === 'ms' ? 'Subjek (Pilihan)' : 'Subject (Optional)'}
           </label>
           <input
@@ -380,7 +381,7 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
         {/* Message Field (Required) */}
         <div>
           <label className="block text-sm font-bold text-brown-900 mb-2 flex items-center">
-            <MessageSquare className="w-4 h-4 mr-2 text-palm-600" />
+            <FontAwesomeIcon icon={faMessage} className="w-4 h-4 mr-2 text-palm-600" />
             {locale === 'ms' ? 'Mesej *' : 'Message *'}
           </label>
           <textarea
@@ -409,9 +410,9 @@ export default function SupportForm({ locale = 'en' }: SupportFormProps) {
           className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center space-x-2 disabled:cursor-not-allowed"
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-white" />
+            <FontAwesomeIcon icon={faSpinner} className="w-5 h-5 animate-spin text-white" spin />
           ) : (
-            <Send className="w-5 h-5 text-white" />
+            <FontAwesomeIcon icon={faPaperPlane} className="w-5 h-5 text-white" />
           )}
           <span className="text-white">
             {isLoading

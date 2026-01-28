@@ -2,26 +2,27 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import {
-  HelpCircle,
-  MessageSquare,
-  BookOpen,
-  Search,
-  ChevronDown,
-  ChevronUp,
-  Leaf,
-  Zap,
-  BarChart3,
-  Users,
-  Shield,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  FileText,
-  Mail,
-  Phone,
-  MapPin
-} from 'lucide-react';
+  faCircleQuestion,
+  faMessage,
+  faBookOpen,
+  faMagnifyingGlass,
+  faChevronDown,
+  faChevronUp,
+  faLeaf,
+  faBolt,
+  faChartColumn,
+  faUsers,
+  faShieldHalved,
+  faClock,
+  faCircleCheck,
+  faCircleExclamation,
+  faEnvelope,
+  faPhone,
+  faLocationDot,
+} from '@fortawesome/free-solid-svg-icons';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import SupportForm from '@/components/SupportForm';
@@ -39,7 +40,7 @@ interface Category {
   id: string;
   label: string;
   labelMs: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: IconDefinition;
 }
 
 const faqs: FAQ[] = [
@@ -125,11 +126,11 @@ const faqs: FAQ[] = [
 ];
 
 const categories: Category[] = [
-  { id: 'getting-started', label: 'Getting Started', labelMs: 'Bermula', icon: BookOpen },
-  { id: 'analysis', label: 'Analysis & Results', labelMs: 'Analisis & Keputusan', icon: BarChart3 },
-  { id: 'billing', label: 'Subscription & Billing', labelMs: 'Langganan & Bil', icon: Shield },
-  { id: 'technical', label: 'Technical', labelMs: 'Teknikal', icon: Zap },
-  { id: 'troubleshooting', label: 'Troubleshooting', labelMs: 'Penyelesaian Masalah', icon: AlertCircle }
+  { id: 'getting-started', label: 'Getting Started', labelMs: 'Bermula', icon: faBookOpen },
+  { id: 'analysis', label: 'Analysis & Results', labelMs: 'Analisis & Keputusan', icon: faChartColumn },
+  { id: 'billing', label: 'Subscription & Billing', labelMs: 'Langganan & Bil', icon: faShieldHalved },
+  { id: 'technical', label: 'Technical', labelMs: 'Teknikal', icon: faBolt },
+  { id: 'troubleshooting', label: 'Troubleshooting', labelMs: 'Penyelesaian Masalah', icon: faCircleExclamation }
 ];
 
 interface ContactFormData {
@@ -316,42 +317,42 @@ export default function HelpCenterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
-                icon: Leaf,
+                icon: faLeaf,
                 title: language === 'ms' ? 'Analisis Tanah & Daun' : 'Soil & Leaf Analysis',
                 description: language === 'ms'
                   ? 'Bantuan dengan analisis kesihatan tanah dan pengesanan penyakit daun.'
                   : 'Help with soil health analysis and leaf disease detection.'
               },
               {
-                icon: BarChart3,
+                icon: faChartColumn,
                 title: language === 'ms' ? 'Laporan & Keputusan' : 'Reports & Results',
                 description: language === 'ms'
                   ? 'Memahami dan mentafsir laporan analisis anda.'
                   : 'Understanding and interpreting your analysis reports.'
               },
               {
-                icon: Users,
+                icon: faUsers,
                 title: language === 'ms' ? 'Akaun & Langganan' : 'Account & Subscription',
                 description: language === 'ms'
                   ? 'Pengurusan akaun, pengebilan, dan pilihan langganan.'
                   : 'Account management, billing, and subscription options.'
               },
               {
-                icon: Zap,
+                icon: faBolt,
                 title: language === 'ms' ? 'Teknikal' : 'Technical',
                 description: language === 'ms'
                   ? 'Sokongan teknikal dan penyelesaian masalah.'
                   : 'Technical support and troubleshooting.'
               },
               {
-                icon: Shield,
+                icon: faShieldHalved,
                 title: language === 'ms' ? 'Keselamatan & Privasi' : 'Security & Privacy',
                 description: language === 'ms'
                   ? 'Maklumat tentang keselamatan data dan privasi.'
                   : 'Information about data security and privacy.'
               },
               {
-                icon: Clock,
+                icon: faClock,
                 title: language === 'ms' ? 'Masa Respons' : 'Response Times',
                 description: language === 'ms'
                   ? 'Jangkaan masa untuk sokongan dan analisis.'
@@ -365,7 +366,7 @@ export default function HelpCenterPage() {
                 transition={{ duration: 0.6, delay: 0.1 * index }}
                 className="bg-white rounded-xl shadow-lg p-6 sm:p-8 hover:shadow-xl transition-all duration-300 border border-gray-100"
               >
-                <feature.icon className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
+                <FontAwesomeIcon icon={feature.icon} className="w-10 h-10 sm:w-12 sm:h-12 text-green-600 mb-4" />
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{feature.title}</h3>
                 <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{feature.description}</p>
               </motion.div>
@@ -401,7 +402,7 @@ export default function HelpCenterPage() {
                   {language === 'ms' ? 'Cari Soalan' : 'Search Questions'}
                 </label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                  <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="faq-search"
                     type="text"
@@ -454,8 +455,8 @@ export default function HelpCenterPage() {
                   <div className="flex items-start space-x-3 sm:space-x-4 flex-1 pr-4">
                     {(() => {
                       const category = categories.find(cat => cat.id === faq.category);
-                      const IconComponent = category?.icon || HelpCircle;
-                      return <IconComponent className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mt-1 flex-shrink-0" />;
+                      const icon = category?.icon || faCircleQuestion;
+                      return <FontAwesomeIcon icon={icon} className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 mt-1 flex-shrink-0" />;
                     })()}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">
@@ -472,9 +473,9 @@ export default function HelpCenterPage() {
                     </div>
                   </div>
                   {expandedFAQs.has(index) ? (
-                    <ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <FontAwesomeIcon icon={faChevronUp} className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   ) : (
-                    <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+                    <FontAwesomeIcon icon={faChevronDown} className="w-5 h-5 text-gray-500 flex-shrink-0" />
                   )}
                 </button>
 
@@ -498,7 +499,7 @@ export default function HelpCenterPage() {
 
           {filteredFAQs.length === 0 && (
             <div className="text-center py-12 sm:py-16">
-              <HelpCircle className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
+              <FontAwesomeIcon icon={faCircleQuestion} className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
               <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
                 {language === 'ms' ? 'Tiada Soalan Dijumpai' : 'No Questions Found'}
               </h3>
@@ -542,7 +543,7 @@ export default function HelpCenterPage() {
                 <div className="space-y-5 sm:space-y-6">
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                      <FontAwesomeIcon icon={faEnvelope} className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
@@ -560,7 +561,7 @@ export default function HelpCenterPage() {
 
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                      <FontAwesomeIcon icon={faPhone} className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
@@ -578,7 +579,7 @@ export default function HelpCenterPage() {
 
                   <div className="flex items-start space-x-4">
                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <MapPin className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+                      <FontAwesomeIcon icon={faLocationDot} className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
@@ -764,22 +765,22 @@ export default function HelpCenterPage() {
               {
                 href: '/pricing',
                 label: language === 'ms' ? 'Harga' : 'Pricing',
-                icon: CheckCircle
+                icon: faCircleCheck
               },
               {
                 href: '/features',
                 label: language === 'ms' ? 'Ciri-ciri' : 'Features',
-                icon: Zap
+                icon: faBolt
               },
               {
                 href: '/tutorials',
                 label: language === 'ms' ? 'Tutorial' : 'Tutorials',
-                icon: BookOpen
+                icon: faBookOpen
               },
               {
                 href: '/contact',
                 label: language === 'ms' ? 'Hubungi Kami' : 'Contact Us',
-                icon: MessageSquare
+                icon: faMessage
               }
             ].map((link, index) => (
               <motion.a
@@ -791,7 +792,7 @@ export default function HelpCenterPage() {
                 className="bg-white rounded-xl shadow-md p-5 sm:p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col items-center border border-gray-100 group"
               >
                 <div className="w-12 h-12 sm:w-14 sm:h-14 bg-green-100 rounded-lg flex items-center justify-center mb-3 sm:mb-4 group-hover:bg-green-600 transition-colors">
-                  <link.icon className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 group-hover:text-white transition-colors" />
+                  <FontAwesomeIcon icon={link.icon} className="w-6 h-6 sm:w-7 sm:h-7 text-green-600 group-hover:text-white transition-colors" />
                 </div>
                 <span className="font-semibold text-gray-900 text-sm sm:text-base">{link.label}</span>
               </motion.a>

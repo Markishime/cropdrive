@@ -4,9 +4,45 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
-import { Send, FileText, Loader2, AlertCircle, User, Bot, ChevronDown, ChevronUp } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faPaperPlane,
+  faFileAlt,
+  faSpinner,
+  faCircleExclamation,
+  faUser,
+  faChevronDown,
+  faChevronUp,
+  faGear,
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
 import Button from './ui/Button';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
+
+const CONVERSATION_STYLES = [
+  {
+    id: 'diagnostic_interview',
+    label: 'Diagnostic Interview',
+    labelMs: 'Temu Bual Diagnostik',
+    description: 'Asks questions first, then gives checklists',
+    descriptionMs: 'Bertanya soalan dahulu, kemudian memberikan senarai semak',
+  },
+  {
+    id: 'checklist_only',
+    label: 'Checklist Only',
+    labelMs: 'Senarai Semak Sahaja',
+    description: 'Direct checklist output',
+    descriptionMs: 'Output senarai semak langsung',
+  },
+  {
+    id: 'short_direct',
+    label: 'Short Direct',
+    labelMs: 'Ringkas & Langsung',
+    description: 'Brief 2-3 sentence answers',
+    descriptionMs: 'Jawapan ringkas 2-3 ayat',
+  },
+];
 
 interface Message {
   id: string;
@@ -49,7 +85,10 @@ export default function PalmiraChat({
   const [activeReportId, setActiveReportId] = useState<string | null>(initialReportId || null);
   const [reports, setReports] = useState<Report[]>([]);
   const [showReports, setShowReports] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [conversationStyle, setConversationStyle] = useState<string>('short_direct');
   const [loadingChat, setLoadingChat] = useState(false);
+  const [savingSettings, setSavingSettings] = useState(false);
   const isMountedRef = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -61,12 +100,77 @@ export default function PalmiraChat({
     };
   }, []);
 
-  // Load reports
+  // Load reports and settings
   useEffect(() => {
     if (user) {
       loadReports();
+      loadSettings();
     }
   }, [user]);
+
+  const loadSettings = async () => {
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken();
+
+      const response = await fetch('/api/palmira/settings', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const result = await response.json();
+      if (result.success && result.data?.conversationStyle) {
+        if (isMountedRef.current) {
+          setConversationStyle(result.data.conversationStyle);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
+
+  const saveSettings = async (newStyle: string) => {
+    setSavingSettings(true);
+    try {
+      const currentUser = auth.currentUser;
+      if (!currentUser) return;
+      const token = await currentUser.getIdToken();
+
+      const response = await fetch('/api/palmira/settings', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          conversationStyle: newStyle,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setConversationStyle(newStyle);
+        toast.success(
+          language === 'ms'
+            ? 'Tetapan disimpan'
+            : 'Settings saved'
+        );
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error);
+      toast.error(
+        language === 'ms'
+          ? 'Ralat menyimpan tetapan'
+          : 'Error saving settings'
+      );
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   // Load chat if chatId is provided
   useEffect(() => {
@@ -256,29 +360,42 @@ export default function PalmiraChat({
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Report Selector */}
+      {/* Header with Report Selector and Settings */}
       <div className="border-b border-gray-200 p-4 bg-gray-50">
-        <button
-          onClick={() => setShowReports(!showReports)}
-          className="flex items-center justify-between w-full p-3 bg-white rounded-lg border border-gray-200 hover:border-green-500 transition"
-        >
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-gray-600" />
-            <span className="text-sm font-medium text-gray-700">
-              {activeReportId
-                ? reports.find(r => r.id === activeReportId)?.title ||
-                  (language === 'ms' ? 'Laporan Dipilih' : 'Report Selected')
-                : language === 'ms'
-                ? 'Pilih Laporan'
-                : 'Select Report'}
-            </span>
-          </div>
-          {showReports ? (
-            <ChevronUp className="w-4 h-4 text-gray-600" />
-          ) : (
-            <ChevronDown className="w-4 h-4 text-gray-600" />
-          )}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowReports(!showReports)}
+            className="flex-1 flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:border-green-500 transition"
+          >
+            <div className="flex items-center gap-2">
+              <FontAwesomeIcon icon={faFileAlt} className="w-4 h-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">
+                {activeReportId
+                  ? reports.find(r => r.id === activeReportId)?.title ||
+                    (language === 'ms' ? 'Laporan Dipilih' : 'Report Selected')
+                  : language === 'ms'
+                  ? 'Pilih Laporan'
+                  : 'Select Report'}
+              </span>
+            </div>
+            {showReports ? (
+              <FontAwesomeIcon icon={faChevronUp} className="w-4 h-4 text-gray-600" />
+            ) : (
+              <FontAwesomeIcon icon={faChevronDown} className="w-4 h-4 text-gray-600" />
+            )}
+          </button>
+          <button
+            onClick={() => setShowSettings(!showSettings)}
+            className={`p-3 rounded-lg border transition ${
+              showSettings
+                ? 'bg-green-50 border-green-500 text-green-700'
+                : 'bg-white border-gray-200 hover:border-green-500 text-gray-600'
+            }`}
+            title={language === 'ms' ? 'Tetapan' : 'Settings'}
+          >
+            <FontAwesomeIcon icon={faGear} className="w-5 h-5" />
+          </button>
+        </div>
 
         <AnimatePresence>
           {showReports && (
@@ -321,18 +438,75 @@ export default function PalmiraChat({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Settings Panel */}
+        <AnimatePresence>
+          {showSettings && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="mt-2"
+            >
+              <div className="bg-white rounded-lg border border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-semibold text-gray-900">
+                    {language === 'ms' ? 'Gaya Jawapan' : 'Response Style'}
+                  </h3>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="p-1 hover:bg-gray-100 rounded"
+                    title={language === 'ms' ? 'Tutup' : 'Close'}
+                    aria-label={language === 'ms' ? 'Tutup tetapan' : 'Close settings'}
+                  >
+                    <FontAwesomeIcon icon={faXmark} className="w-4 h-4 text-gray-500" />
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {CONVERSATION_STYLES.map(style => (
+                    <button
+                      key={style.id}
+                      onClick={() => saveSettings(style.id)}
+                      disabled={savingSettings}
+                      className={`w-full text-left p-3 rounded-lg transition border ${
+                        conversationStyle === style.id
+                          ? 'bg-green-50 border-green-500 text-green-700'
+                          : 'border-gray-200 hover:border-green-300 hover:bg-gray-50'
+                      } ${savingSettings ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    >
+                      <div className="font-medium text-sm">
+                        {language === 'ms' ? style.labelMs : style.label}
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {language === 'ms' ? style.descriptionMs : style.description}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {loadingChat ? (
           <div className="flex items-center justify-center h-full">
-            <Loader2 className="w-6 h-6 animate-spin text-green-600" />
+            <FontAwesomeIcon icon={faSpinner} className="w-6 h-6 animate-spin text-green-600" spin />
           </div>
         ) : messages.length === 0 ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center text-gray-500">
-              <Bot className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full overflow-hidden">
+                <Image
+                  src="/images/Palmira.png"
+                  alt="Palmira"
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <p className="text-lg font-medium">
                 {language === 'ms'
                   ? 'Selamat datang ke Palmira!'
@@ -357,8 +531,14 @@ export default function PalmiraChat({
                 }`}
               >
                 {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center flex-shrink-0">
-                    <Bot className="w-5 h-5 text-white" />
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                    <Image
+                      src="/images/Palmira.png"
+                      alt="Palmira"
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 )}
                 <div
@@ -373,7 +553,7 @@ export default function PalmiraChat({
                   </div>
                   {message.metadata?.escalated && (
                     <div className="mt-2 flex items-center gap-1 text-xs opacity-75">
-                      <AlertCircle className="w-3 h-3" />
+                      <FontAwesomeIcon icon={faCircleExclamation} className="w-3 h-3" />
                       {language === 'ms'
                         ? 'Ditandakan untuk susulan'
                         : 'Flagged for follow-up'}
@@ -382,18 +562,24 @@ export default function PalmiraChat({
                 </div>
                 {message.role === 'user' && (
                   <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0">
-                    <User className="w-5 h-5 text-gray-600" />
+                    <FontAwesomeIcon icon={faUser} className="w-5 h-5 text-gray-600" />
                   </div>
                 )}
               </motion.div>
             ))}
             {loading && (
               <div className="flex gap-3 justify-start">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-blue-500 flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                  <Image
+                    src="/images/Palmira.png"
+                    alt="Palmira"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <Loader2 className="w-5 h-5 animate-spin text-gray-600" />
+                  <FontAwesomeIcon icon={faSpinner} className="w-5 h-5 animate-spin text-gray-600" spin />
                 </div>
               </div>
             )}
@@ -425,9 +611,9 @@ export default function PalmiraChat({
             className="bg-green-600 hover:bg-green-700 px-6"
           >
             {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
+              <FontAwesomeIcon icon={faSpinner} className="w-5 h-5 animate-spin" spin />
             ) : (
-              <Send className="w-5 h-5" />
+              <FontAwesomeIcon icon={faPaperPlane} className="w-5 h-5" />
             )}
           </Button>
         </div>

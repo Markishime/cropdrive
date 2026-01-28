@@ -8,20 +8,19 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { getPlanById } from '@/lib/subscriptions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  LayoutDashboard,
-  MessageSquare,
-  BookOpen,
-  Menu,
-  X,
-  ChevronRight,
-  ChevronLeft,
-  HelpCircle,
-  FileText,
-  Home,
-  Bot,
-  Shield
-} from 'lucide-react';
+  faGauge,
+  faMessage,
+  faBookOpen,
+  faBars,
+  faXmark,
+  faChevronRight,
+  faChevronLeft,
+  faFileAlt,
+  faHouse,
+  faRobot,
+} from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarItemProps {
   href: string;
@@ -65,7 +64,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
                     {language === 'ms' ? labelMs : label}
                   </span>
                   {isActive && (
-                    <ChevronRight className="ml-auto w-3 h-3 sm:w-4 sm:h-4 text-green-900 flex-shrink-0" />
+                    <FontAwesomeIcon icon={faChevronRight} className="ml-auto w-3 h-3 sm:w-4 sm:h-4 text-green-900 flex-shrink-0" />
                   )}
           </>
         )}
@@ -152,14 +151,14 @@ export const Sidebar: React.FC = () => {
   const sidebarItems = [
     {
       href: '/',
-      icon: <Home className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faHouse} className="w-5 h-5" />,
       label: 'Home',
       labelMs: 'Laman Utama',
       showAlways: true
     },
     {
       href: '/dashboard',
-      icon: <LayoutDashboard className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faGauge} className="w-5 h-5" />,
       label: 'Dashboard',
       labelMs: 'Papan Pemuka',
       showAlways: true
@@ -167,7 +166,7 @@ export const Sidebar: React.FC = () => {
     // AI Assistant - only for users with plans
     {
       href: '/assistant',
-      icon: <MessageSquare className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />,
       label: 'AI Assistant',
       labelMs: 'Pembantu AI',
       showAlways: false,
@@ -176,7 +175,7 @@ export const Sidebar: React.FC = () => {
     // Palmira Chatbot - only for users with plans
     {
       href: '/palmira',
-      icon: <Bot className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faRobot} className="w-5 h-5" />,
       label: 'Palmira',
       labelMs: 'Palmira',
       showAlways: false,
@@ -185,7 +184,7 @@ export const Sidebar: React.FC = () => {
     // Reports - only for users with plans
     {
       href: '/reports',
-      icon: <FileText className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faFileAlt} className="w-5 h-5" />,
       label: 'Reports History',
       labelMs: 'Sejarah Laporan',
       showAlways: false,
@@ -204,7 +203,7 @@ export const Sidebar: React.FC = () => {
     },
     {
       href: '/tutorials',
-      icon: <BookOpen className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faBookOpen} className="w-5 h-5" />,
       label: 'Tutorials',
       labelMs: 'Tutorial',
       showAlways: true
@@ -221,7 +220,7 @@ export const Sidebar: React.FC = () => {
     // Support - only for users with plans
     {
       href: '/support',
-      icon: <MessageSquare className="w-5 h-5" />,
+      icon: <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />,
       label: 'Support',
       labelMs: 'Sokongan',
       showAlways: false,
@@ -281,7 +280,7 @@ export const Sidebar: React.FC = () => {
               className="p-1.5 sm:p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0 ml-2 hidden lg:block"
               title={language === 'ms' ? 'Runtuhkan' : 'Collapse'}
             >
-              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
+              <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4 sm:w-5 sm:h-5 text-white/80" />
             </button>
           )}
         </div>
@@ -291,7 +290,7 @@ export const Sidebar: React.FC = () => {
             className="w-full p-2 rounded-lg hover:bg-white/10 transition-colors mt-2 hidden lg:block"
             title={language === 'ms' ? 'Kembangkan' : 'Expand'}
           >
-            <ChevronRight className="w-5 h-5 text-white/80 mx-auto" />
+            <FontAwesomeIcon icon={faChevronRight} className="w-5 h-5 text-white/80 mx-auto" />
           </button>
         )}
       </div>
@@ -371,9 +370,9 @@ export const Sidebar: React.FC = () => {
         aria-label={isOpen ? (language === 'ms' ? 'Tutup menu' : 'Close menu') : (language === 'ms' ? 'Buka menu' : 'Open menu')}
       >
         {isOpen ? (
-          <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+          <FontAwesomeIcon icon={faXmark} className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
         ) : (
-          <Menu className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+          <FontAwesomeIcon icon={faBars} className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
         )}
       </button>
 

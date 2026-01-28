@@ -4,8 +4,18 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
-import { Globe, Users, MessageSquare, Shield, Check, ArrowRight, ArrowLeft } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faGlobe,
+  faUsers,
+  faMessage,
+  faShieldHalved,
+  faCheck,
+  faArrowRight,
+  faArrowLeft,
+} from '@fortawesome/free-solid-svg-icons';
 import Button from './ui/Button';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 interface PalmiraOnboardingProps {
@@ -126,10 +136,10 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
   };
 
   const steps = [
-    { id: 1, icon: Globe, label: 'Language' },
-    { id: 2, icon: Users, label: 'Customer Group' },
-    { id: 3, icon: MessageSquare, label: 'Conversation Style' },
-    { id: 4, icon: Shield, label: 'Privacy & Consent' },
+    { id: 1, icon: faGlobe, label: 'Language' },
+    { id: 2, icon: faUsers, label: 'Customer Group' },
+    { id: 3, icon: faMessage, label: 'Conversation Style' },
+    { id: 4, icon: faShieldHalved, label: 'Privacy & Consent' },
   ];
 
   return (
@@ -145,9 +155,15 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ delay: 0.2, type: 'spring' }}
-            className="w-16 h-16 bg-green-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+            className="w-20 h-20 rounded-full overflow-hidden mx-auto mb-4 shadow-lg"
           >
-            <span className="text-3xl">🌴</span>
+            <Image
+              src="/images/Palmira.png"
+              alt="Palmira"
+              width={80}
+              height={80}
+              className="w-full h-full object-cover"
+            />
           </motion.div>
           <h1 className="text-3xl font-black text-green-900 mb-2">
             {selectedLanguage === 'ms' ? 'Mula' : 'Getting Started'}
@@ -156,8 +172,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
 
         {/* Progress Indicator */}
         <div className="flex justify-center gap-3 mb-8">
-          {steps.map((stepItem, index) => {
-            const Icon = stepItem.icon;
+          {steps.map((stepItem) => {
             const isCompleted = step > stepItem.id;
             const isActive = step === stepItem.id;
             
@@ -173,9 +188,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                   }`}
                 >
                   {isCompleted ? (
-                    <Check className="w-6 h-6" />
+                    <FontAwesomeIcon icon={faCheck} className="w-6 h-6" />
                   ) : (
-                    <Icon className="w-6 h-6" />
+                    <FontAwesomeIcon icon={stepItem.icon} className="w-6 h-6" />
                   )}
                 </div>
               </div>
@@ -250,7 +265,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
                     <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
               </motion.div>
@@ -307,7 +322,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     title={selectedLanguage === 'ms' ? 'Kembali' : 'Back'}
                     aria-label={selectedLanguage === 'ms' ? 'Kembali ke langkah sebelumnya' : 'Back to previous step'}
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
                     <span>{selectedLanguage === 'ms' ? 'Kembali' : 'Back'}</span>
                   </Button>
                   <Button
@@ -318,7 +333,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
                     <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
               </motion.div>
@@ -384,7 +399,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     title={selectedLanguage === 'ms' ? 'Kembali' : 'Back'}
                     aria-label={selectedLanguage === 'ms' ? 'Kembali ke langkah sebelumnya' : 'Back to previous step'}
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
                     <span>{selectedLanguage === 'ms' ? 'Kembali' : 'Back'}</span>
                   </Button>
                   <Button
@@ -395,7 +410,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
                     <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
               </motion.div>
@@ -486,7 +501,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     title={selectedLanguage === 'ms' ? 'Kembali' : 'Back'}
                     aria-label={selectedLanguage === 'ms' ? 'Kembali ke langkah sebelumnya' : 'Back to previous step'}
                   >
-                    <ArrowLeft className="w-4 h-4" />
+                    <FontAwesomeIcon icon={faArrowLeft} className="w-4 h-4" />
                     <span>{selectedLanguage === 'ms' ? 'Kembali' : 'Back'}</span>
                   </Button>
                   <Button
@@ -505,7 +520,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         ? 'Teruskan'
                         : 'Continue'}
                     </span>
-                    {!loading && <ArrowRight className="w-4 h-4" />}
+                    {!loading && <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />}
                   </Button>
                 </div>
               </motion.div>

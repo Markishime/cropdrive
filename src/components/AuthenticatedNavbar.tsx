@@ -9,12 +9,13 @@ import { useAuth } from '@/lib/auth';
 import { useTranslation, getCurrentLanguage, setLanguage } from '@/i18n';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  User,
-  Settings,
-  LogOut,
-  LayoutDashboard,
-} from 'lucide-react';
+  faUser,
+  faGear,
+  faRightFromBracket,
+  faGauge,
+} from '@fortawesome/free-solid-svg-icons';
 
 export const AuthenticatedNavbar: React.FC = () => {
   const [mounted, setMounted] = useState(false);
@@ -160,7 +161,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                     ? 'bg-green-600 text-white hover:bg-green-700'
                     : 'bg-yellow-400 text-green-900 hover:bg-yellow-300'
                 }`}>
-                  <LayoutDashboard className="w-4 h-4 mr-2" />
+                  <FontAwesomeIcon icon={faGauge} className="w-4 h-4 mr-2" />
                   {language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
                 </Button>
               </Link>
@@ -202,7 +203,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             onClick={() => setShowUserMenu(false)}
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
                           >
-                            <LayoutDashboard className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faGauge} className="w-5 h-5" />
                             <span className="font-medium">{language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}</span>
                           </Link>
                           <Link
@@ -210,7 +211,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             onClick={() => setShowUserMenu(false)}
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
                           >
-                            <User className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
                             <span className="font-medium">{language === 'ms' ? 'Profil' : 'Profile'}</span>
                           </Link>
                           <div className="border-t border-gray-200 my-1"></div>
@@ -221,7 +222,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             }}
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all w-full"
                           >
-                            <LogOut className="w-5 h-5" />
+                            <FontAwesomeIcon icon={faRightFromBracket} className="w-5 h-5" />
                             <span className="font-medium">{language === 'ms' ? 'Log Keluar' : 'Logout'}</span>
                           </button>
                         </div>
@@ -340,7 +341,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                               : 'text-gray-700 hover:bg-gray-100'
                           }`}
                         >
-                          <User className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                          <FontAwesomeIcon icon={faUser} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
                             {language === 'ms' ? 'Profil' : 'Profile'}
                           </span>
@@ -354,7 +355,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                               : 'text-gray-700 hover:bg-gray-100'
                           }`}
                         >
-                          <Settings className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                          <FontAwesomeIcon icon={faGear} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
                             {language === 'ms' ? 'Tetapan' : 'Settings'}
                           </span>
@@ -367,7 +368,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                           }}
                           className="flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all w-full"
                         >
-                          <LogOut className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                          <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
                             {language === 'ms' ? 'Log Keluar' : 'Logout'}
                           </span>

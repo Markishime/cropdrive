@@ -4,7 +4,8 @@ import React from 'react';
 import SupportForm from '@/components/SupportForm';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { motion } from 'framer-motion';
-import { MessageSquare, HelpCircle } from 'lucide-react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMessage, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
 
 interface SupportPageClientProps {
   locale: string;
@@ -40,7 +41,7 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
                     {locale === 'ms' ? 'Pusat' : 'Support'} <span className="text-yellow-400">{locale === 'ms' ? 'Sokongan' : 'Center'}</span>
                   </h1>
                   <p className="text-lg sm:text-xl text-white/90 flex items-center justify-center sm:justify-start gap-2">
-                    <MessageSquare className="w-5 h-5" />
+                    <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />
                     {locale === 'ms'
                       ? 'Pasukan pakar kami sedia membantu anda'
                       : 'Our expert team is ready to help you'
@@ -73,7 +74,7 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
             >
               <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-blue-200">
                 <div className="flex items-start gap-3">
-                  <HelpCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                  <FontAwesomeIcon icon={faCircleQuestion} className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-gray-700">
                     {locale === 'ms' ? (
                       <>
