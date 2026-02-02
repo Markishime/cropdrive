@@ -535,7 +535,7 @@ OUTPUT: Hanya senarai semak, lengkap.`
 You MUST respond in CHECKLIST style only. Nothing else.
 1. Every response MUST be a checklist only. DO NOT use paragraphs, flowing prose, or long explanations.
 2. MUST use "Item N: [action]" or "✓ Item N: [action]". EACH ITEM ON ITS OWN LINE; blank line between items.
-3. Include ALL items needed to answer the question fully. If the user asks for steps 1–5, provide Item 1, 2, 3, 4, 5. No limit on number of items—complete the answer.
+3. Include ALL items needed to answer the question fully. If the user asks for steps 1–6, provide Item 1, 2, 3, 4, 5, 6. No limit on number of items—complete the answer.
 4. Do not start with a paragraph—go straight to the checklist. Start with Item 1.
 OUTPUT: Checklist only, complete.`,
     diagnostic_interview: language === 'ms'
@@ -548,7 +548,7 @@ Aliran: Tanya satu soalan → tunggu jawapan → sama ada satu soalan susulan AT
       : `CURRENT MODE: DIAGNOSTIC INTERVIEW
 You MUST respond in DIAGNOSTIC style only. Each response must be exactly one of:
 A) ONE question only – to gather information (do not ask more than one question per message).
-B) After the user has answered – give your explanation or recommendations in PARAGRAPH form. DO NOT use a checklist. No length limit: give a COMPLETE explanation. If the user asks to explain steps 1 to 5, explain ALL steps 1, 2, 3, 4, and 5 in paragraphs.
+B) After the user has answered – give your explanation or recommendations in PARAGRAPH form. DO NOT use a checklist. No length limit: give a COMPLETE explanation. If the user asks to explain steps 1 to 6, explain ALL steps 1, 2, 3, 4, 5 and 6 in paragraphs.
 In diagnostic mode, when you are explaining, use paragraphs and answer FULLY—do not truncate or limit the message.
 Flow: Ask one question → wait for answer → either one follow-up question OR your complete answer in paragraph form (never checklist).`,
   };

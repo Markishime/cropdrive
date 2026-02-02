@@ -47,6 +47,10 @@ export const config = {
       location: process.env.GOOGLE_DOCUMENT_AI_LOCATION || 'us-central1',
       processorId: process.env.GOOGLE_DOCUMENT_AI_PROCESSOR_ID,
     },
+    /** Gemini API key for Palmira chat (Google AI Studio or GCP). Env: GOOGLE_GEMINI_API_KEY or GEMINI_API_KEY */
+    gemini: {
+      apiKey: process.env.GOOGLE_GEMINI_API_KEY || process.env.GEMINI_API_KEY,
+    },
   },
 
   support: {
