@@ -189,5 +189,31 @@ service cloud.firestore {
       allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
       allow write: if false; // Only server-side access
     }
+
+    // Blog Posts collection - public read access, server-side write only
+    match /blog_posts/{postId} {
+      // Anyone can read published blog posts
+      allow read: if resource.data.published != false || !resource.exists;
+      // Only server-side functions can write (via admin SDK)
+      allow write: if false;
+    }
+
+    // Allow querying blog posts (public read access)
+    match /blog_posts {
+      // Allow public queries for published posts
+      allow list: if true;
+      allow get: if true;
+    }
+
+    // Newsletter Subscribers collection - server-side only
+    match /newsletter_subscribers/{subscriberId} {
+      // No client-side access - only server-side functions can read/write
+      allow read, write: if false;
+    }
+
+    // Allow querying newsletter subscribers (server-side only)
+    match /newsletter_subscribers {
+      allow read, write: if false;
+    }
   }
 }

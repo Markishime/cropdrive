@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -20,8 +20,12 @@ import {
   faGlobe,
   faSeedling,
   faMicroscope,
+  faXmark,
+  faExternalLink,
 } from '@fortawesome/free-solid-svg-icons';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { db } from '@/lib/firebase';
+import { collection, query, orderBy, onSnapshot, QuerySnapshot, DocumentData } from 'firebase/firestore';
 
 interface BlogPost {
   id: string;
@@ -42,9 +46,11 @@ interface BlogPost {
   tagsMs: string[];
   image: string;
   featured?: boolean;
+  published?: boolean;
 }
 
-const blogPosts: BlogPost[] = [
+// Static blog posts (fallback if API fails)
+const staticBlogPosts: BlogPost[] = [
   // Featured CropDrive Posts
   {
     id: 'cropdrive-introduction',
@@ -320,12 +326,158 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+  const [blogPosts, setBlogPosts] = useState<BlogPost[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [newsletterMessage, setNewsletterMessage] = useState('');
+
+  const handlePostClick = (post: BlogPost) => {
+    const isAGS = post.id.includes('ags');
+    if (isAGS) {
+      window.open('https://agriglobalsolutions.com', '_blank');
+    } else {
+      setSelectedPost(post);
+    }
+  };
+
+  const closeModal = () => {
+    setSelectedPost(null);
+  };
+
+  const handleNewsletterSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!newsletterEmail || !newsletterEmail.includes('@')) {
+      setNewsletterStatus('error');
+      setNewsletterMessage(language === 'ms' ? 'Sila masukkan alamat emel yang sah' : 'Please enter a valid email address');
+      return;
+    }
+
+    try {
+      setNewsletterStatus('loading');
+      setNewsletterMessage('');
+
+      const response = await fetch('/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: newsletterEmail }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setNewsletterStatus('success');
+        setNewsletterMessage(
+          data.alreadySubscribed
+            ? (language === 'ms' ? 'Anda sudah melanggan!' : 'You are already subscribed!')
+            : (language === 'ms' ? 'Berjaya melanggan! Semak peti masuk anda.' : 'Successfully subscribed! Check your inbox.')
+        );
+        setNewsletterEmail('');
+        
+        // Reset status after 5 seconds
+        setTimeout(() => {
+          setNewsletterStatus('idle');
+          setNewsletterMessage('');
+        }, 5000);
+      } else {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.error || (language === 'ms' ? 'Gagal melanggan. Sila cuba lagi.' : 'Failed to subscribe. Please try again.'));
+      }
+    } catch (error) {
+      console.error('Newsletter subscription error:', error);
+      setNewsletterStatus('error');
+      setNewsletterMessage(language === 'ms' ? 'Ralat berlaku. Sila cuba lagi.' : 'An error occurred. Please try again.');
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
     const lang = getCurrentLanguage();
     setCurrentLanguage(lang);
   }, []);
+
+  // Real-time blog posts listener using Firestore
+  useEffect(() => {
+    if (!mounted) return;
+
+    setLoading(true);
+
+    // Set up Firestore real-time listener
+    const q = query(
+      collection(db, 'blog_posts'),
+      orderBy('date', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        try {
+          const posts = snapshot.docs
+            .map((doc) => {
+              const data = doc.data();
+              const post: BlogPost = {
+                id: doc.id,
+                title: data.title || '',
+                titleMs: data.titleMs || '',
+                excerpt: data.excerpt || '',
+                excerptMs: data.excerptMs || '',
+                content: data.content || '',
+                contentMs: data.contentMs || '',
+                author: data.author || '',
+                authorMs: data.authorMs || '',
+                date: data.date?.toDate?.()?.toISOString() || data.date || '',
+                readTime: data.readTime || '',
+                readTimeMs: data.readTimeMs || '',
+                category: data.category || '',
+                categoryMs: data.categoryMs || '',
+                tags: data.tags || [],
+                tagsMs: data.tagsMs || [],
+                image: data.image || '',
+                featured: data.featured || false,
+                published: data.published !== false,
+              };
+              return post;
+            })
+            .filter((post) => post.published !== false); // Only show published posts
+          
+          if (posts.length > 0) {
+            setBlogPosts(posts);
+          } else {
+            // Fallback to static posts if Firestore is empty
+            setBlogPosts(staticBlogPosts);
+          }
+        } catch (error) {
+          console.error('Error processing blog posts:', error);
+          setBlogPosts(staticBlogPosts);
+        } finally {
+          setLoading(false);
+        }
+      },
+      (error: Error) => {
+        console.error('Error listening to blog posts:', error);
+        // Fallback to static posts on error
+        setBlogPosts(staticBlogPosts);
+        setLoading(false);
+        
+        // Also try fetching via API as backup
+        fetch('/api/blog/posts')
+          .then(res => res.json())
+          .then(data => {
+            if (data.posts && data.posts.length > 0) {
+              setBlogPosts(data.posts);
+            }
+          })
+          .catch(err => console.error('API fallback also failed:', err));
+      }
+    );
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
+  }, [mounted]);
 
   // Listen for language changes
   useEffect(() => {
@@ -338,14 +490,29 @@ export default function BlogPage() {
     return () => window.removeEventListener('storage', handleStorageChange);
   }, []);
 
+  // Handle ESC key to close modal
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && selectedPost) {
+        closeModal();
+      }
+    };
+
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [selectedPost]);
+
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+
+  // Use blogPosts state, fallback to staticBlogPosts if empty
+  const displayPosts = blogPosts.length > 0 ? blogPosts : staticBlogPosts;
 
   // Get all unique tags
   const allTags = Array.from(
-    new Set(blogPosts.flatMap(post => language === 'ms' ? post.tagsMs : post.tags))
+    new Set(displayPosts.flatMap(post => language === 'ms' ? post.tagsMs : post.tags))
   );
 
-  const filteredPosts = blogPosts.filter(post => {
+  const filteredPosts = displayPosts.filter(post => {
     const matchesSearch = searchQuery === '' ||
       (language === 'ms' ? post.titleMs : post.title).toLowerCase().includes(searchQuery.toLowerCase()) ||
       (language === 'ms' ? post.excerptMs : post.excerpt).toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -407,53 +574,6 @@ export default function BlogPage() {
           }}></div>
         </div>
         
-        {/* Floating Elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <motion.div
-            animate={{
-              y: [0, -20, 0],
-              rotate: [0, 5, 0],
-            }}
-            transition={{
-              duration: 6,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-            className="absolute top-20 left-10 text-6xl opacity-20"
-          >
-            🌱
-          </motion.div>
-          <motion.div
-            animate={{
-              y: [0, 20, 0],
-              rotate: [0, -5, 0],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 1
-            }}
-            className="absolute top-40 right-20 text-5xl opacity-20"
-          >
-            🌾
-          </motion.div>
-          <motion.div
-            animate={{
-              y: [0, -15, 0],
-              rotate: [0, 3, 0],
-            }}
-            transition={{
-              duration: 7,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: 2
-            }}
-            className="absolute bottom-20 left-1/4 text-4xl opacity-20"
-          >
-            📊
-          </motion.div>
-        </div>
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -531,6 +651,13 @@ export default function BlogPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          </div>
+        )}
+        
         {/* Filters and Search */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -604,7 +731,7 @@ export default function BlogPage() {
           </div>
         </motion.div>
 
-        {/* Featured Posts */}
+        {/* Featured Posts - Magazine Style Layout */}
         {featuredPosts.length > 0 && (
           <motion.section
             initial={{ opacity: 0, y: 20 }}
@@ -619,7 +746,9 @@ export default function BlogPage() {
               </h2>
               <div className="flex-1 h-1 bg-gradient-to-r from-green-400 to-transparent rounded-full"></div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            
+            {/* Magazine Style Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
               {featuredPosts.map((post, index) => {
                 const title = language === 'ms' ? post.titleMs : post.title;
                 const excerpt = language === 'ms' ? post.excerptMs : post.excerpt;
@@ -627,6 +756,12 @@ export default function BlogPage() {
                 const author = language === 'ms' ? post.authorMs : post.author;
                 const readTime = language === 'ms' ? post.readTimeMs : post.readTime;
                 const tags = language === 'ms' ? post.tagsMs : post.tags;
+                const isAGS = post.id.includes('ags');
+                const isCropDrive = post.id.includes('cropdrive');
+                
+                // Varying column spans for magazine layout
+                const colSpan = index === 0 ? 'lg:col-span-8' : index === 1 ? 'lg:col-span-4' : 'lg:col-span-6';
+                const imageHeight = index === 0 ? 'h-96' : index === 1 ? 'h-full min-h-[400px]' : 'h-64';
                 
                 return (
                   <motion.div
@@ -634,51 +769,66 @@ export default function BlogPage() {
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.5 + index * 0.1 }}
-                    className="group"
+                    className={`${colSpan} group cursor-pointer`}
+                    onClick={() => handlePostClick(post)}
                   >
-                    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 h-full flex flex-col transform hover:-translate-y-2">
-                      {/* Image Placeholder with Gradient */}
-                      <div className="relative h-48 bg-gradient-to-br from-green-500 via-green-600 to-blue-600 overflow-hidden">
-                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-all duration-300"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-white/30 text-6xl font-black">
-                            {post.id.includes('cropdrive') ? '🌱' : post.id.includes('ags') ? '🌾' : '📊'}
-                          </div>
-                        </div>
-                        <div className="absolute top-4 left-4">
-                          <span className="bg-white/90 text-green-700 px-3 py-1 rounded-full text-xs font-bold">
+                    <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 h-full transform hover:scale-[1.02]">
+                      {/* Image */}
+                      <div className={`relative ${imageHeight} overflow-hidden`}>
+                        <Image
+                          src={post.image}
+                          alt={title}
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        
+                        {/* Category Badge */}
+                        <div className="absolute top-6 left-6">
+                          <span className={`px-4 py-2 rounded-full text-xs font-bold backdrop-blur-md ${
+                            isCropDrive ? 'bg-green-500/90 text-white' : 
+                            isAGS ? 'bg-blue-500/90 text-white' : 
+                            'bg-white/90 text-gray-700'
+                          }`}>
                             {category}
                           </span>
                         </div>
-                        <div className="absolute bottom-4 right-4">
-                          <span className="bg-yellow-400 text-gray-900 px-2 py-1 rounded-full text-xs font-bold">
+                        
+                        {/* Featured Badge */}
+                        <div className="absolute top-6 right-6">
+                          <span className="bg-yellow-400 text-gray-900 px-3 py-1.5 rounded-full text-xs font-black">
                             {language === 'ms' ? 'Pilihan' : 'Featured'}
                           </span>
                         </div>
+                        
+                        {/* External Link Icon for AGS */}
+                        {isAGS && (
+                          <div className="absolute bottom-6 right-6">
+                            <div className="bg-white/90 backdrop-blur-md p-2 rounded-full">
+                              <FontAwesomeIcon icon={faExternalLink} className="w-4 h-4 text-blue-600" />
+                            </div>
+                          </div>
+                        )}
                       </div>
                       
-                      {/* Content */}
-                      <div className="p-6 flex-1 flex flex-col">
-                        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-green-600 transition-colors">
+                      {/* Content Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 text-white">
+                        <h3 className="text-2xl lg:text-3xl font-black mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors">
                           {title}
                         </h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3 flex-1">
+                        <p className="text-white/90 text-sm lg:text-base mb-4 line-clamp-2">
                           {excerpt}
                         </p>
                         
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {tags.slice(0, 3).map(tag => (
-                            <span key={tag} className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                        
                         {/* Meta */}
-                        <div className="flex items-center justify-between text-xs text-gray-500 pt-4 border-t border-gray-100">
-                          <span>{author}</span>
-                          <span>{readTime}</span>
+                        <div className="flex items-center justify-between text-xs text-white/80 pt-4 border-t border-white/20">
+                          <span className="font-medium">{author}</span>
+                          <div className="flex items-center gap-3">
+                            <span>{formatDate(post.date)}</span>
+                            <span>•</span>
+                            <span>{readTime}</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -689,7 +839,7 @@ export default function BlogPage() {
           </motion.section>
         )}
 
-        {/* All Posts */}
+        {/* All Posts - Unique Layout */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -710,7 +860,7 @@ export default function BlogPage() {
           </div>
 
           {regularPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div className="space-y-8">
               {regularPosts.map((post, index) => {
                 const title = language === 'ms' ? post.titleMs : post.title;
                 const excerpt = language === 'ms' ? post.excerptMs : post.excerpt;
@@ -720,84 +870,95 @@ export default function BlogPage() {
                 const tags = language === 'ms' ? post.tagsMs : post.tags;
                 const isCropDrive = post.id.includes('cropdrive');
                 const isAGS = post.id.includes('ags');
+                const isEven = index % 2 === 0;
                 
                 return (
                   <motion.div
                     key={post.id}
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.7 + index * 0.05 }}
-                    className="group"
+                    initial={{ opacity: 0, x: isEven ? -50 : 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.7 + index * 0.05 }}
+                    className="group cursor-pointer"
+                    onClick={() => handlePostClick(post)}
                   >
-                    <div className={`bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border-2 h-full flex flex-col transform hover:-translate-y-1 ${
-                      isCropDrive ? 'border-green-200 hover:border-green-400' : 
-                      isAGS ? 'border-blue-200 hover:border-blue-400' : 
-                      'border-gray-200 hover:border-gray-400'
+                    <div className={`relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                      isCropDrive ? 'border-l-4 border-l-green-500' : 
+                      isAGS ? 'border-l-4 border-l-blue-500' : 
+                      'border-l-4 border-l-purple-500'
                     }`}>
-                      {/* Image Placeholder with Unique Gradient */}
-                      <div className={`relative h-40 overflow-hidden ${
-                        isCropDrive ? 'bg-gradient-to-br from-green-400 via-green-500 to-emerald-600' :
-                        isAGS ? 'bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600' :
-                        'bg-gradient-to-br from-purple-400 via-purple-500 to-pink-600'
-                      }`}>
-                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-all duration-300"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <div className="text-white/40 text-5xl font-black transform group-hover:scale-110 transition-transform duration-300">
-                            {isCropDrive ? '🌱' : isAGS ? '🌾' : '📊'}
+                      <div className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-0`}>
+                        {/* Image Section */}
+                        <div className="relative lg:w-1/3 h-64 lg:h-auto overflow-hidden">
+                          <Image
+                            src={post.image}
+                            alt={title}
+                            fill
+                            className="object-cover group-hover:scale-110 transition-transform duration-700"
+                            sizes="(max-width: 1024px) 100vw, 33vw"
+                          />
+                          <div className={`absolute inset-0 bg-gradient-to-r ${
+                            isEven ? 'from-black/60 via-black/30 to-transparent' : 
+                            'from-transparent via-black/30 to-black/60'
+                          } lg:hidden`}></div>
+                          
+                          {/* Category Badge */}
+                          <div className={`absolute top-4 ${isEven ? 'left-4' : 'right-4'} lg:${isEven ? 'left-4' : 'right-4'}`}>
+                            <span className={`px-3 py-1.5 rounded-full text-xs font-bold backdrop-blur-md ${
+                              isCropDrive ? 'bg-green-500/90 text-white' : 
+                              isAGS ? 'bg-blue-500/90 text-white' : 
+                              'bg-purple-500/90 text-white'
+                            }`}>
+                              {category}
+                            </span>
                           </div>
-                        </div>
-                        <div className="absolute top-3 left-3">
-                          <span className={`px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm ${
-                            isCropDrive ? 'bg-green-600/90 text-white' :
-                            isAGS ? 'bg-blue-600/90 text-white' :
-                            'bg-white/90 text-gray-700'
-                          }`}>
-                            {category}
-                          </span>
-                        </div>
-                        {/* Decorative Pattern */}
-                        <div className="absolute inset-0 opacity-10">
-                          <div className="absolute inset-0" style={{
-                            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-                            backgroundSize: '20px 20px'
-                          }}></div>
-                        </div>
-                      </div>
-                      
-                      {/* Content */}
-                      <div className="p-5 flex-1 flex flex-col">
-                        <h3 className={`text-lg font-bold mb-2 line-clamp-2 transition-colors ${
-                          isCropDrive ? 'text-gray-900 group-hover:text-green-600' :
-                          isAGS ? 'text-gray-900 group-hover:text-blue-600' :
-                          'text-gray-900 group-hover:text-purple-600'
-                        }`}>
-                          {title}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-1">
-                          {excerpt}
-                        </p>
-                        
-                        {/* Tags */}
-                        <div className="flex flex-wrap gap-1.5 mb-3">
-                          {tags.slice(0, 2).map(tag => (
-                            <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">
-                              {tag}
-                            </span>
-                          ))}
-                          {tags.length > 2 && (
-                            <span className="text-xs text-gray-400 px-2 py-0.5">
-                              +{tags.length - 2}
-                            </span>
+                          
+                          {/* External Link Icon for AGS */}
+                          {isAGS && (
+                            <div className={`absolute bottom-4 ${isEven ? 'right-4' : 'left-4'}`}>
+                              <div className="bg-white/90 backdrop-blur-md p-2 rounded-full">
+                                <FontAwesomeIcon icon={faExternalLink} className="w-4 h-4 text-blue-600" />
+                              </div>
+                            </div>
                           )}
                         </div>
                         
-                        {/* Meta */}
-                        <div className="flex items-center justify-between text-xs text-gray-500 pt-3 border-t border-gray-100">
-                          <span className="font-medium">{author}</span>
-                          <div className="flex items-center gap-2">
-                            <span>{formatDate(post.date)}</span>
-                            <span>•</span>
-                            <span>{readTime}</span>
+                        {/* Content Section */}
+                        <div className="lg:w-2/3 p-6 lg:p-8 flex flex-col justify-between">
+                          <div>
+                            <h3 className={`text-2xl lg:text-3xl font-black mb-3 group-hover:underline transition-all ${
+                              isCropDrive ? 'text-gray-900 group-hover:text-green-600' :
+                              isAGS ? 'text-gray-900 group-hover:text-blue-600' :
+                              'text-gray-900 group-hover:text-purple-600'
+                            }`}>
+                              {title}
+                            </h3>
+                            <p className="text-gray-600 text-base mb-4 line-clamp-2">
+                              {excerpt}
+                            </p>
+                            
+                            {/* Tags */}
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {tags.slice(0, 4).map(tag => (
+                                <span key={tag} className="text-xs bg-gray-100 text-gray-700 px-3 py-1 rounded-full font-medium">
+                                  {tag}
+                                </span>
+                              ))}
+                              {tags.length > 4 && (
+                                <span className="text-xs text-gray-400 px-2 py-1">
+                                  +{tags.length - 4}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {/* Meta */}
+                          <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                            <span className="font-semibold">{author}</span>
+                            <div className="flex items-center gap-3">
+                              <span>{formatDate(post.date)}</span>
+                              <span>•</span>
+                              <span>{readTime}</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -858,31 +1019,184 @@ export default function BlogPage() {
                     : 'Get the latest updates on CropDrive AI, AGS services, agricultural technology, and palm oil industry news delivered straight to your inbox.'
                   }
                 </p>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
+                <form onSubmit={handleNewsletterSubscribe} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
                   <label htmlFor="newsletter-email" className="sr-only">
                     {language === 'ms' ? 'Alamat emel' : 'Email address'}
                   </label>
                   <input
                     id="newsletter-email"
                     type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
                     placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
                     className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
+                    disabled={newsletterStatus === 'loading'}
+                    required
                   />
-                  <button className="bg-yellow-400 text-gray-900 px-8 py-3.5 rounded-xl font-black hover:bg-yellow-300 transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 whitespace-nowrap transform">
-                    {language === 'ms' ? 'Langgan' : 'Subscribe'}
+                  <button 
+                    type="submit"
+                    disabled={newsletterStatus === 'loading'}
+                    className={`px-8 py-3.5 rounded-xl font-black transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 whitespace-nowrap transform ${
+                      newsletterStatus === 'loading'
+                        ? 'bg-yellow-300 text-gray-600 cursor-not-allowed'
+                        : newsletterStatus === 'success'
+                        ? 'bg-green-500 text-white'
+                        : newsletterStatus === 'error'
+                        ? 'bg-red-500 text-white'
+                        : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
+                    }`}
+                  >
+                    {newsletterStatus === 'loading' 
+                      ? (language === 'ms' ? 'Memproses...' : 'Processing...')
+                      : newsletterStatus === 'success'
+                      ? '✓'
+                      : language === 'ms' ? 'Langgan' : 'Subscribe'
+                    }
                   </button>
-                </div>
-                <p className="text-sm text-green-100 mt-4 opacity-80">
-                  {language === 'ms'
-                    ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.'
-                    : 'No spam. Just high-quality content about CropDrive and AGS.'
-                  }
-                </p>
+                </form>
+                {newsletterMessage && (
+                  <p className={`text-sm mt-4 font-medium ${
+                    newsletterStatus === 'success' 
+                      ? 'text-yellow-200' 
+                      : newsletterStatus === 'error'
+                      ? 'text-red-200'
+                      : 'text-green-100 opacity-80'
+                  }`}>
+                    {newsletterMessage}
+                  </p>
+                )}
+                {!newsletterMessage && (
+                  <p className="text-sm text-green-100 mt-4 opacity-80">
+                    {language === 'ms'
+                      ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.'
+                      : 'No spam. Just high-quality content about CropDrive and AGS.'
+                    }
+                  </p>
+                )}
               </motion.div>
             </div>
           </div>
         </motion.section>
       </div>
+
+      {/* Article Modal */}
+      <AnimatePresence>
+        {selectedPost && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={closeModal}
+          >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 50 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 50 }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          >
+            {/* Close Button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-6 right-6 z-10 bg-white/90 backdrop-blur-md p-3 rounded-full hover:bg-white transition-all shadow-lg hover:scale-110"
+              aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+              title={language === 'ms' ? 'Tutup' : 'Close'}
+            >
+              <FontAwesomeIcon icon={faXmark} className="w-5 h-5 text-gray-700" />
+            </button>
+
+            {/* Modal Content */}
+            <div className="overflow-y-auto flex-1">
+              {/* Hero Image */}
+              <div className="relative h-64 md:h-80 overflow-hidden">
+                <Image
+                  src={selectedPost.image}
+                  alt={language === 'ms' ? selectedPost.titleMs : selectedPost.title}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                
+                {/* Category Badge */}
+                <div className="absolute top-6 left-6">
+                  <span className={`px-4 py-2 rounded-full text-xs font-bold backdrop-blur-md ${
+                    selectedPost.id.includes('cropdrive') ? 'bg-green-500/90 text-white' : 
+                    selectedPost.id.includes('ags') ? 'bg-blue-500/90 text-white' : 
+                    'bg-purple-500/90 text-white'
+                  }`}>
+                    {language === 'ms' ? selectedPost.categoryMs : selectedPost.category}
+                  </span>
+                </div>
+              </div>
+
+              {/* Article Content */}
+              <div className="p-8 md:p-12">
+                <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 leading-tight">
+                  {language === 'ms' ? selectedPost.titleMs : selectedPost.title}
+                </h1>
+                
+                {/* Meta Info */}
+                <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-gray-700">
+                      {language === 'ms' ? selectedPost.authorMs : selectedPost.author}
+                    </span>
+                  </div>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600">{formatDate(selectedPost.date)}</span>
+                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-600">{language === 'ms' ? selectedPost.readTimeMs : selectedPost.readTime}</span>
+                </div>
+
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {(language === 'ms' ? selectedPost.tagsMs : selectedPost.tags).map(tag => (
+                    <span key={tag} className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Article Body */}
+                <div className="prose prose-lg max-w-none">
+                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                    {language === 'ms' ? selectedPost.excerptMs : selectedPost.excerpt}
+                  </p>
+                  <div className="text-gray-700 leading-relaxed space-y-4">
+                    {(language === 'ms' ? selectedPost.contentMs : selectedPost.content).split('\n').map((paragraph, idx) => (
+                      paragraph.trim() && (
+                        <p key={idx} className="text-base md:text-lg leading-relaxed">
+                          {paragraph}
+                        </p>
+                      )
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="border-t border-gray-200 p-6 bg-gray-50">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  {language === 'ms' 
+                    ? 'Dikongsi dari CropDrive Blog' 
+                    : 'Shared from CropDrive Blog'}
+                </div>
+                <button
+                  onClick={closeModal}
+                  className="px-6 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
+                >
+                  {language === 'ms' ? 'Tutup' : 'Close'}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
