@@ -2,10 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { adminDb } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
+import { isAdmin } from '@/lib/admin';
 import { PalmiraKnowledgeBaseDocument } from '@/types';
 import admin from 'firebase-admin';
 
-// GET - List all knowledge base documents (authenticated users only)
+// GET - List all knowledge base documents (admin or Palmira plan)
 export async function GET(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -21,13 +22,15 @@ export async function GET(request: NextRequest) {
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
-    // Check membership for full access
-    const membership = await getMembershipAdmin(userId);
-    if (!canAccessPalmira(membership)) {
-      return NextResponse.json(
-        { success: false, error: 'Palmira access requires a plan' },
-        { status: 403 }
-      );
+    const userIsAdmin = await isAdmin(userId);
+    if (!userIsAdmin) {
+      const membership = await getMembershipAdmin(userId);
+      if (!canAccessPalmira(membership)) {
+        return NextResponse.json(
+          { success: false, error: 'Palmira access requires a plan' },
+          { status: 403 }
+        );
+      }
     }
 
     const { searchParams } = new URL(request.url);

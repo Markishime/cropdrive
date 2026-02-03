@@ -62,15 +62,19 @@ export default function PalmiraKnowledgeBaseAdmin() {
     
     try {
       const token = await auth.currentUser.getIdToken();
-      const response = await fetch('/api/palmira/admin/knowledge-base', {
+      const response = await fetch('/api/admin/check', {
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
       
       if (response.ok) {
-        setIsAdmin(true);
-      } else if (response.status === 403) {
+        const data = await response.json();
+        setIsAdmin(data.isAdmin || false);
+        if (!data.isAdmin) {
+          setError('You do not have admin access');
+        }
+      } else {
         setIsAdmin(false);
         setError('You do not have admin access');
       }
