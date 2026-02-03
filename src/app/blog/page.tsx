@@ -139,7 +139,7 @@ const staticBlogPosts: BlogPost[] = [
     categoryMs: 'Pertanian',
     tags: ['AGS', 'Consultancy', 'Agriculture', 'Sustainability', 'Expertise'],
     tagsMs: ['AGS', 'Perundingan', 'Pertanian', 'Kelestarian', 'Kepakaran'],
-    image: '/images/blog/ags-intro.jpg',
+    image: '/images/blog/ags-empowering.jpg',
     featured: true
   },
   {
@@ -740,76 +740,6 @@ export default function BlogPage() {
           </div>
         </motion.div>
 
-        {/* Newsletter Signup - Visible after filters */}
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-24"
-        >
-          <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-blue-700 rounded-3xl p-8 lg:p-12 text-center text-white shadow-2xl overflow-hidden border-4 border-green-500/30">
-            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} aria-hidden="true" />
-            <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">🌱</div>
-            <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">🌾</div>
-            <div className="max-w-2xl mx-auto relative z-10">
-              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
-                {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
-              </h2>
-              <p className="text-base sm:text-lg md:text-xl text-green-50 mb-8 leading-relaxed font-body">
-                {language === 'ms'
-                  ? 'Dapatkan kemas kini terkini tentang CropDrive AI, perkhidmatan AGS, teknologi pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
-                  : 'Get the latest updates on CropDrive AI, AGS services, agricultural technology, and palm oil industry news delivered straight to your inbox.'}
-              </p>
-              <form onSubmit={handleNewsletterSubscribe} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
-                <label htmlFor="newsletter-email" className="sr-only">
-                  {language === 'ms' ? 'Alamat emel' : 'Email address'}
-                </label>
-                <input
-                  id="newsletter-email"
-                  type="email"
-                  value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
-                  className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
-                  disabled={newsletterStatus === 'loading'}
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={newsletterStatus === 'loading'}
-                  className={`px-8 py-3.5 rounded-xl font-black transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 whitespace-nowrap transform ${
-                    newsletterStatus === 'loading'
-                      ? 'bg-yellow-300 text-gray-600 cursor-not-allowed'
-                      : newsletterStatus === 'success'
-                      ? 'bg-green-500 text-white'
-                      : newsletterStatus === 'error'
-                      ? 'bg-red-500 text-white'
-                      : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
-                  }`}
-                >
-                  {newsletterStatus === 'loading'
-                    ? (language === 'ms' ? 'Memproses...' : 'Processing...')
-                    : newsletterStatus === 'success'
-                    ? '✓'
-                    : language === 'ms' ? 'Langgan' : 'Subscribe'}
-                </button>
-              </form>
-              {newsletterMessage && (
-                <p className={`text-sm mt-4 font-medium ${
-                  newsletterStatus === 'success' ? 'text-yellow-200' : newsletterStatus === 'error' ? 'text-red-200' : 'text-green-100 opacity-80'
-                }`}>
-                  {newsletterMessage}
-                </p>
-              )}
-              {!newsletterMessage && (
-                <p className="text-sm text-green-100 mt-4 opacity-80">
-                  {language === 'ms' ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.' : 'No spam. Just high-quality content about CropDrive and AGS.'}
-                </p>
-              )}
-            </div>
-          </div>
-        </motion.section>
-
         {/* Featured Posts - Magazine Style Layout */}
         {featuredPosts.length > 0 && (
           <motion.section
@@ -862,7 +792,7 @@ export default function BlogPage() {
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           priority={index < 3}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" aria-hidden="true"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/20" aria-hidden="true" role="presentation"></div>
                         
                         {/* Category Badge */}
                         <div className="absolute top-6 left-6">
@@ -892,17 +822,16 @@ export default function BlogPage() {
                         )}
                       </div>
                       
-                      {/* Content Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 text-white">
-                        <h3 className="text-2xl lg:text-3xl font-black font-heading mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors">
+                      {/* Content Overlay - dark bar for readable text on any image */}
+                      <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 text-white bg-gradient-to-t from-black/80 to-transparent">
+                        <h3 className="text-2xl lg:text-3xl font-black font-heading mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                           {title}
                         </h3>
-                        <p className="text-white/90 text-sm sm:text-base font-body leading-relaxed mb-4 line-clamp-2">
+                        <p className="text-white text-sm sm:text-base font-body leading-relaxed mb-4 line-clamp-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                           {excerpt}
                         </p>
-                        
                         {/* Meta */}
-                        <div className="flex items-center justify-between text-xs sm:text-sm text-white/80 pt-4 border-t border-white/20 font-body">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-white/95 pt-4 border-t border-white/30 font-body drop-shadow-[0_1px_1px_rgba(0,0,0,0.5)]">
                           <span className="font-medium">{author}</span>
                           <div className="flex items-center gap-3">
                             <span>{formatDate(post.date)}</span>
@@ -1060,6 +989,76 @@ export default function BlogPage() {
               </p>
           </div>
           )}
+        </motion.section>
+
+        {/* Newsletter Signup - Bottom of page */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+          className="mb-24"
+        >
+          <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-blue-700 rounded-3xl p-8 lg:p-12 text-center text-white shadow-2xl overflow-hidden border-4 border-green-500/30">
+            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} aria-hidden="true" />
+            <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">🌱</div>
+            <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">🌾</div>
+            <div className="max-w-2xl mx-auto relative z-10">
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
+                {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
+              </h2>
+              <p className="text-base sm:text-lg md:text-xl text-green-50 mb-8 leading-relaxed font-body">
+                {language === 'ms'
+                  ? 'Dapatkan kemas kini terkini tentang CropDrive AI, perkhidmatan AGS, teknologi pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
+                  : 'Get the latest updates on CropDrive AI, AGS services, agricultural technology, and palm oil industry news delivered straight to your inbox.'}
+              </p>
+              <form onSubmit={handleNewsletterSubscribe} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
+                <label htmlFor="newsletter-email" className="sr-only">
+                  {language === 'ms' ? 'Alamat emel' : 'Email address'}
+                </label>
+                <input
+                  id="newsletter-email"
+                  type="email"
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
+                  className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
+                  disabled={newsletterStatus === 'loading'}
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={newsletterStatus === 'loading'}
+                  className={`px-8 py-3.5 rounded-xl font-black transition-all duration-300 shadow-xl hover:shadow-2xl hover:scale-105 whitespace-nowrap transform ${
+                    newsletterStatus === 'loading'
+                      ? 'bg-yellow-300 text-gray-600 cursor-not-allowed'
+                      : newsletterStatus === 'success'
+                      ? 'bg-green-500 text-white'
+                      : newsletterStatus === 'error'
+                      ? 'bg-red-500 text-white'
+                      : 'bg-yellow-400 text-gray-900 hover:bg-yellow-300'
+                  }`}
+                >
+                  {newsletterStatus === 'loading'
+                    ? (language === 'ms' ? 'Memproses...' : 'Processing...')
+                    : newsletterStatus === 'success'
+                    ? '✓'
+                    : language === 'ms' ? 'Langgan' : 'Subscribe'}
+                </button>
+              </form>
+              {newsletterMessage && (
+                <p className={`text-sm mt-4 font-medium ${
+                  newsletterStatus === 'success' ? 'text-yellow-200' : newsletterStatus === 'error' ? 'text-red-200' : 'text-green-100 opacity-80'
+                }`}>
+                  {newsletterMessage}
+                </p>
+              )}
+              {!newsletterMessage && (
+                <p className="text-sm text-green-100 mt-4 opacity-80 font-body">
+                  {language === 'ms' ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.' : 'No spam. Just high-quality content about CropDrive and AGS.'}
+                </p>
+              )}
+            </div>
+          </div>
         </motion.section>
       </div>
 
