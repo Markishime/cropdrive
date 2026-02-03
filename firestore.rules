@@ -215,5 +215,13 @@ service cloud.firestore {
     match /newsletter_subscribers {
       allow read, write: if false;
     }
+
+    // Podcasts collection - server-side only (API uses admin SDK; page uses /api/podcasts)
+    match /podcasts/{episodeId} {
+      allow read, write: if false;
+    }
+    match /podcasts {
+      allow read, write: if false;
+    }
   }
 }

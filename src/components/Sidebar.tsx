@@ -20,6 +20,7 @@ import {
   faFileAlt,
   faHouse,
   faRobot,
+  faPodcast,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface SidebarItemProps {
@@ -187,6 +188,15 @@ export const Sidebar: React.FC = () => {
       icon: <FontAwesomeIcon icon={faFileAlt} className="w-5 h-5" />,
       label: 'Reports History',
       labelMs: 'Sejarah Laporan',
+      showAlways: false,
+      requiresPlan: true
+    },
+    // Podcasts - only for authenticated users with a plan
+    {
+      href: '/podcasts',
+      icon: <FontAwesomeIcon icon={faPodcast} className="w-5 h-5" />,
+      label: 'Podcasts',
+      labelMs: 'Podcast',
       showAlways: false,
       requiresPlan: true
     },
