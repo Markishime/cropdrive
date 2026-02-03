@@ -852,7 +852,7 @@ export default function BlogPage() {
                     onClick={() => handlePostClick(post)}
                   >
                     <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 h-full transform hover:scale-[1.02]">
-                      {/* Image */}
+                      {/* Image - visible with lighter overlay so AI/post image shows */}
                       <div className={`relative ${imageHeight} overflow-hidden`}>
                         <Image
                           src={getBlogImageSrc(post.image)}
@@ -860,8 +860,9 @@ export default function BlogPage() {
                           fill
                           className="object-cover group-hover:scale-110 transition-transform duration-700"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          priority={index < 3}
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" aria-hidden="true"></div>
                         
                         {/* Category Badge */}
                         <div className="absolute top-6 left-6">
@@ -976,9 +977,9 @@ export default function BlogPage() {
                             sizes="(max-width: 1024px) 100vw, 33vw"
                           />
                           <div className={`absolute inset-0 bg-gradient-to-r ${
-                            isEven ? 'from-black/60 via-black/30 to-transparent' : 
-                            'from-transparent via-black/30 to-black/60'
-                          } lg:hidden`}></div>
+                            isEven ? 'from-black/50 via-black/15 to-transparent' : 
+                            'from-transparent via-black/15 to-black/50'
+                          } lg:hidden`} aria-hidden="true"></div>
                           
                           {/* Category Badge */}
                           <div className={`absolute top-4 ${isEven ? 'left-4' : 'right-4'} lg:${isEven ? 'left-4' : 'right-4'}`}>
