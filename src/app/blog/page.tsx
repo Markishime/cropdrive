@@ -602,13 +602,13 @@ export default function BlogPage() {
               </span>
             </motion.div>
             
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight font-heading">
+            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 xs:mb-8 leading-tight font-heading px-2">
               <span className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 bg-clip-text text-transparent animate-gradient">
                 {language === 'ms' ? 'Blog' : 'Blog'}
               </span>
             </h1>
             
-            <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed font-body px-3 xs:px-4">
               {language === 'ms'
                 ? 'Pandangan terkini tentang CropDrive AI, perkhidmatan perundingan AGS, teknologi pertanian, dan inovasi dalam industri kelapa sawit Malaysia.'
                 : 'Latest insights on CropDrive AI, AGS consultancy services, agricultural technology, and innovations in Malaysia\'s palm oil industry.'
@@ -678,7 +678,7 @@ export default function BlogPage() {
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-end">
               {/* Search */}
               <div className="flex-1 w-full">
-                <label htmlFor="blog-search" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="blog-search" className="block text-sm font-medium text-gray-700 mb-2 font-body">
                   {language === 'ms' ? 'Cari Artikel' : 'Search Articles'}
                 </label>
                 <div className="relative">
@@ -696,7 +696,7 @@ export default function BlogPage() {
 
               {/* Category Filter */}
               <div className="lg:w-64 w-full">
-                <label htmlFor="blog-category-filter" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="blog-category-filter" className="block text-sm font-medium text-gray-700 mb-2 font-body">
                   {language === 'ms' ? 'Kategori' : 'Category'}
                 </label>
                 <select
@@ -717,7 +717,7 @@ export default function BlogPage() {
             {/* Tags */}
             {allTags.length > 0 && (
               <div className="mt-5 sm:mt-6">
-                <p className="text-sm font-medium text-gray-700 mb-3">
+                <p className="text-sm font-medium text-gray-700 mb-3 font-body">
                   {language === 'ms' ? 'Tag:' : 'Tags:'}
                 </p>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
@@ -752,10 +752,10 @@ export default function BlogPage() {
             <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">🌱</div>
             <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">🌾</div>
             <div className="max-w-2xl mx-auto relative z-10">
-              <h2 className="text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
                 {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
               </h2>
-              <p className="text-lg md:text-xl text-green-50 mb-8 leading-relaxed">
+              <p className="text-base sm:text-lg md:text-xl text-green-50 mb-8 leading-relaxed font-body">
                 {language === 'ms'
                   ? 'Dapatkan kemas kini terkini tentang CropDrive AI, perkhidmatan AGS, teknologi pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
                   : 'Get the latest updates on CropDrive AI, AGS services, agricultural technology, and palm oil industry news delivered straight to your inbox.'}
@@ -819,11 +819,11 @@ export default function BlogPage() {
             className="mb-24"
           >
             <div className="flex items-center gap-4 mb-12">
-              <div className="h-1 w-16 bg-gradient-to-r from-green-600 to-green-400 rounded-full"></div>
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900">
-              {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
-            </h2>
-              <div className="flex-1 h-1 bg-gradient-to-r from-green-400 to-transparent rounded-full"></div>
+              <div className="h-1 w-16 bg-gradient-to-r from-green-600 to-green-400 rounded-full flex-shrink-0" aria-hidden="true" />
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
+                {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
+              </h2>
+              <div className="flex-1 h-1 bg-gradient-to-r from-green-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
             
             {/* Magazine Style Grid */}
@@ -894,15 +894,15 @@ export default function BlogPage() {
                       
                       {/* Content Overlay */}
                       <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 text-white">
-                        <h3 className="text-2xl lg:text-3xl font-black mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors">
+                        <h3 className="text-2xl lg:text-3xl font-black font-heading mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors">
                           {title}
-              </h3>
-                        <p className="text-white/90 text-sm lg:text-base mb-4 line-clamp-2">
+                        </h3>
+                        <p className="text-white/90 text-sm sm:text-base font-body leading-relaxed mb-4 line-clamp-2">
                           {excerpt}
                         </p>
                         
                         {/* Meta */}
-                        <div className="flex items-center justify-between text-xs text-white/80 pt-4 border-t border-white/20">
+                        <div className="flex items-center justify-between text-xs sm:text-sm text-white/80 pt-4 border-t border-white/20 font-body">
                           <span className="font-medium">{author}</span>
                           <div className="flex items-center gap-3">
                             <span>{formatDate(post.date)}</span>
@@ -927,14 +927,14 @@ export default function BlogPage() {
           className="mb-24"
         >
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-12 gap-3">
-            <div className="flex items-center gap-4">
-              <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full"></div>
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900">
-              {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
-            </h2>
-              <div className="flex-1 h-1 bg-gradient-to-r from-blue-400 to-transparent rounded-full"></div>
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full flex-shrink-0" aria-hidden="true" />
+              <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
+                {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
+              </h2>
+              <div className="flex-1 h-1 bg-gradient-to-r from-blue-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
-            <div className="text-sm sm:text-base text-gray-600 bg-gradient-to-r from-green-100 to-blue-100 px-4 py-2 rounded-full font-bold border border-green-200">
+            <div className="text-sm sm:text-base text-gray-600 font-body bg-gradient-to-r from-green-100 to-blue-100 px-4 py-2 rounded-full font-bold border border-green-200 flex-shrink-0">
               {filteredPosts.length} {language === 'ms' ? 'artikel' : 'articles'}
             </div>
           </div>
@@ -1005,14 +1005,14 @@ export default function BlogPage() {
                         {/* Content Section */}
                         <div className="lg:w-2/3 p-6 lg:p-8 flex flex-col justify-between">
                           <div>
-                            <h3 className={`text-2xl lg:text-3xl font-black mb-3 group-hover:underline transition-all ${
+                            <h3 className={`text-2xl lg:text-3xl font-black font-heading mb-3 group-hover:underline transition-all ${
                               isCropDrive ? 'text-gray-900 group-hover:text-green-600' :
                               isAGS ? 'text-gray-900 group-hover:text-blue-600' :
                               'text-gray-900 group-hover:text-purple-600'
                             }`}>
                               {title}
                             </h3>
-                            <p className="text-gray-600 text-base mb-4 line-clamp-2">
+                            <p className="text-gray-600 text-base sm:text-lg font-body leading-relaxed mb-4 line-clamp-2">
                               {excerpt}
                             </p>
                             
@@ -1032,7 +1032,7 @@ export default function BlogPage() {
                           </div>
                           
                           {/* Meta */}
-                          <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                          <div className="flex items-center justify-between text-sm text-gray-500 font-body pt-4 border-t border-gray-100">
                             <span className="font-semibold">{author}</span>
                             <div className="flex items-center gap-3">
                               <span>{formatDate(post.date)}</span>
@@ -1049,16 +1049,15 @@ export default function BlogPage() {
             </div>
           ) : (
           <div className="bg-white rounded-xl shadow-lg p-16 sm:p-20 text-center border border-gray-100">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4">
+              <div className="text-6xl mb-4" aria-hidden="true">🔍</div>
+              <h3 className="text-2xl md:text-3xl font-black text-gray-900 font-heading mb-4">
                 {language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
-            </h3>
-              <p className="text-lg text-gray-600">
-              {language === 'ms'
+              </h3>
+              <p className="text-base sm:text-lg text-gray-600 font-body leading-relaxed">
+                {language === 'ms'
                   ? 'Cuba menyesuaikan penapis carian anda untuk mencari lebih banyak artikel.'
-                  : 'Try adjusting your search filters to find more articles.'
-              }
-            </p>
+                  : 'Try adjusting your search filters to find more articles.'}
+              </p>
           </div>
           )}
         </motion.section>
@@ -1118,12 +1117,12 @@ export default function BlogPage() {
 
               {/* Article Content */}
               <div className="p-8 md:p-12">
-                <h1 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 leading-tight">
+                <h1 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight mb-4 leading-tight">
                   {language === 'ms' ? selectedPost.titleMs : selectedPost.title}
                 </h1>
                 
                 {/* Meta Info */}
-                <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-gray-200">
+                <div className="flex flex-wrap items-center gap-4 mb-8 pb-6 border-b border-gray-200 font-body">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold text-gray-700">
                       {language === 'ms' ? selectedPost.authorMs : selectedPost.author}
@@ -1145,14 +1144,14 @@ export default function BlogPage() {
                 </div>
 
                 {/* Article Body */}
-                <div className="prose prose-lg max-w-none">
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                <div className="prose prose-lg max-w-none font-body">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-6">
                     {language === 'ms' ? selectedPost.excerptMs : selectedPost.excerpt}
                   </p>
                   <div className="text-gray-700 leading-relaxed space-y-4">
                     {(language === 'ms' ? selectedPost.contentMs : selectedPost.content).split('\n').map((paragraph, idx) => (
                       paragraph.trim() && (
-                        <p key={idx} className="text-base md:text-lg leading-relaxed">
+                        <p key={idx} className="text-base sm:text-lg leading-relaxed">
                           {paragraph}
                         </p>
                       )
