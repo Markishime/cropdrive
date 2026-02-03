@@ -13,7 +13,7 @@ import {
   faPlay,
   faSpinner,
   faXmark,
-  faXCircle,
+  faCircleXmark,
   faSeedling,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -202,7 +202,7 @@ export default function PodcastAdmin() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md">
-          <FontAwesomeIcon icon={faXCircle} className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <FontAwesomeIcon icon={faCircleXmark} className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {language === 'ms' ? 'Log Masuk Diperlukan' : 'Login Required'}
           </h2>
@@ -218,7 +218,7 @@ export default function PodcastAdmin() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-blue-50 p-4">
         <div className="bg-white rounded-2xl shadow-lg p-8 text-center max-w-md">
-          <FontAwesomeIcon icon={faXCircle} className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <FontAwesomeIcon icon={faCircleXmark} className="w-16 h-16 text-red-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             {language === 'ms' ? 'Akses Ditolak' : 'Access Denied'}
           </h2>
@@ -268,7 +268,7 @@ export default function PodcastAdmin() {
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-            <FontAwesomeIcon icon={faXCircle} className="w-5 h-5 text-red-600 flex-shrink-0" />
+            <FontAwesomeIcon icon={faCircleXmark} className="w-5 h-5 text-red-600 flex-shrink-0" />
             <p className="text-red-800 flex-1">{error}</p>
             <button
               type="button"
