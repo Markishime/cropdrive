@@ -32,16 +32,27 @@ export async function POST(req: NextRequest) {
     }
     await verifyAdmin(authHeader.split('Bearer ')[1]);
 
-    const snapshot = await adminFirestore.collection('podcasts').limit(1).get();
-    if (!snapshot.empty) {
-      return NextResponse.json(
-        { success: true, message: 'Podcasts already exist; seed skipped.', count: 0 },
-        { status: 200 }
-      );
+    const { searchParams } = new URL(req.url || '', 'http://localhost');
+    const replace = searchParams.get('replace') === 'true' || searchParams.get('replace') === '1';
+
+    const ref = adminFirestore.collection('podcasts');
+
+    if (replace) {
+      const existing = await ref.get();
+      const batch = adminFirestore.batch();
+      existing.docs.forEach((doc) => batch.delete(doc.ref));
+      if (!existing.empty) await batch.commit();
+    } else {
+      const snapshot = await ref.limit(1).get();
+      if (!snapshot.empty) {
+        return NextResponse.json(
+          { success: true, message: 'Podcasts already exist; seed skipped. Use ?replace=1 to replace.', count: 0 },
+          { status: 200 }
+        );
+      }
     }
 
     const { getYouTubeVideoId } = await import('@/lib/youtube');
-    const ref = adminFirestore.collection('podcasts');
 
     for (let i = 0; i < INITIAL_EPISODES.length; i++) {
       const ep = INITIAL_EPISODES[i];

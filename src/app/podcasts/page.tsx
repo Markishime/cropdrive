@@ -18,7 +18,7 @@ import {
   faCirclePlay,
   faMicrophone,
 } from '@fortawesome/free-solid-svg-icons';
-import { getYouTubeEmbedUrl, getYouTubeVideoId } from '@/lib/youtube';
+import { getYouTubeEmbedUrl, getYouTubeVideoId, extractYouTubeVideoIdFromText } from '@/lib/youtube';
 
 interface PodcastEpisode {
   id: string;
@@ -41,7 +41,10 @@ function getResolvedVideoId(ep: PodcastEpisode): string | null {
       : null;
   if (fromStored) return fromStored;
   const url = ep.youtubeUrl ? String(ep.youtubeUrl).trim() : '';
-  return url ? getYouTubeVideoId(url) : null;
+  const fromUrl = url ? getYouTubeVideoId(url) : null;
+  if (fromUrl) return fromUrl;
+  const fromDesc = extractYouTubeVideoIdFromText(ep.description || '') ?? extractYouTubeVideoIdFromText(ep.descriptionMs || '');
+  return fromDesc;
 }
 
 export default function PodcastsPage() {
@@ -84,6 +87,7 @@ export default function PodcastsPage() {
       const token = await auth.currentUser.getIdToken();
       const res = await fetch('/api/podcasts', {
         headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
       });
       const data = await res.json();
       if (!res.ok) {
@@ -259,7 +263,7 @@ export default function PodcastsPage() {
                     <div className="absolute top-4 left-4">
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-yellow-400 text-green-900 text-xs font-bold uppercase tracking-wide">
                         <span className="w-2 h-2 rounded-full bg-green-800 animate-pulse" />
-                        {t('Episode', 'Episod')} 1
+                        {t('Episode', 'Episod')} {episodes.length}
                       </span>
                     </div>
                   </div>
@@ -282,35 +286,34 @@ export default function PodcastsPage() {
               </motion.article>
             </section>
 
-            {/* All Episodes */}
-            {episodes.length > 1 && (
-              <section>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.4, delay: 0.2 }}
-                  className="flex items-center justify-between mb-6"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-800 text-white">
-                      <FontAwesomeIcon icon={faListUl} className="w-5 h-5" />
-                    </div>
-                    <h2 className="font-heading text-xl font-bold text-gray-900">
-                      {t('All Episodes', 'Semua Episod')}
-                    </h2>
+            {/* All Episodes - show all so episode 2 is always visible */}
+            <section>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="flex items-center justify-between mb-6"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-green-800 text-white">
+                    <FontAwesomeIcon icon={faListUl} className="w-5 h-5" />
                   </div>
-                  <span className="rounded-full bg-green-100 px-4 py-1.5 text-sm font-semibold text-green-800">
-                    {episodes.length} {t('episodes', 'episod')}
-                  </span>
-                </motion.div>
+                  <h2 className="font-heading text-xl font-bold text-gray-900">
+                    {t('All Episodes', 'Semua Episod')}
+                  </h2>
+                </div>
+                <span className="rounded-full bg-green-100 px-4 py-1.5 text-sm font-semibold text-green-800">
+                  {episodes.length} {t('episodes', 'episod')}
+                </span>
+              </motion.div>
 
-                <div className="grid gap-4">
-                  {episodes.slice(1).map((ep, index) => {
-                    const title = language === 'ms' ? ep.titleMs : ep.title;
-                    const desc = language === 'ms' ? ep.descriptionMs : ep.description;
-                    const videoId = getResolvedVideoId(ep);
-                    const thumb = ep.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
-                    const episodeNum = index + 2;
+              <div className="grid gap-4">
+                {episodes.map((ep, index) => {
+                  const title = language === 'ms' ? ep.titleMs : ep.title;
+                  const desc = language === 'ms' ? ep.descriptionMs : ep.description;
+                  const videoId = getResolvedVideoId(ep);
+                  const thumb = ep.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
+                  const episodeNum = episodes.length - index;
                     return (
                       <motion.article
                         key={ep.id}
@@ -363,7 +366,6 @@ export default function PodcastsPage() {
                   })}
                 </div>
               </section>
-            )}
           </div>
         )}
       </div>

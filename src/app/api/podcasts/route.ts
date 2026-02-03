@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { adminFirestore } from '@/lib/firebase-admin';
-import { getYouTubeVideoId } from '@/lib/youtube';
+import { getYouTubeVideoId, extractYouTubeVideoIdFromText } from '@/lib/youtube';
 
 /**
  * GET /api/podcasts
@@ -39,20 +39,28 @@ export async function GET(req: NextRequest) {
     const episodes = snapshot.docs
       .map((doc) => {
         const d = doc.data();
-        const youtubeUrl = (d.youtubeUrl ?? d.youtube_url ?? '').toString().trim();
-        const storedVideoId = d.videoId ?? d.video_id ?? null;
-        const videoId = (storedVideoId && String(storedVideoId).length === 11)
-          ? String(storedVideoId)
-          : (youtubeUrl ? getYouTubeVideoId(youtubeUrl) : null);
-        const storedThumbnail = d.thumbnail ?? null;
-        const thumbnail = storedThumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null);
+        let youtubeUrl = (d.youtubeUrl ?? d.youtube_url ?? d.youtubeLink ?? d.youtube_link ?? '').toString().trim();
+        let storedVideoId = d.videoId ?? d.video_id ?? null;
+        let videoId: string | null =
+          storedVideoId && String(storedVideoId).trim().length === 11
+            ? String(storedVideoId).trim()
+            : null;
+        if (!videoId && youtubeUrl) videoId = getYouTubeVideoId(youtubeUrl);
+        if (!videoId) {
+          const desc = (d.description ?? '').toString();
+          const descMs = (d.descriptionMs ?? '').toString();
+          videoId = extractYouTubeVideoIdFromText(desc) ?? extractYouTubeVideoIdFromText(descMs) ?? null;
+        }
+        if (!youtubeUrl && videoId) youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        const thumbnail =
+          d.thumbnail ?? (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null);
         return {
           id: doc.id,
           title: d.title ?? '',
           titleMs: d.titleMs ?? d.title ?? '',
           description: d.description ?? '',
           descriptionMs: d.descriptionMs ?? d.description ?? '',
-          youtubeUrl,
+          youtubeUrl: youtubeUrl || (videoId ? `https://www.youtube.com/watch?v=${videoId}` : ''),
           videoId,
           thumbnail,
           order: d.order ?? 0,
@@ -62,11 +70,11 @@ export async function GET(req: NextRequest) {
       })
       .filter((ep) => ep.published)
       .sort((a, b) => {
-        const orderDiff = (a.order ?? 0) - (b.order ?? 0);
-        if (orderDiff !== 0) return orderDiff;
+        // Newest first so "Latest Episode" is the most recently uploaded
         const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return tB - tA;
+        if (tB !== tA) return tB - tA;
+        return (a.order ?? 0) - (b.order ?? 0);
       });
 
     return NextResponse.json({ success: true, episodes });

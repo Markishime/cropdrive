@@ -185,7 +185,7 @@ export default function PodcastAdmin() {
     setError(null);
     try {
       const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/podcasts/seed', {
+      const res = await fetch('/api/podcasts/seed?replace=1', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
