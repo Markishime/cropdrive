@@ -49,6 +49,9 @@ export async function PUT(req: NextRequest, { params }: Params) {
       }
       updates.youtubeUrl = String(youtubeUrl).trim();
       updates.videoId = videoId;
+      if (thumbnail === undefined) {
+        updates.thumbnail = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+      }
     }
 
     await ref.update(updates);

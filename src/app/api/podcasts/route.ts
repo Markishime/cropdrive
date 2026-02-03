@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import { adminFirestore } from '@/lib/firebase-admin';
+import { getYouTubeVideoId } from '@/lib/youtube';
 
 /**
  * GET /api/podcasts
@@ -38,15 +39,22 @@ export async function GET(req: NextRequest) {
     const episodes = snapshot.docs
       .map((doc) => {
         const d = doc.data();
+        const youtubeUrl = (d.youtubeUrl ?? d.youtube_url ?? '').toString().trim();
+        const storedVideoId = d.videoId ?? d.video_id ?? null;
+        const videoId = (storedVideoId && String(storedVideoId).length === 11)
+          ? String(storedVideoId)
+          : (youtubeUrl ? getYouTubeVideoId(youtubeUrl) : null);
+        const storedThumbnail = d.thumbnail ?? null;
+        const thumbnail = storedThumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null);
         return {
           id: doc.id,
           title: d.title ?? '',
           titleMs: d.titleMs ?? d.title ?? '',
           description: d.description ?? '',
           descriptionMs: d.descriptionMs ?? d.description ?? '',
-          youtubeUrl: d.youtubeUrl ?? '',
-          videoId: d.videoId ?? null,
-          thumbnail: d.thumbnail ?? null,
+          youtubeUrl,
+          videoId,
+          thumbnail,
           order: d.order ?? 0,
           published: d.published !== false,
           createdAt: d.createdAt?.toDate?.()?.toISOString?.() ?? null,

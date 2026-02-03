@@ -17,6 +17,7 @@ import {
   faSeedling,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getYouTubeVideoId } from '@/lib/youtube';
 
 interface PodcastEpisode {
   id: string;
@@ -292,22 +293,45 @@ export default function PodcastAdmin() {
             {episodes.length === 0 ? (
               <div className="p-12 text-center">
                 <FontAwesomeIcon icon={faPodcast} className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-600 font-body mb-4">
-                  {language === 'ms' ? 'Tiada episod. Klik "Seed 2 Episod" atau "Tambah Episod".' : 'No episodes. Click "Seed 2 Episodes" or "Add Episode".'}
+                <p className="text-gray-600 font-body mb-6">
+                  {language === 'ms' ? 'Belum ada episod. Tambah episod pertama atau muatkan episod contoh.' : 'No episodes yet. Add your first episode or load sample episodes.'}
                 </p>
-                <button
-                  type="button"
-                  onClick={seed}
-                  disabled={seeding}
-                  className="text-green-600 hover:text-green-800 font-medium"
-                >
-                  {seeding ? (language === 'ms' ? 'Memproses...' : 'Processing...') : (language === 'ms' ? 'Seed episod awal' : 'Seed initial episodes')}
-                </button>
+                <div className="flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={openAdd}
+                    className="px-5 py-2.5 rounded-xl bg-green-800 text-white hover:bg-green-900 font-semibold flex items-center gap-2"
+                  >
+                    <FontAwesomeIcon icon={faPlus} />
+                    {language === 'ms' ? 'Tambah Episod' : 'Add Episode'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={seed}
+                    disabled={seeding}
+                    className="px-5 py-2.5 rounded-xl border border-green-600 text-green-700 hover:bg-green-50 font-medium flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {seeding ? <FontAwesomeIcon icon={faSpinner} className="animate-spin" /> : <FontAwesomeIcon icon={faSeedling} />}
+                    {language === 'ms' ? 'Muatkan episod contoh' : 'Load sample episodes'}
+                  </button>
+                </div>
               </div>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {episodes.map((ep) => (
+                {episodes.map((ep) => {
+                  const videoId = ep.videoId || (ep.youtubeUrl ? getYouTubeVideoId(ep.youtubeUrl) : null);
+                  const thumb = ep.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null);
+                  return (
                   <li key={ep.id} className="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-gray-50">
+                    <div className="flex-shrink-0 w-32 sm:w-40 aspect-video rounded-lg overflow-hidden bg-gray-200">
+                      {thumb ? (
+                        <img src={thumb} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <FontAwesomeIcon icon={faPodcast} className="w-8 h-8" />
+                        </div>
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-gray-900 font-heading truncate">{ep.title}</h3>
                       <p className="text-sm text-gray-500 truncate">{ep.youtubeUrl}</p>
@@ -340,7 +364,8 @@ export default function PodcastAdmin() {
                       </button>
                     </div>
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             )}
           </div>

@@ -7,18 +7,18 @@ const INITIAL_EPISODES = [
   {
     title: 'Oil Palm Insights from Our AGS Community',
     titleMs: 'Pandangan Kelapa Sawit dari Komuniti AGS Kami',
-    description: 'First podcast episode developed from a Facebook post in our AGS community group. Join the conversation on oil palm farming and CropDrive.',
-    descriptionMs: 'Episod podcast pertama yang dibangunkan dari siaran Facebook dalam kumpulan komuniti AGS kami. Sertai perbincangan tentang pertanian kelapa sawit dan CropDrive.',
-    youtubeUrl: 'https://youtu.be/iniFCAiYw6Q',
+    description: 'The first CropDrive podcast, developed from a Facebook post in our AGS community group (Oil Palm Malaysia). Watch to discover how we bring community insights to CropDrive. Original post: https://www.facebook.com/groups/oilpalmmalaysia/permalink/1557871882120829/',
+    descriptionMs: 'Podcast CropDrive pertama, dibangunkan dari siaran Facebook dalam kumpulan komuniti AGS kami (Oil Palm Malaysia). Tonton untuk mengetahui bagaimana kami membawa pandangan komuniti ke CropDrive.',
+    youtubeUrl: 'https://www.youtube.com/watch?si=My2QuuabYFHZGwhh&v=iniFCAiYw6Q&feature=youtu.be',
     order: 0,
     published: true,
   },
   {
-    title: 'CropDrive & AGS: Driving Traffic from Community to CropDrive',
-    titleMs: 'CropDrive & AGS: Memandu Trafik dari Komuniti ke CropDrive',
-    description: 'Another episode to help divert traffic from Facebook to CropDrive. Insights on community engagement and agricultural technology.',
-    descriptionMs: 'Episod lain untuk membantu mengalihkan trafik dari Facebook ke CropDrive. Pandangan tentang penglibatan komuniti dan teknologi pertanian.',
-    youtubeUrl: 'https://youtu.be/wpZNcJCqHKE',
+    title: 'CropDrive & AGS: From Facebook to CropDrive.ai',
+    titleMs: 'CropDrive & AGS: Dari Facebook ke CropDrive.ai',
+    description: 'Episode to help bring Facebook community followers to CropDrive.ai and build steady traffic to the site. More insights on oil palm, AGS consultancy, and CropDrive tools.',
+    descriptionMs: 'Episod untuk membantu membawa pengikut komuniti Facebook ke CropDrive.ai dan mewujudkan trafik tetap ke laman web. Lebih banyak pandangan tentang kelapa sawit, perundingan AGS, dan alat CropDrive.',
+    youtubeUrl: 'https://www.youtube.com/watch?v=wpZNcJCqHKE&feature=youtu.be',
     order: 1,
     published: true,
   },
@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
     for (let i = 0; i < INITIAL_EPISODES.length; i++) {
       const ep = INITIAL_EPISODES[i];
       const videoId = getYouTubeVideoId(ep.youtubeUrl);
+      const thumbnail = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
       await ref.add({
         title: ep.title,
         titleMs: ep.titleMs,
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
         descriptionMs: ep.descriptionMs,
         youtubeUrl: ep.youtubeUrl,
         videoId: videoId || null,
-        thumbnail: null,
+        thumbnail,
         order: ep.order,
         published: ep.published,
         createdAt: FieldValue.serverTimestamp(),

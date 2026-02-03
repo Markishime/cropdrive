@@ -15,6 +15,7 @@ import {
   faGear,
   faRightFromBracket,
   faGauge,
+  faScrewdriverWrench,
 } from '@fortawesome/free-solid-svg-icons';
 
 export const AuthenticatedNavbar: React.FC = () => {
@@ -22,6 +23,7 @@ export const AuthenticatedNavbar: React.FC = () => {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -32,6 +34,23 @@ export const AuthenticatedNavbar: React.FC = () => {
     const lang = getCurrentLanguage();
     setCurrentLang(lang);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    const checkAdmin = async () => {
+      try {
+        const { auth } = await import('@/lib/firebase');
+        if (!auth.currentUser) return;
+        const token = await auth.currentUser.getIdToken();
+        const res = await fetch('/api/admin/check', { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        setIsAdmin(!!data?.isAdmin);
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkAdmin();
+  }, [user]);
 
   useEffect(() => {
     if (isLandingPage) {
@@ -248,6 +267,17 @@ export const AuthenticatedNavbar: React.FC = () => {
           
           {/* Right Side Actions */}
           <div className="flex items-center space-x-1 sm:space-x-2 ml-auto">
+            {/* Manage pages - only for admin (dashboard navbar only, not landing) */}
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 hover:bg-yellow-400/30 hover:text-white transition-colors font-medium text-sm"
+                title={language === 'ms' ? 'Urus halaman' : 'Manage pages'}
+              >
+                <FontAwesomeIcon icon={faScrewdriverWrench} className="w-4 h-4" />
+                <span className="hidden sm:inline">{language === 'ms' ? 'Urus' : 'Manage'}</span>
+              </Link>
+            )}
             {/* Language Switcher - Toggle Switch */}
             <button
               onClick={toggleLanguage}

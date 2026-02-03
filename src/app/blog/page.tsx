@@ -751,8 +751,8 @@ export default function BlogPage() {
             <div className="flex items-center gap-4 mb-12">
               <div className="h-1 w-16 bg-gradient-to-r from-green-600 to-green-400 rounded-full flex-shrink-0" aria-hidden="true" />
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
-                {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
-              </h2>
+              {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
+            </h2>
               <div className="flex-1 h-1 bg-gradient-to-r from-green-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
             
@@ -826,7 +826,7 @@ export default function BlogPage() {
                       <div className="absolute bottom-0 left-0 right-0 p-6 lg:p-8 text-white bg-gradient-to-t from-black/80 to-transparent">
                         <h3 className="text-2xl lg:text-3xl font-black font-heading mb-3 line-clamp-2 group-hover:text-yellow-300 transition-colors drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
                           {title}
-                        </h3>
+              </h3>
                         <p className="text-white text-sm sm:text-base font-body leading-relaxed mb-4 line-clamp-2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                           {excerpt}
                         </p>
@@ -859,8 +859,8 @@ export default function BlogPage() {
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full flex-shrink-0" aria-hidden="true" />
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
-                {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
-              </h2>
+              {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
+            </h2>
               <div className="flex-1 h-1 bg-gradient-to-r from-blue-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
             <div className="text-sm sm:text-base text-gray-600 font-body bg-gradient-to-r from-green-100 to-blue-100 px-4 py-2 rounded-full font-bold border border-green-200 flex-shrink-0">
@@ -981,12 +981,12 @@ export default function BlogPage() {
               <div className="text-6xl mb-4" aria-hidden="true">🔍</div>
               <h3 className="text-2xl md:text-3xl font-black text-gray-900 font-heading mb-4">
                 {language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
-              </h3>
+            </h3>
               <p className="text-base sm:text-lg text-gray-600 font-body leading-relaxed">
-                {language === 'ms'
+              {language === 'ms'
                   ? 'Cuba menyesuaikan penapis carian anda untuk mencari lebih banyak artikel.'
                   : 'Try adjusting your search filters to find more articles.'}
-              </p>
+            </p>
           </div>
           )}
         </motion.section>

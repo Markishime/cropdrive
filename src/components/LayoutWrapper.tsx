@@ -45,7 +45,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   if (user) {
     // Dashboard pages (protected routes) - show sidebar and authenticated navbar
     // When logged in, these pages show sidebar + authenticated navbar (like tutorials)
-    const dashboardPages = ['/dashboard', '/assistant', '/palmira', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing', '/podcasts'];
+    const dashboardPages = ['/dashboard', '/assistant', '/palmira', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing', '/podcasts', '/admin'];
 
     // Check if pathname matches dashboard pages (handles both regular and locale-prefixed routes)
     const isDashboardPage = dashboardPages.some(page => {

@@ -63,6 +63,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const thumbnailUrl = thumbnail ? String(thumbnail).trim() : `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+
     const ref = adminFirestore.collection('podcasts').doc();
     await ref.set({
       title: String(title).trim(),
@@ -71,7 +73,7 @@ export async function POST(req: NextRequest) {
       descriptionMs: descriptionMs ? String(descriptionMs).trim() : (description ? String(description).trim() : ''),
       youtubeUrl: String(youtubeUrl).trim(),
       videoId,
-      thumbnail: thumbnail ? String(thumbnail).trim() : null,
+      thumbnail: thumbnailUrl,
       order: typeof order === 'number' ? order : 0,
       published: published !== false,
       createdAt: FieldValue.serverTimestamp(),
