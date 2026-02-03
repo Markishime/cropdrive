@@ -105,23 +105,23 @@ export default function PodcastsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
-      {/* Hero */}
-      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-16 sm:py-20 overflow-hidden">
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} aria-hidden />
+      {/* Hero Section - Matching Analysis History */}
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:40px_40px]"></div>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-yellow-400/20 border-2 border-yellow-400/40 mb-6">
-              <FontAwesomeIcon icon={faPodcast} className="w-8 h-8 text-yellow-400" />
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white font-heading tracking-tight mb-4">
-              {t('CropDrive Podcasts', 'Podcast CropDrive')}
+            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
+              {t('CropDrive', 'CropDrive')} <span className="text-yellow-400">{t('Podcasts', 'Podcast')}</span>
             </h1>
-            <p className="text-lg sm:text-xl text-white/90 max-w-2xl mx-auto font-body">
+            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
               {t(
                 'Watch and listen to insights on oil palm farming, AI, and AGS consultancy. Stay on CropDrive — no redirects.',
                 'Tonton dan dengar pandangan tentang pertanian kelapa sawit, AI, dan perundingan AGS. Kekal di CropDrive — tiada redirect.'

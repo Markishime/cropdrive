@@ -5,9 +5,12 @@ import { adminAuth, adminDb } from './firebase-admin';
  * Admins are determined by:
  * 1. Having isAdmin: true in their user document, OR
  * 2. Having their email in the ADMIN_EMAILS environment variable (comma-separated)
+ *    - Checks both the user document email AND Firebase Auth email
  */
 export async function isAdmin(userId: string): Promise<boolean> {
   try {
+    const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim().toLowerCase()) || [];
+    
     // Check user document for isAdmin flag
     const userDoc = await adminDb.collection('users').doc(userId).get();
     
@@ -19,12 +22,23 @@ export async function isAdmin(userId: string): Promise<boolean> {
         return true;
       }
       
-      // Check if user email is in admin emails list (from user document)
-      const adminEmails = process.env.ADMIN_EMAILS?.split(',').map(email => email.trim().toLowerCase()) || [];
-      const userEmail = userData?.email?.toLowerCase();
-      
-      if (userEmail && adminEmails.length > 0 && adminEmails.includes(userEmail)) {
+      // Check if user document email is in admin emails list
+      const userDocEmail = userData?.email?.toLowerCase();
+      if (userDocEmail && adminEmails.length > 0 && adminEmails.includes(userDocEmail)) {
         return true;
+      }
+    }
+
+    // Also check Firebase Auth email directly (in case user document email is missing or different)
+    if (adminEmails.length > 0) {
+      try {
+        const authUser = await adminAuth.getUser(userId);
+        const authEmail = authUser.email?.toLowerCase();
+        if (authEmail && adminEmails.includes(authEmail)) {
+          return true;
+        }
+      } catch (authError) {
+        console.error('Error fetching Firebase Auth user:', authError);
       }
     }
 
