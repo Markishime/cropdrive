@@ -1910,6 +1910,49 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Podcasts Section */}
+      <section className="py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:40px_40px]" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-4xl md:text-6xl font-black mb-6 font-heading">
+              {language === 'ms' ? 'CropDrive' : 'CropDrive'} <span className="text-yellow-400">{language === 'ms' ? 'Podcast' : 'Podcasts'}</span>
+            </h2>
+            <p className="text-xl text-green-50 max-w-3xl mx-auto leading-relaxed">
+              {language === 'ms'
+                ? 'Tonton dan dengar pandangan eksklusif tentang pertanian kelapa sawit, teknologi AI, dan perkhidmatan perundingan AGS. Kandungan video yang membantu meningkatkan pengetahuan anda.'
+                : 'Watch and listen to exclusive insights on oil palm farming, AI technology, and AGS consultancy services. Video content that helps enhance your knowledge.'}
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="text-center"
+          >
+            <Link href="/podcasts">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-yellow-400 text-green-900 rounded-full font-black text-lg uppercase tracking-wider shadow-2xl hover:bg-yellow-300 transition-all duration-300 border-4 border-yellow-300"
+              >
+                {language === 'ms' ? '🎧 Tonton Podcast' : '🎧 Watch Podcasts'}
+              </motion.button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
       <section className="py-24 bg-gradient-to-br from-green-50 to-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

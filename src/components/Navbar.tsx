@@ -42,6 +42,7 @@ export const Navbar: React.FC = () => {
       { href: '/how-it-works', label: 'How It Works', labelMs: 'Cara Ia Berfungsi' },
       { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
       { href: '/contact', label: 'Contact Us', labelMs: 'Hubungi Kami' },
+      { href: '/podcasts', label: 'Podcasts', labelMs: 'Podcast' },
     ];
   };
 

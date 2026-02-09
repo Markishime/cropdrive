@@ -191,15 +191,6 @@ export const Sidebar: React.FC = () => {
       showAlways: false,
       requiresPlan: true
     },
-    // Podcasts - only for authenticated users with a plan
-    {
-      href: '/podcasts',
-      icon: <FontAwesomeIcon icon={faPodcast} className="w-5 h-5" />,
-      label: 'Podcasts',
-      labelMs: 'Podcast',
-      showAlways: false,
-      requiresPlan: true
-    },
     // Payment Method - only for users with plans
     {
       href: '/payment-method',

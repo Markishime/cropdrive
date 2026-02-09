@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -48,7 +47,6 @@ function getResolvedVideoId(ep: PodcastEpisode): string | null {
 }
 
 export default function PodcastsPage() {
-  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ms'>('en');
@@ -63,44 +61,23 @@ export default function PodcastsPage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.replace('/login');
-      return;
-    }
-    if (user && (!user.plan || user.plan === 'none')) {
-      router.replace('/pricing');
-      return;
-    }
-  }, [authLoading, user, router]);
-
-  useEffect(() => {
-    if (!user || !user.plan || user.plan === 'none') return;
     loadEpisodes();
-  }, [user]);
+  }, []);
 
   const loadEpisodes = async () => {
-    const { auth } = await import('@/lib/firebase');
-    if (!auth.currentUser) return;
     setLoading(true);
     setError(null);
     try {
-      const token = await auth.currentUser.getIdToken();
       const res = await fetch('/api/podcasts', {
-        headers: { Authorization: `Bearer ${token}` },
         cache: 'no-store',
       });
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 403) {
-          router.replace('/pricing');
-          return;
-        }
         throw new Error(data.error || 'Failed to load podcasts');
       }
       setEpisodes(data.episodes || []);
     } catch (e: any) {
       setError(e.message || 'Failed to load podcasts');
-      if (e.message?.includes('plan')) router.replace('/pricing');
     } finally {
       setLoading(false);
     }
@@ -108,16 +85,13 @@ export default function PodcastsPage() {
 
   const closeModal = () => setSelectedEpisode(null);
 
-  if (!mounted || authLoading) {
+  if (!mounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-white to-blue-50">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600" />
       </div>
     );
   }
-
-  if (!user) return null;
-  if (!user.plan || user.plan === 'none') return null;
 
   const t = (en: string, ms: string) => (language === 'ms' ? ms : en);
 
