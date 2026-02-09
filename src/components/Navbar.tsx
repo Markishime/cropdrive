@@ -40,9 +40,10 @@ export const Navbar: React.FC = () => {
     return [
       { href: '/', label: 'Home', labelMs: 'Laman Utama' },
       { href: '/how-it-works', label: 'How It Works', labelMs: 'Cara Ia Berfungsi' },
+      { href: '/podcasts', label: 'Podcasts', labelMs: 'Podcast' },
+      { href: '/blog', label: 'Blog', labelMs: 'Blog' },
       { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
       { href: '/contact', label: 'Contact Us', labelMs: 'Hubungi Kami' },
-      { href: '/podcasts', label: 'Podcasts', labelMs: 'Podcast' },
     ];
   };
 
