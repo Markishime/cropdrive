@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
-import { Analytics } from '@vercel/analytics/next';
 import LayoutWrapper from '@/components/LayoutWrapper';
+import { VercelAnalytics } from '@/components/VercelAnalytics';
 import CookieConsent from '@/components/CookieConsent';
 import { Toaster } from 'react-hot-toast';
 import { config } from '@fortawesome/fontawesome-svg-core';
@@ -236,8 +236,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
           </LayoutWrapper>
           <CookieConsent />
-          {/* Only load Vercel Analytics when enabled to avoid script errors; set NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true in Vercel after enabling Web Analytics */}
-          {process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED === 'true' && <Analytics />}
+          <VercelAnalytics />
         </AuthProvider>
       </body>
     </html>
