@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
 import LayoutWrapper from '@/components/LayoutWrapper';
-import { VercelAnalytics } from '@/components/VercelAnalytics';
 import CookieConsent from '@/components/CookieConsent';
 import { Toaster } from 'react-hot-toast';
 import { config } from '@fortawesome/fontawesome-svg-core';
@@ -236,7 +235,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
           </LayoutWrapper>
           <CookieConsent />
-          <VercelAnalytics />
         </AuthProvider>
       </body>
     </html>
