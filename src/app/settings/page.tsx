@@ -45,6 +45,8 @@ export default function SettingsPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deletePassword, setDeletePassword] = useState('');
+  const [showDeletePassword, setShowDeletePassword] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   
   const { user, loading: authLoading, signOut: authSignOut, refreshUser } = useAuth();
@@ -168,29 +170,35 @@ export default function SettingsPage() {
   };
 
   const handleDeleteAccountClick = () => {
+    setDeletePassword('');
     setShowDeleteModal(true);
   };
 
   const handleDeleteAccountConfirm = async () => {
+    const currentUser = auth.currentUser;
+    if (!user?.uid || !currentUser?.email) {
+      toast.error(language === 'ms' ? 'Akaun tidak dijumpai' : 'User not found');
+      return;
+    }
+    if (!deletePassword.trim()) {
+      toast.error(language === 'ms' ? 'Sila masukkan kata laluan anda untuk mengesahkan' : 'Please enter your password to confirm');
+      return;
+    }
+
     const toastId = toast.loading(language === 'ms' ? 'Memadam akaun...' : 'Deleting account...');
     setDeletingAccount(true);
 
     try {
-      if (!user?.uid) {
-        toast.error(language === 'ms' ? 'Akaun tidak dijumpai' : 'User not found', { id: toastId });
-        return;
-      }
-
-      const currentUser = auth.currentUser;
-      if (!currentUser) {
-        toast.error(language === 'ms' ? 'Sila log masuk semula' : 'Please log in again', { id: toastId });
-        return;
-      }
+      // Re-authenticate first so Firebase allows delete (avoids auth/requires-recent-login)
+      const credential = EmailAuthProvider.credential(currentUser.email, deletePassword);
+      await reauthenticateWithCredential(currentUser, credential);
 
       // Delete Firestore user document first, then Firebase Auth user
       await deleteDoc(doc(db, 'users', user.uid));
       await deleteUser(currentUser);
 
+      setDeletePassword('');
+      setShowDeleteModal(false);
       toast.success(language === 'ms' ? 'Akaun berjaya dipadam' : 'Account deleted successfully', { id: toastId });
       router.push('/');
     } catch (error: any) {
@@ -198,7 +206,10 @@ export default function SettingsPage() {
       if (error.code === 'auth/requires-recent-login') {
         toast.error(language === 'ms' ? 'Sila log masuk semula untuk memadam akaun' : 'Please log in again to delete account', { id: toastId });
         await authSignOut();
+        setShowDeleteModal(false);
         router.push('/login');
+      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        toast.error(language === 'ms' ? 'Kata laluan tidak betul' : 'Incorrect password', { id: toastId });
       } else {
         toast.error(language === 'ms' ? 'Ralat memadam akaun. Sila cuba lagi.' : 'Error deleting account. Please try again.', { id: toastId });
       }
@@ -635,7 +646,12 @@ export default function SettingsPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => !deletingAccount && setShowDeleteModal(false)}
+                onClick={() => {
+                  if (!deletingAccount) {
+                    setShowDeleteModal(false);
+                    setDeletePassword('');
+                  }
+                }}
                 aria-hidden="true"
               />
               <motion.div
@@ -655,7 +671,7 @@ export default function SettingsPage() {
                     </h3>
                   </div>
                   <button
-                    onClick={() => setShowDeleteModal(false)}
+                    onClick={() => { setShowDeleteModal(false); setDeletePassword(''); }}
                     className="text-gray-400 hover:text-gray-600 transition"
                     aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                     title={language === 'ms' ? 'Tutup' : 'Close'}
@@ -674,10 +690,38 @@ export default function SettingsPage() {
                     </p>
                   </div>
 
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      {language === 'ms' ? 'Kata laluan anda (untuk mengesahkan)' : 'Your password (to confirm)'}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showDeletePassword ? 'text' : 'password'}
+                        value={deletePassword}
+                        onChange={(e) => setDeletePassword(e.target.value)}
+                        placeholder={language === 'ms' ? 'Kata laluan' : 'Password'}
+                        disabled={deletingAccount}
+                        className="w-full px-4 py-2.5 border-2 border-gray-300 rounded-xl focus:border-red-500 focus:ring-2 focus:ring-red-200 outline-none disabled:opacity-50 pr-10"
+                        autoComplete="current-password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowDeletePassword(!showDeletePassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        tabIndex={-1}
+                        title={showDeletePassword ? (language === 'ms' ? 'Sembunyikan kata laluan' : 'Hide password') : (language === 'ms' ? 'Tunjuk kata laluan' : 'Show password')}
+                        aria-label={showDeletePassword ? (language === 'ms' ? 'Sembunyikan kata laluan' : 'Hide password') : (language === 'ms' ? 'Tunjuk kata laluan' : 'Show password')}
+                      >
+                        <FontAwesomeIcon icon={showDeletePassword ? faEyeSlash : faEye} className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="flex space-x-3 mt-6">
                     <Button
                       onClick={() => {
                         setShowDeleteModal(false);
+                        setDeletePassword('');
                         toast(language === 'ms' ? 'Pemadaman dibatalkan' : 'Deletion cancelled');
                       }}
                       variant="outline"
