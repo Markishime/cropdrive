@@ -19,6 +19,8 @@ import {
   faWandSparkles,
   faCircleCheck,
   faFloppyDisk,
+  faEye,
+  faEyeSlash,
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import { doc, updateDoc, deleteDoc, serverTimestamp, onSnapshot } from 'firebase/firestore';
@@ -30,7 +32,6 @@ export default function SettingsPage() {
   const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [notifications, setNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
-  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
@@ -39,6 +40,11 @@ export default function SettingsPage() {
     confirmPassword: ''
   });
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [userData, setUserData] = useState<any>(null);
   
   const { user, loading: authLoading, signOut: authSignOut, refreshUser } = useAuth();
@@ -80,28 +86,33 @@ export default function SettingsPage() {
 
 
   const handleSaveNotifications = async () => {
-    if (!user?.uid) return;
-    
+    if (!user?.uid) {
+      toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please log in again.');
+      return;
+    }
+
+    const toastId = toast.loading(language === 'ms' ? 'Menyimpan tetapan...' : 'Saving settings...');
     setSaving(true);
     try {
       const userRef = doc(db, 'users', user.uid);
+      const existingPrefs = userData?.preferences || {};
       await updateDoc(userRef, {
         preferences: {
+          ...existingPrefs,
           notifications,
-          emailNotifications
+          emailNotifications,
         },
-        updatedAt: serverTimestamp()
+        updatedAt: serverTimestamp(),
       });
 
-      // Refresh user data
       if (refreshUser) {
         await refreshUser();
       }
 
-      toast.success(language === 'ms' ? '✓ Tetapan disimpan!' : '✓ Settings saved!');
+      toast.success(language === 'ms' ? 'Tetapan berjaya disimpan!' : 'Settings saved successfully!', { id: toastId });
     } catch (error) {
       console.error('Error saving settings:', error);
-      toast.error(language === 'ms' ? '✗ Ralat menyimpan tetapan' : '✗ Error saving settings');
+      toast.error(language === 'ms' ? 'Ralat menyimpan tetapan. Sila cuba lagi.' : 'Error saving settings. Please try again.', { id: toastId });
     } finally {
       setSaving(false);
     }
@@ -118,69 +129,81 @@ export default function SettingsPage() {
       return;
     }
 
+    if (!passwordForm.currentPassword.trim()) {
+      toast.error(language === 'ms' ? 'Sila masukkan kata laluan semasa' : 'Please enter your current password');
+      return;
+    }
+
+    const toastId = toast.loading(language === 'ms' ? 'Menukar kata laluan...' : 'Changing password...');
     setChangingPassword(true);
     try {
       const currentUser = auth.currentUser;
       if (!currentUser || !currentUser.email) {
-        throw new Error('User not authenticated');
+        toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please log in again.', { id: toastId });
+        return;
       }
 
       const credential = EmailAuthProvider.credential(currentUser.email, passwordForm.currentPassword);
       await reauthenticateWithCredential(currentUser, credential);
       await firebaseUpdatePassword(currentUser, passwordForm.newPassword);
 
-      toast.success(language === 'ms' ? '✓ Kata laluan dikemas kini!' : '✓ Password updated!');
+      toast.success(language === 'ms' ? 'Kata laluan berjaya dikemas kini!' : 'Password updated successfully!', { id: toastId });
       setShowPasswordModal(false);
+      setShowCurrentPassword(false);
+      setShowNewPassword(false);
+      setShowConfirmPassword(false);
       setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     } catch (error: any) {
       console.error('Error changing password:', error);
       if (error.code === 'auth/wrong-password') {
-        toast.error(language === 'ms' ? '✗ Kata laluan semasa salah' : '✗ Current password is incorrect');
+        toast.error(language === 'ms' ? 'Kata laluan semasa salah' : 'Current password is incorrect', { id: toastId });
+      } else if (error.code === 'auth/too-many-requests') {
+        toast.error(language === 'ms' ? 'Terlalu banyak percubaan. Sila cuba lagi nanti.' : 'Too many attempts. Please try again later.', { id: toastId });
       } else {
-        toast.error(language === 'ms' ? '✗ Ralat menukar kata laluan' : '✗ Error changing password');
+        toast.error(language === 'ms' ? 'Ralat menukar kata laluan' : 'Error changing password', { id: toastId });
       }
     } finally {
       setChangingPassword(false);
     }
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmDelete = confirm(
-      language === 'ms' 
-        ? 'Adakah anda PASTI mahu memadam akaun anda? Tindakan ini tidak boleh dibatalkan dan semua data anda akan hilang.'
-        : 'Are you SURE you want to delete your account? This action cannot be undone and all your data will be lost.'
-    );
+  const handleDeleteAccountClick = () => {
+    setShowDeleteModal(true);
+  };
 
-    if (!confirmDelete) return;
-
-    const confirmAgain = confirm(
-      language === 'ms'
-        ? 'Klik OK untuk mengesahkan pemadaman akaun'
-        : 'Click OK to confirm account deletion'
-    );
-
-    if (!confirmAgain) return;
+  const handleDeleteAccountConfirm = async () => {
+    const toastId = toast.loading(language === 'ms' ? 'Memadam akaun...' : 'Deleting account...');
+    setDeletingAccount(true);
 
     try {
-      if (!user?.uid) throw new Error('User not found');
-      
-      const currentUser = auth.currentUser;
-      if (!currentUser) throw new Error('Not authenticated');
+      if (!user?.uid) {
+        toast.error(language === 'ms' ? 'Akaun tidak dijumpai' : 'User not found', { id: toastId });
+        return;
+      }
 
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+        toast.error(language === 'ms' ? 'Sila log masuk semula' : 'Please log in again', { id: toastId });
+        return;
+      }
+
+      // Delete Firestore user document first, then Firebase Auth user
       await deleteDoc(doc(db, 'users', user.uid));
       await deleteUser(currentUser);
 
-      toast.success(language === 'ms' ? 'Akaun dipadam' : 'Account deleted');
+      toast.success(language === 'ms' ? 'Akaun berjaya dipadam' : 'Account deleted successfully', { id: toastId });
       router.push('/');
     } catch (error: any) {
       console.error('Error deleting account:', error);
       if (error.code === 'auth/requires-recent-login') {
-        toast.error(language === 'ms' ? 'Sila log masuk semula untuk memadam akaun' : 'Please log in again to delete account');
+        toast.error(language === 'ms' ? 'Sila log masuk semula untuk memadam akaun' : 'Please log in again to delete account', { id: toastId });
         await authSignOut();
         router.push('/login');
       } else {
-        toast.error(language === 'ms' ? '✗ Ralat memadam akaun' : '✗ Error deleting account');
+        toast.error(language === 'ms' ? 'Ralat memadam akaun. Sila cuba lagi.' : 'Error deleting account. Please try again.', { id: toastId });
       }
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -366,23 +389,6 @@ export default function SettingsPage() {
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <div className="flex-1">
                       <p className="font-bold text-gray-900 mb-1">
-                        {language === 'ms' ? 'Pengesahan Dua Faktor' : 'Two-Factor Authentication'}
-                      </p>
-                      <p className="text-sm text-gray-600">
-                        {language === 'ms' 
-                          ? 'Tambah lapisan keselamatan tambahan ke akaun anda'
-                          : 'Add an extra layer of security to your account'
-                        }
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      {language === 'ms' ? 'Dayakan' : 'Enable'}
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <div className="flex-1">
-                      <p className="font-bold text-gray-900 mb-1">
                         {language === 'ms' ? 'Tukar Kata Laluan' : 'Change Password'}
                       </p>
                       <p className="text-sm text-gray-600">
@@ -435,9 +441,12 @@ export default function SettingsPage() {
                   <Button 
                     variant="outline" 
                     className="border-red-600 text-red-600 hover:bg-red-50 font-bold" 
-                    onClick={handleDeleteAccount}
+                    onClick={handleDeleteAccountClick}
+                    disabled={deletingAccount}
                   >
-                    {language === 'ms' ? 'Padamkan Akaun' : 'Delete Account'}
+                    {deletingAccount
+                      ? (language === 'ms' ? 'Memadam...' : 'Deleting...')
+                      : (language === 'ms' ? 'Padamkan Akaun' : 'Delete Account')}
                   </Button>
                 </div>
               </motion.div>
@@ -461,7 +470,16 @@ export default function SettingsPage() {
                   </h3>
                   <button
                     type="button"
-                    onClick={() => setShowPasswordModal(false)}
+                    onClick={() => {
+                      setShowPasswordModal(false);
+                      setShowCurrentPassword(false);
+                      setShowNewPassword(false);
+                      setShowConfirmPassword(false);
+                      if (passwordForm.currentPassword || passwordForm.newPassword || passwordForm.confirmPassword) {
+                        toast(language === 'ms' ? 'Perubahan dibatalkan' : 'Changes discarded');
+                      }
+                      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                    }}
                     className="text-gray-400 hover:text-gray-600 transition"
                     aria-label={language === 'ms' ? 'Tutup' : 'Close'}
                     title={language === 'ms' ? 'Tutup' : 'Close'}
@@ -475,39 +493,81 @@ export default function SettingsPage() {
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       {language === 'ms' ? 'Kata Laluan Semasa' : 'Current Password'}
                     </label>
-                    <input
-                      type="password"
-                      value={passwordForm.currentPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showCurrentPassword ? 'text' : 'password'}
+                        value={passwordForm.currentPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                        aria-label={showCurrentPassword ? (language === 'ms' ? 'Sembunyikan' : 'Hide') : (language === 'ms' ? 'Tunjuk' : 'Show')}
+                      >
+                        {showCurrentPassword ? (
+                          <FontAwesomeIcon icon={faEyeSlash} className="w-5 h-5" />
+                        ) : (
+                          <FontAwesomeIcon icon={faEye} className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       {language === 'ms' ? 'Kata Laluan Baharu' : 'New Password'}
                     </label>
-                    <input
-                      type="password"
-                      value={passwordForm.newPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showNewPassword ? 'text' : 'password'}
+                        value={passwordForm.newPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                        aria-label={showNewPassword ? (language === 'ms' ? 'Sembunyikan' : 'Hide') : (language === 'ms' ? 'Tunjuk' : 'Show')}
+                      >
+                        {showNewPassword ? (
+                          <FontAwesomeIcon icon={faEyeSlash} className="w-5 h-5" />
+                        ) : (
+                          <FontAwesomeIcon icon={faEye} className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
                       {language === 'ms' ? 'Sahkan Kata Laluan' : 'Confirm Password'}
                     </label>
-                    <input
-                      type="password"
-                      value={passwordForm.confirmPassword}
-                      onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
-                      placeholder="••••••••"
-                    />
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={passwordForm.confirmPassword}
+                        onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
+                        className="w-full px-4 py-3 pr-10 border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                        placeholder="••••••••"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 transition-colors"
+                        aria-label={showConfirmPassword ? (language === 'ms' ? 'Sembunyikan' : 'Hide') : (language === 'ms' ? 'Tunjuk' : 'Show')}
+                      >
+                        {showConfirmPassword ? (
+                          <FontAwesomeIcon icon={faEyeSlash} className="w-5 h-5" />
+                        ) : (
+                          <FontAwesomeIcon icon={faEye} className="w-5 h-5" />
+                        )}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="flex items-start space-x-2 p-4 bg-yellow-50 border-2 border-yellow-200 rounded-xl">
@@ -522,7 +582,16 @@ export default function SettingsPage() {
 
                   <div className="flex space-x-3 mt-6">
                     <Button
-                      onClick={() => setShowPasswordModal(false)}
+                      onClick={() => {
+                        setShowPasswordModal(false);
+                        setShowCurrentPassword(false);
+                        setShowNewPassword(false);
+                        setShowConfirmPassword(false);
+                        if (passwordForm.currentPassword || passwordForm.newPassword || passwordForm.confirmPassword) {
+                          toast(language === 'ms' ? 'Perubahan dibatalkan' : 'Changes discarded');
+                        }
+                        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+                      }}
                       variant="outline"
                       className="flex-1"
                       disabled={changingPassword}
@@ -547,6 +616,94 @@ export default function SettingsPage() {
                 </div>
               </motion.div>
             </div>
+          )}
+        </AnimatePresence>
+
+        {/* Delete Account Confirmation Modal */}
+        <AnimatePresence>
+          {showDeleteModal && (
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 min-h-screen"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <motion.div
+                className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => !deletingAccount && setShowDeleteModal(false)}
+                aria-hidden="true"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="relative bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border-2 border-red-200"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                      <FontAwesomeIcon icon={faCircleExclamation} className="w-6 h-6 text-red-600" />
+                    </div>
+                    <h3 className="text-2xl font-black text-red-900">
+                      {language === 'ms' ? 'Padamkan Akaun?' : 'Delete Account?'}
+                    </h3>
+                  </div>
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
+                    className="text-gray-400 hover:text-gray-600 transition"
+                    aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                    title={language === 'ms' ? 'Tutup' : 'Close'}
+                    disabled={deletingAccount}
+                  >
+                    <FontAwesomeIcon icon={faCircleXmark} className="w-6 h-6" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-red-50 border-2 border-red-200 rounded-xl">
+                    <p className="text-sm font-bold text-red-900 mb-2">
+                      {language === 'ms'
+                        ? '⚠️ Tindakan ini tidak boleh dibatalkan dan semua data anda akan hilang.'
+                        : '⚠️ This action cannot be undone and all your data will be lost.'}
+                    </p>
+                  </div>
+
+                  <div className="flex space-x-3 mt-6">
+                    <Button
+                      onClick={() => {
+                        setShowDeleteModal(false);
+                        toast(language === 'ms' ? 'Pemadaman dibatalkan' : 'Deletion cancelled');
+                      }}
+                      variant="outline"
+                      className="flex-1"
+                      disabled={deletingAccount}
+                    >
+                      {language === 'ms' ? 'Batal' : 'Cancel'}
+                    </Button>
+                    <Button
+                      onClick={handleDeleteAccountConfirm}
+                      className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 font-bold text-white"
+                      disabled={deletingAccount}
+                    >
+                      {deletingAccount ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          {language === 'ms' ? 'Memadam...' : 'Deleting...'}
+                        </>
+                      ) : (
+                        language === 'ms' ? 'Ya, Padamkan' : 'Yes, Delete'
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
           )}
         </AnimatePresence>
       </div>

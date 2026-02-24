@@ -15,9 +15,17 @@ service cloud.firestore {
     // Users collection - users can read/write their own profile
     // Works for both website and Streamlit app (when authenticated)
     match /users/{userId} {
-      allow read, write: if isOwner(userId);
-      allow read: if isAuthenticated(); // Allow reading other users for admin purposes
-      allow create: if isAuthenticated(); // Allow user creation during signup
+      // User can read their own document
+      allow read: if isOwner(userId);
+
+      // User can create their own document during signup/onboarding
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+
+      // User can update their own document
+      allow update: if isOwner(userId);
+
+      // User can delete their own document (for account deletion)
+      allow delete: if isOwner(userId);
     }
 
     // Subscriptions collection - users can read their own subscriptions

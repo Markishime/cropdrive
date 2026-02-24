@@ -74,7 +74,6 @@ export const AuthenticatedNavbar: React.FC = () => {
   const handleSignOut = async () => {
     try {
       await signOut(language);
-      toast.success(language === 'ms' ? 'Berjaya log keluar' : 'Successfully logged out');
       router.push('/');
     } catch (error) {
       toast.error(language === 'ms' ? 'Ralat log keluar' : 'Error logging out');

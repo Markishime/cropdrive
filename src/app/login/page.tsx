@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation, getCurrentLanguage } from '@/i18n';
@@ -26,6 +26,8 @@ export default function LoginPage() {
 
   const { signIn, user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const justRegistered = searchParams.get('registered') === '1';
 
   useEffect(() => {
     setMounted(true);
@@ -46,48 +48,22 @@ export default function LoginPage() {
 
   const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
 
-  // Redirect logic
+  // Redirect logic - go directly to landing page when logged in
   useEffect(() => {
-    // Wait for initial auth load
     if (authLoading) return;
 
     if (user) {
-      // If user is manually logging in (loading=true), wait for that process to finish 
-      // so we can show the toast
       if (loading) return;
 
       if (shouldShowSuccess) {
-        // User just logged in via form submission - redirect to dashboard
-        toast.dismiss('login-success');
-        toast.success(
-          language === 'ms' ? 'Berjaya log masuk!' : 'Successfully logged in!',
-          {
-            id: 'login-success',
-            duration: 2000,
-            style: {
-              background: '#22c55e',
-              color: '#fff',
-              fontWeight: 'bold',
-              padding: '16px 24px',
-              borderRadius: '12px',
-            },
-          }
-        );
-        
-        const timer = setTimeout(() => {
-          // Reset the flag before redirecting
-          setShouldShowSuccess(false);
-          router.push('/dashboard');
-          router.refresh();
-        }, 1000);
-        return () => clearTimeout(timer);
+        setShouldShowSuccess(false);
+        router.push('/');
+        router.refresh();
       } else {
-        // User was already logged in (opened login page while authenticated) - redirect to landing page
-        // This handles cases where user opens website in another browser or reopens after being logged in
         router.push('/');
       }
     }
-  }, [user, authLoading, loading, shouldShowSuccess, router, language]);
+  }, [user, authLoading, loading, shouldShowSuccess, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -102,17 +78,14 @@ export default function LoginPage() {
 
       await signIn(email, password, language);
 
-      // Check if remember me is checked
       if (rememberMe) {
         localStorage.setItem('cropdrive-remember-email', email);
       } else {
         localStorage.removeItem('cropdrive-remember-email');
       }
 
-      // Signal that we want to show success toast
       setShouldShowSuccess(true);
-    } catch (error) {
-      // Error handling is done in the signIn function
+    } catch (error: any) {
       console.error('Login error:', error);
     } finally {
       setLoading(false);
@@ -225,6 +198,13 @@ export default function LoginPage() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="bg-white/95 backdrop-blur-xl rounded-2xl xs:rounded-3xl shadow-2xl p-5 xs:p-6 sm:p-8 border border-white/20"
           >
+            {justRegistered && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800">
+                {language === 'ms'
+                  ? 'Sila semak emel anda dan klik pautan pengesahan untuk mengaktifkan akaun anda sebelum log masuk.'
+                  : 'Please check your email and click the verification link to activate your account before signing in.'}
+              </div>
+            )}
             <form onSubmit={handleSubmit} className="space-y-4 xs:space-y-5 sm:space-y-6">
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">

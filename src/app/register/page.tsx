@@ -108,27 +108,8 @@ export default function RegisterPage() {
         language: language as 'ms' | 'en',
       }, language);
 
-      // Show success message
-      toast.success(
-        language === 'ms' 
-          ? '🎉 Akaun berjaya dibuat! Mengalihkan ke halaman log masuk...' 
-          : '🎉 Account created successfully! Redirecting to login...',
-        {
-          duration: 4000,
-          style: {
-            background: '#22c55e',
-            color: '#fff',
-            fontWeight: 'bold',
-            padding: '16px 24px',
-            borderRadius: '12px',
-          },
-        }
-      );
-      
-      // Redirect to login page after a short delay
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
+      // Redirect to login page immediately (with query to show verification reminder)
+      router.push('/login?registered=1');
     } catch (error) {
       console.error('Registration error:', error);
       // Error already handled by signUp function with toast

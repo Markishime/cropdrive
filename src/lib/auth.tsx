@@ -7,7 +7,6 @@ import {
   createUserWithEmailAndPassword,
   signOut as firebaseSignOut,
   updateProfile as firebaseUpdateProfile,
-  sendEmailVerification,
   onAuthStateChanged,
   UserCredential,
 } from 'firebase/auth';
@@ -97,41 +96,58 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  // Sign in function
   const signIn = async (email: string, password: string, language: 'en' | 'ms' = 'ms'): Promise<void> => {
     try {
       setLoading(true);
       const result: UserCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      const userDoc = await getDoc(doc(db, 'users', result.user.uid));
+      const userData = userDoc.exists() ? userDoc.data() : {};
+      const requiresVerification = userData.requiresEmailVerification === true;
+
+      if (requiresVerification && !result.user.emailVerified) {
+        await firebaseSignOut(auth);
+        toast.error(
+          language === 'ms'
+            ? 'Sila sahkan emel anda terlebih dahulu. Semak peti masuk anda untuk pautan pengesahan.'
+            : 'Please verify your email first. Check your inbox for the verification link.'
+        );
+        throw new Error('EMAIL_NOT_VERIFIED');
+      }
 
       // Update last login
       await updateDoc(doc(db, 'users', result.user.uid), {
         lastLogin: serverTimestamp(),
       });
       
-      // Create login notification
-      try {
-        await addDoc(collection(db, 'notifications'), {
-          userId: result.user.uid,
-          type: 'info',
-          title: 'Login Detected',
-          titleMs: 'Log Masuk Dikesan',
-          message: `You successfully logged in on ${new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', { dateStyle: 'full' })}.`,
-          messageMs: `Anda berjaya log masuk pada ${new Date().toLocaleDateString('ms-MY', { dateStyle: 'full' })}.`,
-          read: false,
-          createdAt: serverTimestamp(),
-        });
-      } catch (notifError) {
-        console.error('Error creating login notification:', notifError);
-        // Don't fail the login if notification creation fails
+      // Create login notification (only if user has notifications enabled)
+      const notificationsEnabled = userData.preferences?.notifications !== false;
+      if (notificationsEnabled) {
+        try {
+          await addDoc(collection(db, 'notifications'), {
+            userId: result.user.uid,
+            type: 'info',
+            title: 'Login Detected',
+            titleMs: 'Log Masuk Dikesan',
+            message: `You successfully logged in on ${new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', { dateStyle: 'full' })}.`,
+            messageMs: `Anda berjaya log masuk pada ${new Date().toLocaleDateString('ms-MY', { dateStyle: 'full' })}.`,
+            read: false,
+            createdAt: serverTimestamp(),
+          });
+        } catch (notifError) {
+          console.error('Error creating login notification:', notifError);
+        }
       }
 
       // Don't show success toast here - let the login page handle it
     } catch (error: any) {
       console.error('Sign in error:', error);
-      if (error.code === 'auth/user-not-found') {
+      if (error?.message === 'EMAIL_NOT_VERIFIED') {
+        // Toast already shown above
+      } else if (error.code === 'auth/user-not-found') {
         toast.error(language === 'ms' ? 'Akaun tidak dijumpai. Sila daftar terlebih dahulu.' : 'Account not found. Please register first.');
-      } else if (error.code === 'auth/wrong-password') {
-        toast.error(language === 'ms' ? 'Kata laluan salah.' : 'Wrong password.');
+      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+        toast.error(language === 'ms' ? 'Emel atau kata laluan tidak sah.' : 'Invalid email or password.');
       } else if (error.code === 'auth/too-many-requests') {
         toast.error(language === 'ms' ? 'Terlalu banyak percubaan. Sila cuba lagi nanti.' : 'Too many attempts. Please try again later.');
       } else {
@@ -154,8 +170,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
         displayName: userData.displayName,
       });
 
-      // Send email verification
-      await sendEmailVerification(result.user);
+      // Send custom verification email only (no Firebase template)
+      const res = await fetch('/api/auth/send-verification-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: userData.email,
+          displayName: userData.displayName,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Failed to send verification email');
+      }
 
       // Create user document in Firestore - NO PLAN BY DEFAULT
       const newUser: Omit<User, 'uid'> = {
@@ -183,6 +210,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         ...newUser,
         registrationDate: serverTimestamp(),
         lastLogin: serverTimestamp(),
+        requiresEmailVerification: true, // Only new users need to verify; existing users can log in
       });
 
       // Create welcome notification
@@ -201,10 +229,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         console.error('Error creating welcome notification:', notifError);
       }
 
-      // Sign out the user so they need to log in
+      // Sign out the user so they need to log in after verifying email
       await firebaseSignOut(auth);
-      
-      toast.success(language === 'ms' ? 'Akaun berjaya didaftarkan! Sila semak emel anda untuk pengesahan.' : 'Account successfully registered! Please check your email for verification.');
     } catch (error: any) {
       console.error('Sign up error:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -213,6 +239,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
         toast.error(language === 'ms' ? 'Kata laluan terlalu lemah.' : 'Password is too weak.');
       } else if (error.code === 'auth/invalid-email') {
         toast.error(language === 'ms' ? 'Format emel tidak sah.' : 'Invalid email format.');
+      } else if (error?.message?.includes('verification email') || error?.message?.includes('Email service not configured')) {
+        toast.error(language === 'ms' ? 'Gagal menghantar emel pengesahan. Sila hubungi sokongan.' : 'Failed to send verification email. Please contact support.');
       } else {
         toast.error(language === 'ms' ? 'Ralat pendaftaran. Sila cuba lagi.' : 'Registration error. Please try again.');
       }
