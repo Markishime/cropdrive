@@ -28,6 +28,7 @@ export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justRegistered = searchParams.get('registered') === '1';
+  const justVerified = searchParams.get('verified') === '1';
 
   useEffect(() => {
     setMounted(true);
@@ -203,6 +204,13 @@ export default function LoginPage() {
                 {language === 'ms'
                   ? 'Sila semak emel anda dan klik pautan pengesahan untuk mengaktifkan akaun anda sebelum log masuk.'
                   : 'Please check your email and click the verification link to activate your account before signing in.'}
+              </div>
+            )}
+            {justVerified && (
+              <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 font-medium">
+                {language === 'ms'
+                  ? '✓ E-mel anda telah disahkan! Anda kini boleh log masuk.'
+                  : '✓ Your email has been verified! You can now sign in.'}
               </div>
             )}
             <form onSubmit={handleSubmit} className="space-y-4 xs:space-y-5 sm:space-y-6">

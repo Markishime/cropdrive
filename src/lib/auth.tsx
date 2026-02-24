@@ -170,7 +170,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         displayName: userData.displayName,
       });
 
-      // Send custom verification email only (no Firebase template)
+      // Send custom verification email (CropDrive-branded, no Firebase branding)
       const res = await fetch('/api/auth/send-verification-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -239,8 +239,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
         toast.error(language === 'ms' ? 'Kata laluan terlalu lemah.' : 'Password is too weak.');
       } else if (error.code === 'auth/invalid-email') {
         toast.error(language === 'ms' ? 'Format emel tidak sah.' : 'Invalid email format.');
-      } else if (error?.message?.includes('verification email') || error?.message?.includes('Email service not configured')) {
-        toast.error(language === 'ms' ? 'Gagal menghantar emel pengesahan. Sila hubungi sokongan.' : 'Failed to send verification email. Please contact support.');
+      } else if (error?.message?.includes('verification') || error?.message?.includes('Email service not configured') || error?.code === 'auth/too-many-requests') {
+        const msg = error?.code === 'auth/too-many-requests'
+          ? (language === 'ms' ? 'Terlalu banyak emel pengesahan. Sila cuba lagi nanti.' : 'Too many verification emails. Please try again later.')
+          : (language === 'ms' ? 'Gagal menghantar emel pengesahan. Sila hubungi sokongan.' : 'Failed to send verification email. Please contact support.');
+        toast.error(msg);
       } else {
         toast.error(language === 'ms' ? 'Ralat pendaftaran. Sila cuba lagi.' : 'Registration error. Please try again.');
       }

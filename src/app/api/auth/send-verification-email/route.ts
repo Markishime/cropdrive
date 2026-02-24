@@ -8,8 +8,8 @@ const smtpUser = process.env.SMTP_USER;
 const smtpPass = process.env.SMTP_PASS;
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cropdrive.ai';
 
-// From: noreply@cropdrive.ai. Set VERIFICATION_FROM_EMAIL if SMTP requires a different sender.
-const FROM_EMAIL = process.env.VERIFICATION_FROM_EMAIL || 'noreply@cropdrive.ai';
+// Send from the authenticated SMTP sender (contact@agriglobalsolutions.com)
+const FROM_EMAIL = smtpUser || process.env.VERIFICATION_FROM_EMAIL || 'contact@agriglobalsolutions.com';
 const FROM_NAME = 'CropDrive';
 
 export async function POST(req: NextRequest) {
@@ -33,9 +33,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Generate Firebase email verification link
+    // Generate Firebase email verification link - redirect to login with verified=1 after user clicks
     const verificationLink = await adminAuth.generateEmailVerificationLink(email, {
-      url: `${appUrl}/login`,
+      url: `${appUrl}/login?verified=1`,
     });
 
     const transporter = nodemailer.createTransport({
@@ -116,7 +116,7 @@ CropDrive OP Advisor - AI-Powered Agronomy for Malaysian Oil Palm Farmers`;
     await transporter.sendMail({
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: email,
-      replyTo: FROM_EMAIL,
+      replyTo: process.env.VERIFICATION_REPLY_TO || FROM_EMAIL,
       subject: 'Verify your CropDrive email address',
       text: textContent,
       html: htmlContent,
@@ -129,9 +129,18 @@ CropDrive OP Advisor - AI-Powered Agronomy for Malaysian Oil Palm Farmers`;
     console.log('Verification email sent to:', email);
     return NextResponse.json({ success: true });
   } catch (error: unknown) {
-    console.error('Send verification email error:', error);
+    const err = error as Error & { response?: string; code?: string };
+    console.error('Send verification email error:', err?.message || err);
+    if (err?.response) console.error('SMTP response:', err.response);
+    if (err?.code) console.error('Error code:', err.code);
+
+    const message =
+      err?.message && typeof err.message === 'string'
+        ? err.message
+        : 'Failed to send verification email';
+
     return NextResponse.json(
-      { error: 'Failed to send verification email' },
+      { error: message },
       { status: 500 }
     );
   }
