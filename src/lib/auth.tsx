@@ -161,9 +161,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Sign up function
   const signUp = async (userData: SignUpData, language: 'en' | 'ms' = 'ms'): Promise<void> => {
+    let createdUser: FirebaseUser | null = null;
     try {
       setLoading(true);
       const result: UserCredential = await createUserWithEmailAndPassword(auth, userData.email, userData.password);
+      createdUser = result.user;
 
       // Update Firebase Auth profile
       await firebaseUpdateProfile(result.user, {
@@ -206,7 +208,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         },
       };
 
-      await setDoc(doc(db, 'users', result.user.uid), {
+      await setDoc(doc(db, 'users', createdUser.uid), {
         ...newUser,
         registrationDate: serverTimestamp(),
         lastLogin: serverTimestamp(),
@@ -216,7 +218,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       // Create welcome notification
       try {
         await addDoc(collection(db, 'notifications'), {
-          userId: result.user.uid,
+          userId: createdUser.uid,
           type: 'success',
           title: 'Welcome to CropDrive!',
           titleMs: 'Selamat Datang ke CropDrive!',
@@ -228,9 +230,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
       } catch (notifError) {
         console.error('Error creating welcome notification:', notifError);
       }
-
-      // Sign out the user so they need to log in after verifying email
-      await firebaseSignOut(auth);
     } catch (error: any) {
       console.error('Sign up error:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -249,6 +248,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
       }
       throw error;
     } finally {
+      // Ensure the newly-created user is never kept logged in after signup (even if verification email fails)
+      if (createdUser) {
+        try {
+          await firebaseSignOut(auth);
+        } catch (signOutError) {
+          console.error('Sign out after signup error:', signOutError);
+        }
+      }
       setLoading(false);
     }
   };

@@ -55,13 +55,6 @@ export default function RegisterPage() {
 
   const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
 
-  // Redirect logged-in users away from register, but do NOT interrupt active registration flow
-  useEffect(() => {
-    if (!authLoading && user && !loading && !registrationComplete) {
-      router.push('/dashboard');
-    }
-  }, [user, authLoading, loading, registrationComplete, router]);
-
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
