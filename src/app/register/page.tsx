@@ -106,6 +106,11 @@ export default function RegisterPage() {
       // Show post-registration instructions instead of immediate redirect
       setRegisteredEmail(formData.email);
       setRegistrationComplete(true);
+      toast.success(
+        language === 'ms'
+          ? 'Pendaftaran berjaya! Sila semak emel anda untuk pengesahan akaun.'
+          : 'Registration successful! Please check your email to verify your account.'
+      );
     } catch (error) {
       console.error('Registration error:', error);
       // Error already handled by signUp function with toast

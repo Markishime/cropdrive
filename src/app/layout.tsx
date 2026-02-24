@@ -236,7 +236,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
             {children}
           </LayoutWrapper>
           <CookieConsent />
-          <Analytics />
+          {/* Only load Vercel Analytics when enabled to avoid script errors; set NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED=true in Vercel after enabling Web Analytics */}
+          {process.env.NEXT_PUBLIC_VERCEL_ANALYTICS_ENABLED === 'true' && <Analytics />}
         </AuthProvider>
       </body>
     </html>
