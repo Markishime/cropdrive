@@ -76,19 +76,19 @@ export default function PalmiraPage() {
       });
       const result = await response.json();
 
-      // Check if user is within their 1-year contract period
-      const withinContract = !!result?.success && !!result?.data?.isWithinContract;
-      const contractExpired = !!result?.success && !!result?.data?.isContractExpired;
-      
+      // canAccessPalmira is the authoritative gate: true for any active/trialing/within-period subscription
+      const hasAccess = !!result?.success && !!result?.data?.canAccessPalmira;
+      const contractExpired = !!result?.success && !hasAccess && !!result?.data?.isContractExpired;
+      const noPlan = !!result?.success && !hasAccess && !contractExpired;
+
       if (isMountedRef.current) {
-        setMembershipActive(withinContract);
+        setMembershipActive(hasAccess);
         setIsContractExpired(contractExpired);
         if (result?.data?.contractEndDate) {
           setContractEndDate(new Date(result.data.contractEndDate));
         }
       }
-      
-      // Only show "Subscription Expired" if contract has ended (after 1 year)
+
       if (contractExpired) {
         toast.error(
           currentLang === 'ms'
@@ -98,7 +98,7 @@ export default function PalmiraPage() {
         setTimeout(() => {
           router.push('/pricing');
         }, 2000);
-      } else if (!withinContract) {
+      } else if (noPlan) {
         // No plan at all
         toast.error(
           currentLang === 'ms'
