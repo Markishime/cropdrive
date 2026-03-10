@@ -1,31 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-
-// Initialize Firebase Admin if not already initialized
-let adminAuth: any = null;
-let adminDb: any = null;
-
-if (!getApps().length) {
-  try {
-    if (process.env.FIREBASE_PRIVATE_KEY) {
-      initializeApp({
-        credential: cert({
-          projectId: process.env.FIREBASE_PROJECT_ID,
-          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-          privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        }),
-      });
-      adminAuth = getAuth();
-      adminDb = getFirestore();
-    }
-  } catch (error) {
-    console.error('Firebase Admin initialization error:', error);
-  }
-}
+import { FieldValue } from 'firebase-admin/firestore';
+import { getAdminAuth, adminDb } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,28 +34,25 @@ export async function POST(request: NextRequest) {
 
     const token = authHeader.split('Bearer ')[1];
     
-    // Verify token if Admin SDK is available, otherwise trust client-side validation
-    if (adminAuth) {
-      try {
-        const decodedToken = await adminAuth.verifyIdToken(token);
-        // Verify the userId matches the authenticated user
-        if (decodedToken.uid !== userId) {
-          return NextResponse.json(
-            { error: 'Unauthorized: User ID mismatch' },
-            { status: 403 }
-          );
-        }
-      } catch (error) {
+    // Verify token using Admin SDK
+    try {
+      const decodedToken = await getAdminAuth().verifyIdToken(token);
+      if (decodedToken.uid !== userId) {
         return NextResponse.json(
-          { error: 'Unauthorized: Invalid token' },
-          { status: 401 }
+          { error: 'Unauthorized: User ID mismatch' },
+          { status: 403 }
         );
       }
+    } catch (error) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Invalid token' },
+        { status: 401 }
+      );
     }
 
     // Check user's upload limits before saving
     // Note: Even if subscription is cancelled, limits still apply until period end
-    if (adminDb) {
+    {
       const userDoc = await adminDb.collection('users').doc(userId).get();
       if (userDoc.exists) {
         const userData = userDoc.data();
@@ -129,7 +101,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Save report to Firestore
-    // Note: Firestore security rules will validate that userId matches auth.uid
     const reportData = {
       userId,
       title,
@@ -140,59 +111,37 @@ export async function POST(request: NextRequest) {
       date: new Date().toISOString().split('T')[0],
       fileUrl: fileUrl || null,
       analysisData: analysisData || null,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
+      createdAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     };
 
-    // Use Admin SDK if available, otherwise return instructions
-    if (adminDb) {
-      console.log(`💾 Saving report to Firestore for user ${userId}...`);
-      
-      // Save the analysis report
-      const docRef = await adminDb.collection('analysis_results').add(reportData);
-      console.log(`✅ Report saved with ID: ${docRef.id}`);
-      
-      // Get current user data before incrementing
-      const userDocBefore = await adminDb.collection('users').doc(userId).get();
-      const userDataBefore = userDocBefore.exists ? userDocBefore.data() : null;
-      const uploadsUsedBefore = userDataBefore?.uploadsUsed || 0;
-      
-      console.log(`📊 Current uploadsUsed before increment: ${uploadsUsedBefore}`);
-      
-      // Increment the user's uploadsUsed counter
-      await adminDb.collection('users').doc(userId).update({
-        uploadsUsed: FieldValue.increment(1),
-        updatedAt: FieldValue.serverTimestamp(),
-      });
-      console.log(`✅ Incremented uploadsUsed for user ${userId}`);
-      
-      // Get updated user data
-      const updatedUserDoc = await adminDb.collection('users').doc(userId).get();
-      const updatedUserData = updatedUserDoc.exists ? updatedUserDoc.data() : null;
-      
-      const finalUploadsUsed = updatedUserData?.uploadsUsed || (uploadsUsedBefore + 1);
-      const finalUploadsLimit = updatedUserData?.uploadsLimit || 10;
-      
-      console.log(`✅ Report saved and upload count incremented for user ${userId}: ${finalUploadsUsed}/${finalUploadsLimit}`);
-      console.log(`📄 Report ID: ${docRef.id}`);
-      
-      return NextResponse.json({
-        success: true,
-        reportId: docRef.id,
-        message: 'Report saved successfully',
-        uploadsUsed: finalUploadsUsed,
-        uploadsLimit: finalUploadsLimit,
-      });
-    } else {
-      // If Admin SDK not available, return success but note that client-side will handle it
-      // The client-side code will save directly to Firestore (with security rules validation)
-      return NextResponse.json({
-        success: true,
-        message: 'Report will be saved client-side',
-        note: 'Admin SDK not configured, using client-side save',
-        incrementUsage: true, // Flag to tell client to increment usage
-      });
-    }
+    console.log(`💾 Saving report to Firestore for user ${userId}...`);
+
+    const docRef = await adminDb.collection('analysis_results').add(reportData);
+    console.log(`✅ Report saved with ID: ${docRef.id}`);
+
+    const userDocBefore = await adminDb.collection('users').doc(userId).get();
+    const uploadsUsedBefore = userDocBefore.exists ? (userDocBefore.data()?.uploadsUsed || 0) : 0;
+
+    await adminDb.collection('users').doc(userId).update({
+      uploadsUsed: FieldValue.increment(1),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    const updatedUserDoc = await adminDb.collection('users').doc(userId).get();
+    const updatedUserData = updatedUserDoc.exists ? updatedUserDoc.data() : null;
+    const finalUploadsUsed = updatedUserData?.uploadsUsed || (uploadsUsedBefore + 1);
+    const finalUploadsLimit = updatedUserData?.uploadsLimit || 10;
+
+    console.log(`✅ Report saved and upload count incremented: ${finalUploadsUsed}/${finalUploadsLimit}`);
+
+    return NextResponse.json({
+      success: true,
+      reportId: docRef.id,
+      message: 'Report saved successfully',
+      uploadsUsed: finalUploadsUsed,
+      uploadsLimit: finalUploadsLimit,
+    });
   } catch (error: any) {
     console.error('Error saving report:', error);
     return NextResponse.json(

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
 import { getStripe } from '@/lib/stripe-server';
+import { getAdminAuth } from '@/lib/firebase-admin';
 import { 
   canAccessAIAssistant, 
   canAccessPalmira, 
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAuth();
+    const auth = getAdminAuth();
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 

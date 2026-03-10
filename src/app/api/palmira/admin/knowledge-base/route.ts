@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 import { isAdmin } from '@/lib/admin';
 import { PalmiraKnowledgeBaseDocument } from '@/types';
@@ -18,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAuth();
+    const auth = getAdminAuth();
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
