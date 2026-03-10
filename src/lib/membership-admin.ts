@@ -51,8 +51,15 @@ function getUploadLimitForPlan(planId: string): number {
 }
 
 /**
- * Server-side membership check using Admin SDK
- * Use this in API routes instead of the client-side getMembership
+ * Server-side membership check using Admin SDK.
+ *
+ * Data strategy:
+ *  - Reads BOTH `users/{uid}` and `subscriptions/{stripeSubId}` documents.
+ *  - `users.subscriptionStatus` is updated by every Stripe webhook and is the
+ *    most reliable status signal. The `subscriptions` doc may lag behind.
+ *  - `currentPeriodEnd` uses the LATER of the two documents so that a stale
+ *    `subscriptions` doc never causes a false expiry.
+ *  - This matches what the dashboard displays (which reads from `users` doc).
  */
 export async function getMembershipAdmin(userId: string): Promise<Membership | null> {
   try {
@@ -61,99 +68,119 @@ export async function getMembershipAdmin(userId: string): Promise<Membership | n
       return null;
     }
 
-    // Get user document using Admin SDK
+    // --- 1. Read the user document (always present) ---
     const userDoc = await adminDb.collection('users').doc(userId).get();
+    if (!userDoc.exists) return null;
+    const userData = userDoc.data()!;
 
-    if (!userDoc.exists) {
-      return null;
-    }
-
-    const userData = userDoc.data();
-
-    // Check if user has a stripe subscription ID
-    if (userData?.stripeSubscriptionId) {
+    // --- 2. Optionally read the subscriptions document ---
+    let subscriptionData: Record<string, any> | null = null;
+    const stripeSubId: string | undefined = userData.stripeSubscriptionId;
+    if (stripeSubId) {
       try {
         const subscriptionDoc = await adminDb
           .collection('subscriptions')
-          .doc(userData.stripeSubscriptionId)
+          .doc(stripeSubId)
           .get();
-
         if (subscriptionDoc.exists) {
-          const subscriptionData = subscriptionDoc.data();
-          const createdAt = parseDate(subscriptionData?.createdAt, new Date());
-          // Contract end date is 1 year from subscription creation
-          const contractEndDate = parseDate(
-            subscriptionData?.contractEndDate,
-            new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000)
-          );
-          const planId = subscriptionData?.planId || userData?.plan || 'start';
-          return {
-            userId: userData.uid || userId,
-            planId,
-            status: subscriptionData?.status || 'active',
-            stripeSubscriptionId: subscriptionData?.stripeSubscriptionId || userData.stripeSubscriptionId,
-            stripeCustomerId: subscriptionData?.stripeCustomerId || userData.stripeCustomerId,
-            currentPeriodStart: parseDate(subscriptionData?.currentPeriodStart, new Date()),
-            currentPeriodEnd: parseDate(subscriptionData?.currentPeriodEnd, new Date()),
-            contractEndDate,
-            cancelAtPeriodEnd: subscriptionData?.cancelAtPeriodEnd || false,
-            createdAt,
-            updatedAt: parseDate(subscriptionData?.updatedAt, new Date()),
-            uploadsUsedThisMonth: userData?.uploadsUsedThisMonth || 0,
-            uploadLimit: getUploadLimitForPlan(planId),
-          } as Membership;
+          subscriptionData = subscriptionDoc.data() ?? null;
         }
       } catch (subError) {
-        console.warn('Error fetching subscription by ID, using user data:', subError);
+        console.warn('Error fetching subscription doc, using user data only:', subError);
       }
     }
 
-    // Return basic membership info from user profile
-    const userPlan = userData?.plan || 'start';
-    const isPaidPlan = userPlan === 'smart' || userPlan === 'precision';
-    
-    // Determine status
-    let membershipStatus: 'active' | 'past_due' | 'canceled' | 'trialing' = 'active';
-    if (isPaidPlan && userData?.stripeSubscriptionId) {
-      membershipStatus = 'active';
-    } else if (isPaidPlan) {
-      membershipStatus = 'active'; // User has paid plan but subscription might still be processing
+    // --- 3. Determine planId ---
+    // subscriptions doc is source of truth; fallback to users.plan
+    const planId: string =
+      (subscriptionData?.planId as string | undefined) ||
+      (userData.plan as string | undefined) ||
+      'start';
+
+    // --- 4. Determine effective status ---
+    // users.subscriptionStatus is updated by ALL Stripe webhooks (most reliable).
+    // subscriptions.status can lag. If EITHER says active/trialing → grant active.
+    const rawUserStatus = userData.subscriptionStatus as string | undefined;
+    const rawSubStatus = subscriptionData?.status as string | undefined;
+
+    let effectiveStatus: 'active' | 'past_due' | 'canceled' | 'trialing';
+    if (rawUserStatus === 'trialing' || rawSubStatus === 'trialing') {
+      effectiveStatus = 'trialing';
+    } else if (rawUserStatus === 'active' || rawSubStatus === 'active') {
+      effectiveStatus = 'active';
+    } else if (rawUserStatus === 'past_due' || rawSubStatus === 'past_due') {
+      effectiveStatus = 'past_due';
+    } else if (rawUserStatus === 'canceled' || rawSubStatus === 'canceled') {
+      effectiveStatus = 'canceled';
+    } else {
+      // No explicit status from either source — assume active if there is a valid plan
+      effectiveStatus = planId && planId !== 'none' && planId !== '' ? 'active' : 'canceled';
     }
 
-    const createdAt = parseDate(userData?.createdAt, new Date());
-    // Contract end date is 1 year from account/subscription creation
+    // --- 5. Determine effective currentPeriodEnd ---
+    // Use the LATER of the two sources. Webhooks write `uploadsUsed` and
+    // `currentPeriodEnd` to the users doc on every successful payment, so it
+    // is often fresher than the subscriptions doc.
+    const EPOCH_ZERO = new Date(0);
+    const userPeriodEnd = parseDate(userData.currentPeriodEnd, EPOCH_ZERO);
+    const subPeriodEnd = parseDate(subscriptionData?.currentPeriodEnd, EPOCH_ZERO);
+    const latestPeriodEnd =
+      userPeriodEnd > subPeriodEnd ? userPeriodEnd : subPeriodEnd;
+
+    // If neither doc has a period end, use a safe default
+    const defaultPeriodEnd =
+      planId === 'start'
+        ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // free: long-lived
+        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // paid: 30-day grace
+    const effectivePeriodEnd =
+      latestPeriodEnd.getTime() === EPOCH_ZERO.getTime() ? defaultPeriodEnd : latestPeriodEnd;
+
+    // --- 6. Determine contractEndDate ---
+    // Never stored by webhooks — computed as subscription/account createdAt + 1 year.
+    const createdAt = parseDate(
+      subscriptionData?.createdAt ?? userData.createdAt,
+      new Date()
+    );
     const contractEndDate = parseDate(
-      userData?.contractEndDate,
+      subscriptionData?.contractEndDate ?? userData.contractEndDate,
       new Date(createdAt.getTime() + 365 * 24 * 60 * 60 * 1000)
     );
-    
+
+    // --- 7. Uploads tracking ---
+    // Webhooks write to users.uploadsUsed (not uploadsUsedThisMonth)
+    const uploadsUsedThisMonth: number =
+      (userData.uploadsUsed as number | undefined) ??
+      (userData.uploadsUsedThisMonth as number | undefined) ??
+      0;
+
     return {
-      userId: userData?.uid || userId,
-      planId: userPlan,
-      status: membershipStatus,
-      stripeSubscriptionId: userData?.stripeSubscriptionId,
-      stripeCustomerId: userData?.stripeCustomerId,
-      currentPeriodStart: parseDate(userData?.currentPeriodStart ?? userData?.createdAt, new Date()),
-      currentPeriodEnd: parseDate(
-        userData?.currentPeriodEnd,
-        // If period end is missing (common on free/start), make it long-lived.
-        userPlan === 'start'
-          ? new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000) // 10 years
-          : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) // 30 days
+      userId: (userData.uid as string | undefined) || userId,
+      planId,
+      status: effectiveStatus,
+      stripeSubscriptionId: stripeSubId || subscriptionData?.stripeSubscriptionId,
+      stripeCustomerId:
+        (userData.stripeCustomerId as string | undefined) ||
+        subscriptionData?.stripeCustomerId,
+      currentPeriodStart: parseDate(
+        subscriptionData?.currentPeriodStart ?? userData.currentPeriodStart,
+        new Date()
       ),
+      currentPeriodEnd: effectivePeriodEnd,
       contractEndDate,
-      cancelAtPeriodEnd: false,
+      cancelAtPeriodEnd:
+        (subscriptionData?.cancelAtPeriodEnd as boolean | undefined) ??
+        (userData.cancelAtPeriodEnd as boolean | undefined) ??
+        false,
       createdAt,
-      updatedAt: parseDate(userData?.updatedAt, new Date()),
-      uploadsUsedThisMonth: userData?.uploadsUsedThisMonth || 0,
-      uploadLimit: getUploadLimitForPlan(userPlan),
+      updatedAt: parseDate(subscriptionData?.updatedAt ?? userData.updatedAt, new Date()),
+      uploadsUsedThisMonth,
+      uploadLimit: getUploadLimitForPlan(planId),
     } as Membership;
   } catch (error: any) {
     console.error('Error getting membership (admin):', error);
 
     // Dev resilience: if Firestore Admin is temporarily unavailable locally,
     // don't hard-block Palmira endpoints (they require auth anyway).
-    // This prevents 403s when running without reliable Firestore connectivity.
     const isDev = process.env.NODE_ENV !== 'production';
     const isUnavailable =
       error?.code === 14 ||
