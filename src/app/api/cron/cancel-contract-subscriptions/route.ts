@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe-server';
 import { adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover' as any,
-});
 
 // Secret key to protect cron endpoint (set in environment variables)
 const CRON_SECRET = process.env.CRON_SECRET;
@@ -18,6 +16,7 @@ const CRON_SECRET = process.env.CRON_SECRET;
  * where the contractCancellationDate has passed, and cancels them in Stripe.
  */
 export async function GET(req: NextRequest) {
+  const stripe = getStripe();
   try {
     // Verify this is a legitimate Vercel cron request
     // Vercel sends a special header for cron jobs, or we can use a secret in query params

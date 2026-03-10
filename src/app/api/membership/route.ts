@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
 import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe-server';
 import { 
   canAccessAIAssistant, 
   canAccessPalmira, 
@@ -13,13 +14,11 @@ import {
 } from '@/lib/membership-admin';
 import type { Membership } from '@/lib/membership-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover' as any,
-});
 
 /** Compute contract year end from Stripe subscription (same logic as payment-method "Full Access Until") */
 async function getContractYearEndFromStripe(stripeSubscriptionId: string): Promise<Date | null> {
   try {
+    const stripe = getStripe();
     const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
     const startTimestamp = (subscription as any).start_date ?? subscription.created ?? Math.floor(Date.now() / 1000);
     const startDate = new Date(startTimestamp * 1000);
@@ -33,6 +32,7 @@ async function getContractYearEndFromStripe(stripeSubscriptionId: string): Promi
 }
 
 export async function GET(request: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

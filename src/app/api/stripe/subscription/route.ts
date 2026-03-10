@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe-server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover' as any,
-  maxNetworkRetries: 2,
-  timeout: 10000,
-});
 
 // Helper function to safely convert timestamp to ISO string
 const safeTimestampToISO = (timestamp: number | undefined | null): string | null => {
@@ -23,6 +19,7 @@ const safeTimestampToISO = (timestamp: number | undefined | null): string | null
 
 // GET - Fetch subscription details
 export async function GET(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -360,6 +357,7 @@ export async function GET(req: NextRequest) {
 
 // PATCH - Update subscription (toggle auto-renewal, update payment method)
 export async function PATCH(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -545,6 +543,7 @@ export async function PATCH(req: NextRequest) {
 
 // DELETE - Request cancellation (for 12-month contract, schedules cancellation at contract end)
 export async function DELETE(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -712,6 +711,7 @@ export async function DELETE(req: NextRequest) {
 
 // POST - Reactivate/Undo cancellation
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { getStripe } from '@/lib/stripe-server';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-12-15.clover' as any,
-  maxNetworkRetries: 2,
-  timeout: 10000,
-});
 
 /**
  * POST - Cancel monthly subscription with contract year logic
@@ -24,6 +20,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
  * If user is beyond 12 months: just set cancel_at_period_end = true (like yearly)
  */
 export async function POST(req: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = req.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
