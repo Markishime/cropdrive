@@ -1018,16 +1018,9 @@ CRITICAL: PDF content will be provided in the user message between "=== PDF CONT
   }
 
   if (knowledgeBaseRefs.length > 0) {
-    const knowledgeContext = knowledgeBaseRefs
-      .map((ref, index) => {
-        const source = ref.sourceUrl ? `Source URL: ${ref.sourceUrl}` : 'Source URL: internal knowledge base';
-        return `[KB ${index + 1}] ${ref.title}\n${source}\nContent:\n${ref.contentSnippet}`;
-      })
-      .join('\n\n');
-
     prompt += language === 'ms'
-      ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.\n\n${knowledgeContext}`
-      : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.\n\n${knowledgeContext}`;
+      ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.`
+      : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.`;
   }
 
   return prompt;
