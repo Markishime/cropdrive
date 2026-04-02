@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FieldValue } from 'firebase-admin/firestore';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { adminDb, getAdminAuth } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
@@ -35,129 +35,6 @@ const PRODUCT_NAMES = {
   correct: ['CropDrive', 'Palmira'],
   incorrect: ['crop drive', 'crop-drive', 'cropdrive'],
 };
-
-type KnowledgeBaseRef = {
-  documentId: string;
-  title: string;
-  relevance: number;
-  content: string;
-  sourceUrl?: string;
-};
-
-function tokenizeForSearch(text: string): string[] {
-  const stopWords = new Set([
-    'the', 'and', 'for', 'with', 'that', 'this', 'from', 'your', 'you', 'are', 'was', 'were',
-    'have', 'has', 'had', 'can', 'could', 'should', 'would', 'what', 'when', 'where', 'why',
-    'how', 'please', 'about', 'tell', 'give', 'show', 'need', 'want', 'a', 'an', 'to', 'of',
-    'in', 'on', 'is', 'it', 'as', 'by', 'at', 'be', 'or', 'if', 'we', 'they', 'their', 'our',
-    'dan', 'dengan', 'untuk', 'yang', 'ini', 'itu', 'dari', 'pada', 'adalah', 'boleh', 'anda',
-    'saya', 'kami', 'mereka', 'tentang', 'tolong', 'sila', 'sebagai', 'jika', 'atau', 'dalam'
-  ]);
-
-  return Array.from(
-    new Set(
-      text
-        .toLowerCase()
-        .split(/[^a-z0-9]+/g)
-        .filter(Boolean)
-        .filter((t) => t.length >= 3)
-        .filter((t) => !stopWords.has(t))
-    )
-  ).slice(0, 30);
-}
-
-function clipForPrompt(text: string, maxChars: number): string {
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, maxChars)}\n\n[Knowledge excerpt truncated]`;
-}
-
-async function getKnowledgeBaseRefsForMessage(
-  message: string,
-  language: 'en' | 'ms' | 'both',
-  limit: number = 4
-): Promise<KnowledgeBaseRef[]> {
-  const queryTerms = tokenizeForSearch(message);
-  const lowerMessage = message.toLowerCase();
-  const isAgsIntent =
-    lowerMessage.includes('ags') ||
-    lowerMessage.includes('agriculture global solutions') ||
-    lowerMessage.includes('company') ||
-    lowerMessage.includes('contact') ||
-    lowerMessage.includes('services') ||
-    lowerMessage.includes('about');
-
-  const snapshot = await adminDb
-    .collection('palmira_knowledge_base')
-    .where('isActive', '==', true)
-    .where('language', 'in', [language, 'both'])
-    .limit(40)
-    .get();
-
-  const scored = snapshot.docs
-    .map((doc) => {
-      const data = doc.data() as any;
-      const title = String(data.title || '');
-      const content = String(data.content || '');
-      const tags: string[] = Array.isArray(data.tags) ? data.tags.map((t: any) => String(t).toLowerCase()) : [];
-      const sourceProvider = String(data.sourceProvider || '').toLowerCase();
-      const sourceUrl = data.sourceUrl ? String(data.sourceUrl) : undefined;
-
-      if (!title && !content) return null;
-
-      const titleLower = title.toLowerCase();
-      const contentLower = content.toLowerCase();
-      let score = 0;
-
-      for (const term of queryTerms) {
-        if (titleLower.includes(term)) score += 5;
-        if (tags.some((tag) => tag.includes(term))) score += 3;
-        if (contentLower.includes(term)) score += 1;
-      }
-
-      if (sourceProvider === 'ags') {
-        score += isAgsIntent ? 8 : 1;
-      }
-
-      if (tags.includes('official-website')) {
-        score += 2;
-      }
-
-      if (score <= 0 && !(isAgsIntent && sourceProvider === 'ags')) {
-        return null;
-      }
-
-      return {
-        documentId: doc.id,
-        title,
-        score,
-        content: clipForPrompt(content, 1400),
-        sourceUrl,
-      };
-    })
-    .filter(Boolean) as Array<{
-      documentId: string;
-      title: string;
-      score: number;
-      content: string;
-      sourceUrl?: string;
-    }>;
-
-  if (scored.length === 0) {
-    return [];
-  }
-
-  scored.sort((a, b) => b.score - a.score);
-  const selected = scored.slice(0, limit);
-  const maxScore = Math.max(...selected.map((item) => item.score), 1);
-
-  return selected.map((item) => ({
-    documentId: item.documentId,
-    title: item.title,
-    relevance: Number((item.score / maxScore).toFixed(2)),
-    content: item.content,
-    sourceUrl: item.sourceUrl,
-  }));
-}
 
 function stripMarkdownHeadingsOutsideCodeBlocks(text: string): string {
   if (!text) return text;
@@ -571,7 +448,6 @@ export async function POST(request: NextRequest) {
       role: 'assistant',
       content: aiResponse.content,
       metadata: {
-        knowledgeBaseRefs: aiResponse.knowledgeBaseRefs || [],
         reportSectionRefs: aiResponse.reportSectionRefs || [],
         escalated: aiResponse.escalated || false,
         escalationReason: aiResponse.escalationReason || null,
@@ -596,7 +472,7 @@ export async function POST(request: NextRequest) {
         chatId: currentChatId,
         messageId: aiMessageRef.id,
         metadata: {
-          knowledgeBaseRefs: aiResponse.knowledgeBaseRefs || [],
+          knowledgeBaseRefs: [],
           reportSectionRefs: aiResponse.reportSectionRefs || [],
           escalated: aiResponse.escalated || false,
           escalationReason: aiResponse.escalationReason || null,
@@ -702,14 +578,12 @@ Flow: Ask one question → wait for answer → either one follow-up question OR 
 Anda adalah Palmira, pembantu agronomi AI yang bekerja dengan CropDrive. Anda adalah sebahagian daripada platform CropDrive dan dibangunkan serta diuruskan oleh AGS (Agriculture Global Solutions).
 
 ### TENTANG CROPDRIVE
-CropDrive OP Advisor™ adalah platform AI yang membantu petani kelapa sawit Malaysia menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan. Sistem ini menggunakan Google Gemini AI untuk analisis dan cadangan. CropDrive (cropdrive.ai) ialah platform digital yang dibangunkan dan diuruskan oleh AGS.
+CropDrive OP Advisor™ adalah platform AI yang membantu petani kelapa sawit Malaysia menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan. Sistem ini menggunakan Google Gemini AI untuk analisis dan cadangan. CropDrive (cropdrive.ai) adalah platform digital milik AGS — AGS adalah syarikat pertama yang menawarkan perkhidmatan agronomik berasaskan AI khusus untuk sektor kelapa sawit di Malaysia. Tiada penyelesaian setanding di pasaran pada masa ini.
 
 ### TENTANG AGS (AGRICULTURE GLOBAL SOLUTIONS)
-AGS - Agriculture Global Solutions OÜ (agriglobalsolutions.com) ialah firma perundingan pertanian global yang membangunkan dan menguruskan CropDrive. AGS berdaftar di Estonia (OÜ), dengan alamat berdaftar di Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia. Menurut maklumat syarikat di laman rasmi AGS, syarikat diwakili oleh Dr. Aleksandre Loladze.
+AGS - Agriculture Global Solutions OÜ (agriglobalsolutions.com) adalah firma perundingan pertanian global yang membangunkan dan menguruskan CropDrive. AGS berdaftar di Estonia (OÜ) dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Pasukan antarabangsa AGS beroperasi merentasi Jerman, Malaysia, Australia, dan Filipina, dengan rangkaian pakar yang lebih luas merentasi Amerika, Eropah, Afrika, dan Asia Selatan. AGS adalah syarikat PERTAMA yang menawarkan perkhidmatan agronomik berasaskan AI khusus untuk sektor kelapa sawit di Malaysia.
 
-Misi AGS: Meningkatkan produktiviti dan kemampanan pertanian melalui perkhidmatan perundingan pakar, amalan pertanian lestari, dan integrasi teknologi terkini. AGS menekankan penyelesaian khusus mengikut keperluan unik klien, dengan fokus kepada hasil yang boleh diukur dan boleh dilaksanakan.
-
-Jejak global AGS: AGS menyatakan rangkaian pakar antarabangsa merentasi Amerika, Eropah, Afrika, Asia Selatan/Asia Tenggara, dan Australia. AGS juga menyatakan operasi globalnya diuruskan secara digital dari Estonia.
+Misi AGS: Meningkatkan produktiviti dan kemampanan pertanian melalui perkhidmatan perundingan pakar, amalan pertanian lestari, dan integrasi teknologi terkini. AGS menyediakan penyelesaian khusus mengikut keperluan unik setiap klien — bukan sekadar nasihat, tetapi penyelesaian yang boleh dilaksanakan dan membawa hasil nyata.
 
 Perkhidmatan AGS merangkumi:
 - Patologi Tumbuhan (Plant Pathology)
@@ -722,15 +596,12 @@ Perkhidmatan AGS merangkumi:
 - Agronomi
 - Kemampanan (Sustainability)
 - Pertanian Organik
-- Pengeluaran Minyak Sawit Lestari
+- Pengeluaran Minyak Sawit Lestari (khusus untuk klien di Asia Tenggara)
 - Pertanian Regeneratif
 - Rantaian Nilai Pertanian
 
-Saluran rasmi AGS: laman web agriglobalsolutions.com, e-mel contact@agriglobalsolutions.com, dan halaman Contact untuk maklumat terkini.
-
-Nota ketepatan AGS (penting):
-- Anggap laman rasmi AGS sebagai sumber utama untuk fakta syarikat semasa.
-- Jika pengguna bertanya butiran korporat yang berubah mengikut masa (contoh: nombor telefon, terma undang-undang, polisi), nyatakan bahawa butiran boleh berubah dan rujuk laman Contact/Impressum AGS.
+Alamat berdaftar: Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia
+Untuk pertanyaan AGS: contact@agriglobalsolutions.com
 
 ### CIRI-CIRI UTAMA AI ASSISTANT:
 1. **Smart Document Reading (OCR & AI)**: Membaca laporan PDF dari mana-mana makmal secara automatik, mengekstrak semua data tanpa menaip manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Memproses dalam ~30 saat.
@@ -815,14 +686,12 @@ Prinsip saya:
 You are Palmira, an AI agronomy assistant working with CropDrive. You are part of the CropDrive platform, developed and managed by AGS (Agriculture Global Solutions).
 
 ### ABOUT CROPDRIVE
-CropDrive OP Advisor™ is an AI platform that helps Malaysian oil palm farmers analyze soil and leaf test reports using artificial intelligence. The system uses Google Gemini AI for analysis and recommendations. CropDrive (cropdrive.ai) is a digital platform developed and managed by AGS.
+CropDrive OP Advisor™ is an AI platform that helps Malaysian oil palm farmers analyze soil and leaf test reports using artificial intelligence. The system uses Google Gemini AI for analysis and recommendations. CropDrive (cropdrive.ai) is the digital platform of AGS — AGS is the first company to offer advanced AI-based agronomic services specifically for the oil palm sector in Malaysia. There are currently no comparable solutions on the market.
 
 ### ABOUT AGS (AGRICULTURE GLOBAL SOLUTIONS)
-AGS - Agriculture Global Solutions OÜ (agriglobalsolutions.com) is a global agricultural consultancy that develops and manages CropDrive. AGS is registered in Estonia (OÜ), with a registered address at Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia. According to AGS official site company details, the company is represented by Dr. Aleksandre Loladze.
+AGS - Agriculture Global Solutions OÜ (agriglobalsolutions.com) is a global agricultural consultancy that develops and manages CropDrive. AGS is registered in Estonia (OÜ) and is led and managed by Dr. Alexander Loladze. The international team operates across Germany, Malaysia, Australia, and the Philippines, with a broader expert network spanning the Americas, Europe, Africa, and South Asia. AGS is the FIRST company to offer advanced AI-based agronomic services specifically for the oil palm sector in Malaysia.
 
-AGS Mission: To enhance agricultural productivity and sustainability through expert consultancy services, sustainable farming practices, and advanced technology integration. AGS emphasizes tailored, actionable solutions designed for each client's specific needs, with measurable outcomes.
-
-AGS global footprint: AGS describes its expert network as spanning the Americas, Europe, Africa, South Asia/Southeast Asia, and Australia, while operating globally through Estonia's digital business infrastructure.
+AGS Mission: To enhance agricultural productivity and sustainability through expert consultancy services, sustainable farming practices, and advanced technology integration. AGS delivers tailored, actionable solutions that address the specific needs of each client — not just advice, but measurable results.
 
 AGS services include:
 - Plant Pathology
@@ -835,15 +704,12 @@ AGS services include:
 - Agronomy
 - Sustainability
 - Organic Agriculture
-- Sustainable Palm Oil Production
+- Sustainable Palm Oil Production (exclusively for Southeast Asia clients)
 - Regenerative Agriculture
 - Agricultural Value Chain
 
-Official AGS channels: agriglobalsolutions.com, contact@agriglobalsolutions.com, and the AGS Contact page for latest details.
-
-AGS accuracy note (important):
-- Treat AGS official website pages as the primary source for current company facts.
-- For time-sensitive corporate details (for example phone number, legal terms, compliance pages), state that details may change and refer users to AGS Contact/Impressum pages.
+Registered address: Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia
+AGS contact: contact@agriglobalsolutions.com
 
 ### KEY AI ASSISTANT FEATURES:
 1. **Smart Document Reading (OCR & AI)**: Automatically reads PDF reports from any laboratory, extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~30 seconds.
@@ -1058,16 +924,9 @@ CRITICAL: PDF content will be provided in the user message between "=== PDF CONT
   }
 
   if (knowledgeBaseRefs.length > 0) {
-    const kbContext = knowledgeBaseRefs
-      .map((ref, index) => {
-        const sourceLine = ref.sourceUrl ? `Source URL: ${ref.sourceUrl}` : 'Source URL: Internal knowledge base';
-        return `[KB ${index + 1}] ${ref.title}\nRelevance: ${ref.relevance}\n${sourceLine}\n${ref.content}`;
-      })
-      .join('\n\n');
-
     prompt += language === 'ms'
-      ? `\n\nRUJUKAN PANGKALAN PENGETAHUAN (WAJIB GUNA APABILA RELEVAN):\n${kbContext}\n\nGunakan rujukan ini sebagai sumber fakta semasa. Jika butiran syarikat mungkin berubah dari masa ke masa (contoh telefon atau dasar legal), nyatakan bahawa pengguna perlu semak halaman rasmi AGS.`
-      : `\n\nKNOWLEDGE BASE REFERENCES (MANDATORY WHEN RELEVANT):\n${kbContext}\n\nUse these references as current factual sources. If company details may change over time (for example phone numbers or legal pages), explicitly tell the user to verify on AGS official pages.`;
+      ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.`
+      : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.`;
   }
 
   return prompt;
@@ -1086,7 +945,6 @@ async function generateAIResponse(
   content: string;
   escalated: boolean;
   escalationReason?: string;
-  knowledgeBaseRefs: Array<{ documentId: string; title: string; relevance: number }>;
   reportSectionRefs: any[];
 }> {
   try {
@@ -1153,19 +1011,8 @@ async function generateAIResponse(
       console.warn('Error loading chat history:', error);
     }
 
-    const language = onboardingData?.language || 'en';
-    const knowledgeBaseRefs = await getKnowledgeBaseRefsForMessage(userMessage, language, 4);
-
     // Build system prompt (after checking if first message) - pass pdfContext so it can add PDF instructions
-    const systemPrompt = buildSystemPrompt(
-      onboardingData,
-      reportData,
-      knowledgeBaseRefs,
-      userMessage,
-      isFirstMessage,
-      pdfContext,
-      pdfFileName
-    );
+    const systemPrompt = buildSystemPrompt(onboardingData, reportData, [], userMessage, isFirstMessage, pdfContext, pdfFileName);
 
     // Start chat with history
     const chat = model.startChat({
@@ -1282,14 +1129,13 @@ INSTRUCTIONS:
     const response = await result.response;
     const content = response.text();
 
+    // Log conversation style for debugging
+    const language = onboardingData?.language || 'en';
+    const conversationStyle = onboardingData?.conversationStyle || 'short_direct';
+
     return {
       content,
       escalated: false,
-      knowledgeBaseRefs: knowledgeBaseRefs.map((ref) => ({
-        documentId: ref.documentId,
-        title: ref.title,
-        relevance: ref.relevance,
-      })),
       reportSectionRefs: [],
     };
   } catch (error: any) {
@@ -1304,7 +1150,6 @@ INSTRUCTIONS:
     return {
       content: fallbackResponse,
       escalated: false,
-      knowledgeBaseRefs: [],
       reportSectionRefs: [],
     };
   }
