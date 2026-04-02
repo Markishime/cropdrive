@@ -147,9 +147,7 @@ export default function PalmiraPage() {
   };
 
   // Loading state
-  // loadingOnboarding only stalls the render when we already know the user has access
-  // (checkOnboarding never runs when membershipActive is false, so we must not wait for it)
-  if (!mounted || authLoading || loadingMembership || (loadingOnboarding && membershipActive)) {
+  if (!mounted || authLoading || loadingMembership || loadingOnboarding) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-green-50">
         <div className="flex flex-col items-center space-y-4">
