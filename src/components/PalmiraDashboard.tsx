@@ -1678,7 +1678,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             transition={{ type: "spring", stiffness: 300 }}
           >
             <div className="max-w-4xl mx-auto">
-              {canAccessAI ? (
+              {canAccessAI && canPerformAnalysis ? (
               <>
                 <motion.div
                   className="flex items-end gap-3 p-2 bg-gray-50 rounded-2xl border border-gray-200"
