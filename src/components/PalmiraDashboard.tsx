@@ -1804,6 +1804,46 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   </p>
                 </motion.div>
               </>
+            ) : canAccessAI && hasReachedUploadLimit ? (
+              <motion.div
+                className="text-center py-6"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <motion.div
+                  className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 shadow-sm"
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.05, 1]
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    <FontAwesomeIcon icon={faFileAlt} className="w-10 h-10 text-blue-600 mx-auto mb-3" />
+                  </motion.div>
+                  <h3 className="font-bold text-blue-800 mb-3 text-lg font-heading">
+                    {language === 'ms' ? 'Had Muat Naik Dicapai' : 'Upload Limit Reached'}
+                  </h3>
+                  <p className="text-sm text-blue-700 leading-relaxed mb-3">
+                    {language === 'ms'
+                      ? `Anda telah menggunakan ${uploadsUsedThisMonth} daripada ${uploadLimit === -1 ? 'tanpa had' : uploadLimit} muat naik bulan ini. Anda masih boleh melihat sejarah analisis dan sembang anda.`
+                      : `You have used ${uploadsUsedThisMonth} of ${uploadLimit === -1 ? 'unlimited' : uploadLimit} uploads this month. You can still view your analysis history and chats.`}
+                  </p>
+                  <button
+                    onClick={() => router.push('/pricing')}
+                    className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  >
+                    {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
+                  </button>
+                </motion.div>
+              </motion.div>
             ) : (
               <motion.div
                 className="text-center py-6"
