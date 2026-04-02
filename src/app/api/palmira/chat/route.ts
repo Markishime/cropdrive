@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
@@ -18,6 +17,14 @@ interface ChatRequest {
     sectionId?: string;
     previousMessages?: number;
   };
+}
+
+interface KnowledgeBaseRef {
+  documentId: string;
+  title: string;
+  relevance: number;
+  contentSnippet: string;
+  sourceUrl?: string;
 }
 
 // Safety boundaries - topics to refuse
@@ -264,6 +271,88 @@ function normalizeChecklistFormattingOutsideCodeBlocks(text: string): string {
   return out.join('');
 }
 
+function tokenizeForSearch(input: string): string[] {
+  const stopWords = new Set([
+    'the', 'and', 'for', 'with', 'that', 'this', 'from', 'your', 'you', 'are', 'was', 'were', 'have', 'has', 'had',
+    'can', 'could', 'should', 'would', 'what', 'when', 'where', 'why', 'how', 'please', 'about', 'into', 'onto',
+    'dengan', 'untuk', 'yang', 'dan', 'dari', 'dalam', 'adalah', 'atau', 'pada', 'saya', 'kami', 'anda', 'boleh',
+  ]);
+
+  return Array.from(
+    new Set(
+      input
+        .toLowerCase()
+        .split(/[^a-z0-9]+/g)
+        .filter(Boolean)
+        .filter(token => token.length >= 3)
+        .filter(token => !stopWords.has(token))
+    )
+  ).slice(0, 24);
+}
+
+async function retrieveRelevantKnowledgeBase(userMessage: string, language: 'en' | 'ms'): Promise<KnowledgeBaseRef[]> {
+  const terms = tokenizeForSearch(userMessage);
+  let snapshot;
+
+  try {
+    snapshot = await adminDb
+      .collection('palmira_knowledge_base')
+      .where('isActive', '==', true)
+      .where('language', 'in', [language, 'both'])
+      .limit(40)
+      .get();
+  } catch {
+    snapshot = await adminDb
+      .collection('palmira_knowledge_base')
+      .where('isActive', '==', true)
+      .limit(40)
+      .get();
+  }
+
+  const scored = snapshot.docs
+    .map((doc) => {
+      const data = doc.data() as any;
+      const title = String(data.title || '');
+      const content = String(data.content || '');
+      const tags: string[] = Array.isArray(data.tags) ? data.tags.map((tag: unknown) => String(tag).toLowerCase()) : [];
+      const category = String(data.category || '').toLowerCase();
+
+      const haystack = `${title}\n${content}`.toLowerCase();
+      let score = 0;
+
+      for (const term of terms) {
+        if (title.toLowerCase().includes(term)) score += 3;
+        if (tags.some((tag: string) => tag.includes(term))) score += 2;
+        if (category.includes(term)) score += 1;
+        if (haystack.includes(term)) score += 1;
+      }
+
+      // Keep AGS auto-synced knowledge slightly prioritized when user asks AGS-related questions.
+      if ((haystack.includes('ags') || haystack.includes('agriculture global solutions')) && terms.some(t => ['ags', 'agriculture', 'global', 'solutions', 'cropdrive'].includes(t))) {
+        score += 2;
+      }
+
+      const snippet = content.slice(0, 1500);
+
+      return {
+        documentId: doc.id,
+        title,
+        relevance: score,
+        contentSnippet: snippet,
+        sourceUrl: typeof data.sourceUrl === 'string' ? data.sourceUrl : undefined,
+      } satisfies KnowledgeBaseRef;
+    })
+    .sort((a, b) => b.relevance - a.relevance);
+
+  const bestMatches = scored.filter(doc => doc.relevance > 0).slice(0, 6);
+  if (bestMatches.length > 0) {
+    return bestMatches;
+  }
+
+  // Fallback to a few active docs if no lexical match is found.
+  return scored.slice(0, 3);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authHeader = request.headers.get('authorization');
@@ -275,7 +364,7 @@ export async function POST(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAuth();
+    const auth = adminAuth;
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
@@ -413,6 +502,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate AI response using Google Gemini (use truncated finalMessage to avoid oversized prompts)
+    const promptLanguage: 'en' | 'ms' = onboardingData?.language === 'ms' ? 'ms' : 'en';
+    const knowledgeBaseRefs = await retrieveRelevantKnowledgeBase(finalMessage, promptLanguage);
+
     const aiResponseRaw = await generateAIResponse(
       finalMessage,
       resolvedPdfContext,
@@ -420,7 +512,8 @@ export async function POST(request: NextRequest) {
       onboardingData,
       activeReportData,
       currentChatId,
-      userId
+      userId,
+      knowledgeBaseRefs
     );
     const aiResponse = {
       ...aiResponseRaw,
@@ -473,7 +566,7 @@ export async function POST(request: NextRequest) {
         chatId: currentChatId,
         messageId: aiMessageRef.id,
         metadata: {
-          knowledgeBaseRefs: [],
+            knowledgeBaseRefs: aiResponse.knowledgeBaseRefs || [],
           reportSectionRefs: aiResponse.reportSectionRefs || [],
           escalated: aiResponse.escalated || false,
           escalationReason: aiResponse.escalationReason || null,
@@ -493,7 +586,7 @@ export async function POST(request: NextRequest) {
 function buildSystemPrompt(
   onboardingData: any,
   reportData: any,
-  knowledgeBaseRefs: any[],
+  knowledgeBaseRefs: KnowledgeBaseRef[],
   userMessage?: string,
   isFirstMessage: boolean = false,
   pdfContext?: string,
@@ -925,9 +1018,16 @@ CRITICAL: PDF content will be provided in the user message between "=== PDF CONT
   }
 
   if (knowledgeBaseRefs.length > 0) {
+    const knowledgeContext = knowledgeBaseRefs
+      .map((ref, index) => {
+        const source = ref.sourceUrl ? `Source URL: ${ref.sourceUrl}` : 'Source URL: internal knowledge base';
+        return `[KB ${index + 1}] ${ref.title}\n${source}\nContent:\n${ref.contentSnippet}`;
+      })
+      .join('\n\n');
+
     prompt += language === 'ms'
-      ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.`
-      : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.`;
+      ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.\n\n${knowledgeContext}`
+      : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.\n\n${knowledgeContext}`;
   }
 
   return prompt;
@@ -941,11 +1041,18 @@ async function generateAIResponse(
   onboardingData: any,
   reportData: any,
   chatId: string,
-  userId: string
+  userId: string,
+  knowledgeBaseRefs: KnowledgeBaseRef[]
 ): Promise<{
   content: string;
   escalated: boolean;
   escalationReason?: string;
+  knowledgeBaseRefs: Array<{
+    documentId: string;
+    title: string;
+    relevance: number;
+    sourceUrl?: string;
+  }>;
   reportSectionRefs: any[];
 }> {
   try {
@@ -1013,7 +1120,7 @@ async function generateAIResponse(
     }
 
     // Build system prompt (after checking if first message) - pass pdfContext so it can add PDF instructions
-    const systemPrompt = buildSystemPrompt(onboardingData, reportData, [], userMessage, isFirstMessage, pdfContext, pdfFileName);
+    const systemPrompt = buildSystemPrompt(onboardingData, reportData, knowledgeBaseRefs, userMessage, isFirstMessage, pdfContext, pdfFileName);
 
     // Start chat with history
     const chat = model.startChat({
@@ -1137,6 +1244,12 @@ INSTRUCTIONS:
     return {
       content,
       escalated: false,
+      knowledgeBaseRefs: knowledgeBaseRefs.map(ref => ({
+        documentId: ref.documentId,
+        title: ref.title,
+        relevance: ref.relevance,
+        sourceUrl: ref.sourceUrl,
+      })),
       reportSectionRefs: [],
     };
   } catch (error: any) {
@@ -1151,6 +1264,12 @@ INSTRUCTIONS:
     return {
       content: fallbackResponse,
       escalated: false,
+      knowledgeBaseRefs: knowledgeBaseRefs.map(ref => ({
+        documentId: ref.documentId,
+        title: ref.title,
+        relevance: ref.relevance,
+        sourceUrl: ref.sourceUrl,
+      })),
       reportSectionRefs: [],
     };
   }
