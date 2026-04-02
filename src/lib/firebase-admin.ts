@@ -23,32 +23,24 @@ function getApp(): admin.app.App {
   });
 }
 
-/**
- * Returns the Firebase Admin Auth instance, ensuring the app is initialised first.
- * Use this instead of `getAuth()` from 'firebase-admin/auth' so that our lazy
- * initialisation always runs before any auth operation is attempted.
- */
-export function getAdminAuth(): admin.auth.Auth {
-  return getApp().auth();
-}
+export const adminAuth = new Proxy({} as admin.auth.Auth, {
+  get(_t, prop) {
+    return (getApp().auth() as any)[prop];
+  },
+});
 
-/**
- * Helper proxy factory — binds every method to its service instance so that
- * detached property access (e.g. `const fn = proxy.method; fn()`) works safely.
- */
-function makeProxy<T extends object>(getService: () => T): T {
-  return new Proxy({} as T, {
-    get(_t, prop: string | symbol) {
-      const service = getService();
-      const val = (service as any)[prop];
-      return typeof val === 'function' ? (val as Function).bind(service) : val;
-    },
-  });
-}
+export const adminDb = new Proxy({} as admin.firestore.Firestore, {
+  get(_t, prop) {
+    return (getApp().firestore() as any)[prop];
+  },
+});
 
-export const adminAuth = makeProxy<admin.auth.Auth>(() => getApp().auth());
-export const adminDb   = makeProxy<admin.firestore.Firestore>(() => getApp().firestore());
 export const adminFirestore = adminDb;
-export const adminStorage   = makeProxy<admin.storage.Storage>(() => getApp().storage());
+
+export const adminStorage = new Proxy({} as admin.storage.Storage, {
+  get(_t, prop) {
+    return (getApp().storage() as any)[prop];
+  },
+});
 
 export default admin;

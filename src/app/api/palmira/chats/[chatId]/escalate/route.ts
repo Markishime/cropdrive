@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { adminDb, getAdminAuth } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 
 export async function POST(
@@ -17,7 +18,7 @@ export async function POST(
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAdminAuth();
+    const auth = getAuth();
     const decodedToken = await auth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
