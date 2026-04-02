@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
+import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { 
   canAccessAIAssistant, 
@@ -31,6 +32,7 @@ async function getContractYearEndFromStripe(stripeSubscriptionId: string): Promi
 }
 
 export async function GET(request: NextRequest) {
+  const stripe = getStripe();
   try {
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {

@@ -257,29 +257,20 @@ export function hasReachedUploadLimit(membership: Membership | null): boolean {
 /**
  * Palmira access gate.
  *
- * Product requirement: All subscribed users can access Palmira until their
- * subscription expires. Access is granted when:
- *   1. Subscription status is 'active' or 'trialing' (currently paying), OR
- *   2. Subscription was cancelled but the paid billing period hasn't ended yet, OR
- *   3. Still within the original 1-year contract window (e.g., status stale in DB).
- *
- * Users with no plan at all cannot access Palmira.
+ * Product requirement: Users within their 1-year contract period can access 
+ * the AI assistant to view their history and reports. The "Subscription Expired"
+ * message only shows after the 1-year contract ends.
+ * 
+ * For users with no plan at all, they cannot access Palmira.
  */
 export function canAccessPalmira(membership: Membership | null): boolean {
   if (!membership) return false;
   const planId = String(membership.planId || '').toLowerCase().trim();
-
-  // Must have a valid plan (not free/no plan)
+  
+  // Must have a valid plan
   if (planId === '' || planId === 'none') return false;
-
-  // Active and trialing subscriptions always have access
-  if (membership.status === 'active' || membership.status === 'trialing') return true;
-
-  // Cancelled/past_due: still grant access if within their paid billing period
-  const now = new Date();
-  if (membership.currentPeriodEnd > now) return true;
-
-  // Final fallback: within the original 1-year contract window
+  
+  // Check if within 1-year contract period
   return isWithinContractPeriod(membership);
 }
 
