@@ -1164,10 +1164,11 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
   // If this payment intent is associated with an invoice, the invoice.paid event
   // will handle the main processing. This is just for logging/verification.
-  if (paymentIntent.invoice) {
-    const invoiceId = typeof paymentIntent.invoice === 'string' 
-      ? paymentIntent.invoice 
-      : (paymentIntent.invoice as Stripe.Invoice).id;
+  const invoiceRef = (paymentIntent as Stripe.PaymentIntent & { invoice?: string | Stripe.Invoice | null }).invoice;
+  if (invoiceRef) {
+    const invoiceId = typeof invoiceRef === 'string' 
+      ? invoiceRef 
+      : invoiceRef.id;
     console.log('💡 Payment intent linked to invoice:', invoiceId, '- invoice.paid will handle processing');
   } else {
     // One-time payment (not subscription) - could be handled here if needed
