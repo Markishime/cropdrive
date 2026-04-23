@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -22,7 +22,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [shouldShowSuccess, setShouldShowSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
 
   const { signIn, user, loading: authLoading } = useAuth();
   const router = useRouter();

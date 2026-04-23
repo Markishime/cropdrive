@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -49,7 +50,7 @@ function getResolvedVideoId(ep: PodcastEpisode): string | null {
 export default function PodcastsPage() {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ms'>('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +58,7 @@ export default function PodcastsPage() {
 
   useEffect(() => {
     setMounted(true);
-    setLanguage(getCurrentLanguage() as 'en' | 'ms');
+    setLanguage(getCurrentLanguage());
   }, []);
 
   useEffect(() => {
@@ -93,7 +94,8 @@ export default function PodcastsPage() {
     );
   }
 
-  const t = (en: string, ms: string) => (language === 'ms' ? ms : en);
+  const t = (en: string, ms: string) => (language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en);
+  const localize = (en: string, ms: string) => (language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
@@ -244,10 +246,10 @@ export default function PodcastsPage() {
                   {/* Content */}
                   <div className="flex flex-1 flex-col justify-center p-6 sm:p-8 lg:p-10">
                     <h3 className="font-heading text-2xl sm:text-3xl font-bold text-gray-900 mb-4 group-hover:text-green-700 transition-colors leading-tight">
-                      {language === 'ms' ? episodes[0].titleMs : episodes[0].title}
+                      {localize(episodes[0].title, episodes[0].titleMs)}
                     </h3>
                     <p className="text-gray-600 font-body leading-relaxed line-clamp-4 mb-6">
-                      {language === 'ms' ? episodes[0].descriptionMs : episodes[0].description || t('CropDrive & AGS insights.', 'Pandangan CropDrive & AGS.')}
+                      {localize(episodes[0].description || t('CropDrive & AGS insights.', 'Pandangan CropDrive & AGS.'), episodes[0].descriptionMs || 'Pandangan CropDrive & AGS.')}
                     </p>
                     <div className="flex items-center gap-4">
                       <span className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-green-100 text-green-700 font-semibold text-sm hover:bg-green-200 transition-colors">
@@ -283,8 +285,8 @@ export default function PodcastsPage() {
 
               <div className="grid gap-4">
                 {episodes.map((ep, index) => {
-                  const title = language === 'ms' ? ep.titleMs : ep.title;
-                  const desc = language === 'ms' ? ep.descriptionMs : ep.description;
+                  const title = localize(ep.title, ep.titleMs);
+                  const desc = localize(ep.description, ep.descriptionMs);
                   const videoId = getResolvedVideoId(ep);
                   const thumb = ep.thumbnail || (videoId ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` : null);
                   const episodeNum = episodes.length - index;
@@ -348,7 +350,7 @@ export default function PodcastsPage() {
       <AnimatePresence>
         {selectedEpisode && (() => {
           const resolvedVideoId = getResolvedVideoId(selectedEpisode);
-          const title = language === 'ms' ? selectedEpisode.titleMs : selectedEpisode.title;
+          const title = localize(selectedEpisode.title, selectedEpisode.titleMs);
           return (
             <motion.div
               initial={{ opacity: 0 }}

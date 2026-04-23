@@ -19,6 +19,7 @@ import {
 import Button from './ui/Button';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import type { Language } from '@/i18n';
 
 const CONVERSATION_STYLES = [
   {
@@ -67,7 +68,7 @@ interface Report {
 interface PalmiraChatProps {
   chatId?: string;
   reportId?: string;
-  language: 'en' | 'ms';
+  language: Language;
   onReportSelect?: (reportId: string) => void;
 }
 

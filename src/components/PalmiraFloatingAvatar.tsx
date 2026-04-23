@@ -7,9 +7,10 @@ import { useAuth } from '@/lib/auth';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWandSparkles } from '@fortawesome/free-solid-svg-icons';
 import Image from 'next/image';
+import type { Language } from '@/i18n';
 
 interface PalmiraFloatingAvatarProps {
-  language?: 'en' | 'ms';
+  language?: Language;
 }
 
 export default function PalmiraFloatingAvatar({ language = 'en' }: PalmiraFloatingAvatarProps) {

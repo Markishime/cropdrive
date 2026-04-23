@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation, getCurrentLanguage, setLanguage } from '@/i18n';
+import { useTranslation, type Language } from '@/i18n';
 import toast from 'react-hot-toast';
 import Button from './ui/Button';
+import { useLanguage } from './LanguageProvider';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUser,
@@ -20,19 +21,19 @@ import {
 
 export const AuthenticatedNavbar: React.FC = () => {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const { user, signOut } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isLandingPage = pathname === '/';
+  const languageMenuRef = useRef<HTMLDivElement>(null);
+  const { language: currentLang, setLanguage } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
-    const lang = getCurrentLanguage();
-    setCurrentLang(lang);
   }, []);
 
   useEffect(() => {
@@ -63,12 +64,140 @@ export const AuthenticatedNavbar: React.FC = () => {
   }, [isLandingPage]);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
+  const translateLabel = (english: string, malay: string, indonesian = malay) => (
+    language === 'en' ? english : language === 'id' ? indonesian : malay
+  );
+  const languageOptions: Array<{ value: Language; code: string; label: string }> = [
+    { value: 'en', code: 'EN', label: 'English' },
+    { value: 'ms', code: 'MS', label: 'Bahasa Melayu' },
+    { value: 'id', code: 'ID', label: 'Bahasa Indonesia' },
+  ];
 
-  const toggleLanguage = () => {
-    const newLanguage = language === 'en' ? 'ms' : 'en';
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      if (languageMenuRef.current && !languageMenuRef.current.contains(event.target as Node)) {
+        setShowLanguageMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  const getLocalizedPath = (newLanguage: Language) => {
+    if (!pathname) {
+      return pathname;
+    }
+
+    if (/^\/(en|ms|id)(?=\/|$)/.test(pathname)) {
+      return pathname.replace(/^\/(en|ms|id)(?=\/|$)/, `/${newLanguage}`);
+    }
+
+    return pathname;
+  };
+
+  const handleLanguageSelect = (newLanguage: Language) => {
+    setShowLanguageMenu(false);
+
+    if (newLanguage === currentLang) {
+      return;
+    }
+
+    const nextPath = getLocalizedPath(newLanguage);
+
     setLanguage(newLanguage);
-    setCurrentLang(newLanguage);
-    toast.success(newLanguage === 'ms' ? 'Bahasa ditukar!' : 'Language changed!');
+
+    if (nextPath && nextPath !== pathname) {
+      router.push(nextPath);
+    }
+
+    toast.success(
+      newLanguage === 'id'
+        ? 'Bahasa diubah ke Bahasa Indonesia'
+        : newLanguage === 'ms'
+        ? 'Bahasa ditukar ke Bahasa Melayu'
+        : 'Language changed to English'
+    );
+  };
+
+  const renderLanguageDropdown = () => {
+    const overlayTheme = isLandingPage && !scrolled;
+
+    return (
+      <div ref={languageMenuRef} className="relative">
+        <button
+          onClick={() => setShowLanguageMenu((current) => !current)}
+          className={`relative flex cursor-pointer items-center gap-2 rounded-full p-1 transition-all duration-300 ${
+            overlayTheme
+              ? 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+              : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+          }`}
+          aria-haspopup="menu"
+          aria-expanded={showLanguageMenu}
+          title={translateLabel('Choose language', 'Pilih bahasa', 'Pilih bahasa')}
+        >
+          <span className="rounded-full bg-white px-3 py-1.5 text-xs font-black tracking-[0.24em] text-green-800 shadow-xl">
+            {language.toUpperCase()}
+          </span>
+          <svg
+            className={`mr-2 h-4 w-4 transition-transform duration-200 ${showLanguageMenu ? 'rotate-180' : ''}`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        <AnimatePresence>
+          {showLanguageMenu && (
+            <motion.div
+              initial={{ opacity: 0, y: -8, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -8, scale: 0.98 }}
+              transition={{ duration: 0.18 }}
+              className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
+                overlayTheme ? 'border-yellow-400/30 bg-gray-900/95' : 'border-green-200 bg-white/95'
+              }`}
+              role="menu"
+            >
+              <div className="p-2">
+                {languageOptions.map((option) => {
+                  const active = option.value === currentLang;
+
+                  return (
+                    <button
+                      key={option.value}
+                      onClick={() => handleLanguageSelect(option.value)}
+                      className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-all duration-200 ${
+                        active
+                          ? overlayTheme
+                            ? 'bg-yellow-400/20 text-yellow-300'
+                            : 'bg-green-50 text-green-700'
+                          : overlayTheme
+                          ? 'text-white hover:bg-white/10'
+                          : 'text-gray-700 hover:bg-green-50/80'
+                      }`}
+                      role="menuitem"
+                    >
+                      <div>
+                        <div className="text-sm font-bold">{option.label}</div>
+                        <div className={`text-xs ${overlayTheme ? 'text-gray-400' : 'text-gray-500'}`}>{option.code}</div>
+                      </div>
+                      {active && (
+                        <span className={`text-xs font-bold uppercase tracking-[0.2em] ${overlayTheme ? 'text-yellow-300' : 'text-green-600'}`}>
+                          {translateLabel('Active', 'Aktif', 'Aktif')}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
   };
 
   const handleSignOut = async () => {
@@ -76,7 +205,7 @@ export const AuthenticatedNavbar: React.FC = () => {
       await signOut(language);
       router.push('/');
     } catch (error) {
-      toast.error(language === 'ms' ? 'Ralat log keluar' : 'Error logging out');
+      toast.error(translateLabel('Error logging out', 'Ralat log keluar', 'Terjadi kesalahan saat keluar'));
     }
   };
 
@@ -104,7 +233,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover w-full h-full"
+                  className="object-cover"
                   priority
                 />
               </div>
@@ -126,37 +255,7 @@ export const AuthenticatedNavbar: React.FC = () => {
             {/* Right Side - User Info and Dashboard Button */}
             <div className="flex items-center space-x-2 sm:space-x-3 ml-auto">
               {/* Language Switcher */}
-              <button
-                onClick={toggleLanguage}
-                className="relative flex items-center rounded-full p-1 transition-all duration-300 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-                title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
-              >
-                <div className="relative flex items-center">
-                  <motion.div
-                    className="absolute left-0 h-8 rounded-full bg-white shadow-xl"
-                    initial={false}
-                    animate={{
-                      x: language === 'en' ? 0 : 44,
-                      width: 44,
-                    }}
-                    transition={{
-                      type: 'spring',
-                      stiffness: 400,
-                      damping: 25,
-                    }}
-                  />
-                  <span className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'en' ? (scrolled ? 'text-green-700' : 'text-green-700') : (scrolled ? 'text-gray-400' : 'text-white/60')
-                  }`}>
-                    EN
-                  </span>
-                  <span className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'ms' ? (scrolled ? 'text-green-700' : 'text-green-700') : (scrolled ? 'text-gray-400' : 'text-white/60')
-                  }`}>
-                    MS
-                  </span>
-                </div>
-              </button>
+              {renderLanguageDropdown()}
 
               {/* User Name */}
               <div className={`hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg ${
@@ -180,7 +279,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                     : 'bg-yellow-400 text-green-900 hover:bg-yellow-300'
                 }`}>
                   <FontAwesomeIcon icon={faGauge} className="w-4 h-4 mr-2" />
-                  {language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
+                  {translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}
                 </Button>
               </Link>
 
@@ -222,7 +321,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
                           >
                             <FontAwesomeIcon icon={faGauge} className="w-5 h-5" />
-                            <span className="font-medium">{language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}</span>
+                            <span className="font-medium">{translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}</span>
                           </Link>
                           <Link
                             href="/profile"
@@ -230,7 +329,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-all"
                           >
                             <FontAwesomeIcon icon={faUser} className="w-5 h-5" />
-                            <span className="font-medium">{language === 'ms' ? 'Profil' : 'Profile'}</span>
+                            <span className="font-medium">{translateLabel('Profile', 'Profil', 'Profil')}</span>
                           </Link>
                           <div className="border-t border-gray-200 my-1"></div>
                           <button
@@ -241,7 +340,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                             className="flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all w-full"
                           >
                             <FontAwesomeIcon icon={faRightFromBracket} className="w-5 h-5" />
-                            <span className="font-medium">{language === 'ms' ? 'Log Keluar' : 'Logout'}</span>
+                            <span className="font-medium">{translateLabel('Logout', 'Log Keluar', 'Keluar')}</span>
                           </button>
                         </div>
                       </motion.div>
@@ -271,55 +370,14 @@ export const AuthenticatedNavbar: React.FC = () => {
               <Link
                 href="/admin"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/40 text-yellow-200 hover:bg-yellow-400/30 hover:text-white transition-colors font-medium text-sm"
-                title={language === 'ms' ? 'Urus halaman' : 'Manage pages'}
+                title={translateLabel('Manage pages', 'Urus halaman', 'Kelola halaman')}
               >
                 <FontAwesomeIcon icon={faScrewdriverWrench} className="w-4 h-4" />
-                <span className="hidden sm:inline">{language === 'ms' ? 'Urus' : 'Manage'}</span>
+                <span className="hidden sm:inline">{translateLabel('Manage', 'Urus', 'Kelola')}</span>
               </Link>
             )}
-            {/* Language Switcher - Toggle Switch */}
-            <button
-              onClick={toggleLanguage}
-              className="relative flex items-center rounded-full p-1 transition-all duration-300 bg-white/20 hover:bg-white/30 backdrop-blur-sm"
-              title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
-            >
-              <div className="relative flex items-center">
-                {/* Background slider */}
-                <motion.div
-                  className="absolute left-0 h-8 rounded-full bg-white shadow-xl"
-                  initial={false}
-                  animate={{
-                    x: language === 'en' ? 0 : 44,
-                    width: 44,
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
-                  }}
-                />
-                {/* EN Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'en'
-                      ? 'text-green-700'
-                      : 'text-white/60'
-                  }`}
-                >
-                  EN
-                </span>
-                {/* MS Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'ms'
-                      ? 'text-green-700'
-                      : 'text-white/60'
-                  }`}
-                >
-                  MS
-                </span>
-              </div>
-            </button>
+            {/* Language Switcher */}
+            {renderLanguageDropdown()}
 
             {/* User Menu */}
             <div className="relative">
@@ -372,7 +430,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faUser} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
-                            {language === 'ms' ? 'Profil' : 'Profile'}
+                            {translateLabel('Profile', 'Profil', 'Profil')}
                           </span>
                         </Link>
                         <Link
@@ -386,7 +444,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faGear} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
-                            {language === 'ms' ? 'Tetapan' : 'Settings'}
+                            {translateLabel('Settings', 'Tetapan', 'Pengaturan')}
                           </span>
                         </Link>
                         <div className="border-t border-gray-200 my-1"></div>
@@ -399,7 +457,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                         >
                           <FontAwesomeIcon icon={faRightFromBracket} className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
                           <span className="font-medium text-sm sm:text-base">
-                            {language === 'ms' ? 'Log Keluar' : 'Logout'}
+                            {translateLabel('Logout', 'Log Keluar', 'Keluar')}
                           </span>
                         </button>
                       </div>

@@ -110,7 +110,7 @@ We're here for you!
 ## ❓ Frequently Asked Questions
 
 ### What kind of reports can I upload?
-Any soil analysis or leaf analysis reports from certified labs. We support PDF documents, Excel files, and photos (JPG, PNG). Our AI can read multiple lab report formats including SPLAB and farm_test_data formats.
+Any soil analysis or leaf analysis reports from certified labs. We support PDF documents, Excel files, and photos (JPG, PNG). Our AI can read multiple lab report formats including SPLAB and farm_data formats.
 
 ### Do I need a computer?
 No! CropDrive works great on your smartphone. You can upload reports directly from your phone's camera.

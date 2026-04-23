@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPodcast,
@@ -36,7 +36,7 @@ interface PodcastEpisode {
 
 export default function PodcastAdmin() {
   const { user } = useAuth();
-  const [language, setLanguage] = useState<'en' | 'ms'>('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,7 +58,7 @@ export default function PodcastAdmin() {
   const { t } = useTranslation(language);
 
   useEffect(() => {
-    setLanguage(getCurrentLanguage() as 'en' | 'ms');
+    setLanguage(getCurrentLanguage());
     checkAdmin();
   }, []);
 

@@ -16,9 +16,10 @@ const stripe = stripeSecretKey
     })
   : null;
 
-// Stripe Billing Portal configurations
-const YEARLY_PORTAL_CONFIGURATION = 'bpc_1Sd48cC4LvDVWRjedcrtJD42';
-const MONTHLY_PORTAL_CONFIGURATION = 'bpc_1Sd4JPC4LvDVWRje0O5qeDRv';
+// Optional Stripe Billing Portal configurations.
+// If not set, Stripe's default billing portal configuration is used.
+const YEARLY_PORTAL_CONFIGURATION = process.env.STRIPE_BILLING_PORTAL_CONFIG_YEARLY;
+const MONTHLY_PORTAL_CONFIGURATION = process.env.STRIPE_BILLING_PORTAL_CONFIG_MONTHLY;
 
 // Collect known price IDs from env (fallback to interval detection)
 const yearlyPriceIds = [
@@ -113,11 +114,16 @@ export async function POST(req: NextRequest) {
       baseUrl = process.env.NEXT_PUBLIC_APP_URL;
     }
 
-    const session = await stripe.billingPortal.sessions.create({
+    const sessionConfig: Stripe.BillingPortal.SessionCreateParams = {
       customer: customerId,
-      configuration: portalConfiguration,
       return_url: `${baseUrl}/payment-method`,
-    });
+    };
+
+    if (portalConfiguration) {
+      sessionConfig.configuration = portalConfiguration;
+    }
+
+    const session = await stripe.billingPortal.sessions.create(sessionConfig);
 
     return NextResponse.json({ 
       success: true,

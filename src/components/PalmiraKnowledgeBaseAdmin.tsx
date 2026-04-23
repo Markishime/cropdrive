@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { PalmiraKnowledgeBaseDocument } from '@/types';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { 
   Plus, 
   Edit2, 
@@ -23,7 +23,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PalmiraKnowledgeBaseAdmin() {
   const { user } = useAuth();
-  const [language, setLanguage] = useState<'en' | 'ms'>('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [documents, setDocuments] = useState<PalmiraKnowledgeBaseDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export default function PalmiraKnowledgeBaseAdmin() {
     content: '',
     category: '',
     tags: '',
-    language: 'both' as 'en' | 'ms' | 'both',
+    language: 'both' as 'en' | 'ms' | 'id' | 'both',
     isActive: true,
   });
   const [saving, setSaving] = useState(false);
@@ -540,7 +540,7 @@ export default function PalmiraKnowledgeBaseAdmin() {
                         </label>
                         <select
                           value={formData.language}
-                          onChange={(e) => setFormData({ ...formData, language: e.target.value as 'en' | 'ms' | 'both' })}
+                          onChange={(e) => setFormData({ ...formData, language: e.target.value as 'en' | 'ms' | 'id' | 'both' })}
                           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                           title={language === 'ms' ? 'Pilih bahasa' : 'Select language'}
                           aria-label={language === 'ms' ? 'Pilih bahasa' : 'Select language'}

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useTranslation } from '@/i18n';
+import { useTranslation, type Language } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import Card, { CardContent } from '@/components/ui/Card';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,21 +17,21 @@ import {
 
 export default function TutorialsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [activeVideo, setActiveVideo] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const { user } = useAuth();
 
   useEffect(() => {
     setMounted(true);
-    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+    const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
     setCurrentLang(lang);
   }, []);
 
   // Listen for language changes
   useEffect(() => {
     const handleStorageChange = () => {
-      const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+      const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
       setCurrentLang(lang);
     };
     
@@ -41,14 +41,18 @@ export default function TutorialsPage() {
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
   const hasPlan = user && user.plan && user.plan !== 'none';
+  const isMs = language === 'ms';
+  const isId = language === 'id';
 
   // Section removed per project update
 
   const guideSteps = [
     {
       step: 1,
-      title: language === 'ms' ? 'Daftar Akaun' : 'Create Account',
-      description: language === 'ms'
+      title: isId ? 'Buat Akun' : isMs ? 'Daftar Akaun' : 'Create Account',
+      description: isId
+        ? 'Daftar dengan email Anda dan verifikasi akun melalui email konfirmasi'
+        : isMs
         ? 'Daftar dengan email anda dan sahkan akaun melalui email pengesahan'
         : 'Sign up with your email and verify your account via confirmation email',
       image: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop',
@@ -56,8 +60,10 @@ export default function TutorialsPage() {
     },
     {
       step: 2,
-      title: language === 'ms' ? 'Pilih Pelan' : 'Choose Plan',
-      description: language === 'ms'
+      title: isId ? 'Pilih Paket' : isMs ? 'Pilih Pelan' : 'Choose Plan',
+      description: isId
+        ? 'Pilih paket yang sesuai dengan ukuran kebun dan kebutuhan Anda'
+        : isMs
         ? 'Pilih pelan yang sesuai dengan saiz ladang dan keperluan anda'
         : 'Select the plan that fits your farm size and requirements',
       image: 'https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=600&h=400&fit=crop',
@@ -65,8 +71,10 @@ export default function TutorialsPage() {
     },
     {
       step: 3,
-      title: language === 'ms' ? 'Muat Naik Laporan' : 'Upload Reports',
-      description: language === 'ms'
+      title: isId ? 'Unggah Laporan' : isMs ? 'Muat Naik Laporan' : 'Upload Reports',
+      description: isId
+        ? 'Unggah laporan laboratorium tanah atau daun dalam format PDF, JPG, atau PNG'
+        : isMs
         ? 'Muat naik laporan makmal tanah atau daun dalam format PDF, JPG, atau PNG'
         : 'Upload soil or leaf lab reports in PDF, JPG, or PNG format',
       image: 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=600&h=400&fit=crop',
@@ -74,8 +82,10 @@ export default function TutorialsPage() {
     },
     {
       step: 4,
-      title: language === 'ms' ? 'Dapatkan Analisis AI' : 'Get AI Analysis',
-      description: language === 'ms'
+      title: isId ? 'Dapatkan Analisis AI' : isMs ? 'Dapatkan Analisis AI' : 'Get AI Analysis',
+      description: isId
+        ? 'AI kami akan menganalisis laporan dan memberikan rekomendasi dalam 5-8 menit'
+        : isMs
         ? 'AI kami akan menganalisis laporan dan memberikan cadangan dalam 5-8 minit'
         : 'Our AI will analyze your report and provide recommendations within 5-8 minutes',
       image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop',
@@ -85,39 +95,49 @@ export default function TutorialsPage() {
 
   const faqs = [
     {
-      question: language === 'ms' ? 'Apakah format fail yang disokong?' : 'What file formats are supported?',
-      answer: language === 'ms'
-        ? 'Kami menyokong Gambar (JPG, PNG), PDF, dan Excel (.xlsx, .xls). Termasuk laporan SPLAB dan farm_test_data. Saiz maksimum ialah 10MB setiap fail.'
-        : 'We support Images (JPG, PNG), PDF, and Excel (.xlsx, .xls) files. Including SPLAB and farm_test_data reports. Maximum size is 10MB per file.'
+      question: isId ? 'Format file apa yang didukung?' : isMs ? 'Apakah format fail yang disokong?' : 'What file formats are supported?',
+      answer: isId
+        ? 'Kami mendukung Gambar (JPG, PNG), PDF, dan Excel (.xlsx, .xls), termasuk laporan SPLAB dan farm_data. Ukuran maksimum adalah 10MB per file.'
+        : isMs
+        ? 'Kami menyokong Gambar (JPG, PNG), PDF, dan Excel (.xlsx, .xls). Termasuk laporan SPLAB dan farm_data. Saiz maksimum ialah 10MB setiap fail.'
+        : 'We support Images (JPG, PNG), PDF, and Excel (.xlsx, .xls) files. Including SPLAB and farm_data reports. Maximum size is 10MB per file.'
     },
     {
-      question: language === 'ms' ? 'Berapa lama masa pemprosesan AI?' : 'How long does AI processing take?',
-      answer: language === 'ms'
+      question: isId ? 'Berapa lama proses AI berlangsung?' : isMs ? 'Berapa lama masa pemprosesan AI?' : 'How long does AI processing take?',
+      answer: isId
+        ? 'Sebagian besar analisis selesai dalam 5-8 menit. Untuk file yang lebih kompleks atau besar, prosesnya bisa memakan waktu lebih lama.'
+        : isMs
         ? 'Kebanyakan analisis selesai dalam 5-8 minit. Untuk fail yang lebih kompleks atau besar, ia mungkin mengambil masa lebih lama.'
         : 'Most analyses complete in 5-8 minutes. For more complex or larger files, it may take longer.'
     },
     {
-      question: language === 'ms' ? 'Adakah data saya selamat dan sulit?' : 'Is my data secure and confidential?',
-      answer: language === 'ms'
+      question: isId ? 'Apakah data saya aman dan rahasia?' : isMs ? 'Adakah data saya selamat dan sulit?' : 'Is my data secure and confidential?',
+      answer: isId
+        ? 'Ya, semua data dienkripsi end-to-end dan disimpan dengan aman di server kami. Kami tidak membagikan data Anda kepada pihak ketiga mana pun.'
+        : isMs
         ? 'Ya, semua data disulitkan end-to-end dan disimpan dengan selamat di server kami. Kami tidak berkongsi data anda dengan mana-mana pihak ketiga.'
         : 'Yes, all data is end-to-end encrypted and stored securely on our servers. We do not share your data with any third parties.'
     },
     {
-      question: language === 'ms' ? 'Bolehkah saya eksport laporan analisis?' : 'Can I export analysis reports?',
-      answer: language === 'ms'
+      question: isId ? 'Bisakah saya mengekspor laporan analisis?' : isMs ? 'Bolehkah saya eksport laporan analisis?' : 'Can I export analysis reports?',
+      answer: isId
+        ? 'Ya, Anda dapat mengunduh laporan lengkap dalam format PDF dengan semua grafik, tabel, dan rekomendasi.'
+        : isMs
         ? 'Ya, anda boleh memuat turun laporan lengkap dalam format PDF dengan semua graf, jadual, dan cadangan.'
         : 'Yes, you can download complete reports in PDF format with all graphs, tables, and recommendations.'
     },
     {
-      question: language === 'ms' ? 'Adakah sokongan tersedia dalam Bahasa Malaysia?' : 'Is support available in Bahasa Malaysia?',
-      answer: language === 'ms'
+      question: isId ? 'Apakah dukungan tersedia dalam Bahasa Indonesia?' : isMs ? 'Adakah sokongan tersedia dalam Bahasa Malaysia?' : 'Is support available in Bahasa Malaysia?',
+      answer: isId
+        ? 'Ya, kami menyediakan dukungan penuh dalam Bahasa Indonesia dan English melalui WhatsApp, email, dan live chat.'
+        : isMs
         ? 'Ya, kami menawarkan sokongan penuh dalam Bahasa Malaysia dan English melalui WhatsApp, email, dan live chat.'
         : 'Yes, we offer full support in both Bahasa Malaysia and English via WhatsApp, email, and live chat.'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+    <div className="min-h-screen premium-page-shell premium-mesh">
       {/* Enhanced Header with Quick Stats */}
       <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
         {/* Background Pattern */}
@@ -138,14 +158,16 @@ export default function TutorialsPage() {
             <div className="flex items-center justify-center sm:justify-start flex-wrap gap-4 mb-6">
               <div className="text-center sm:text-left">
                 <span className="inline-block text-green-200 text-sm font-bold tracking-widest uppercase mb-3 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
-                  {language === 'ms' ? '📚 Pusat Pembelajaran' : '📚 Learning Center'}
+                  {isId ? '📚 Pusat Belajar' : isMs ? '📚 Pusat Pembelajaran' : '📚 Learning Center'}
                 </span>
                 <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
-                  {language === 'ms' ? 'Tutorial &' : 'Tutorials &'} <span className="text-yellow-400">{language === 'ms' ? 'Panduan' : 'Guides'}</span>
+                  {isId ? 'Tutorial &' : isMs ? 'Tutorial &' : 'Tutorials &'} <span className="text-yellow-400">{isId ? 'Panduan' : isMs ? 'Panduan' : 'Guides'}</span>
                 </h1>
                 <p className="text-lg sm:text-xl text-white/90 flex items-center justify-center sm:justify-start gap-2">
                   <FontAwesomeIcon icon={faGraduationCap} className="w-5 h-5" />
-                  {language === 'ms'
+                  {isId
+                    ? 'Pelajari cara memaksimalkan penggunaan CropDrive AI'
+                    : isMs
                     ? 'Belajar cara maksimumkan penggunaan CropDrive AI'
                     : 'Learn how to maximize CropDrive AI usage'
                   }
@@ -168,7 +190,7 @@ export default function TutorialsPage() {
             transition={{ duration: 0.5 }}
             className="mb-12"
           >
-            <Card className="bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50 border-2 border-yellow-300 shadow-xl overflow-hidden">
+            <Card className="premium-panel-strong border-2 border-yellow-300 overflow-hidden bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50">
               <CardContent className="p-8 relative">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-yellow-300/20 to-transparent rounded-full blur-3xl -mr-32 -mt-32"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-orange-300/20 to-transparent rounded-full blur-3xl -ml-32 -mb-32"></div>
@@ -179,17 +201,21 @@ export default function TutorialsPage() {
                       <div className="flex items-center justify-center md:justify-start space-x-2 mb-3">
                         <FontAwesomeIcon icon={faCrown} className="w-6 h-6 text-yellow-600" />
                         <span className="text-yellow-700 font-bold text-sm uppercase tracking-wide">
-                          {language === 'ms' ? 'Tingkatkan Akaun Anda' : 'Upgrade Your Account'}
+                          {isId ? 'Upgrade Akun Anda' : isMs ? 'Tingkatkan Akaun Anda' : 'Upgrade Your Account'}
                         </span>
                       </div>
                       <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                        {language === 'ms' 
+                        {isId 
+                          ? '🚀 Buka Kekuatan Penuh AI untuk Kebun Anda' 
+                          : isMs 
                           ? '🚀 Buka Kuasa Penuh AI untuk Ladang Anda' 
                           : '🚀 Unlock Full AI Power for Your Farm'
                         }
                       </h3>
                       <p className="text-gray-700 text-lg mb-4">
-                        {language === 'ms'
+                        {isId
+                          ? 'Dapatkan analisis tanah AI, rekomendasi pupuk cerdas, dan masih banyak lagi!'
+                          : isMs
                           ? 'Dapatkan analisis tanah AI, cadangan baja pintar, dan banyak lagi!'
                           : 'Get AI soil analysis, smart fertilizer recommendations, and much more!'
                         }
@@ -198,19 +224,19 @@ export default function TutorialsPage() {
                         <div className="flex items-center space-x-2 text-green-700">
                           <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
-                            {language === 'ms' ? 'Analisis 5-8 minit' : '5-8 min analysis'}
+                            {isId ? 'Analisis 5-8 menit' : isMs ? 'Analisis 5-8 minit' : '5-8 min analysis'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-green-700">
                           <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
-                            {language === 'ms' ? 'Laporan terperinci' : 'Detailed reports'}
+                            {isId ? 'Laporan terperinci' : isMs ? 'Laporan terperinci' : 'Detailed reports'}
                           </span>
                         </div>
                         <div className="flex items-center space-x-2 text-green-700">
                           <FontAwesomeIcon icon={faCircleCheck} className="w-5 h-5" />
                           <span className="font-semibold">
-                            {language === 'ms' ? 'Sokongan 24/7' : '24/7 support'}
+                            {isId ? 'Dukungan 24/7' : isMs ? 'Sokongan 24/7' : '24/7 support'}
                           </span>
                         </div>
                       </div>
@@ -219,7 +245,7 @@ export default function TutorialsPage() {
                       <Link href="/pricing">
                         <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-bold text-lg shadow-lg hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 flex items-center space-x-2">
                           <FontAwesomeIcon icon={faBolt} className="w-5 h-5" />
-                          <span>{language === 'ms' ? 'Pilih Pelan Sekarang' : 'Choose Plan Now'}</span>
+                          <span>{isId ? 'Pilih Paket Sekarang' : isMs ? 'Pilih Pelan Sekarang' : 'Choose Plan Now'}</span>
                         </button>
                       </Link>
                     </div>
@@ -245,7 +271,7 @@ export default function TutorialsPage() {
               <FontAwesomeIcon icon={faBookOpen} className="w-6 h-6 text-green-900" />
             </div>
             <h2 className="text-3xl font-bold text-gray-900">
-              {language === 'ms' ? 'Panduan Langkah Demi Langkah' : 'Step-by-Step Guide'}
+              {isId ? 'Panduan Langkah demi Langkah' : isMs ? 'Panduan Langkah Demi Langkah' : 'Step-by-Step Guide'}
             </h2>
           </div>
 
@@ -258,7 +284,7 @@ export default function TutorialsPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="group hover:shadow-xl transition-all duration-300 h-full">
+                <Card className="premium-panel group h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                   <div className="relative aspect-[4/3] bg-gray-200 overflow-hidden">
                     <img
                       src={step.image}
@@ -294,10 +320,12 @@ export default function TutorialsPage() {
         >
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {language === 'ms' ? 'Soalan Lazim (FAQ)' : 'Frequently Asked Questions (FAQ)'}
+              {isId ? 'Pertanyaan yang Sering Diajukan (FAQ)' : isMs ? 'Soalan Lazim (FAQ)' : 'Frequently Asked Questions (FAQ)'}
             </h2>
             <p className="text-gray-600">
-              {language === 'ms'
+              {isId
+                ? 'Jawaban untuk pertanyaan yang paling sering diajukan'
+                : isMs
                 ? 'Jawapan kepada soalan yang sering ditanya'
                 : 'Answers to commonly asked questions'
               }
@@ -313,7 +341,7 @@ export default function TutorialsPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                <Card className="hover:shadow-lg transition-shadow duration-300">
+                <Card className="premium-panel transition-shadow duration-300 hover:shadow-lg">
                   <CardContent className="p-6">
                     <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-start">
                       <span className="text-green-600 mr-3 flex-shrink-0">Q:</span>
@@ -338,13 +366,15 @@ export default function TutorialsPage() {
           viewport={{ once: true }}
           className="mt-20 text-center"
         >
-          <Card className="bg-gradient-to-br from-green-600 to-green-700 border-0">
+          <Card className="premium-cta-band border border-white/10 rounded-[32px] overflow-hidden shadow-[0_28px_64px_-28px_rgba(22,163,74,0.5)]">
             <CardContent className="p-12">
               <h2 className="text-3xl font-bold text-white mb-4">
-                {language === 'ms' ? 'Perlukan Bantuan Lanjut?' : 'Need More Help?'}
+                {isId ? 'Butuh Bantuan Lebih Lanjut?' : isMs ? 'Perlukan Bantuan Lanjut?' : 'Need More Help?'}
               </h2>
               <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-                {language === 'ms'
+                {isId
+                  ? 'Tim dukungan kami siap membantu Anda 24/7 melalui WhatsApp, Email, atau Live Chat'
+                  : isMs
                   ? 'Pasukan sokongan kami sedia membantu anda 24/7 melalui WhatsApp, Email, atau Live Chat'
                   : 'Our support team is ready to help you 24/7 via WhatsApp, Email, or Live Chat'
                 }
@@ -352,12 +382,12 @@ export default function TutorialsPage() {
               <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link href={hasPlan ? "/support" : "/contact"}>
                   <button className="px-8 py-4 bg-white text-green-700 rounded-lg font-bold hover:bg-gray-100 transition-colors duration-200 shadow-xl">
-                    {language === 'ms' ? 'Hubungi Sokongan' : 'Contact Support'}
+                    {isId ? 'Hubungi Dukungan' : isMs ? 'Hubungi Sokongan' : 'Contact Support'}
                   </button>
                 </Link>
                 <Link href="/contact">
                   <button className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold hover:bg-white/10 transition-colors duration-200">
-                    {language === 'ms' ? 'Jadualkan Demo' : 'Schedule Demo'}
+                    {isId ? 'Jadwalkan Demo' : isMs ? 'Jadualkan Demo' : 'Schedule Demo'}
                   </button>
                 </Link>
               </div>

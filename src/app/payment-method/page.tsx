@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation } from '@/i18n';
+import { useTranslation, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { getPricingTierById, PRICING_TIERS } from '@/lib/subscriptions';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -87,7 +88,7 @@ interface SubscriptionData {
 
 export default function PaymentMethodPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [loading, setLoading] = useState(false);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [showAllInvoicesModal, setShowAllInvoicesModal] = useState(false);
@@ -108,7 +109,7 @@ export default function PaymentMethodPage() {
   useEffect(() => {
     setMounted(true);
     try {
-      const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+      const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
       setCurrentLang(lang);
     } catch (e) {
       // localStorage might not be available
@@ -117,6 +118,10 @@ export default function PaymentMethodPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLang : 'en');
+  const isMs = language === 'ms';
+  const isId = language === 'id';
+  const copy = (en: string, ms: string) => isId ? toIndonesianText(ms) : isMs ? ms : en;
+  const planText = (en: string | undefined, ms: string | undefined) => isId ? toIndonesianText(ms || en || '') : isMs ? (ms || en || '') : (en || ms || '');
 
   // Fetch invoices from Stripe
   const fetchInvoices = useCallback(async () => {
@@ -156,19 +161,11 @@ export default function PaymentMethodPage() {
       } else {
         const errorData = await response.json();
         console.error('❌ Error fetching invoices:', errorData);
-        toast.error(
-          language === 'ms' 
-            ? 'Gagal memuatkan invois' 
-            : 'Failed to load invoices'
-        );
+        toast.error(copy('Failed to load invoices', 'Gagal memuatkan invois'));
       }
     } catch (error) {
       console.error('❌ Error fetching invoices:', error);
-      toast.error(
-        language === 'ms' 
-          ? 'Ralat memuatkan invois' 
-          : 'Error loading invoices'
-      );
+      toast.error(copy('Error loading invoices', 'Ralat memuatkan invois'));
     } finally {
       setLoadingInvoices(false);
     }
@@ -289,11 +286,7 @@ export default function PaymentMethodPage() {
         // Only show error toast for actual errors (500, network errors, etc.)
         // Don't show error for 404 or "No active subscription" - those are valid states
         if (showErrorToast && response.status >= 500) {
-          toast.error(
-            language === 'ms' 
-              ? 'Gagal memuatkan butiran langganan' 
-              : 'Failed to load subscription details'
-          );
+          toast.error(copy('Failed to load subscription details', 'Gagal memuatkan butiran langganan'));
         }
         
         // If user has subscription ID but API failed, don't clear subscription state
@@ -305,11 +298,7 @@ export default function PaymentMethodPage() {
     } catch (error) {
       console.error('❌ Error fetching subscription:', error);
       if (showErrorToast) {
-      toast.error(
-        language === 'ms' 
-          ? 'Ralat memuatkan butiran langganan' 
-          : 'Error loading subscription details'
-      );
+      toast.error(copy('Error loading subscription details', 'Ralat memuatkan butiran langganan'));
       }
     } finally {
       setLoadingSubscription(false);
@@ -444,23 +433,57 @@ export default function PaymentMethodPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">
-            {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+            {copy('Loading...', 'Memuatkan...')}
           </p>
         </div>
       </div>
     );
   }
 
+  return (
+    <ProtectedRoute>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 px-4">
+        <div className="max-w-2xl w-full bg-white rounded-3xl shadow-xl border border-gray-200 p-8 text-center">
+          <div className="w-16 h-16 mx-auto rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <Sparkles className="w-8 h-8 text-green-700" />
+          </div>
+          <h1 className="text-2xl font-black text-gray-900 mb-3">
+            {copy('Free Access Transition', 'Peralihan Akses Percuma')}
+          </h1>
+          <p className="text-gray-700 mb-6">
+            {copy(
+              'Stripe payment settings are temporarily hidden while CropDrive transitions to free access for all farmers.',
+              'Tetapan pembayaran Stripe disembunyikan sementara ketika CropDrive beralih ke akses percuma untuk semua petani.'
+            )}
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link href="/dashboard" className="inline-flex items-center justify-center px-5 py-3 rounded-xl bg-green-700 text-white font-bold hover:bg-green-800 transition-colors">
+              {copy('Back to Dashboard', 'Kembali ke Papan Pemuka')}
+            </Link>
+            <Link href="/pricing" className="inline-flex items-center justify-center px-5 py-3 rounded-xl border-2 border-green-700 text-green-700 font-bold hover:bg-green-50 transition-colors">
+              {copy('View Free Access Details', 'Lihat Butiran Akses Percuma')}
+            </Link>
+          </div>
+        </div>
+      </div>
+    </ProtectedRoute>
+  );
+
   // Check if user has a subscription
   const hasSubscription = !!subscription;
 
-  const currentPlan = getPricingTierById(user.plan);
+  // Guard clause: ensure user exists before accessing properties
+  if (!user) {
+    return null;
+  }
+
+  const currentPlan = getPricingTierById(user!.plan);
   // Ensure uploadsUsed and uploadsLimit are numbers (handle undefined/null)
-  const uploadsUsed = user.uploadsUsed ?? 0;
-  const uploadsLimit = user.uploadsLimit ?? 0;
+  const uploadsUsed = user!.uploadsUsed ?? 0;
+  const uploadsLimit = user!.uploadsLimit ?? 0;
   const uploadPercentage = uploadsLimit === -1 ? 100 : uploadsLimit > 0 ? (uploadsUsed / uploadsLimit) * 100 : 0;
   const isUploadLimitExceeded = uploadsLimit !== -1 && uploadsUsed >= uploadsLimit;
-  const billingCycle = user.billingCycle || 'monthly';
+  const billingCycle = user!.billingCycle || 'monthly';
   const subscriptionInterval = subscription?.billingCycle || (billingCycle === 'yearly' ? 'year' : 'month');
   const isMonthlySubscription = subscriptionInterval === 'month';
   const isYearlySubscription = subscriptionInterval === 'year';
@@ -473,7 +496,7 @@ export default function PaymentMethodPage() {
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
-        toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+        toast.error(copy('Session expired. Please login again.', 'Sesi tamat. Sila log masuk semula.'));
         setUpdatingAutoRenewal(false);
         return;
       }
@@ -490,9 +513,7 @@ export default function PaymentMethodPage() {
           if (refreshUser) await refreshUser();
         } else {
           toast.error(
-            language === 'ms' 
-              ? 'Tiada langganan aktif ditemui. Sila hubungi sokongan.' 
-              : 'No active subscription found. Please contact support.'
+            copy('No active subscription found. Please contact support.', 'Tiada langganan aktif ditemui. Sila hubungi sokongan.')
           );
           setUpdatingAutoRenewal(false);
           return;
@@ -558,12 +579,8 @@ export default function PaymentMethodPage() {
         // Use API message if available, otherwise use default
         const successMessage = data.message || (
           data.cancelAtPeriodEnd
-            ? (language === 'ms' 
-                ? '🔄 Pembaharuan auto dimatikan. Langganan anda akan kekal aktif sehingga akhir tempoh.' 
-                : '🔄 Auto-renewal turned off. Your subscription will remain active until the end of the period.')
-            : (language === 'ms' 
-                ? '🔄 Pembaharuan auto dihidupkan. Langganan akan diperbaharui secara automatik.' 
-                : '🔄 Auto-renewal turned on. Subscription will renew automatically.')
+            ? copy('🔄 Auto-renewal turned off. Your subscription will remain active until the end of the period.', '🔄 Pembaharuan auto dimatikan. Langganan anda akan kekal aktif sehingga akhir tempoh.')
+            : copy('🔄 Auto-renewal turned on. Subscription will renew automatically.', '🔄 Pembaharuan auto dihidupkan. Langganan akan diperbaharui secara automatik.')
         );
         
         toast.success(successMessage, {
@@ -583,9 +600,7 @@ export default function PaymentMethodPage() {
     } catch (error: any) {
       console.error('Error toggling auto-renewal:', error);
       toast.error(
-        language === 'ms' 
-          ? `Ralat mengemas kini: ${error.message}` 
-          : `Error updating: ${error.message}`
+        isId ? `Kesalahan saat memperbarui: ${error.message}` : isMs ? `Ralat mengemas kini: ${error.message}` : `Error updating: ${error.message}`
       );
     } finally {
       setUpdatingAutoRenewal(false);
@@ -619,8 +634,8 @@ export default function PaymentMethodPage() {
         setEmailNotifications(newValue);
         toast.success(
           newValue
-            ? (language === 'ms' ? '📧 Pemberitahuan email dihidupkan' : '📧 Email notifications turned on')
-            : (language === 'ms' ? '📧 Pemberitahuan email dimatikan' : '📧 Email notifications turned off'),
+            ? copy('📧 Email notifications turned on', '📧 Pemberitahuan email dihidupkan')
+            : copy('📧 Email notifications turned off', '📧 Pemberitahuan email dimatikan'),
           {
             duration: 3000,
             style: {
@@ -638,7 +653,7 @@ export default function PaymentMethodPage() {
       }
     } catch (error) {
       console.error('Error toggling email notifications:', error);
-      toast.error(language === 'ms' ? 'Ralat mengemas kini' : 'Error updating');
+      toast.error(copy('Error updating', 'Ralat mengemas kini'));
     } finally {
       setUpdatingEmailNotifications(false);
     }
@@ -647,9 +662,7 @@ export default function PaymentMethodPage() {
   const handleOpenBillingPortal = async () => {
     if (!subscription) {
       toast.error(
-        language === 'ms'
-          ? 'Tiada langganan aktif untuk diurus'
-          : 'No active subscription to manage'
+        copy('No active subscription to manage', 'Tiada langganan aktif untuk diurus')
       );
       return;
     }
@@ -677,9 +690,7 @@ export default function PaymentMethodPage() {
       }
 
       toast.loading(
-        language === 'ms'
-          ? '🔄 Membuka portal Stripe...'
-          : '🔄 Opening Stripe portal...',
+        copy('🔄 Opening Stripe portal...', '🔄 Membuka portal Stripe...'),
         { duration: 1200 }
       );
 
@@ -687,9 +698,7 @@ export default function PaymentMethodPage() {
     } catch (error) {
       console.error('Error opening billing portal:', error);
       toast.error(
-        language === 'ms'
-          ? 'Tidak dapat membuka portal bil'
-          : 'Unable to open billing portal'
+        copy('Unable to open billing portal', 'Tidak dapat membuka portal bil')
       );
     } finally {
       setCreatingPortalSession(false);
@@ -699,7 +708,7 @@ export default function PaymentMethodPage() {
   const handleCopyInvoiceId = (invoiceId: string) => {
     navigator.clipboard.writeText(invoiceId);
     toast.success(
-      language === 'ms' ? '📋 ID invois disalin!' : '📋 Invoice ID copied!',
+      copy('📋 Invoice ID copied!', '📋 ID invois disalin!'),
       {
         duration: 2000,
         style: {
@@ -718,9 +727,7 @@ export default function PaymentMethodPage() {
     if (invoice.pdfUrl) {
       window.open(invoice.pdfUrl, '_blank');
       toast.success(
-        language === 'ms' 
-          ? `⬇️ Memuat turun invois...` 
-          : `⬇️ Downloading invoice...`,
+        copy('⬇️ Downloading invoice...', '⬇️ Memuat turun invois...'),
         {
           duration: 2000,
           style: {
@@ -736,7 +743,7 @@ export default function PaymentMethodPage() {
     } else if (invoice.hostedUrl) {
       window.open(invoice.hostedUrl, '_blank');
     } else {
-      toast.error(language === 'ms' ? 'Invois tidak tersedia' : 'Invoice not available');
+      toast.error(copy('Invoice not available', 'Invois tidak tersedia'));
     }
   };
 
@@ -776,12 +783,12 @@ export default function PaymentMethodPage() {
         // Use the message from API if available
         const successMessage = data.message || (
           data.pendingContractCancellation
-            ? (language === 'ms' 
-                ? `✅ Pembatalan dijadualkan untuk ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan.` 
-                : `✅ Cancellation scheduled for ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString() : 'contract end'}. Monthly payments will continue.`)
-            : (language === 'ms' 
-                ? '✅ Langganan akan dibatalkan pada akhir tempoh bil' 
-                : '✅ Subscription will be cancelled at end of billing period')
+            ? (isId
+                ? `✅ Pembatalan dijadwalkan untuk ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString('id-ID') : 'akhir kontrak'}. Pembayaran bulanan akan berlanjut.`
+                : isMs
+                  ? `✅ Pembatalan dijadualkan untuk ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan.`
+                  : `✅ Cancellation scheduled for ${data.contractCancellationDate ? new Date(data.contractCancellationDate).toLocaleDateString() : 'contract end'}. Monthly payments will continue.`)
+            : copy('✅ Subscription will be cancelled at end of billing period', '✅ Langganan akan dibatalkan pada akhir tempoh bil')
         );
         
         toast.success(successMessage, {
@@ -803,9 +810,7 @@ export default function PaymentMethodPage() {
         // If still no subscription after sync, show helpful message
         if (data.error === 'No active subscription') {
           toast.error(
-            language === 'ms' 
-              ? '❌ Tiada langganan aktif ditemui. Sila hubungi sokongan jika anda mempunyai langganan.' 
-              : '❌ No active subscription found. Please contact support if you have a subscription.',
+            copy('❌ No active subscription found. Please contact support if you have a subscription.', '❌ Tiada langganan aktif ditemui. Sila hubungi sokongan jika anda mempunyai langganan.'),
             {
               duration: 5000,
               style: {
@@ -825,9 +830,11 @@ export default function PaymentMethodPage() {
     } catch (error: any) {
       console.error('Cancel subscription error:', error);
       toast.error(
-        language === 'ms' 
-          ? `❌ Ralat membatalkan langganan: ${error.message}` 
-          : `❌ Error cancelling subscription: ${error.message}`,
+        isId
+          ? `❌ Kesalahan saat membatalkan langganan: ${error.message}`
+          : isMs
+            ? `❌ Ralat membatalkan langganan: ${error.message}`
+            : `❌ Error cancelling subscription: ${error.message}`,
         {
           duration: 5000,
           style: {
@@ -867,9 +874,7 @@ export default function PaymentMethodPage() {
       
       if (response.ok && data.success !== false) {
         const successMessage = data.message || (
-          language === 'ms' 
-            ? '🎉 Pembatalan telah dibatalkan! Langganan anda akan diteruskan seperti biasa.' 
-            : '🎉 Cancellation undone! Your subscription will continue normally.'
+          copy('🎉 Cancellation undone! Your subscription will continue normally.', '🎉 Pembatalan telah dibatalkan! Langganan anda akan diteruskan seperti biasa.')
         );
         
         toast.success(successMessage, {
@@ -890,9 +895,7 @@ export default function PaymentMethodPage() {
       } else {
         if (data.expired) {
           toast.error(
-            language === 'ms' 
-              ? '⚠️ Tempoh langganan telah tamat. Sila langgan pelan baru.' 
-              : '⚠️ Subscription period has ended. Please subscribe to a new plan.',
+            copy('⚠️ Subscription period has ended. Please subscribe to a new plan.', '⚠️ Tempoh langganan telah tamat. Sila langgan pelan baru.'),
             {
               duration: 5000,
               style: {
@@ -913,9 +916,11 @@ export default function PaymentMethodPage() {
     } catch (error: any) {
       console.error('Reactivate subscription error:', error);
       toast.error(
-        language === 'ms' 
-          ? `❌ Ralat mengaktifkan semula langganan: ${error.message}` 
-          : `❌ Error reactivating subscription: ${error.message}`,
+        isId
+          ? `❌ Kesalahan saat mengaktifkan kembali langganan: ${error.message}`
+          : isMs
+            ? `❌ Ralat mengaktifkan semula langganan: ${error.message}`
+            : `❌ Error reactivating subscription: ${error.message}`,
         {
           duration: 5000,
           style: {
@@ -939,7 +944,7 @@ export default function PaymentMethodPage() {
       console.error('Invalid date:', dateString);
       return 'Invalid date';
     }
-    return date.toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+    return date.toLocaleDateString(isId ? 'id-ID' : isMs ? 'ms-MY' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -959,7 +964,7 @@ export default function PaymentMethodPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      <div className="min-h-screen premium-page-shell premium-mesh">
         {/* Enhanced Header */}
         <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
           {/* Animated Background Elements */}
@@ -985,33 +990,33 @@ export default function PaymentMethodPage() {
                     </div>
                     <div className="min-w-0">
                       <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight break-words">
-                        {language === 'ms' ? 'Pengurusan' : 'Subscription'}
+                        {copy('Subscription', 'Pengurusan')}
                       </h1>
                       <span className="text-amber-400 text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black break-words">
-                        {language === 'ms' ? 'Langganan' : 'Management'}
+                        {copy('Management', 'Langganan')}
                       </span>
                     </div>
                   </div>
                   <p className="text-sm sm:text-base lg:text-lg text-white/80 flex items-center gap-2">
                     <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 flex-shrink-0" />
-                    <span className="break-words">{language === 'ms' ? 'Urus langganan dan bil anda dengan selamat' : 'Manage your subscriptions and billing securely'}</span>
+                    <span className="break-words">{copy('Manage your subscriptions and billing securely', 'Urus langganan dan bil anda dengan selamat')}</span>
                   </p>
                 </div>
                 
                 {/* Quick Stats */}
                 <div className="flex flex-wrap gap-3 sm:gap-4 w-full lg:w-auto">
-                  <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/20 flex-1 sm:flex-none min-w-[140px]">
+                  <div className="premium-glass-card rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 flex-1 sm:flex-none min-w-[140px]">
                     <p className="text-white/70 text-xs font-medium mb-1">
-                      {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                      {isId ? 'Paket Saat Ini' : isMs ? 'Pelan Semasa' : 'Current Plan'}
                     </p>
                     <p className="text-white font-black text-base sm:text-lg truncate">{currentPlan?.name || 'N/A'}</p>
                   </div>
                   {daysUntilRenewal !== null && (
-                    <div className="bg-white/10 backdrop-blur-sm rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/20 flex-1 sm:flex-none min-w-[140px]">
+                    <div className="premium-glass-card rounded-lg sm:rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 flex-1 sm:flex-none min-w-[140px]">
                       <p className="text-white/70 text-xs font-medium mb-1">
-                        {language === 'ms' ? 'Pembaharuan Dalam' : 'Renews In'}
+                        {isId ? 'Perpanjangan Dalam' : isMs ? 'Pembaharuan Dalam' : 'Renews In'}
                       </p>
-                      <p className="text-amber-400 font-black text-base sm:text-lg">{daysUntilRenewal} {language === 'ms' ? 'hari' : 'days'}</p>
+                      <p className="text-amber-400 font-black text-base sm:text-lg">{daysUntilRenewal} {isId ? 'hari' : isMs ? 'hari' : 'days'}</p>
                     </div>
                   )}
                 </div>
@@ -1030,7 +1035,7 @@ export default function PaymentMethodPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100 overflow-hidden relative"
+                  className="premium-accent-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 overflow-hidden relative"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 sm:w-40 sm:h-40 bg-gradient-to-br from-green-100 to-transparent rounded-bl-full opacity-50"></div>
                   
@@ -1038,7 +1043,7 @@ export default function PaymentMethodPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                       <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3">
                         <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
-                        {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
+                        {isId ? 'Paket Saat Ini' : isMs ? 'Pelan Semasa' : 'Current Plan'}
                       </h2>
                       <span className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold self-start sm:self-auto ${
                         subscription?.status === 'canceled' 
@@ -1046,8 +1051,8 @@ export default function PaymentMethodPage() {
                           : 'bg-green-100 text-green-700'
                       }`}>
                         {subscription?.status === 'canceled' 
-                          ? (language === 'ms' ? 'Dibatalkan' : 'Cancelled')
-                          : (language === 'ms' ? 'Aktif' : 'Active')
+                          ? (isId ? 'Dibatalkan' : isMs ? 'Dibatalkan' : 'Cancelled')
+                          : (isId ? 'Aktif' : isMs ? 'Aktif' : 'Active')
                         }
                       </span>
                     </div>
@@ -1056,10 +1061,10 @@ export default function PaymentMethodPage() {
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="flex-1 min-w-0">
                           <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-1 break-words">
-                            {language === 'ms' ? currentPlan?.nameMs : currentPlan?.name}
+                            {planText(currentPlan?.name, currentPlan?.nameMs)}
                           </h3>
                           <p className="text-sm sm:text-base text-gray-600 break-words">
-                            {language === 'ms' ? currentPlan?.taglineMs : currentPlan?.tagline}
+                            {planText(currentPlan?.tagline, currentPlan?.taglineMs)}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <span className={`px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
@@ -1068,8 +1073,8 @@ export default function PaymentMethodPage() {
                                 : 'bg-green-100 text-green-700'
                             }`}>
                               {billingCycle === 'yearly' 
-                                ? (language === 'ms' ? 'Bayar Pendahuluan' : 'Pay Upfront')
-                                : (language === 'ms' ? 'Bayar Mengikut Masa' : 'Pay Over Time')
+                                ? (isId ? 'Bayar di Muka' : isMs ? 'Bayar Pendahuluan' : 'Pay Upfront')
+                                : (isId ? 'Bayar Bertahap' : isMs ? 'Bayar Mengikut Masa' : 'Pay Over Time')
                               }
                             </span>
                           </div>
@@ -1081,7 +1086,7 @@ export default function PaymentMethodPage() {
                             </span>
                           </div>
                           <span className="text-sm sm:text-base text-gray-500">
-                            /{billingCycle === 'yearly' ? (language === 'ms' ? 'tahun' : 'year') : (language === 'ms' ? 'bulan' : 'month')}
+                            /{billingCycle === 'yearly' ? (isId ? 'tahun' : isMs ? 'tahun' : 'year') : (isId ? 'bulan' : isMs ? 'bulan' : 'month')}
                           </span>
                         </div>
                       </div>
@@ -1092,7 +1097,7 @@ export default function PaymentMethodPage() {
                       <div className="flex justify-between mb-3">
                         <span className="text-sm font-bold text-gray-700 flex items-center gap-2">
                           <BarChart3 className="w-4 h-4 text-green-600" />
-                          {language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
+                          {isId ? 'Penggunaan Unggah' : isMs ? 'Penggunaan Muat Naik' : 'Upload Usage'}
                         </span>
                         <span className="text-sm font-black text-gray-900">
                           {uploadsUsed} / {uploadsLimit === -1 ? '∞' : uploadsLimit}
@@ -1122,10 +1127,10 @@ export default function PaymentMethodPage() {
                                 : 'text-gray-500'
                           }`}>
                             {isUploadLimitExceeded
-                              ? (language === 'ms' ? '❌ Had tercapai - Naik taraf untuk terus menganalisis' : '❌ Limit reached - Upgrade to continue analyzing')
+                              ? (isId ? '❌ Batas tercapai - upgrade untuk terus menganalisis' : isMs ? '❌ Had tercapai - Naik taraf untuk terus menganalisis' : '❌ Limit reached - Upgrade to continue analyzing')
                               : uploadPercentage > 80 
-                              ? (language === 'ms' ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
-                              : (language === 'ms' ? 'Penggunaan normal' : 'Normal usage')
+                              ? (isId ? '⚠️ Mendekati batas' : isMs ? '⚠️ Hampir mencapai had' : '⚠️ Approaching limit')
+                              : (isId ? 'Penggunaan normal' : isMs ? 'Penggunaan normal' : 'Normal usage')
                             }
                           </p>
                         </div>
@@ -1136,17 +1141,17 @@ export default function PaymentMethodPage() {
                     {subscription && (
                       <div className="space-y-3 mb-4 sm:mb-6">
                         {/* Next Billing (monthly payment) */}
-                        {subscription.status !== 'canceled' && (
+                        {subscription!.status !== 'canceled' && (
                           <div className="rounded-xl p-3 sm:p-4 bg-gray-50">
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
                               <div className="flex items-center gap-2 sm:gap-3">
                                 <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-gray-500" />
                                 <div className="min-w-0">
                                   <p className="text-xs sm:text-sm font-bold text-gray-700">
-                                    {language === 'ms' ? 'Bil Seterusnya' : 'Next Billing'}
+                                    {copy('Next Billing', 'Bil Seterusnya')}
                                   </p>
                                   <p className="text-xs text-gray-500 break-words">
-                                    {formatDate(subscription.currentPeriodEnd)}
+                                    {formatDate(subscription!.currentPeriodEnd)}
                                   </p>
                                 </div>
                               </div>
@@ -1158,30 +1163,30 @@ export default function PaymentMethodPage() {
                         )}
                         
                         {/* Access Ends - shows contract year end for monthly installment plans */}
-                        {subscription.isMonthlyInstallment && !subscription.isBeyondContractYear && (
+                        {subscription!.isMonthlyInstallment && !subscription!.isBeyondContractYear && (
                           <div className={`rounded-xl p-3 sm:p-4 ${
-                            subscription.pendingContractCancellation 
+                            subscription!.pendingContractCancellation 
                               ? 'bg-amber-50 border-2 border-amber-200' 
                               : 'bg-green-50 border border-green-200'
                           }`}>
                             <div className="flex items-center gap-2 sm:gap-3">
                               <Calendar className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 ${
-                                subscription.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
+                                subscription!.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
                               }`} />
                               <div className="min-w-0 flex-1">
                                 <p className={`text-xs sm:text-sm font-bold ${
-                                  subscription.pendingContractCancellation ? 'text-amber-700' : 'text-green-700'
+                                  subscription!.pendingContractCancellation ? 'text-amber-700' : 'text-green-700'
                                 }`}>
-                                  {subscription.pendingContractCancellation
-                                    ? (language === 'ms' ? 'Akses Tamat (Pembatalan Dijadualkan)' : 'Access Ends (Cancellation Scheduled)')
-                                    : (language === 'ms' ? 'Akses Penuh Sehingga' : 'Full Access Until')
+                                  {subscription!.pendingContractCancellation
+                                    ? (isId ? 'Akses Berakhir (Pembatalan Dijadwalkan)' : isMs ? 'Akses Tamat (Pembatalan Dijadualkan)' : 'Access Ends (Cancellation Scheduled)')
+                                    : (isId ? 'Akses Penuh Hingga' : isMs ? 'Akses Penuh Sehingga' : 'Full Access Until')
                                   }
                                 </p>
                                 <p className={`text-xs ${
-                                  subscription.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
+                                  subscription!.pendingContractCancellation ? 'text-amber-600' : 'text-green-600'
                                 } break-words`}>
-                                  {formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)}
-                                  {' '}({language === 'ms' ? 'akhir kontrak 12 bulan' : 'end of 12-month contract'})
+                                  {formatDate(subscription!.accessEndsDate || subscription!.contractYearEnd || subscription!.currentPeriodEnd)}
+                                  {' '}({isId ? 'akhir kontrak 12 bulan' : isMs ? 'akhir kontrak 12 bulan' : 'end of 12-month contract'})
                                 </p>
                               </div>
                             </div>
@@ -1189,16 +1194,16 @@ export default function PaymentMethodPage() {
                         )}
                         
                         {/* Cancelled subscription - show when access ends */}
-                        {subscription.status === 'canceled' && (
+                        {subscription!.status === 'canceled' && (
                           <div className="rounded-xl p-3 sm:p-4 bg-amber-50 border-2 border-amber-200">
                             <div className="flex items-center gap-2 sm:gap-3">
                               <Clock className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 text-amber-600" />
                               <div className="min-w-0">
                                 <p className="text-xs sm:text-sm font-bold text-amber-700">
-                                  {language === 'ms' ? 'Akses Tamat' : 'Access Ends'}
+                                  {isId ? 'Akses Berakhir' : isMs ? 'Akses Tamat' : 'Access Ends'}
                                 </p>
                                 <p className="text-xs text-amber-600 break-words">
-                                  {formatDate(subscription.accessEndsDate || subscription.currentPeriodEnd)}
+                                  {formatDate(subscription!.accessEndsDate || subscription!.currentPeriodEnd)}
                                 </p>
                               </div>
                             </div>
@@ -1212,24 +1217,28 @@ export default function PaymentMethodPage() {
                       <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-gradient-to-r from-slate-600 to-slate-700 rounded-xl p-4 sm:p-5 md:p-6 mb-6 text-white"
+                        className="premium-cta-band rounded-xl p-4 sm:p-5 md:p-6 mb-6 text-white"
                       >
                         <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                           <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <p className="font-bold mb-2 text-base sm:text-lg">
-                              {language === 'ms' 
+                              {isId 
+                                ? 'Langganan Dibatalkan' 
+                                : isMs 
                                 ? 'Langganan Dibatalkan' 
                                 : 'Subscription Cancelled'}
                             </p>
                             <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed">
-                              {language === 'ms' 
-                                ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)} (akhir kontrak 12 bulan anda). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
-                                : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription.accessEndsDate || subscription.contractYearEnd || subscription.currentPeriodEnd)} (end of your 12-month contract). To continue after this date, please subscribe to a new plan.`}
+                              {isId 
+                                ? `Langganan Anda telah dibatalkan. Namun, Anda masih dapat menggunakan semua fitur dan layanan hingga ${formatDate(subscription!.accessEndsDate || subscription!.contractYearEnd || subscription!.currentPeriodEnd)} (akhir kontrak 12 bulan Anda). Untuk melanjutkan setelah tanggal ini, silakan berlangganan paket baru.`
+                                : isMs 
+                                ? `Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri dan perkhidmatan sehingga ${formatDate(subscription!.accessEndsDate || subscription!.contractYearEnd || subscription!.currentPeriodEnd)} (akhir kontrak 12 bulan anda). Untuk meneruskan selepas tarikh ini, sila langgan pelan baharu.`
+                                : `Your subscription has been cancelled. However, you can still use all features and services until ${formatDate(subscription!.accessEndsDate || subscription!.contractYearEnd || subscription!.currentPeriodEnd)} (end of your 12-month contract). To continue after this date, please subscribe to a new plan.`}
                             </p>
                             <Link href="/pricing" className="inline-block w-full sm:w-auto">
                               <Button className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-2.5 px-5 sm:px-6 font-bold rounded-lg shadow-md text-sm sm:text-base transition-colors">
-                                {language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe to New Plan'}
+                                {isId ? 'Berlangganan Paket Baru' : isMs ? 'Langgan Pelan Baru' : 'Subscribe to New Plan'}
                               </Button>
                             </Link>
                           </div>
@@ -1248,14 +1257,14 @@ export default function PaymentMethodPage() {
                           <Calendar className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mt-0.5" />
                           <div className="flex-1 min-w-0">
                             <p className="font-bold mb-2 text-base sm:text-lg">
-                              {language === 'ms' 
-                                ? 'Pembatalan Dijadualkan - Perkhidmatan Masih Aktif' 
-                                : 'Cancellation Scheduled - Service Still Active'}
+                              {copy('Cancellation Scheduled - Service Still Active', 'Pembatalan Dijadualkan - Perkhidmatan Masih Aktif')}
                             </p>
                             <p className="text-sm sm:text-base text-white/90 mb-3 sm:mb-4 leading-relaxed break-words">
-                              {language === 'ms' 
-                                ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY')} (akhir kontrak 12 bulan). Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant. Pembatalan hanya menghentikan pembaharuan untuk tahun berikutnya.`
-                                : `Your subscription will continue with monthly installment payments until ${new Date(subscription.contractCancellationDate).toLocaleDateString()} (end of 12-month contract). You can still use all services including AI assistant. Cancellation only stops renewal for the following year.`}
+                              {isId
+                                ? `Langganan Anda akan berlanjut dengan pembayaran cicilan bulanan hingga ${new Date(subscription!.contractCancellationDate!).toLocaleDateString('id-ID')} (akhir kontrak 12 bulan). Anda tetap dapat menggunakan semua layanan termasuk AI assistant. Pembatalan hanya menghentikan perpanjangan untuk tahun berikutnya.`
+                                : isMs
+                                  ? `Langganan anda akan diteruskan dengan bayaran ansuran bulanan sehingga ${new Date(subscription!.contractCancellationDate!).toLocaleDateString('ms-MY')} (akhir kontrak 12 bulan). Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant. Pembatalan hanya menghentikan pembaharuan untuk tahun berikutnya.`
+                                  : `Your subscription will continue with monthly installment payments until ${new Date(subscription!.contractCancellationDate!).toLocaleDateString()} (end of 12-month contract). You can still use all services including AI assistant. Cancellation only stops renewal for the following year.`}
                             </p>
                             <Button
                               onClick={handleReactivateSubscription}
@@ -1267,7 +1276,7 @@ export default function PaymentMethodPage() {
                               ) : (
                                 <RefreshCw className="w-4 h-4 mr-2" />
                               )}
-                              {language === 'ms' ? 'Batal Pembatalan & Teruskan' : 'Undo Cancellation & Continue'}
+                              {copy('Undo Cancellation & Continue', 'Batal Pembatalan & Teruskan')}
                             </Button>
                           </div>
                         </div>
@@ -1280,8 +1289,8 @@ export default function PaymentMethodPage() {
                         <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-3 font-bold rounded-xl shadow-lg">
                           <TrendingUp className="w-4 h-4 mr-2" />
                           {subscription?.status === 'canceled' || subscription?.pendingContractCancellation
-                            ? (language === 'ms' ? 'Langgan Pelan Baru' : 'Subscribe New Plan')
-                            : (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
+                            ? copy('Subscribe New Plan', 'Langgan Pelan Baru')
+                            : copy('Upgrade', 'Naik Taraf')
                           }
                         </Button>
                       </Link>
@@ -1294,17 +1303,17 @@ export default function PaymentMethodPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100"
+                  className="premium-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8"
                 >
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3">
                       <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-violet-600" />
-                      {language === 'ms' ? 'Kaedah Bayaran' : 'Payment Method'}
+                      {copy('Payment Method', 'Kaedah Bayaran')}
                     </h2>
                     <button
                       onClick={() => setShowCardDetails(!showCardDetails)}
-                      aria-label={showCardDetails ? (language === 'ms' ? 'Sorok butiran kad' : 'Hide card details') : (language === 'ms' ? 'Tunjuk butiran kad' : 'Show card details')}
-                      title={showCardDetails ? (language === 'ms' ? 'Sorok butiran kad' : 'Hide card details') : (language === 'ms' ? 'Tunjuk butiran kad' : 'Show card details')}
+                      aria-label={showCardDetails ? copy('Hide card details', 'Sorok butiran kad') : copy('Show card details', 'Tunjuk butiran kad')}
+                      title={showCardDetails ? copy('Hide card details', 'Sorok butiran kad') : copy('Show card details', 'Tunjuk butiran kad')}
                       className="p-2 hover:bg-gray-100 rounded-lg transition"
                     >
                       {showCardDetails ? (
@@ -1326,7 +1335,7 @@ export default function PaymentMethodPage() {
                         <div className="bg-gray-50 rounded-xl p-6 text-center">
                           <CreditCard className="w-12 h-12 text-gray-300 mx-auto mb-3" />
                           <p className="text-gray-500">
-                            {language === 'ms' ? 'Tiada kaedah bayaran' : 'No payment method on file'}
+                            {copy('No payment method on file', 'Tiada kaedah bayaran')}
                           </p>
                         </div>
                       );
@@ -1344,18 +1353,18 @@ export default function PaymentMethodPage() {
                               <div className="w-6 h-4 sm:w-8 sm:h-6 bg-amber-500 rounded-sm"></div>
                             </div>
                             <span className="text-xs sm:text-sm font-semibold opacity-90 capitalize">
-                                {paymentMethod.brand}
+                                {paymentMethod!.brand}
                             </span>
                           </div>
                           <div className="flex items-center gap-2 bg-white/20 px-2.5 sm:px-3 py-1 rounded-full text-xs font-bold self-start sm:self-auto">
                             <CheckCircle className="w-3 h-3" />
-                            {language === 'ms' ? 'Disahkan' : 'Verified'}
+                            {copy('Verified', 'Disahkan')}
                           </div>
                         </div>
                         
                         <p className="text-lg sm:text-xl font-mono mb-3 sm:mb-4 tracking-wider break-all sm:break-normal">
                           {showCardDetails 
-                              ? `•••• •••• •••• ${paymentMethod.last4}`
+                              ? `•••• •••• •••• ${paymentMethod!.last4}`
                             : '•••• •••• •••• ••••'
                           }
                         </p>
@@ -1363,17 +1372,17 @@ export default function PaymentMethodPage() {
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-3 sm:gap-0">
                           <div className="min-w-0">
                             <p className="text-xs opacity-70 mb-1">
-                              {language === 'ms' ? 'Pemegang Kad' : 'Card Holder'}
+                              {copy('Card Holder', 'Pemegang Kad')}
                             </p>
-                            <p className="font-bold text-sm sm:text-base truncate">{user.displayName || user.email}</p>
+                            <p className="font-bold text-sm sm:text-base truncate">{user!.displayName || user!.email}</p>
                           </div>
                           <div className="text-left sm:text-right flex-shrink-0">
                             <p className="text-xs opacity-70 mb-1">
-                              {language === 'ms' ? 'Tamat' : 'Expires'}
+                              {copy('Expires', 'Tamat')}
                             </p>
                             <p className="font-bold text-sm sm:text-base">
                               {showCardDetails 
-                                  ? `${String(paymentMethod.expMonth).padStart(2, '0')}/${paymentMethod.expYear}`
+                                  ? `${String(paymentMethod!.expMonth).padStart(2, '0')}/${paymentMethod!.expYear}`
                                 : '••/••'
                               }
                             </p>
@@ -1386,7 +1395,7 @@ export default function PaymentMethodPage() {
                   
                   <div className="flex items-center justify-center gap-2 text-sm text-gray-500 mt-4">
                     <Shield className="w-4 h-4 text-green-600" />
-                    <span>{language === 'ms' ? 'Dilindungi dengan penyulitan SSL' : 'Protected with SSL encryption'}</span>
+                    <span>{copy('Protected with SSL encryption', 'Dilindungi dengan penyulitan SSL')}</span>
                   </div>
                   
                   {/* Manage Payment Method Button */}
@@ -1402,7 +1411,7 @@ export default function PaymentMethodPage() {
                         ) : (
                           <Settings className="w-4 h-4 mr-2" />
                         )}
-                        {language === 'ms' ? 'Urus Kaedah Pembayaran' : 'Manage Payment Method'}
+                        {copy('Manage Payment Method', 'Urus Kaedah Pembayaran')}
                       </Button>
                     </div>
                   )}
@@ -1413,11 +1422,11 @@ export default function PaymentMethodPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.15 }}
-                  className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-xl border border-gray-100"
+                  className="premium-panel rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8"
                 >
                   <h2 className="text-xl sm:text-2xl font-black text-gray-900 flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
                     <Settings className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
-                    {language === 'ms' ? 'Tetapan Bil' : 'Billing Settings'}
+                    {copy('Billing Settings', 'Tetapan Bil')}
                   </h2>
 
 
@@ -1432,20 +1441,17 @@ export default function PaymentMethodPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-gray-900 text-sm sm:text-base">
-                              {language === 'ms' ? 'Pelan Ansuran 12 Bulan' : '12-Month Installment Plan'}
+                              {copy('12-Month Installment Plan', 'Pelan Ansuran 12 Bulan')}
                             </p>
                             <p className="text-xs sm:text-sm text-gray-600 break-words">
-                              {language === 'ms' 
-                                ? 'Pembayaran bulanan akan diteruskan secara automatik sepanjang tempoh kontrak 12 bulan. Pembatalan awal akan menghentikan pembaharuan automatik untuk tahun berikutnya.'
-                                : 'Monthly payments will continue automatically throughout the 12-month contract period. Early cancellation stops auto-renewal for the following year.'
-                              }
+                              {copy('Monthly payments will continue automatically throughout the 12-month contract period. Early cancellation stops auto-renewal for the following year.', 'Pembayaran bulanan akan diteruskan secara automatik sepanjang tempoh kontrak 12 bulan. Pembatalan awal akan menghentikan pembaharuan automatik untuk tahun berikutnya.')}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-green-100 rounded-full flex-shrink-0">
                           <CheckCircle className="w-4 h-4 text-green-600" />
                           <span className="text-xs sm:text-sm font-bold text-green-700">
-                            {language === 'ms' ? 'Aktif' : 'Active'}
+                            {copy('Active', 'Aktif')}
                           </span>
                         </div>
                       </div>
@@ -1458,16 +1464,16 @@ export default function PaymentMethodPage() {
                           </div>
                           <div className="min-w-0 flex-1">
                             <p className="font-bold text-gray-900 text-sm sm:text-base">
-                              {language === 'ms' ? 'Pembaharuan Automatik' : 'Auto Renewal'}
+                              {copy('Auto Renewal', 'Pembaharuan Automatik')}
                             </p>
                             <p className="text-xs sm:text-sm text-gray-500 break-words">
                               {autoRenewal
                                   ? (subscriptionInterval === 'year'
-                                      ? (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap tahun' : 'Subscription will renew automatically every year')
-                                      : (language === 'ms' ? 'Langganan akan diperbaharui secara automatik setiap bulan' : 'Subscription will renew automatically every month'))
+                                      ? copy('Subscription will renew automatically every year', 'Langganan akan diperbaharui secara automatik setiap tahun')
+                                      : copy('Subscription will renew automatically every month', 'Langganan akan diperbaharui secara automatik setiap bulan'))
                                   : (subscriptionInterval === 'year'
-                                      ? (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir tahun, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the year, but will not renew automatically after that')
-                                      : (language === 'ms' ? 'Langganan akan kekal aktif sehingga akhir bulan, tetapi tidak akan diperbaharui secara automatik selepas itu' : 'Subscription will remain active until the end of the month, but will not renew automatically after that'))
+                                      ? copy('Subscription will remain active until the end of the year, but will not renew automatically after that', 'Langganan akan kekal aktif sehingga akhir tahun, tetapi tidak akan diperbaharui secara automatik selepas itu')
+                                      : copy('Subscription will remain active until the end of the month, but will not renew automatically after that', 'Langganan akan kekal aktif sehingga akhir bulan, tetapi tidak akan diperbaharui secara automatik selepas itu'))
                                 }
                             </p>
                           </div>
@@ -1475,8 +1481,8 @@ export default function PaymentMethodPage() {
                         <button
                           type="button"
                           onClick={handleToggleAutoRenewal}
-                          aria-label={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
-                          title={language === 'ms' ? 'Togol pembaharuan automatik' : 'Toggle auto renewal'}
+                          aria-label={copy('Toggle auto renewal', 'Togol pembaharuan automatik')}
+                          title={copy('Toggle auto renewal', 'Togol pembaharuan automatik')}
                           className={`relative w-14 h-7 rounded-full transition-colors cursor-pointer flex-shrink-0 ${
                             updatingAutoRenewal
                               ? 'opacity-70' 
@@ -1503,18 +1509,18 @@ export default function PaymentMethodPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="font-bold text-gray-900 text-sm sm:text-base">
-                            {language === 'ms' ? 'Pemberitahuan Email' : 'Email Notifications'}
+                            {copy('Email Notifications', 'Pemberitahuan Email')}
                           </p>
                           <p className="text-xs sm:text-sm text-gray-500 break-words">
-                            {language === 'ms' ? 'Terima invois & kemas kini bil melalui email' : 'Receive invoices & billing updates via email'}
+                            {copy('Receive invoices & billing updates via email', 'Terima invois & kemas kini bil melalui email')}
                           </p>
                         </div>
                       </div>
                       <button
                         onClick={handleToggleEmailNotifications}
                         disabled={updatingEmailNotifications}
-                        aria-label={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
-                        title={language === 'ms' ? 'Togol pemberitahuan email' : 'Toggle email notifications'}
+                        aria-label={copy('Toggle email notifications', 'Togol pemberitahuan email')}
+                        title={copy('Toggle email notifications', 'Togol pemberitahuan email')}
                         className={`relative w-14 h-7 rounded-full transition-colors disabled:opacity-50 flex-shrink-0 ${
                           emailNotifications ? 'bg-blue-600' : 'bg-gray-300'
                         }`}
@@ -1549,22 +1555,20 @@ export default function PaymentMethodPage() {
                         <div className="min-w-0 flex-1">
                           <p className="font-bold text-gray-900 text-sm sm:text-base">
                             {subscription?.pendingContractCancellation
-                              ? (language === 'ms' ? 'Pembatalan Dijadualkan' : 'Cancellation Scheduled')
-                              : (language === 'ms' ? 'Batalkan Langganan' : 'Cancel Subscription')
+                              ? copy('Cancellation Scheduled', 'Pembatalan Dijadualkan')
+                              : copy('Cancel Subscription', 'Batalkan Langganan')
                             }
                           </p>
                           <p className="text-xs sm:text-sm text-gray-500 break-words">
                             {subscription?.pendingContractCancellation
-                              ? (language === 'ms'
-                                  ? `Langganan anda akan dibatalkan pada ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut dan anda masih boleh menggunakan semua perkhidmatan.`
-                                  : `Your subscription will be cancelled on ${subscription.contractCancellationDate ? new Date(subscription.contractCancellationDate).toLocaleDateString() : 'end of contract'}. Monthly payments will continue until then and you can still use all services.`)
+                              ? (isId
+                                  ? `Langganan Anda akan dibatalkan pada ${subscription!.contractCancellationDate ? new Date(subscription!.contractCancellationDate!).toLocaleDateString('id-ID') : 'akhir kontrak'}. Pembayaran bulanan akan terus berjalan hingga tanggal tersebut dan Anda tetap dapat menggunakan semua layanan.`
+                                  : isMs
+                                    ? `Langganan anda akan dibatalkan pada ${subscription!.contractCancellationDate ? new Date(subscription!.contractCancellationDate!).toLocaleDateString('ms-MY') : 'akhir kontrak'}. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut dan anda masih boleh menggunakan semua perkhidmatan.`
+                                    : `Your subscription will be cancelled on ${subscription!.contractCancellationDate ? new Date(subscription!.contractCancellationDate!).toLocaleDateString() : 'end of contract'}. Monthly payments will continue until then and you can still use all services.`)
                               : subscription?.cancelAtPeriodEnd
-                                ? (language === 'ms'
-                                    ? 'Langganan anda akan tamat pada akhir tempoh bil semasa.'
-                                    : 'Your subscription will end at the end of the current billing period.')
-                                : (language === 'ms'
-                                    ? 'Pembatalan akan menjadualkan penamatan pada akhir tahun kontrak 12 bulan anda. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut.'
-                                    : 'Cancellation will schedule termination at the end of your 12-month contract year. Monthly payments will continue until then.')
+                                ? copy('Your subscription will end at the end of the current billing period.', 'Langganan anda akan tamat pada akhir tempoh bil semasa.')
+                                : copy('Cancellation will schedule termination at the end of your 12-month contract year. Monthly payments will continue until then.', 'Pembatalan akan menjadualkan penamatan pada akhir tahun kontrak 12 bulan anda. Pembayaran bulanan akan diteruskan sehingga tarikh tersebut.')
                             }
                           </p>
                         </div>
@@ -1581,7 +1585,7 @@ export default function PaymentMethodPage() {
                           ) : (
                             <>
                               <RefreshCw className="w-4 h-4" />
-                              {language === 'ms' ? 'Batal Pembatalan' : 'Undo Cancellation'}
+                              {copy('Undo Cancellation', 'Batal Pembatalan')}
                             </>
                           )}
                         </button>
@@ -1599,9 +1603,9 @@ export default function PaymentMethodPage() {
                           {loading || loadingSubscription ? (
                             <Loader2 className="w-4 h-4 animate-spin" />
                           ) : subscription?.status === 'canceled' ? (
-                            language === 'ms' ? 'Dibatalkan' : 'Cancelled'
+                            copy('Cancelled', 'Dibatalkan')
                           ) : (
-                            language === 'ms' ? 'Batal' : 'Cancel'
+                            copy('Cancel', 'Batal')
                           )}
                         </button>
                       )}
@@ -1619,10 +1623,10 @@ export default function PaymentMethodPage() {
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3">
                       <FileText className="w-6 h-6 text-green-600" />
-                      {language === 'ms' ? 'Sejarah Invois' : 'Invoice History'}
+                      {copy('Invoice History', 'Sejarah Invois')}
                     </h2>
                     <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-bold">
-                      {invoices.length} {language === 'ms' ? 'invois' : 'invoices'}
+                      {invoices.length} {copy('invoices', 'invois')}
                     </span>
                   </div>
                   
@@ -1634,7 +1638,7 @@ export default function PaymentMethodPage() {
                     <div className="text-center py-12">
                       <FileText className="w-16 h-16 text-gray-200 mx-auto mb-4" />
                       <p className="text-gray-500">
-                        {language === 'ms' ? 'Tiada invois lagi' : 'No invoices yet'}
+                        {copy('No invoices yet', 'Tiada invois lagi')}
                       </p>
                     </div>
                   ) : (
@@ -1660,8 +1664,8 @@ export default function PaymentMethodPage() {
                                     </p>
                                     <button
                                       onClick={() => handleCopyInvoiceId(invoice.number || invoice.id)}
-                                      aria-label={language === 'ms' ? 'Salin ID invois' : 'Copy invoice ID'}
-                                      title={language === 'ms' ? 'Salin ID invois' : 'Copy invoice ID'}
+                                      aria-label={copy('Copy invoice ID', 'Salin ID invois')}
+                                      title={copy('Copy invoice ID', 'Salin ID invois')}
                                       className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-gray-200 rounded"
                                     >
                                       <Copy className="w-3 h-3 text-gray-500" />
@@ -1686,7 +1690,7 @@ export default function PaymentMethodPage() {
                                   }`}>
                                     <CheckCircle className="w-3 h-3" />
                                     {invoice.status === 'paid' 
-                                      ? (language === 'ms' ? 'Dibayar' : 'Paid')
+                                      ? copy('Paid', 'Dibayar')
                                       : invoice.status
                                     }
                                   </span>
@@ -1696,8 +1700,8 @@ export default function PaymentMethodPage() {
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
                                   onClick={() => handleDownloadInvoice(invoice)}
-                                  aria-label={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
-                                  title={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                                  aria-label={copy('Download invoice', 'Muat turun invois')}
+                                  title={copy('Download invoice', 'Muat turun invois')}
                                   className="p-3 bg-green-600 hover:bg-green-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all"
                                 >
                                   <Download className="w-4 h-4" />
@@ -1714,7 +1718,7 @@ export default function PaymentMethodPage() {
                             onClick={() => setShowAllInvoicesModal(true)}
                             className="text-green-600 hover:text-green-700 font-bold flex items-center gap-2 mx-auto group"
                           >
-                            {language === 'ms' ? 'Lihat semua invois' : 'View all invoices'}
+                            {copy('View all invoices', 'Lihat semua invois')}
                             <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                           </button>
                         </div>
@@ -1734,12 +1738,12 @@ export default function PaymentMethodPage() {
                 >
                   <h3 className="text-xl font-black text-gray-900 mb-4 flex items-center gap-2">
                     <Zap className="w-5 h-5 text-green-500" />
-                    {language === 'ms' ? 'Pelan Lain' : 'Other Plans'}
+                    {copy('Other Plans', 'Pelan Lain')}
                   </h3>
                   <div className="space-y-3">
-                    {PRICING_TIERS.filter(tier => tier.id !== user.plan).map((tier) => {
+                    {PRICING_TIERS.filter(tier => tier.id !== user!.plan).map((tier) => {
                       const tierOrder = ['none', 'start', 'smart', 'precision'];
-                      const currentIndex = tierOrder.indexOf(user.plan || 'none');
+                      const currentIndex = tierOrder.indexOf(user!.plan || 'none');
                       const targetIndex = tierOrder.indexOf(tier.id);
                       const isUpgrade = targetIndex > currentIndex;
                       
@@ -1749,10 +1753,10 @@ export default function PaymentMethodPage() {
                             <div className="flex items-center justify-between">
                               <div>
                                 <p className="font-bold text-gray-900 group-hover:text-green-700 transition">
-                                  {language === 'ms' ? tier.nameMs : tier.name}
+                                  {planText(tier.name, tier.nameMs)}
                                 </p>
                                 <p className="text-sm text-gray-500">
-                                  RM {tier.monthlyPrice}/{language === 'ms' ? 'mo' : 'mo'} ({language === 'ms' ? 'Jumlah: ' : 'Total: '}{tier.monthlyPrice * 12} RM)
+                                  RM {tier.monthlyPrice}/mo ({copy('Total: ', 'Jumlah: ')}{tier.monthlyPrice * 12} RM)
                                 </p>
                               </div>
                               <span className={`text-xs font-bold px-3 py-1 rounded-full ${
@@ -1761,8 +1765,8 @@ export default function PaymentMethodPage() {
                                   : 'bg-gray-100 text-gray-600'
                               }`}>
                                 {isUpgrade 
-                                  ? (language === 'ms' ? 'Naik Taraf' : 'Upgrade')
-                                  : (language === 'ms' ? 'Turun Taraf' : 'Downgrade')
+                                  ? copy('Upgrade', 'Naik Taraf')
+                                  : copy('Downgrade', 'Turun Taraf')
                                 }
                               </span>
                             </div>
@@ -1782,17 +1786,14 @@ export default function PaymentMethodPage() {
                 >
                   <h3 className="text-xl font-black mb-3 flex items-center gap-2">
                     <Bell className="w-5 h-5" />
-                    {language === 'ms' ? 'Perlukan Bantuan?' : 'Need Help?'}
+                    {copy('Need Help?', 'Perlukan Bantuan?')}
                   </h3>
                   <p className="text-white/80 text-sm mb-4">
-                    {language === 'ms' 
-                      ? 'Hubungi pasukan sokongan kami untuk sebarang pertanyaan mengenai pembayaran.'
-                      : 'Contact our support team for any questions about payments.'
-                    }
+                    {copy('Contact our support team for any questions about payments.', 'Hubungi pasukan sokongan kami untuk sebarang pertanyaan mengenai pembayaran.')}
                   </p>
                   <Link href="/support">
                     <Button className="w-full bg-yellow-500 text-white hover:bg-green-500 py-3 font-bold rounded-xl shadow-lg">
-                      {language === 'ms' ? '📞 Hubungi Sokongan' : '📞 Contact Support'}
+                      {copy('📞 Contact Support', '📞 Hubungi Sokongan')}
                     </Button>
                   </Link>
                 </motion.div>
@@ -1823,51 +1824,46 @@ export default function PaymentMethodPage() {
                     <AlertCircle className="w-8 h-8 text-amber-600" />
                   </div>
                   <h3 className="text-2xl font-black text-gray-900 mb-2">
-                    {language === 'ms' ? 'Jadualkan Pembatalan?' : 'Schedule Cancellation?'}
+                    {copy('Schedule Cancellation?', 'Jadualkan Pembatalan?')}
                   </h3>
                   
-                  {isMonthlySubscription && subscription && !subscription.isBeyondContractYear ? (
+                  {isMonthlySubscription && subscription && !subscription!.isBeyondContractYear ? (
                     <div className="text-left bg-amber-50 rounded-xl p-4 mb-4 border border-amber-200">
                       <p className="text-gray-700 font-semibold mb-2">
-                        {language === 'ms' ? '📋 Butiran Kontrak 12 Bulan:' : '📋 12-Month Contract Details:'}
+                        {copy('📋 12-Month Contract Details:', '📋 Butiran Kontrak 12 Bulan:')}
                       </p>
                       <ul className="text-sm text-gray-600 space-y-2">
                         <li className="flex items-start gap-2">
                           <span className="text-amber-500 mt-0.5">•</span>
-                          {language === 'ms' 
-                            ? `Pembayaran bulanan akan diteruskan sehingga ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString('ms-MY') : 'akhir kontrak'}`
-                            : `Monthly payments will continue until ${subscription.contractYearEnd ? new Date(subscription.contractYearEnd).toLocaleDateString() : 'contract end'}`
+                          {isId
+                            ? `Pembayaran bulanan akan berlanjut hingga ${subscription!.contractYearEnd ? new Date(subscription!.contractYearEnd!).toLocaleDateString('id-ID') : 'akhir kontrak'}`
+                            : isMs
+                              ? `Pembayaran bulanan akan diteruskan sehingga ${subscription!.contractYearEnd ? new Date(subscription!.contractYearEnd!).toLocaleDateString('ms-MY') : 'akhir kontrak'}`
+                              : `Monthly payments will continue until ${subscription!.contractYearEnd ? new Date(subscription!.contractYearEnd!).toLocaleDateString() : 'contract end'}`
                           }
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-green-500 mt-0.5">•</span>
-                          {language === 'ms' 
-                            ? 'Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant'
-                            : 'You can still use all services including AI assistant'
-                          }
+                          {copy('You can still use all services including AI assistant', 'Anda masih boleh menggunakan semua perkhidmatan termasuk AI assistant')}
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-blue-500 mt-0.5">•</span>
-                          {language === 'ms' 
-                            ? 'Anda boleh membatalkan pembatalan ini bila-bila masa sebelum akhir kontrak'
-                            : 'You can undo this cancellation anytime before contract end'
-                          }
+                          {copy('You can undo this cancellation anytime before contract end', 'Anda boleh membatalkan pembatalan ini bila-bila masa sebelum akhir kontrak')}
                         </li>
                         <li className="flex items-start gap-2">
                           <span className="text-gray-500 mt-0.5">•</span>
-                          {language === 'ms' 
-                            ? `Baki bulan dalam kontrak: ${subscription.remainingMonths || 0} bulan`
-                            : `Remaining months in contract: ${subscription.remainingMonths || 0} months`
+                          {isId
+                            ? `Sisa bulan dalam kontrak: ${subscription!.remainingMonths || 0} bulan`
+                            : isMs
+                              ? `Baki bulan dalam kontrak: ${subscription!.remainingMonths || 0} bulan`
+                              : `Remaining months in contract: ${subscription!.remainingMonths || 0} months`
                           }
                         </li>
                       </ul>
                     </div>
                   ) : (
                     <p className="text-gray-600 mb-4">
-                      {language === 'ms'
-                        ? 'Pembatalan akan berkuat kuasa pada akhir tempoh bil semasa. Perkhidmatan akan berterusan sehingga tarikh tersebut.'
-                        : 'Cancellation will take effect at the end of the current billing period. Services will continue until then.'
-                      }
+                      {copy('Cancellation will take effect at the end of the current billing period. Services will continue until then.', 'Pembatalan akan berkuat kuasa pada akhir tempoh bil semasa. Perkhidmatan akan berterusan sehingga tarikh tersebut.')}
                     </p>
                   )}
                 </div>
@@ -1877,7 +1873,7 @@ export default function PaymentMethodPage() {
                     onClick={() => setShowCancelModal(false)}
                     className="flex-1 bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl"
                   >
-                    {language === 'ms' ? 'Kembali' : 'Go Back'}
+                    {copy('Go Back', 'Kembali')}
                   </Button>
                   <Button
                     onClick={handleCancelSubscription}
@@ -1887,7 +1883,7 @@ export default function PaymentMethodPage() {
                     {loading ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      language === 'ms' ? 'Ya, Jadualkan' : 'Yes, Schedule'
+                      copy('Yes, Schedule', 'Ya, Jadualkan')
                     )}
                   </Button>
                 </div>
@@ -1917,12 +1913,12 @@ export default function PaymentMethodPage() {
                 <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                   <h3 className="text-2xl font-black text-gray-900 flex items-center gap-3">
                     <FileText className="w-6 h-6 text-green-600" />
-                    {language === 'ms' ? 'Semua Invois' : 'All Invoices'}
+                    {copy('All Invoices', 'Semua Invois')}
                   </h3>
                   <button
                     onClick={() => setShowAllInvoicesModal(false)}
-                    aria-label={language === 'ms' ? 'Tutup modal' : 'Close modal'}
-                    title={language === 'ms' ? 'Tutup modal' : 'Close modal'}
+                    aria-label={copy('Close modal', 'Tutup modal')}
+                    title={copy('Close modal', 'Tutup modal')}
                     className="p-2 hover:bg-gray-100 rounded-xl transition"
                   >
                     <X className="w-5 h-5 text-gray-500" />
@@ -1949,13 +1945,13 @@ export default function PaymentMethodPage() {
                         <div className="text-right">
                           <p className="font-bold text-gray-900">{invoice.currency} {invoice.amount.toFixed(2)}</p>
                           <span className={`text-xs ${invoice.status === 'paid' ? 'text-green-600' : 'text-amber-600'}`}>
-                            {invoice.status === 'paid' ? (language === 'ms' ? 'Dibayar' : 'Paid') : invoice.status}
+                            {invoice.status === 'paid' ? copy('Paid', 'Dibayar') : invoice.status}
                           </span>
                         </div>
                         <button
                           onClick={() => handleDownloadInvoice(invoice)}
-                          aria-label={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
-                          title={language === 'ms' ? 'Muat turun invois' : 'Download invoice'}
+                          aria-label={copy('Download invoice', 'Muat turun invois')}
+                          title={copy('Download invoice', 'Muat turun invois')}
                           className="p-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition"
                         >
                           <Download className="w-4 h-4" />

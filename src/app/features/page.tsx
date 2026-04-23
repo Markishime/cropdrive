@@ -3,15 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { useAuth } from '@/lib/auth';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function FeaturesPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language, t } = useTranslation(currentLanguage);
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
   const { user } = useAuth();
   
   const currentPlan = user?.plan || 'start';
@@ -31,29 +33,29 @@ export default function FeaturesPage() {
     {
       number: '1',
       icon: '📄',
-      title: language === 'ms' ? 'Pembacaan Dokumen Pintar (OCR & AI)' : 'Smart Document Reading (OCR & AI)',
-      description: language === 'ms'
-        ? 'Membaca laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~5-8 minit.'
-        : 'Automatically reads lab reports (Image/PDF/Excel - SPLAB, farm_test_data), extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~5-8 minutes.',
+      title: copy('Smart Document Reading (OCR & AI)', 'Pembacaan Dokumen Pintar (OCR & AI)'),
+      description: copy('Automatically reads lab reports (Image/PDF/Excel - SPLAB, farm_data), extracts all data without manual typing. Works with different lab formats, handwritten or scanned documents. Processes in ~5-8 minutes.', 'Membaca laporan makmal (Gambar/PDF/Excel - SPLAB, farm_data) secara automatik, mengekstrak semua data tanpa taipan manual. Berfungsi dengan format makmal yang berbeza, dokumen tulisan tangan atau diimbas. Proses dalam ~5-8 minit.'),
       benefits: [
-        language === 'ms' ? 'Jimat berjam-jam kemasukan data manual' : 'Saves hours of manual data entry',
-        language === 'ms' ? 'Hapuskan kesilapan taipan' : 'Eliminates typing errors',
-        language === 'ms' ? 'Tiada perlu tukar makmal semasa' : 'No need to change your current lab',
-        language === 'ms' ? 'Baca dokumen tulisan tangan' : 'Can read handwritten documents',
+        copy('Saves hours of manual data entry', 'Jimat berjam-jam kemasukan data manual'),
+        copy('Eliminates typing errors', 'Hapuskan kesilapan taipan'),
+        copy('No need to change your current lab', 'Tiada perlu tukar makmal semasa'),
+        copy('Can read handwritten documents', 'Baca dokumen tulisan tangan'),
       ],
     },
     {
       number: '2',
       icon: '🔬',
-      title: language === 'ms' ? 'Analisis Nutrien Pintar' : 'Intelligent Nutrient Analysis',
-      description: language === 'ms'
+      title: language === 'id' ? 'Analisis Nutrisi Cerdas' : language === 'ms' ? 'Analisis Nutrien Pintar' : 'Intelligent Nutrient Analysis',
+      description: language === 'id'
+        ? 'Membandingkan hasil dengan standar Indonesian Sustainable Palm Oil (ISPO) dan Good Agricultural Practices (GAP) global terbaik. Tingkat keparahan diberi kode warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritis). Menunjukkan kesenjangan tepat untuk setiap nutrisi dan memprioritaskan masalah dari yang paling mendesak.'
+        : language === 'ms'
         ? 'Bandingkan keputusan dengan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global. Tahap keterukan berkod warna: HIJAU (Seimbang), KUNING (Rendah), MERAH (Kritikal). Tunjukkan jurang tepat untuk setiap nutrien dan utamakan masalah dari paling mendesak.'
         : 'Compares results against MPOB guidelines and best global Good Agricultural Practices (GAP). Color-coded severity levels: GREEN (Balanced), YELLOW (Low), RED (Critical). Shows exact gaps for every nutrient and prioritizes problems from most to least urgent.',
       benefits: [
-        language === 'ms' ? 'Tahu apa yang perlu perhatian' : 'Know exactly what needs attention',
-        language === 'ms' ? 'Fahami keterukan sekilas pandang' : 'Understand severity at a glance',
-        language === 'ms' ? 'Fokus pada isu kritikal dahulu' : 'Focus on critical issues first',
-        language === 'ms' ? 'Perbandingan dengan garis panduan MPOB & GAP global' : 'Comparison against MPOB guidelines & global GAP',
+        language === 'id' ? 'Tahu persis apa yang perlu perhatian' : language === 'ms' ? 'Tahu apa yang perlu perhatian' : 'Know exactly what needs attention',
+        language === 'id' ? 'Pahami tingkat keparahan dalam sekali lihat' : language === 'ms' ? 'Fahami keterukan sekilas pandang' : 'Understand severity at a glance',
+        language === 'id' ? 'Fokus pada isu paling kritis terlebih dahulu' : language === 'ms' ? 'Fokus pada isu kritikal dahulu' : 'Focus on critical issues first',
+        language === 'id' ? 'Perbandingan dengan standar ISPO & GAP global' : language === 'ms' ? 'Perbandingan dengan garis panduan MPOB & GAP global' : 'Comparison against MPOB guidelines & global GAP',
       ],
     },
     {
@@ -197,13 +199,13 @@ export default function FeaturesPage() {
           <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-center sm:text-left">
               <p className="text-sm font-medium">
-                {language === 'ms' ? `✓ Pelan Semasa Anda: ${currentPlan.toUpperCase()} • Semua ciri di bawah tersedia untuk anda!` : `✓ Your Current Plan: ${currentPlan.toUpperCase()} • All features below are available to you!`}
+                {copy(`✓ Your Current Plan: ${currentPlan.toUpperCase()} • All features below are available to you!`, `✓ Pelan Semasa Anda: ${currentPlan.toUpperCase()} • Semua ciri di bawah tersedia untuk anda!`)}
               </p>
             </div>
             {currentPlan === 'start' && (
               <Link href="/pricing">
                 <Button className="bg-yellow-400 text-green-900 hover:bg-yellow-300 font-bold px-6 py-2 text-sm">
-                  {language === 'ms' ? 'Naik Taraf Sekarang' : 'Upgrade Now'}
+                  {copy('Upgrade Now', 'Naik Taraf Sekarang')}
                 </Button>
               </Link>
             )}
@@ -233,30 +235,27 @@ export default function FeaturesPage() {
               transition={{ duration: 0.6 }}
               className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
             >
-              {language === 'ms' ? '11 Ciri Utama' : '11 Core Features'}
+              {copy('11 Core Features', '11 Ciri Utama')}
             </motion.span>
 
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
               {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'CIRI-CIRI' : 'FEATURES'}</span>
+              <span className="text-yellow-400">{copy('FEATURES', 'CIRI-CIRI')}</span>
             </h1>
 
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Teknologi terkini untuk analisis ladang kelapa sawit yang tepat, menyeluruh, dan mudah digunakan'
-                : 'Latest technology for accurate, comprehensive, and easy-to-use palm oil farm analysis'
-              }
+              {copy('Latest technology for accurate, comprehensive, and easy-to-use palm oil farm analysis', 'Teknologi terkini untuk analisis ladang kelapa sawit yang tepat, menyeluruh, dan mudah digunakan')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
                 <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  {language === 'ms' ? 'Daftar Sekarang' : 'Sign Up Now'}
+                  {copy('Sign Up Now', 'Daftar Sekarang')}
                 </button>
               </Link>
               <Link href="/get-started/farmers">
                 <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200 hover:bg-white/10">
-                  {language === 'ms' ? 'Ketahui Lebih Lanjut' : 'Learn More'}
+                  {copy('Learn More', 'Ketahui Lebih Lanjut')}
                 </button>
               </Link>
             </div>
@@ -295,7 +294,7 @@ export default function FeaturesPage() {
 
                     <div className="space-y-3 pt-4 border-t border-gray-200">
                       <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-2">
-                        {language === 'ms' ? 'Manfaat:' : 'Benefits:'}
+                        {copy('Benefits:', 'Manfaat:')}
                       </p>
                       {feature.benefits.map((benefit, benefitIndex) => (
                         <div key={benefitIndex} className="flex items-center">
@@ -333,7 +332,7 @@ export default function FeaturesPage() {
             className="text-center mb-16"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 uppercase">
-              {language === 'ms' ? 'Keupayaan' : 'Technical'} <span className="text-green-700">{language === 'ms' ? 'Teknikal' : 'Capabilities'}</span>
+              {copy('Technical', 'Keupayaan')} <span className="text-green-700">{copy('Capabilities', 'Teknikal')}</span>
             </h2>
           </motion.div>
 
@@ -348,16 +347,16 @@ export default function FeaturesPage() {
             >
               <div className="text-5xl mb-4 text-center">📁</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
-                {language === 'ms' ? 'Format Disokong' : 'Supported Formats'}
+                {copy('Supported Formats', 'Format Disokong')}
               </h3>
               <ul className="space-y-2 text-gray-700">
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Gambar (JPG, PNG)' : 'Images (JPG, PNG)'}</span>
+                  <span>{copy('Images (JPG, PNG)', 'Gambar (JPG, PNG)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>PDF {language === 'ms' ? 'laporan (mana-mana makmal)' : 'reports (any laboratory)'}</span>
+                  <span>PDF {copy('reports (any laboratory)', 'laporan (mana-mana makmal)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
@@ -365,11 +364,11 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span className="font-semibold text-green-700">SPLAB {language === 'ms' ? 'laporan' : 'reports'}</span>
+                  <span className="font-semibold text-green-700">SPLAB {copy('reports', 'laporan')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span className="font-semibold text-green-700">farm_test_data {language === 'ms' ? 'laporan' : 'reports'}</span>
+                  <span className="font-semibold text-green-700">farm_data {copy('reports', 'laporan')}</span>
                 </li>
               </ul>
             </motion.div>
@@ -384,12 +383,12 @@ export default function FeaturesPage() {
             >
               <div className="text-5xl mb-4 text-center">🧪</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
-                {language === 'ms' ? 'Ujian Tanah' : 'Soil Tests'}
+                {copy('Soil Tests', 'Ujian Tanah')}
               </h3>
               <ul className="space-y-2 text-gray-700 text-sm">
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>pH {language === 'ms' ? '(keasidan/alkaliniti)' : '(acidity/alkalinity)'}</span>
+                  <span>pH {copy('(acidity/alkalinity)', '(keasidan/alkaliniti)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
@@ -397,23 +396,23 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Ketepuan Asas (Ca, Mg, K, Na)' : 'Base Saturation (Ca, Mg, K, Na)'}</span>
+                  <span>{copy('Base Saturation (Ca, Mg, K, Na)', 'Ketepuan Asas (Ca, Mg, K, Na)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Nutrien Boleh Tukar' : 'Exchangeable Nutrients'}</span>
+                  <span>{copy('Exchangeable Nutrients', 'Nutrien Boleh Tukar')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Fosforus Tersedia (P)' : 'Available Phosphorus (P)'}</span>
+                  <span>{copy('Available Phosphorus (P)', 'Fosforus Tersedia (P)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Nitrogen Total (N)' : 'Total Nitrogen (N)'}</span>
+                  <span>{copy('Total Nitrogen (N)', 'Nitrogen Total (N)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Mikronutrien (B, Cu, Zn, Mn, Fe, Al)' : 'Micronutrients (B, Cu, Zn, Mn, Fe, Al)'}</span>
+                  <span>{copy('Micronutrients (B, Cu, Zn, Mn, Fe, Al)', 'Mikronutrien (B, Cu, Zn, Mn, Fe, Al)')}</span>
                 </li>
               </ul>
             </motion.div>
@@ -428,27 +427,25 @@ export default function FeaturesPage() {
             >
               <div className="text-5xl mb-4 text-center">🍃</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
-                {language === 'ms' ? 'Ujian Tisu Daun' : 'Leaf Tissue Tests'}
+                {copy('Leaf Tissue Tests', 'Ujian Tisu Daun')}
               </h3>
               <ul className="space-y-2 text-gray-700">
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Makronutrien (N, P, K, Ca, Mg)' : 'Macronutrients (N, P, K, Ca, Mg)'}</span>
+                  <span>{copy('Macronutrients (N, P, K, Ca, Mg)', 'Makronutrien (N, P, K, Ca, Mg)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Mikronutrien (B, Cu, Zn, Cl)' : 'Micronutrients (B, Cu, Zn, Cl)'}</span>
+                  <span>{copy('Micronutrients (B, Cu, Zn, Cl)', 'Mikronutrien (B, Cu, Zn, Cl)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>{language === 'ms' ? 'Nisbah Nutrien (K:Mg, Ca:Mg, dll)' : 'Nutrient Ratios (K:Mg, Ca:Mg, etc.)'}</span>
+                  <span>{copy('Nutrient Ratios (K:Mg, Ca:Mg, etc.)', 'Nisbah Nutrien (K:Mg, Ca:Mg, dll)')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
                 <span className="font-semibold">
-                  {language === 'ms'
-                    ? 'Garis panduan MPOB & Amalan Pertanian Baik (GAP)'
-                    : 'MPOB guidelines & Good Agricultural Practices (GAP)'}
+                  {copy('MPOB guidelines & Good Agricultural Practices (GAP)', 'Garis panduan MPOB & Amalan Pertanian Baik (GAP)')}
                 </span>
                 </li>
               </ul>
@@ -468,16 +465,13 @@ export default function FeaturesPage() {
           >
             <div className="text-center mb-16">
               <span className="inline-block text-yellow-500 text-sm font-bold tracking-widest uppercase mb-4">
-                {language === 'ms' ? 'Mudah & Pantas' : 'Simple & Fast'}
+                {copy('Simple & Fast', 'Mudah & Pantas')}
               </span>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 uppercase">
-                {language === 'ms' ? 'Perjalanan' : 'User'} <span className="text-green-700">{language === 'ms' ? 'Pengguna' : 'Journey'}</span>
+                {copy('User', 'Perjalanan')} <span className="text-green-700">{copy('Journey', 'Pengguna')}</span>
               </h2>
               <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-                {language === 'ms'
-                  ? 'Proses mudah 5 langkah dari muat naik ke tindakan'
-                  : 'Simple 5-step process from upload to action'
-                }
+                {copy('Simple 5-step process from upload to action', 'Proses mudah 5 langkah dari muat naik ke tindakan')}
               </p>
             </div>
 
@@ -572,23 +566,20 @@ export default function FeaturesPage() {
             className="text-center"
           >
             <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase">
-              {language === 'ms' ? 'Sedia untuk' : 'Ready to'} <span className="text-yellow-400">{language === 'ms' ? 'Memulakan?' : 'Start?'}</span>
+              {copy('Ready to', 'Sedia untuk')} <span className="text-yellow-400">{copy('Start?', 'Memulakan?')}</span>
             </h2>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Jangan teka - tahu apa yang ladang anda perlukan dengan ketepatan!'
-                : 'Don\'t guess - know exactly what your plantation needs!'
-              }
+              {copy('Don\'t guess - know exactly what your plantation needs!', 'Jangan teka - tahu apa yang ladang anda perlukan dengan ketepatan!')}
             </p>
             <div className="flex flex-col sm:flex-row gap-6 justify-center">
               <Link href="/register">
                 <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
-                  {language === 'ms' ? 'Sertai Sekarang' : 'Join Now'}
+                  {copy('Join Now', 'Sertai Sekarang')}
                 </button>
               </Link>
               <Link href="/pricing">
                 <button className="px-10 py-5 border-2 border-white text-white rounded-xl font-medium uppercase text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 hover:bg-white/10 transition-all duration-200">
-                  {language === 'ms' ? 'Lihat Pelan Harga' : 'View Plans'}
+                  {copy('View Plans', 'Lihat Pelan Harga')}
                 </button>
               </Link>
             </div>

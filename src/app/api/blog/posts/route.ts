@@ -4,10 +4,231 @@ import { FieldValue } from 'firebase-admin/firestore';
 import { Resend } from 'resend';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const AGS_BASE_URL = 'https://www.agriglobalsolutions.com';
+const AGS_UPDATES_URL = `${AGS_BASE_URL}/updates-insights`;
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+function stripHtml(html: string): string {
+  return decodeHtmlEntities(
+    html
+      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<\/(p|div|article|section|li|h1|h2|h3|h4|h5|h6)>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+  ).trim();
+}
+
+function buildExcerpt(text: string, maxLength = 220): string {
+  const normalized = text.replace(/\s+/g, ' ').trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength).trimEnd()}...`;
+}
+
+function estimateReadTime(text: string): string {
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  return `${Math.max(1, Math.round(wordCount / 220))} min read`;
+}
+
+function normalizeAgsUrl(href: string, currentUrl = AGS_BASE_URL): string | null {
+  try {
+    const url = new URL(href, currentUrl);
+    if (url.hostname !== new URL(AGS_BASE_URL).hostname) return null;
+    url.hash = '';
+    url.search = '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return null;
+  }
+}
+
+function slugFromUrl(url: string): string {
+  return url
+    .replace(/^https?:\/\//, '')
+    .replace(/[^a-z0-9]+/gi, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase();
+}
+
+async function fetchAgsWordPressPosts(): Promise<any[]> {
+  const response = await fetch(`${AGS_BASE_URL}/wp-json/wp/v2/posts?_embed&per_page=12`, {
+    headers: {
+      'User-Agent': 'CropDrive-BlogSync/1.0 (+https://cropdrive.ai)',
+      Accept: 'application/json,text/plain,*/*',
+    },
+    next: { revalidate: 3600 },
+  });
+
+  if (!response.ok) {
+    throw new Error(`AGS WordPress API returned HTTP ${response.status}`);
+  }
+
+  const posts = await response.json();
+  if (!Array.isArray(posts)) return [];
+
+  return posts.map((post: any, index: number) => {
+    const content = stripHtml(post?.content?.rendered || '');
+    const excerpt = stripHtml(post?.excerpt?.rendered || '') || buildExcerpt(content);
+    const categories = (post?._embedded?.['wp:term'] || []).flat().map((term: any) => term?.name).filter(Boolean);
+    const author = post?._embedded?.author?.[0]?.name || 'AGS';
+    const image = post?._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/images/blog/ags-empowering.jpg';
+    const sourceUrl = normalizeAgsUrl(post?.link || `${AGS_UPDATES_URL}/${post?.slug || ''}`) || AGS_BASE_URL;
+
+    return {
+      id: `ags-${post?.slug || index}`,
+      title: stripHtml(post?.title?.rendered || 'AGS Update'),
+      titleMs: stripHtml(post?.title?.rendered || 'AGS Update'),
+      excerpt,
+      excerptMs: excerpt,
+      content,
+      contentMs: content,
+      author,
+      authorMs: author,
+      date: post?.date || new Date().toISOString(),
+      readTime: estimateReadTime(content),
+      readTimeMs: estimateReadTime(content),
+      category: categories[0] || 'AGS',
+      categoryMs: categories[0] || 'AGS',
+      tags: categories.length > 0 ? categories : ['AGS'],
+      tagsMs: categories.length > 0 ? categories : ['AGS'],
+      image,
+      featured: index < 2,
+      published: true,
+      sourceUrl,
+    };
+  });
+}
+
+function extractAgsListingLinks(html: string): string[] {
+  const hrefRegex = /href=["']([^"']+)["']/gi;
+  const links = new Set<string>();
+  let match: RegExpExecArray | null = null;
+
+  while ((match = hrefRegex.exec(html)) !== null) {
+    const normalized = normalizeAgsUrl(match[1], AGS_UPDATES_URL);
+    if (!normalized) continue;
+
+    const pathname = new URL(normalized).pathname.replace(/\/$/, '');
+    if (!pathname.startsWith('/updates-insights')) continue;
+    if (pathname === '/updates-insights') continue;
+    links.add(normalized);
+  }
+
+  return Array.from(links).slice(0, 10);
+}
+
+function extractMetaValue(html: string, regex: RegExp): string | null {
+  const match = html.match(regex);
+  return match?.[1] ? decodeHtmlEntities(match[1].trim()) : null;
+}
+
+async function fetchAgsHtmlPosts(): Promise<any[]> {
+  const listingResponse = await fetch(AGS_UPDATES_URL, {
+    headers: {
+      'User-Agent': 'CropDrive-BlogSync/1.0 (+https://cropdrive.ai)',
+      Accept: 'text/html,application/xhtml+xml',
+    },
+    next: { revalidate: 3600 },
+  });
+
+  if (!listingResponse.ok) {
+    throw new Error(`AGS updates page returned HTTP ${listingResponse.status}`);
+  }
+
+  const listingHtml = await listingResponse.text();
+  const articleUrls = extractAgsListingLinks(listingHtml);
+
+  const posts = await Promise.all(
+    articleUrls.map(async (url, index) => {
+      const response = await fetch(url, {
+        headers: {
+          'User-Agent': 'CropDrive-BlogSync/1.0 (+https://cropdrive.ai)',
+          Accept: 'text/html,application/xhtml+xml',
+        },
+        next: { revalidate: 3600 },
+      });
+
+      if (!response.ok) return null;
+
+      const html = await response.text();
+      const title = extractMetaValue(html, /<title[^>]*>([\s\S]*?)<\/title>/i) || 'AGS Update';
+      const content = stripHtml(html);
+      const excerpt = buildExcerpt(content);
+      const image =
+        extractMetaValue(html, /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+        '/images/blog/ags-empowering.jpg';
+      const date =
+        extractMetaValue(html, /<meta[^>]+property=["']article:published_time["'][^>]+content=["']([^"']+)["']/i) ||
+        new Date().toISOString();
+
+      return {
+        id: `ags-${slugFromUrl(url)}`,
+        title,
+        titleMs: title,
+        excerpt,
+        excerptMs: excerpt,
+        content,
+        contentMs: content,
+        author: 'AGS',
+        authorMs: 'AGS',
+        date,
+        readTime: estimateReadTime(content),
+        readTimeMs: estimateReadTime(content),
+        category: 'AGS',
+        categoryMs: 'AGS',
+        tags: ['AGS', 'Updates'],
+        tagsMs: ['AGS', 'Updates'],
+        image,
+        featured: index < 2,
+        published: true,
+        sourceUrl: url,
+      };
+    })
+  );
+
+  return posts.filter(Boolean);
+}
+
+async function fetchAgsPosts(): Promise<any[]> {
+  try {
+    const wpPosts = await fetchAgsWordPressPosts();
+    if (wpPosts.length > 0) return wpPosts;
+  } catch (error) {
+    console.warn('AGS WordPress fetch failed:', error);
+  }
+
+  try {
+    const htmlPosts = await fetchAgsHtmlPosts();
+    if (htmlPosts.length > 0) return htmlPosts;
+  } catch (error) {
+    console.warn('AGS HTML scrape failed:', error);
+  }
+
+  return [];
+}
 
 // GET: Fetch all blog posts
 export async function GET(req: NextRequest) {
   try {
+    const source = req.nextUrl.searchParams.get('source');
+
+    if (source !== 'firestore') {
+      const agsPosts = await fetchAgsPosts();
+      if (agsPosts.length > 0) {
+        return NextResponse.json({ posts: agsPosts, source: 'ags' });
+      }
+    }
+
     const postsRef = adminFirestore.collection('blog_posts');
     const snapshot = await postsRef
       .orderBy('date', 'desc')
@@ -22,7 +243,7 @@ export async function GET(req: NextRequest) {
       updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString(),
     }));
 
-    return NextResponse.json({ posts });
+    return NextResponse.json({ posts, source: 'firestore' });
   } catch (error: any) {
     console.error('Error fetching blog posts:', error);
     return NextResponse.json(

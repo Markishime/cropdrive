@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import Button from './ui/Button';
 import toast from 'react-hot-toast';
 
 export default function ForgotPasswordClient() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language } = useTranslation(currentLanguage);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

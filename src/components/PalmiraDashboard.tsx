@@ -36,6 +36,7 @@ import {
   faFilePdf,
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
+import type { Language } from '@/i18n';
 
 function stripMarkdownHeadingsOutsideCodeBlocks(text: string): string {
   if (!text) return text;
@@ -91,7 +92,7 @@ const CONVERSATION_STYLES = [
 ] as const;
 
 interface PalmiraDashboardProps {
-  language: 'en' | 'ms';
+  language: Language;
 }
 
 export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {

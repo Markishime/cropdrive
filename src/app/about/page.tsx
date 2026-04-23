@@ -4,12 +4,14 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 
 export default function AboutUsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language } = useTranslation(currentLanguage);
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   useEffect(() => {
     setMounted(true);
@@ -40,13 +42,10 @@ export default function AboutUsPage() {
             className="text-center"
           >
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 xs:mb-8 leading-tight font-heading px-2">
-              {language === 'ms' ? 'Tentang' : 'About'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
+              {copy('About', 'Tentang')} <span className="text-yellow-400">{copy('Us', 'Kami')}</span>
             </h1>
             <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-8 xs:mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-3 xs:px-4">
-              {language === 'ms'
-                ? 'Memperkasakan petani Malaysia dengan teknologi AI untuk pertanian kelapa sawit yang lebih baik'
-                : 'Empowering Malaysian farmers with AI technology for better palm oil farming'
-              }
+              {copy('Empowering Malaysian farmers with AI technology for better palm oil farming', 'Memperkasakan petani Malaysia dengan teknologi AI untuk pertanian kelapa sawit yang lebih baik')}
             </p>
           </motion.div>
         </div>
@@ -65,10 +64,7 @@ export default function AboutUsPage() {
           >
             <div className="max-w-4xl mx-auto text-center">
               <p className="text-base xs:text-lg sm:text-xl text-gray-700 leading-relaxed font-body">
-                {language === 'ms'
-                  ? 'Petani kecil menghasilkan bahagian besar kelapa sawit Malaysia, namun hasil di banyak pekebun kecil kekal jauh di bawah apa yang tanaman ini boleh hasilkan. CropDrive Oil Palm Advisor™ wujud untuk menutup jurang hasil ini supaya petani memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Apabila produktiviti meningkat di kawasan yang sudah ditanam, industri mengurangkan tekanan untuk berkembang ke tanah baharu. Ini menyokong kelapa sawit lestari dan membantu mengurangkan penebangan hutan.'
-                  : 'Smallholder farmers produce a large share of Malaysia\'s oil palm, yet yields on many smallholdings stay far below what the crop can deliver. CropDrive Oil Palm Advisor™ exists to close this yield gap so farmers earn more from the land they already manage. When productivity rises on existing planted areas, the industry reduces pressure to expand into new land. This supports sustainable oil palm and helps reduce deforestation.'
-                }
+                {copy('Smallholder farmers produce a large share of Malaysia\'s oil palm, yet yields on many smallholdings stay far below what the crop can deliver. CropDrive Oil Palm Advisor™ exists to close this yield gap so farmers earn more from the land they already manage. When productivity rises on existing planted areas, the industry reduces pressure to expand into new land. This supports sustainable oil palm and helps reduce deforestation.', 'Petani kecil menghasilkan bahagian besar kelapa sawit Malaysia, namun hasil di banyak pekebun kecil kekal jauh di bawah apa yang tanaman ini boleh hasilkan. CropDrive Oil Palm Advisor™ wujud untuk menutup jurang hasil ini supaya petani memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Apabila produktiviti meningkat di kawasan yang sudah ditanam, industri mengurangkan tekanan untuk berkembang ke tanah baharu. Ini menyokong kelapa sawit lestari dan membantu mengurangkan penebangan hutan.')}
               </p>
             </div>
           </motion.div>
@@ -106,13 +102,10 @@ export default function AboutUsPage() {
           >
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
-                {language === 'ms' ? 'Produk Pertama Kami' : 'Our First Product'}
+                {copy('Our First Product', 'Produk Pertama Kami')}
               </h2>
               <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
-                {language === 'ms'
-                  ? 'CropDrive Oil Palm Advisor™ dibina untuk keputusan ladang praktikal. Anda mendapat tindakan yang jelas dan khusus ladang untuk memperbaiki keadaan tanah, mengoptimumkan penggunaan baja, dan mengutamakan perubahan yang meningkatkan hasil. Matlamatnya adalah hasil yang lebih tinggi, pulangan yang lebih baik, dan kurang kehilangan nutrien kepada alam sekitar. Kami tidak menjual baja, jadi cadangan tidak didorong oleh jualan baja.'
-                  : 'CropDrive Oil Palm Advisor™ is built for practical farm decisions. You get clear, farm specific actions to improve soil conditions, optimise fertiliser use, and prioritise the changes that lift yield. The goal is higher yields, better returns, and less nutrient loss to the environment. We do not sell fertilisers, so recommendations are not driven by fertiliser sales.'
-                }
+                {copy('CropDrive Oil Palm Advisor™ is built for practical farm decisions. You get clear, farm specific actions to improve soil conditions, optimise fertiliser use, and prioritise the changes that lift yield. The goal is higher yields, better returns, and less nutrient loss to the environment. We do not sell fertilisers, so recommendations are not driven by fertiliser sales.', 'CropDrive Oil Palm Advisor™ dibina untuk keputusan ladang praktikal. Anda mendapat tindakan yang jelas dan khusus ladang untuk memperbaiki keadaan tanah, mengoptimumkan penggunaan baja, dan mengutamakan perubahan yang meningkatkan hasil. Matlamatnya adalah hasil yang lebih tinggi, pulangan yang lebih baik, dan kurang kehilangan nutrien kepada alam sekitar. Kami tidak menjual baja, jadi cadangan tidak didorong oleh jualan baja.')}
               </p>
             </div>
           </motion.div>
@@ -127,13 +120,10 @@ export default function AboutUsPage() {
           >
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
-                {language === 'ms' ? 'Pasukan Kami' : 'Our Team'}
+                {copy('Our Team', 'Pasukan Kami')}
               </h2>
               <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body mb-6">
-                {language === 'ms'
-                  ? 'CropDrive Oil Palm Advisor™ dibangunkan oleh AGS – Agriculture Global Solutions, berpangkalan di Jerman dan beroperasi di seluruh dunia, dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Kami adalah satu pasukan antarabangsa yang bekerja di Jerman, Malaysia, Australia, dan Filipina, menggabungkan agronomi, pembangunan produk, kerja data, dan sokongan petani untuk meningkatkan hasil di tanah kelapa sawit sedia ada, meningkatkan pendapatan petani, dan mengukuhkan pengeluaran lestari dengan kurang tekanan untuk pengembangan tanah dan penebangan hutan.'
-                  : 'CropDrive Oil Palm Advisor™ is developed by AGS – Agriculture Global Solutions, based in Germany and operating globally, and led and managed by Dr. Alexander Loladze. We are one international team working across Germany, Malaysia, Australia, and the Philippines, combining agronomy, product development, data work, and farmer support to improve yields on existing oil palm land, raise farmer income, and strengthen sustainable production with less pressure for land expansion and deforestation.'
-                }
+                {copy('CropDrive Oil Palm Advisor™ is developed by AGS – Agriculture Global Solutions, based in Germany and operating globally, and led and managed by Dr. Alexander Loladze. We are one international team working across Germany, Malaysia, Australia, and the Philippines, combining agronomy, product development, data work, and farmer support to improve yields on existing oil palm land, raise farmer income, and strengthen sustainable production with less pressure for land expansion and deforestation.', 'CropDrive Oil Palm Advisor™ dibangunkan oleh AGS – Agriculture Global Solutions, berpangkalan di Jerman dan beroperasi di seluruh dunia, dan diketuai serta diuruskan oleh Dr. Alexander Loladze. Kami adalah satu pasukan antarabangsa yang bekerja di Jerman, Malaysia, Australia, dan Filipina, menggabungkan agronomi, pembangunan produk, kerja data, dan sokongan petani untuk meningkatkan hasil di tanah kelapa sawit sedia ada, meningkatkan pendapatan petani, dan mengukuhkan pengeluaran lestari dengan kurang tekanan untuk pengembangan tanah dan penebangan hutan.')}
               </p>
               <div className="mt-6">
                 <a
@@ -142,7 +132,7 @@ export default function AboutUsPage() {
                   rel="noopener noreferrer"
                   className="inline-block px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
                 >
-                  {language === 'ms' ? 'Lawati AGS – Agriculture Global Solutions' : 'Visit AGS – Agriculture Global Solutions'}
+                  {copy('Visit AGS – Agriculture Global Solutions', 'Lawati AGS – Agriculture Global Solutions')}
                   <svg className="inline-block w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
@@ -161,13 +151,10 @@ export default function AboutUsPage() {
           >
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-6 font-heading tracking-tight">
-                {language === 'ms' ? 'Masa Depan Kami' : 'Our Future'}
+                {copy('Our Future', 'Masa Depan Kami')}
               </h2>
               <p className="text-base sm:text-lg text-gray-700 leading-relaxed font-body">
-                {language === 'ms'
-                  ? 'Kami akan memperluaskan pendekatan yang sama yang memberi tumpuan kepada hasil kepada tanaman lain, bermula dengan koko dan kopi. Prinsipnya tetap sama, meningkatkan produktiviti di tanah pertanian sedia ada supaya petani kecil memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Ini menyokong pengeluaran lestari dan mengurangkan tekanan untuk pengembangan tanah dan penebangan hutan.'
-                  : 'We will extend the same yield focused approach to other crops, starting with cocoa and coffee. The principle stays the same, improve productivity on existing farmland so smallholder farmers earn more from the land they already manage. This supports sustainable production and reduces pressure for land expansion and deforestation.'
-                }
+                {copy('We will extend the same yield focused approach to other crops, starting with cocoa and coffee. The principle stays the same, improve productivity on existing farmland so smallholder farmers earn more from the land they already manage. This supports sustainable production and reduces pressure for land expansion and deforestation.', 'Kami akan memperluaskan pendekatan yang sama yang memberi tumpuan kepada hasil kepada tanaman lain, bermula dengan koko dan kopi. Prinsipnya tetap sama, meningkatkan produktiviti di tanah pertanian sedia ada supaya petani kecil memperoleh lebih banyak daripada tanah yang mereka sudah uruskan. Ini menyokong pengeluaran lestari dan mengurangkan tekanan untuk pengembangan tanah dan penebangan hutan.')}
               </p>
             </div>
           </motion.div>
@@ -185,7 +172,7 @@ export default function AboutUsPage() {
             className="text-center mb-16"
           >
             <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-3 xs:mb-4 font-heading px-2">
-              {language === 'ms' ? 'Nilai' : 'Our'} <span className="text-green-700">{language === 'ms' ? 'Kami' : 'Values'}</span>
+              {copy('Our', 'Nilai')} <span className="text-green-700">{copy('Values', 'Kami')}</span>
             </h2>
           </motion.div>
 
@@ -193,24 +180,18 @@ export default function AboutUsPage() {
             {[
               {
                 img: '/images/our-values/Precision.png',
-                title: language === 'ms' ? 'Ketepatan' : 'Accuracy',
-                desc: language === 'ms' 
-                ? 'Menggunakan garis panduan MPOB dan AI terkini, berpandukan Amalan Pertanian Baik (GAP) global untuk analisis yang tepat'
-                : 'Using MPOB guidelines and latest AI, guided by global Good Agricultural Practices (GAP) for accurate analysis'
+                title: copy('Accuracy', 'Ketepatan'),
+                desc: copy('Using MPOB guidelines and latest AI, guided by global Good Agricultural Practices (GAP) for accurate analysis', 'Menggunakan garis panduan MPOB dan AI terkini, berpandukan Amalan Pertanian Baik (GAP) global untuk analisis yang tepat')
               },
               {
                 img: '/images/our-values/Accessibility.png',
-                title: language === 'ms' ? 'Kebolehcapaian' : 'Accessibility',
-                desc: language === 'ms'
-                  ? 'Menjadikan teknologi AI mudah dan mampu milik untuk semua petani'
-                  : 'Making AI technology easy and affordable for all farmers'
+                title: copy('Accessibility', 'Kebolehcapaian'),
+                desc: copy('Making AI technology easy and affordable for all farmers', 'Menjadikan teknologi AI mudah dan mampu milik untuk semua petani')
               },
               {
                 img: '/images/our-values/Sustainability .png',
-                title: language === 'ms' ? 'Kemampanan' : 'Sustainability',
-                desc: language === 'ms'
-                  ? 'Mempromosikan amalan pertanian regeneratif untuk masa depan yang lebih baik'
-                  : 'Promoting regenerative farming practices for a better future'
+                title: copy('Sustainability', 'Kemampanan'),
+                desc: copy('Promoting regenerative farming practices for a better future', 'Mempromosikan amalan pertanian regeneratif untuk masa depan yang lebih baik')
               }
             ].map((value, index) => (
               <motion.div
@@ -252,17 +233,14 @@ export default function AboutUsPage() {
             viewport={{ once: true }}
           >
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 font-heading">
-              {language === 'ms' ? 'Sertai Kami Hari Ini' : 'Join Us Today'}
+              {copy('Join Us Today', 'Sertai Kami Hari Ini')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 mb-8 font-body">
-              {language === 'ms'
-                ? 'Jadilah sebahagian daripada revolusi pertanian pintar'
-                : 'Be part of the smart farming revolution'
-              }
+              {copy('Be part of the smart farming revolution', 'Jadilah sebahagian daripada revolusi pertanian pintar')}
             </p>
             <Link href="/register">
               <button className="px-10 py-5 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 uppercase tracking-wide">
-                {language === 'ms' ? 'Mulakan Sekarang' : 'Get Started Now'}
+                {copy('Get Started Now', 'Mulakan Sekarang')}
               </button>
             </Link>
           </motion.div>

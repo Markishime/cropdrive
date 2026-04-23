@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import PalmiraOnboarding from '@/components/PalmiraOnboarding';
 import PalmiraDashboard from '@/components/PalmiraDashboard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,7 +15,7 @@ export default function PalmiraPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [onboardingCompleted, setOnboardingCompleted] = useState<boolean | null>(null);
   const [loadingOnboarding, setLoadingOnboarding] = useState(true);
   const [membershipActive, setMembershipActive] = useState(false);
@@ -98,17 +98,8 @@ export default function PalmiraPage() {
         setTimeout(() => {
           router.push('/pricing');
         }, 2000);
-      } else if (!withinContract) {
-        // No plan at all
-        toast.error(
-          currentLang === 'ms'
-            ? 'Pelan diperlukan untuk menggunakan Palmira'
-            : 'A plan is required to use Palmira'
-        );
-        setTimeout(() => {
-          router.push('/pricing');
-        }, 2000);
       }
+      // All users can now access Palmira - no plan required for free access
     } catch (error) {
       console.error('Error checking membership:', error);
     } finally {
@@ -165,8 +156,8 @@ export default function PalmiraPage() {
     return null;
   }
 
-  // Membership not active - show different message for contract expired vs no plan
-  if (!membershipActive) {
+  // Membership not active - only show expired subscription warning, otherwise allow access
+  if (isContractExpired) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-blue-50 to-green-50 px-4">
         <motion.div
@@ -178,26 +169,18 @@ export default function PalmiraPage() {
             <FontAwesomeIcon icon={faCircleExclamation} className="w-10 h-10 text-red-600" />
           </div>
           <h1 className="text-2xl font-black text-gray-900 mb-3">
-            {isContractExpired
-              ? (currentLang === 'ms' ? 'Langganan Tamat' : 'Subscription Expired')
-              : (currentLang === 'ms' ? 'Pelan Diperlukan' : 'Plan Required')}
+            {currentLang === 'ms' ? 'Langganan Tamat' : 'Subscription Expired'}
           </h1>
           <p className="text-gray-600 mb-6">
-            {isContractExpired
-              ? (currentLang === 'ms'
-                  ? 'Langganan anda telah tamat. Sila langgan pelan baharu untuk terus menggunakan CropDrive AI Assistant.'
-                  : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.')
-              : (currentLang === 'ms'
-                  ? 'Palmira tersedia untuk pengguna yang mempunyai pelan. Sila langgan pelan untuk mengakses ciri ini.'
-                  : 'Palmira is available for users with a plan. Please subscribe to a plan to access this feature.')}
+            {currentLang === 'ms'
+              ? 'Langganan anda telah tamat. Sila langgan pelan baharu untuk terus menggunakan CropDrive AI Assistant.'
+              : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.'}
           </p>
           <button
             onClick={() => router.push('/pricing')}
             className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition"
           >
-            {isContractExpired
-              ? (currentLang === 'ms' ? 'Langgan Semula' : 'Subscribe Again')
-              : (currentLang === 'ms' ? 'Lihat Pelan' : 'View Plans')}
+            {currentLang === 'ms' ? 'Langgan Semula' : 'Subscribe Again'}
           </button>
         </motion.div>
       </div>

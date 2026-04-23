@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
@@ -17,7 +17,7 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
 
   const router = useRouter();
 

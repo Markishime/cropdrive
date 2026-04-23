@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { 
   Plus, 
   Edit2, 
@@ -48,7 +48,7 @@ interface BlogPost {
 
 export default function BlogAdmin() {
   const { user } = useAuth();
-  const [language, setLanguage] = useState<'en' | 'ms'>('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

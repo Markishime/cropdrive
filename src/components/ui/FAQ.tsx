@@ -2,9 +2,10 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import type { Language } from '@/i18n';
 
 interface FAQProps {
-  language: 'en' | 'ms';
+  language: Language;
 }
 
 export default function FAQ({ language }: FAQProps) {

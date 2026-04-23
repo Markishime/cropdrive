@@ -6,7 +6,8 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -29,7 +30,7 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
 
@@ -54,6 +55,7 @@ export default function RegisterPage() {
   }, []);
 
   const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -61,22 +63,28 @@ export default function RegisterPage() {
 
   const validateForm = (): string | null => {
     if (!formData.name.trim()) {
-      return language === 'ms' ? 'Nama penuh diperlukan' : 'Full name is required';
+      return copy('Full name is required', 'Nama penuh diperlukan');
     }
     if (!formData.email.trim()) {
-      return language === 'ms' ? 'Email diperlukan' : 'Email is required';
+      return copy('Email is required', 'Email diperlukan');
+    }
+    if (!formData.phone.trim()) {
+      return copy('WhatsApp number is required', 'Nombor WhatsApp diperlukan');
+    }
+    if (!formData.farmLocation.trim()) {
+      return copy('Country/Region is required', 'Negara/Wilayah diperlukan');
     }
     if (!formData.password) {
-      return language === 'ms' ? 'Kata laluan diperlukan' : 'Password is required';
+      return copy('Password is required', 'Kata laluan diperlukan');
     }
     if (formData.password.length < 6) {
-      return language === 'ms' ? 'Kata laluan mestilah sekurang-kurangnya 6 aksara' : 'Password must be at least 6 characters';
+      return copy('Password must be at least 6 characters', 'Kata laluan mestilah sekurang-kurangnya 6 aksara');
     }
     if (formData.password !== formData.confirmPassword) {
-      return language === 'ms' ? 'Kata laluan tidak sepadan' : 'Passwords do not match';
+      return copy('Passwords do not match', 'Kata laluan tidak sepadan');
     }
     if (!agreeToTerms) {
-      return language === 'ms' ? 'Sila bersetuju dengan syarat perkhidmatan' : 'Please agree to the terms of service';
+      return copy('Please agree to the terms of service', 'Sila bersetuju dengan syarat perkhidmatan');
     }
     return null;
   };
@@ -100,16 +108,15 @@ export default function RegisterPage() {
         phoneNumber: formData.phone,
         farmName: formData.farmName,
         farmLocation: formData.farmLocation,
-        language: language as 'ms' | 'en',
+        countryRegion: formData.farmLocation,
+        language: language as Language,
       }, language);
 
       // Show post-registration instructions instead of immediate redirect
       setRegisteredEmail(formData.email);
       setRegistrationComplete(true);
       toast.success(
-        language === 'ms'
-          ? 'Pendaftaran berjaya! Sila semak emel anda untuk pengesahan akaun.'
-          : 'Registration successful! Please check your email to verify your account.'
+        copy('Registration successful! Please check your email to verify your account.', 'Pendaftaran berjaya! Sila semak emel anda untuk pengesahan akaun.')
       );
     } catch (error) {
       console.error('Registration error:', error);
@@ -194,7 +201,7 @@ export default function RegisterPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                {language === 'ms' ? 'Cipta Akaun Baru' : 'Create New Account'}
+                {copy('Create New Account', 'Cipta Akaun Baru')}
               </motion.h2>
               <motion.p 
                 className="text-green-100 text-sm xs:text-base sm:text-lg px-4"
@@ -202,10 +209,7 @@ export default function RegisterPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {language === 'ms'
-                  ? 'Sertai ribuan petani yang menggunakan AI untuk hasil yang lebih baik'
-                  : 'Join thousands of farmers using AI for better yields'
-                }
+                {copy('Join thousands of farmers using AI for better yields', 'Sertai ribuan petani yang menggunakan AI untuk hasil yang lebih baik')}
               </motion.p>
             </div>
           </motion.div>
@@ -219,33 +223,27 @@ export default function RegisterPage() {
             {registrationComplete ? (
               <div className="space-y-4 xs:space-y-5 sm:space-y-6 text-center">
                 <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-gray-900">
-                  {language === 'ms' ? 'Akaun Berjaya Dicipta!' : 'Account Created Successfully!'}
+                  {copy('Account Created Successfully!', 'Akaun Berjaya Dicipta!')}
                 </h3>
                 <p className="text-sm xs:text-base text-gray-700">
-                  {language === 'ms'
-                    ? 'Kami telah menghantar emel pengesahan ke'
-                    : 'We have sent a verification email to'}{' '}
+                  {copy('We have sent a verification email to', 'Kami telah menghantar emel pengesahan ke')}{' '}
                   <span className="font-bold text-green-700 break-all">
                     {registeredEmail}
                   </span>
                   .
                 </p>
                 <p className="text-sm xs:text-base text-gray-700">
-                  {language === 'ms'
-                    ? 'Sila semak peti masuk dan folder spam anda, kemudian klik butang pengesahan dalam emel untuk mengaktifkan akaun anda.'
-                    : 'Please check your inbox and spam folder, then click the verification button in the email to activate your account.'}
+                  {copy('Please check your inbox and spam folder, then click the verification button in the email to activate your account.', 'Sila semak peti masuk dan folder spam anda, kemudian klik butang pengesahan dalam emel untuk mengaktifkan akaun anda.')}
                 </p>
                 <p className="text-sm xs:text-base text-gray-700">
-                  {language === 'ms'
-                    ? 'Selepas mengklik butang tersebut, anda akan diarahkan ke halaman log masuk dan boleh log masuk ke akaun anda.'
-                    : 'After clicking the button, you will be redirected to the login page and can then sign in to your account.'}
+                  {copy('After clicking the button, you will be redirected to the login page and can then sign in to your account.', 'Selepas mengklik butang tersebut, anda akan diarahkan ke halaman log masuk dan boleh log masuk ke akaun anda.')}
                 </p>
                 <div className="pt-2">
                   <Link
                     href="/login"
                     className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-700 text-white font-black text-sm xs:text-base shadow-lg hover:from-green-700 hover:to-green-800 transition-all"
                   >
-                    {language === 'ms' ? 'Pergi ke Halaman Log Masuk' : 'Go to Login Page'}
+                      {copy('Go to Login Page', 'Pergi ke Halaman Log Masuk')}
                   </Link>
                 </div>
               </div>
@@ -255,11 +253,11 @@ export default function RegisterPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 xs:gap-5">
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Nama Penuh' : 'Full Name'} <span className="text-red-500">*</span>
+                        {copy('Full Name', 'Nama Penuh')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder={language === 'ms' ? 'Nama penuh anda' : 'Your full name'}
+                        placeholder={copy('Your full name', 'Nama penuh anda')}
                         value={formData.name}
                         onChange={(e) => handleInputChange('name', e.target.value)}
                         required
@@ -270,11 +268,11 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Email' : 'Email'} <span className="text-red-500">*</span>
+                        {copy('Email', 'Email')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
-                        placeholder={language === 'ms' ? 'nama@email.com' : 'name@email.com'}
+                        placeholder={copy('name@email.com', 'nama@email.com')}
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         required
@@ -285,13 +283,14 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Nombor Telefon' : 'Phone Number'}
+                        {copy('WhatsApp Number', 'Nombor WhatsApp')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
                         placeholder={language === 'ms' ? '+60123456789' : '+60123456789'}
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
+                        required
                         disabled={loading}
                         className="w-full px-3 xs:px-4 py-2.5 xs:py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed text-sm xs:text-base"
                       />
@@ -299,11 +298,11 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Nama Ladang' : 'Farm Name'}
+                        {copy('Farm Name', 'Nama Ladang')}
                       </label>
                       <input
                         type="text"
-                        placeholder={language === 'ms' ? 'Nama ladang anda' : 'Your farm name'}
+                        placeholder={copy('Your farm name', 'Nama ladang anda')}
                         value={formData.farmName}
                         onChange={(e) => handleInputChange('farmName', e.target.value)}
                         disabled={loading}
@@ -313,13 +312,14 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Lokasi Ladang' : 'Farm Location'}
+                        {copy('Country / Region', 'Negara / Wilayah')} <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        placeholder={language === 'ms' ? 'Lokasi ladang anda' : 'Your farm location'}
+                        placeholder={copy('Malaysia, Indonesia, etc.', 'Malaysia, Indonesia, dll.')}
                         value={formData.farmLocation}
                         onChange={(e) => handleInputChange('farmLocation', e.target.value)}
+                        required
                         disabled={loading}
                         className="w-full px-3 xs:px-4 py-2.5 xs:py-3 border-2 border-gray-300 rounded-xl focus:border-green-600 focus:ring-4 focus:ring-green-200 transition-all outline-none disabled:opacity-50 disabled:cursor-not-allowed text-sm xs:text-base"
                       />
@@ -327,12 +327,12 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Kata Laluan' : 'Password'} <span className="text-red-500">*</span>
+                        {copy('Password', 'Kata Laluan')} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
                           type={showPassword ? 'text' : 'password'}
-                          placeholder={language === 'ms' ? 'Kata laluan anda' : 'Your password'}
+                          placeholder={copy('Your password', 'Kata laluan anda')}
                           value={formData.password}
                           onChange={(e) => handleInputChange('password', e.target.value)}
                           required
@@ -355,12 +355,12 @@ export default function RegisterPage() {
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
-                        {language === 'ms' ? 'Sahkan Kata Laluan' : 'Confirm Password'} <span className="text-red-500">*</span>
+                        {copy('Confirm Password', 'Sahkan Kata Laluan')} <span className="text-red-500">*</span>
                       </label>
                       <div className="relative">
                         <input
                           type={showConfirmPassword ? 'text' : 'password'}
-                          placeholder={language === 'ms' ? 'Sahkan kata laluan' : 'Confirm password'}
+                          placeholder={copy('Confirm password', 'Sahkan kata laluan')}
                           value={formData.confirmPassword}
                           onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                           required
@@ -391,13 +391,13 @@ export default function RegisterPage() {
                       className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mt-1 cursor-pointer"
                     />
                     <label htmlFor="agreeToTerms" className="ml-2 text-sm text-gray-700">
-                      {language === 'ms' ? 'Saya bersetuju dengan' : 'I agree to the'}{' '}
+                      {copy('I agree to the', 'Saya bersetuju dengan')}{' '}
                       <Link href="/terms" className="text-green-700 hover:text-green-800 font-bold">
-                        {language === 'ms' ? 'Syarat Perkhidmatan' : 'Terms of Service'}
+                        {copy('Terms of Service', 'Syarat Perkhidmatan')}
                       </Link>
-                      {' '}{language === 'ms' ? 'dan' : 'and'}{' '}
+                      {' '}{copy('and', 'dan')}{' '}
                       <Link href="/privacy" className="text-green-700 hover:text-green-800 font-bold">
-                        {language === 'ms' ? 'Dasar Privasi' : 'Privacy Policy'}
+                        {copy('Privacy Policy', 'Dasar Privasi')}
                       </Link>
                     </label>
                   </div>
@@ -415,22 +415,22 @@ export default function RegisterPage() {
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                           <path className="opacity-75" fill="currentColor" d="M4 12a 8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                         </svg>
-                        {language === 'ms' ? 'Mencipta Akaun...' : 'Creating Account...'}
+                        {copy('Creating Account...', 'Mencipta Akaun...')}
                       </span>
                     ) : (
-                      language === 'ms' ? 'Cipta Akaun' : 'Create Account'
+                      copy('Create Account', 'Cipta Akaun')
                     )}
                   </motion.button>
                 </form>
 
                 <div className="mt-6 text-center">
                   <p className="text-sm text-gray-600">
-                    {language === 'ms' ? 'Sudah mempunyai akaun?' : 'Already have an account?'}{' '}
+                    {copy('Already have an account?', 'Sudah mempunyai akaun?')}{' '}
                     <Link
                       href="/login"
                       className="text-green-700 hover:text-green-800 font-bold transition-colors"
                     >
-                      {language === 'ms' ? 'Log masuk di sini' : 'Sign in here'}
+                      {copy('Sign in here', 'Log masuk di sini')}
                     </Link>
                   </p>
                 </div>
@@ -449,7 +449,7 @@ export default function RegisterPage() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+              {copy('Back to Home', 'Kembali ke Laman Utama')}
             </Link>
           </motion.div>
         </div>

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import toast from 'react-hot-toast';
 
 interface FormData {
@@ -15,8 +16,9 @@ interface FormData {
 
 export default function ContactUsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language } = useTranslation(currentLanguage);
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -42,20 +44,14 @@ export default function ContactUsPage() {
     
     // Validate required fields
     if (!formData.name || !formData.email || !formData.message) {
-      toast.error(language === 'ms' 
-        ? 'Sila isi semua medan yang diperlukan' 
-        : 'Please fill in all required fields'
-      );
+      toast.error(copy('Please fill in all required fields', 'Sila isi semua medan yang diperlukan'));
       return;
     }
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      toast.error(language === 'ms' 
-        ? 'Sila masukkan alamat e-mel yang sah' 
-        : 'Please enter a valid email address'
-      );
+      toast.error(copy('Please enter a valid email address', 'Sila masukkan alamat e-mel yang sah'));
       return;
     }
 
@@ -74,9 +70,7 @@ export default function ContactUsPage() {
       console.log('📧 Contact form response:', { ok: response.ok, status: response.status, success: data.success, error: data.error });
 
       if (response.ok && data.success !== false) {
-        toast.success(language === 'ms' 
-          ? 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.' 
-          : 'Your message has been sent! We\'ll get back to you soon.',
+        toast.success(copy('Your message has been sent! We\'ll get back to you soon.', 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.'),
           { duration: 5000 }
         );
         // Reset form
@@ -94,10 +88,7 @@ export default function ContactUsPage() {
       }
     } catch (error) {
       console.error('Contact form error:', error);
-      toast.error(language === 'ms' 
-        ? 'Gagal menghantar mesej. Sila cuba lagi atau e-mel kami terus.' 
-        : 'Failed to send message. Please try again or email us directly.'
-      );
+      toast.error(copy('Failed to send message. Please try again or email us directly.', 'Gagal menghantar mesej. Sila cuba lagi atau e-mel kami terus.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -126,13 +117,10 @@ export default function ContactUsPage() {
             className="text-center"
           >
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 xs:mb-8 leading-tight font-heading px-2">
-              {language === 'ms' ? 'Hubungi' : 'Contact'} <span className="text-yellow-400">{language === 'ms' ? 'Kami' : 'Us'}</span>
+              {copy('Contact', 'Hubungi')} <span className="text-yellow-400">{copy('Us', 'Kami')}</span>
             </h1>
             <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-8 xs:mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed px-3 xs:px-4">
-              {language === 'ms'
-                ? 'Isi borang di bawah atau hubungi kami terus melalui e-mel untuk respons yang cepat.'
-                : 'Fill in the form below or reach us directly by email for a quick response.'
-              }
+              {copy('Fill in the form below or reach us directly by email for a quick response.', 'Isi borang di bawah atau hubungi kami terus melalui e-mel untuk respons yang cepat.')}
             </p>
           </motion.div>
         </div>
@@ -149,12 +137,10 @@ export default function ContactUsPage() {
             className="text-center mb-10 sm:mb-12"
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
-              {language === 'ms' ? 'Borang Hubungi' : 'Contact Form'}
+              {copy('Contact Form', 'Borang Hubungi')}
             </h2>
             <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-              {language === 'ms'
-                ? 'Isi butiran anda di bawah dan kami akan menghubungi anda secepat mungkin. Untuk respons lebih cepat, e-mel kami di'
-                : 'Share your details below and we\'ll get back to you as soon as possible. For quicker reach, email us at'}
+              {copy('Share your details below and we\'ll get back to you as soon as possible. For quicker reach, email us at', 'Isi butiran anda di bawah dan kami akan menghubungi anda secepat mungkin. Untuk respons lebih cepat, e-mel kami di')}
               {' '}
               <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 font-semibold underline hover:text-green-800 transition-colors">
                 contact@agriglobalsolutions.com
@@ -174,7 +160,7 @@ export default function ContactUsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Nama Penuh' : 'Full Name'} <span className="text-red-500">*</span>
+                  {copy('Full Name', 'Nama Penuh')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
@@ -183,14 +169,14 @@ export default function ContactUsPage() {
                   value={formData.name}
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                  placeholder={language === 'ms' ? 'Masukkan nama anda' : 'Enter your name'}
+                  placeholder={copy('Enter your name', 'Masukkan nama anda')}
                   required
                   disabled={isSubmitting}
                 />
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  {language === 'ms' ? 'E-mel' : 'Email'} <span className="text-red-500">*</span>
+                  {copy('Email', 'E-mel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
@@ -209,7 +195,7 @@ export default function ContactUsPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="organization" className="block text-sm font-semibold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Organisasi (pilihan)' : 'Organization (optional)'}
+                  {copy('Organization (optional)', 'Organisasi (pilihan)')}
                 </label>
                 <input
                   type="text"
@@ -218,13 +204,13 @@ export default function ContactUsPage() {
                   value={formData.organization}
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                  placeholder={language === 'ms' ? 'Nama syarikat atau ladang' : 'Company or farm name'}
+                  placeholder={copy('Company or farm name', 'Nama syarikat atau ladang')}
                   disabled={isSubmitting}
                 />
               </div>
               <div>
                 <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Peranan Anda' : 'Your Role'}
+                  {copy('Your Role', 'Peranan Anda')}
                 </label>
                 <input
                   type="text"
@@ -233,7 +219,7 @@ export default function ContactUsPage() {
                   value={formData.role}
                   onChange={handleInputChange}
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                  placeholder={language === 'ms' ? 'Contoh: Petani, NGO, Makmal' : 'e.g. Farmer, NGO, Lab'}
+                  placeholder={copy('e.g. Farmer, NGO, Lab', 'Contoh: Petani, NGO, Makmal')}
                   disabled={isSubmitting}
                 />
               </div>
@@ -241,7 +227,7 @@ export default function ContactUsPage() {
 
             <div>
               <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
-                {language === 'ms' ? 'Mesej Anda' : 'Your Message'} <span className="text-red-500">*</span>
+                {copy('Your Message', 'Mesej Anda')} <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="message"
@@ -249,7 +235,7 @@ export default function ContactUsPage() {
                 value={formData.message}
                 onChange={handleInputChange}
                 className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base min-h-[140px] resize-y focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
-                placeholder={language === 'ms' ? 'Bagaimana kami boleh membantu anda?' : 'How can we help you?'}
+                placeholder={copy('How can we help you?', 'Bagaimana kami boleh membantu anda?')}
                 required
                 disabled={isSubmitting}
               />
@@ -257,9 +243,7 @@ export default function ContactUsPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-sm text-gray-500">
-                {language === 'ms'
-                  ? 'Dengan menghantar, anda bersetuju untuk dihubungi oleh pasukan CropDrive.'
-                  : 'By submitting, you agree to be contacted by the CropDrive team.'}
+                {copy('By submitting, you agree to be contacted by the CropDrive team.', 'Dengan menghantar, anda bersetuju untuk dihubungi oleh pasukan CropDrive.')}
               </p>
               <button
                 type="submit"
@@ -272,10 +256,10 @@ export default function ContactUsPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {language === 'ms' ? 'Menghantar...' : 'Sending...'}
+                    {copy('Sending...', 'Menghantar...')}
                   </>
                 ) : (
-                  language === 'ms' ? 'Hantar Mesej' : 'Send Message'
+                  copy('Send Message', 'Hantar Mesej')
                 )}
               </button>
             </div>
@@ -300,7 +284,7 @@ export default function ContactUsPage() {
               <div className="flex items-center gap-2">
                 <span className="text-2xl">🌐</span>
                 <span className="text-gray-700 font-medium">
-                  {language === 'ms' ? 'Sokongan dalam BM & EN' : 'Support in BM & EN'}
+                  {copy('Support in BM & EN', 'Sokongan dalam BM & EN')}
                 </span>
               </div>
             </div>

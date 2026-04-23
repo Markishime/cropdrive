@@ -8,7 +8,7 @@ import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 
 interface OnboardingRequest {
   userType: 'smallholder' | 'estate' | 'dealer' | 'student' | 'lab' | 'academic' | 'farmer' | 'organization' | 'researcher' | 'other';
-  language: 'en' | 'ms';
+  language: 'en' | 'ms' | 'id';
   conversationStyle: 'diagnostic_interview' | 'checklist_only' | 'short_direct';
   consentTranscripts: boolean;
   consentFarmProfile: boolean;

@@ -46,6 +46,51 @@
     @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl;
   }
 
+  .premium-page-shell {
+    background:
+      radial-gradient(circle at top left, rgba(250, 204, 21, 0.12), transparent 30%),
+      radial-gradient(circle at top right, rgba(34, 197, 94, 0.12), transparent 28%),
+      linear-gradient(180deg, #f8fafc 0%, #f3f7f5 45%, #edf4f1 100%);
+  }
+
+  .premium-panel {
+    @apply border border-white/70 bg-white/80 backdrop-blur-xl;
+    box-shadow: 0 24px 60px -28px rgba(15, 23, 42, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.28) inset;
+  }
+
+  .premium-panel-strong {
+    @apply border border-white/80 bg-white/90 backdrop-blur-xl;
+    box-shadow: 0 30px 80px -34px rgba(15, 23, 42, 0.32), 0 0 0 1px rgba(255, 255, 255, 0.34) inset;
+  }
+
+  .premium-glass-card {
+    @apply border border-white/20 bg-white/10 backdrop-blur-md;
+    box-shadow: 0 24px 64px -36px rgba(15, 23, 42, 0.48), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  }
+
+  .premium-accent-card {
+    background:
+      radial-gradient(circle at top left, rgba(250, 204, 21, 0.14), transparent 32%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(242, 248, 244, 0.9) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    box-shadow: 0 28px 72px -36px rgba(15, 23, 42, 0.24), 0 0 0 1px rgba(255, 255, 255, 0.32) inset;
+  }
+
+  .premium-cta-band {
+    background:
+      radial-gradient(circle at top left, rgba(250, 204, 21, 0.18), transparent 26%),
+      radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 32%),
+      linear-gradient(135deg, #166534 0%, #15803d 42%, #1d4ed8 100%);
+    box-shadow: 0 30px 84px -38px rgba(21, 128, 61, 0.55);
+  }
+
+  .premium-mesh {
+    background-image:
+      linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+
   /* Custom scrollbar for Palmira dashboard */
   .palmira-scrollbar {
     scrollbar-width: thin;

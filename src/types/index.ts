@@ -5,8 +5,9 @@ export interface User {
   phoneNumber?: string;
   farmName?: string;
   farmLocation?: string;
+  countryRegion?: string;
   farmSize?: string;
-  language: 'en' | 'ms';
+  language: 'en' | 'ms' | 'id';
   registrationDate: Date;
   plan: string; // Plan ID: 'none' | 'start' | 'smart' | 'precision'
   billingCycle?: 'monthly' | 'yearly'; // User's current billing cycle
@@ -31,9 +32,16 @@ export interface User {
 
 export interface UserPreferences {
   notifications: boolean;
-  language: 'en' | 'ms';
+  language: 'en' | 'ms' | 'id';
   theme: 'light' | 'dark' | 'auto';
   units: 'metric' | 'imperial';
+}
+
+export interface PlanFeature {
+  name: string;
+  nameMs: string;
+  included: boolean;
+  limit?: number;
 }
 
 export interface SubscriptionPlan {
@@ -51,13 +59,6 @@ export interface SubscriptionPlan {
   comparativeAnalysis: boolean;
   partnerDiscounts: boolean;
   earlyAccess: boolean;
-}
-
-export interface PlanFeature {
-  name: string;
-  nameMs: string;
-  included: boolean;
-  limit?: number;
 }
 
 export interface Subscription {
@@ -132,10 +133,10 @@ export interface LanguageStrings {
 export interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string, language?: 'en' | 'ms') => Promise<void>;
-  signUp: (userData: SignUpData, language?: 'en' | 'ms') => Promise<void>;
-  signOut: (language?: 'en' | 'ms') => Promise<void>;
-  updateProfile: (updates: Partial<User>, language?: 'en' | 'ms') => Promise<void>;
+  signIn: (email: string, password: string, language?: 'en' | 'ms' | 'id') => Promise<void>;
+  signUp: (userData: SignUpData, language?: 'en' | 'ms' | 'id') => Promise<void>;
+  signOut: (language?: 'en' | 'ms' | 'id') => Promise<void>;
+  updateProfile: (updates: Partial<User>, language?: 'en' | 'ms' | 'id') => Promise<void>;
   refreshUser?: () => Promise<void>;
 }
 
@@ -146,7 +147,8 @@ export interface SignUpData {
   phoneNumber?: string;
   farmName?: string;
   farmLocation?: string;
-  language?: 'en' | 'ms'; // Optional, defaults to current UI language
+  countryRegion?: string;
+  language?: 'en' | 'ms' | 'id'; // Optional, defaults to current UI language
 }
 
 export interface DashboardStats {
@@ -242,7 +244,7 @@ export interface PalmiraConversationStyle {
 export interface PalmiraOnboardingData {
   userId: string;
   userType: PalmiraUserType['id'];
-  language: 'en' | 'ms';
+  language: 'en' | 'ms' | 'id';
   conversationStyle: PalmiraConversationStyle['id'];
   consentTranscripts: boolean;
   consentFarmProfile: boolean;
@@ -252,7 +254,7 @@ export interface PalmiraOnboardingData {
 
 export interface PalmiraPreferences {
   userId: string;
-  language: 'en' | 'ms';
+  language: 'en' | 'ms' | 'id';
   conversationStyle: PalmiraConversationStyle['id'];
   updatedAt: Date;
 }
@@ -323,7 +325,7 @@ export interface PalmiraKnowledgeBaseDocument {
   content: string;
   category: string;
   tags: string[];
-  language: 'en' | 'ms' | 'both';
+  language: 'en' | 'ms' | 'id' | 'both';
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;

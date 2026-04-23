@@ -6,7 +6,7 @@ import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 
 interface SettingsUpdateRequest {
   conversationStyle?: 'diagnostic_interview' | 'checklist_only' | 'short_direct';
-  language?: 'en' | 'ms';
+  language?: 'en' | 'ms' | 'id';
 }
 
 export async function GET(request: NextRequest) {
@@ -92,7 +92,7 @@ export async function PUT(request: NextRequest) {
     }
 
     // Validate language if provided
-    if (language && !['en', 'ms'].includes(language)) {
+    if (language && !['en', 'ms', 'id'].includes(language)) {
       return NextResponse.json(
         { success: false, error: 'Invalid language' },
         { status: 400 }

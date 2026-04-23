@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
+import { useLanguage } from './LanguageProvider';
 
 interface FooterLink {
   href: string;
@@ -61,27 +63,11 @@ const footerSections: FooterSection[] = [
 ];
 
 export const Footer: React.FC = () => {
-  const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
-  
-  useEffect(() => {
-    setMounted(true);
-    const lang = getCurrentLanguage();
-    setCurrentLanguage(lang);
-  }, []);
-
-  // Listen for language changes
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const lang = getCurrentLanguage();
-      setCurrentLanguage(lang);
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const { language: currentLanguage } = useLanguage();
+  const { language } = useTranslation(currentLanguage);
+  const translateLabel = (english: string, malay: string) => (
+    language === 'id' ? toIndonesianText(malay) : language === 'ms' ? malay : english
+  );
 
   return (
     <footer className="bg-secondary-900 text-white">
@@ -100,7 +86,7 @@ export const Footer: React.FC = () => {
                   alt="CropDrive Logo"
                   width={48}
                   height={48}
-                  className="object-cover w-full h-full"
+                  className="object-cover"
                 />
               </motion.div>
               <span className="font-bold text-xl">
@@ -108,10 +94,10 @@ export const Footer: React.FC = () => {
               </span>
             </Link>
             <p className="text-secondary-300 mb-4">
-              {language === 'ms'
-                ? 'Platform AI Pintar untuk Industri Kelapa Sawit di Malaysia.'
-                : 'Smart AI Platform for Oil Palm Industry in Malaysia.'
-              }
+              {translateLabel(
+                'Smart AI Platform for Oil Palm Industry in Malaysia.',
+                'Platform AI Pintar untuk Industri Kelapa Sawit di Malaysia.'
+              )}
             </p>
           </div>
 
@@ -119,7 +105,7 @@ export const Footer: React.FC = () => {
           {footerSections.map((section) => (
             <div key={section.title}>
               <h3 className="font-semibold text-white mb-4">
-                {language === 'ms' ? section.titleMs : section.title}
+                {translateLabel(section.title, section.titleMs)}
               </h3>
               <ul className="space-y-2">
                 {section.links.map((link) => (
@@ -128,7 +114,7 @@ export const Footer: React.FC = () => {
                       href={link.href}
                       className="text-secondary-300 hover:text-primary-400 transition-colors duration-200 text-sm"
                     >
-                      {language === 'ms' ? link.labelMs : link.label}
+                      {translateLabel(link.label, link.labelMs)}
                     </Link>
                   </li>
                 ))}
@@ -140,10 +126,10 @@ export const Footer: React.FC = () => {
         {/* Bottom Bar */}
         <div className="border-t border-secondary-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-secondary-400 text-sm">
-            {language === 'ms'
-              ? '© 2025 CropDrive OP Advisor™. Hak cipta terpelihara.'
-              : '© 2025 CropDrive OP Advisor™. All rights reserved.'
-            }
+            {translateLabel(
+              '© 2025 CropDrive OP Advisor™. All rights reserved.',
+              '© 2025 CropDrive OP Advisor™. Hak cipta terpelihara.'
+            )}
           </p>
         </div>
       </div>

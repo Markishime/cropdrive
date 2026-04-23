@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Language, getCurrentLanguage, setLanguage as setLang } from '@/i18n';
+import { Language, getCurrentLanguage, setLanguage as setLang, subscribeToLanguageChange } from '@/i18n';
 
 interface LanguageContextType {
   language: Language;
@@ -16,17 +16,19 @@ const LanguageContext = createContext<LanguageContextType>({
 export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('en');
+  const [language, setLanguageState] = useState<Language>(() => getCurrentLanguage());
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const currentLang = getCurrentLanguage();
-    setLanguageState(currentLang);
+    setLanguageState(getCurrentLanguage());
+
+    return subscribeToLanguageChange(() => {
+      setLanguageState(getCurrentLanguage());
+    });
   }, []);
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
     setLang(lang);
   };
 

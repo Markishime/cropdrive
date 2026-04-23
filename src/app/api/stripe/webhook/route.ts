@@ -40,7 +40,7 @@ function getStripe(): Stripe | null {
     return null;
   }
   return new Stripe(secretKey, {
-    apiVersion: '2025-09-30.clover' as any, // Match Stripe webhook API version
+    apiVersion: '2025-12-15.clover' as any,
     maxNetworkRetries: 2, // Retry on network failures
     timeout: 10000, // 10 second timeout for Stripe API calls
   });

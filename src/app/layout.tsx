@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { AuthProvider } from '@/lib/auth';
+import { LanguageProvider } from '@/components/LanguageProvider';
 import LayoutWrapper from '@/components/LayoutWrapper';
 import CookieConsent from '@/components/CookieConsent';
 import { Toaster } from 'react-hot-toast';
@@ -75,6 +76,7 @@ export const metadata: Metadata = {
     languages: {
       'en': '/',
       'ms': '/',
+      'id': '/',
     },
   },
   icons: {
@@ -174,67 +176,69 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`}>
+    <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} data-scroll-behavior="smooth">
       <body className={`${inter.className} antialiased`}>
         <AuthProvider>
-          <Toaster 
-            position="top-center"
-            reverseOrder={false}
-            gutter={16}
-            containerStyle={{ top: 24 }}
-            toastOptions={{
-              duration: 4000,
-              // Default style + icon for generic toasts
-              style: {
-                background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-                color: '#1e293b',
-                padding: '16px 20px',
-                borderRadius: '16px',
-                boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
-                backdropFilter: 'blur(12px)',
-                border: '1px solid rgba(34, 197, 94, 0.15)',
-                fontSize: '15px',
-                fontWeight: 500,
-              },
-              icon: '💬',
-              success: {
-                icon: '✅',
+          <LanguageProvider>
+            <Toaster 
+              position="top-center"
+              reverseOrder={false}
+              gutter={16}
+              containerStyle={{ top: 24 }}
+              toastOptions={{
+                duration: 4000,
+                // Default style + icon for generic toasts
                 style: {
-                  border: '1px solid rgba(34, 197, 94, 0.3)',
-                  boxShadow: '0 10px 40px -10px rgba(34, 197, 94, 0.15), 0 0 0 1px rgba(34, 197, 94, 0.1)',
+                  background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
+                  color: '#1e293b',
+                  padding: '16px 20px',
+                  borderRadius: '16px',
+                  boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,0,0,0.05)',
+                  backdropFilter: 'blur(12px)',
+                  border: '1px solid rgba(34, 197, 94, 0.15)',
+                  fontSize: '15px',
+                  fontWeight: 500,
                 },
-                iconTheme: {
-                  primary: '#22c55e',
-                  secondary: '#fff',
+                icon: '💬',
+                success: {
+                  icon: '✅',
+                  style: {
+                    border: '1px solid rgba(34, 197, 94, 0.3)',
+                    boxShadow: '0 10px 40px -10px rgba(34, 197, 94, 0.15), 0 0 0 1px rgba(34, 197, 94, 0.1)',
+                  },
+                  iconTheme: {
+                    primary: '#22c55e',
+                    secondary: '#fff',
+                  },
                 },
-              },
-              error: {
-                icon: '⚠️',
-                style: {
-                  border: '1px solid rgba(239, 68, 68, 0.15)',
-                  boxShadow: '0 10px 40px -10px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.08)',
+                error: {
+                  icon: '⚠️',
+                  style: {
+                    border: '1px solid rgba(239, 68, 68, 0.15)',
+                    boxShadow: '0 10px 40px -10px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.08)',
+                  },
+                  iconTheme: {
+                    primary: '#ef4444',
+                    secondary: '#fff',
+                  },
                 },
-                iconTheme: {
-                  primary: '#ef4444',
-                  secondary: '#fff',
+                loading: {
+                  icon: '⏳',
+                  style: {
+                    border: '1px solid rgba(34, 197, 94, 0.2)',
+                  },
+                  iconTheme: {
+                    primary: '#22c55e',
+                    secondary: '#f8fafc',
+                  },
                 },
-              },
-              loading: {
-                icon: '⏳',
-                style: {
-                  border: '1px solid rgba(34, 197, 94, 0.2)',
-                },
-                iconTheme: {
-                  primary: '#22c55e',
-                  secondary: '#f8fafc',
-                },
-              },
-            }}
-          />
-          <LayoutWrapper>
-            {children}
-          </LayoutWrapper>
-          <CookieConsent />
+              }}
+            />
+            <LayoutWrapper>
+              {children}
+            </LayoutWrapper>
+            <CookieConsent />
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

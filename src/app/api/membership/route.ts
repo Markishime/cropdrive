@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
+import { adminAuth } from '@/lib/firebase-admin';
 import Stripe from 'stripe';
 import { getStripe } from '@/lib/stripe-server';
 import { 
@@ -43,8 +43,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAuth();
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
     const { getMembershipAdmin } = await import('@/lib/membership-admin');

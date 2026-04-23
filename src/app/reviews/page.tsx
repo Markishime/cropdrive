@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function ReviewsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
 
   useEffect(() => {
     setMounted(true);
@@ -27,6 +28,8 @@ export default function ReviewsPage() {
   }, []);
 
   const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
+  const localize = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   const testimonials = [
     {
@@ -100,22 +103,22 @@ export default function ReviewsPage() {
   const stats = [
     {
       number: '10,000+',
-      label: language === 'ms' ? 'Petani Aktif' : 'Active Farmers',
+      label: copy('Active Farmers', 'Petani Aktif'),
       labelMs: 'Petani Aktif',
     },
     {
       number: '50,000+',
-      label: language === 'ms' ? 'Analisis Dilakukan' : 'Analyses Completed',
+      label: copy('Analyses Completed', 'Analisis Dilakukan'),
       labelMs: 'Analisis Dilakukan',
     },
     {
       number: '98%',
-      label: language === 'ms' ? 'Kepuasan Pelanggan' : 'Customer Satisfaction',
+      label: copy('Customer Satisfaction', 'Kepuasan Pelanggan'),
       labelMs: 'Kepuasan Pelanggan',
     },
     {
       number: '25%',
-      label: language === 'ms' ? 'Peningkatan Hasil Purata' : 'Average Yield Increase',
+      label: copy('Average Yield Increase', 'Peningkatan Hasil Purata'),
       labelMs: 'Peningkatan Hasil Purata',
     },
   ];
@@ -131,13 +134,10 @@ export default function ReviewsPage() {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            {language === 'ms' ? 'Apa yang Petani Katakan' : 'What Farmers Say'}
+            {copy('What Farmers Say', 'Apa yang Petani Katakan')}
           </h1>
           <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            {language === 'ms'
-              ? 'Kisah kejayaan dari petani kelapa sawit Malaysia yang menggunakan CropDrive'
-              : 'Success stories from Malaysian palm oil farmers using CropDrive'
-            }
+            {copy('Success stories from Malaysian palm oil farmers using CropDrive', 'Kisah kejayaan dari petani kelapa sawit Malaysia yang menggunakan CropDrive')}
           </p>
         </motion.div>
 
@@ -162,7 +162,7 @@ export default function ReviewsPage() {
                 {stat.number}
               </div>
               <div className="text-gray-600">
-                {language === 'ms' ? stat.labelMs : stat.label}
+                {stat.label}
               </div>
             </motion.div>
           ))}
@@ -172,7 +172,7 @@ export default function ReviewsPage() {
         <div className="mb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {language === 'ms' ? 'Testimoni Unggulan' : 'Featured Testimonials'}
+              {copy('Featured Testimonials', 'Testimoni Unggulan')}
             </h2>
           </div>
 
@@ -201,21 +201,21 @@ export default function ReviewsPage() {
                     </div>
 
                     <p className="text-gray-700 mb-6 leading-relaxed">
-                      "{language === 'ms' ? testimonial.messageMs : testimonial.message}"
+                      "{localize(testimonial.message, testimonial.messageMs)}"
                     </p>
 
                     <div className="flex items-center">
                       <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mr-4">
                         <span className="text-white font-semibold text-lg">
-                          {(language === 'ms' ? testimonial.nameMs : testimonial.name).charAt(0)}
+                          {localize(testimonial.name, testimonial.nameMs).charAt(0)}
                         </span>
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900">
-                          {language === 'ms' ? testimonial.nameMs : testimonial.name}
+                          {localize(testimonial.name, testimonial.nameMs)}
                         </div>
                         <div className="text-gray-600 text-sm">
-                          {language === 'ms' ? testimonial.locationMs : testimonial.location}
+                          {localize(testimonial.location, testimonial.locationMs)}
                         </div>
                       </div>
                     </div>
@@ -230,7 +230,7 @@ export default function ReviewsPage() {
         <div className="mb-16">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              {language === 'ms' ? 'Lebih Banyak Testimoni' : 'More Testimonials'}
+              {copy('More Testimonials', 'Lebih Banyak Testimoni')}
             </h2>
           </div>
 
@@ -259,21 +259,21 @@ export default function ReviewsPage() {
                     </div>
 
                     <p className="text-gray-700 mb-4 leading-relaxed text-sm">
-                      "{language === 'ms' ? testimonial.messageMs : testimonial.message}"
+                      "{localize(testimonial.message, testimonial.messageMs)}"
                     </p>
 
                     <div className="flex items-center">
                       <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-600 rounded-full flex items-center justify-center mr-3">
                         <span className="text-white font-semibold text-sm">
-                          {(language === 'ms' ? testimonial.nameMs : testimonial.name).charAt(0)}
+                          {localize(testimonial.name, testimonial.nameMs).charAt(0)}
                         </span>
                       </div>
                       <div>
                         <div className="font-semibold text-gray-900 text-sm">
-                          {language === 'ms' ? testimonial.nameMs : testimonial.name}
+                          {localize(testimonial.name, testimonial.nameMs)}
                         </div>
                         <div className="text-gray-600 text-xs">
-                          {language === 'ms' ? testimonial.locationMs : testimonial.location}
+                          {localize(testimonial.location, testimonial.locationMs)}
                         </div>
                       </div>
                     </div>
@@ -294,13 +294,10 @@ export default function ReviewsPage() {
         >
           <div className="bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-8 text-white">
             <h2 className="text-3xl font-bold mb-4">
-              {language === 'ms' ? 'Sertai Ribuan Petani Berjaya' : 'Join Thousands of Successful Farmers'}
+              {copy('Join Thousands of Successful Farmers', 'Sertai Ribuan Petani Berjaya')}
             </h2>
             <p className="text-xl text-primary-100 mb-6">
-              {language === 'ms'
-                ? 'Mulakan perjalanan anda untuk hasil yang lebih baik dengan AI hari ini'
-                : 'Start your journey to better yields with AI today'
-              }
+              {copy('Start your journey to better yields with AI today', 'Mulakan perjalanan anda untuk hasil yang lebih baik dengan AI hari ini')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <motion.button
@@ -308,14 +305,14 @@ export default function ReviewsPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {language === 'ms' ? 'Mula Percubaan Percuma' : 'Start Free Trial'}
+                {copy('Start Free Trial', 'Mula Percubaan Percuma')}
               </motion.button>
               <motion.button
                 className="border-2 border-white text-white hover:bg-white hover:text-primary-600 px-8 py-4 rounded-lg font-semibold text-lg transition-colors duration-200"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+                {copy('View Pricing', 'Lihat Harga')}
               </motion.button>
             </div>
           </div>

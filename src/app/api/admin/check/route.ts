@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
+import { adminAuth } from '@/lib/firebase-admin';
 import { isAdmin } from '@/lib/admin';
 
 export async function GET(request: NextRequest) {
@@ -13,8 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     const token = authHeader.split('Bearer ')[1];
-    const auth = getAuth();
-    const decodedToken = await auth.verifyIdToken(token);
+    const decodedToken = await adminAuth.verifyIdToken(token);
     const userId = decodedToken.uid;
 
     const userIsAdmin = await isAdmin(userId);

@@ -28,7 +28,7 @@ export const Button: React.FC<ButtonProps> = ({
   iconPosition = 'left',
   title,
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-semibold rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
+  const baseClasses = 'inline-flex cursor-pointer items-center justify-center font-semibold rounded-lg transition-all duration-300 transform focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none';
 
   const variantClasses = {
     primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-300 hover:shadow-glow',

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -36,7 +36,7 @@ import { AnimatePresence } from 'framer-motion';
 
 export default function ProfilePage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [userData, setUserData] = useState<any>(null);
@@ -164,6 +164,21 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     if (!user?.uid) return;
+
+    if (!user.email?.trim()) {
+      toast.error(language === 'ms' ? 'Emel diperlukan.' : 'Email is required.');
+      return;
+    }
+
+    if (!formData.phoneNumber.trim()) {
+      toast.error(language === 'ms' ? 'Nombor WhatsApp diperlukan.' : 'WhatsApp number is required.');
+      return;
+    }
+
+    if (!formData.farmLocation.trim()) {
+      toast.error(language === 'ms' ? 'Negara/Wilayah diperlukan.' : 'Country/Region is required.');
+      return;
+    }
     
     setSaving(true);
     try {
@@ -177,6 +192,7 @@ export default function ProfilePage() {
         phoneNumber: formData.phoneNumber,
         farmName: formData.farmName,
         farmLocation: formData.farmLocation,
+        countryRegion: formData.farmLocation,
         farmSize: formData.farmSize,
         updatedAt: serverTimestamp()
       });
@@ -461,7 +477,7 @@ export default function ProfilePage() {
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <FontAwesomeIcon icon={faPhone} className="w-4 h-4" />
-                        <span>{language === 'ms' ? 'No. Telefon' : 'Phone Number'}</span>
+                        <span>{language === 'ms' ? 'Nombor WhatsApp' : 'WhatsApp Number'}</span>
                       </label>
                       {isEditing ? (
                         <input
@@ -527,7 +543,7 @@ export default function ProfilePage() {
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-2">
                         <FontAwesomeIcon icon={faLocationDot} className="w-4 h-4" />
-                        <span>{language === 'ms' ? 'Lokasi Ladang' : 'Farm Location'}</span>
+                        <span>{language === 'ms' ? 'Negara / Wilayah' : 'Country / Region'}</span>
                       </label>
                       {isEditing ? (
                         <input

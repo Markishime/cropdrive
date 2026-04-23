@@ -4,13 +4,15 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faScrewdriverWrench,
   faNewspaper,
   faPodcast,
   faBookOpen,
+  faChartLine,
+  faFolderOpen,
   faSpinner,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
@@ -20,13 +22,13 @@ export default function AdminHubPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'ms'>('en');
+  const [language, setLanguage] = useState<Language>('en');
   const [isAdmin, setIsAdmin] = useState(false);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     setMounted(true);
-    setLanguage(getCurrentLanguage() as 'en' | 'ms');
+    setLanguage(getCurrentLanguage());
   }, []);
 
   useEffect(() => {
@@ -93,6 +95,20 @@ export default function AdminHubPage() {
       title: t('Palmira Knowledge Base', 'Pangkalan Pengetahuan Palmira'),
       titleMs: 'Pangkalan Pengetahuan Palmira',
       desc: t('Manage Palmira AI knowledge base documents.', 'Urus dokumen pangkalan pengetahuan Palmira AI.'),
+    },
+    {
+      href: '/admin/operations',
+      icon: faFolderOpen,
+      title: t('Operations Access', 'Akses Operasi'),
+      titleMs: 'Akses Operasi',
+      desc: t('Access uploaded files, report copies, and Palmira logs by user.', 'Akses fail dimuat naik, salinan laporan, dan log Palmira mengikut pengguna.'),
+    },
+    {
+      href: '/admin/subscriber-analytics',
+      icon: faChartLine,
+      title: t('Subscriber Analytics', 'Analitik Pelanggan'),
+      titleMs: 'Analitik Pelanggan',
+      desc: t('Track growth and geographic distribution across markets.', 'Jejak pertumbuhan dan taburan geografi merentas pasaran.'),
     },
   ];
 

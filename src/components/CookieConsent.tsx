@@ -3,24 +3,20 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { safeGetLocalStorage, safeSetLocalStorage } from '@/utils/browser-compat';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark, faCookieBite } from '@fortawesome/free-solid-svg-icons';
+import { useLanguage } from './LanguageProvider';
 
 export default function CookieConsent() {
   const [mounted, setMounted] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const { language: currentLanguage } = useLanguage();
 
   useEffect(() => {
     setMounted(true);
-    try {
-      const lang = getCurrentLanguage();
-      setCurrentLanguage(lang);
-    } catch (e) {
-      setCurrentLanguage('en');
-    }
   }, []);
 
   useEffect(() => {
@@ -36,6 +32,9 @@ export default function CookieConsent() {
   }, [mounted]);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (english: string, malay: string) => (
+    language === 'id' ? toIndonesianText(malay) : language === 'ms' ? malay : english
+  );
 
   const handleAccept = () => {
     safeSetLocalStorage('cropdrive-cookie-consent', 'accepted');
@@ -98,22 +97,23 @@ export default function CookieConsent() {
                   id="cookie-consent-title"
                   className="text-lg font-bold text-gray-900 mb-2"
                 >
-                  {language === 'ms' ? 'Kuki dan Penyimpanan Peranti' : 'Cookies & Device Storage'}
+                  {copy('Cookies & Device Storage', 'Kuki dan Penyimpanan Peranti')}
                 </h3>
                 <p 
                   id="cookie-consent-description"
                   className="text-sm text-gray-700 mb-3"
                 >
-                  {language === 'ms' 
-                    ? 'Kami menggunakan penyimpanan peranti yang diperlukan untuk fungsi asas seperti bahasa dan log masuk. Kami juga menggunakan Vercel Analytics tanpa kuki. Lihat '
-                    : 'We use necessary device storage for basic functions like language and sign-in. We also use Vercel Analytics without cookies. See '}
+                  {copy(
+                    'We use necessary device storage for basic functions like language and sign-in. We also use Vercel Analytics without cookies. See ',
+                    'Kami menggunakan penyimpanan peranti yang diperlukan untuk fungsi asas seperti bahasa dan log masuk. Kami juga menggunakan Vercel Analytics tanpa kuki. Lihat '
+                  )}
                   <Link 
                     href="/cookies" 
                     className="text-green-600 hover:text-green-700 font-semibold underline"
                   >
-                    {language === 'ms' ? 'Dasar Kuki' : 'Cookie Policy'}
+                    {copy('Cookie Policy', 'Dasar Kuki')}
                   </Link>
-                  {language === 'ms' ? ' untuk maklumat lanjut.' : ' for details.'}
+                  {copy(' for details.', ' untuk maklumat lanjut.')}
                 </p>
               </div>
 

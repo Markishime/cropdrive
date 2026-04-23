@@ -12,9 +12,12 @@ interface SupportPageClientProps {
 }
 
 export default function SupportPageClient({ locale }: SupportPageClientProps) {
+  const isMs = locale === 'ms';
+  const isId = locale === 'id';
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
+      <div className="min-h-screen premium-page-shell premium-mesh">
         {/* Enhanced Header */}
         <section className="bg-gradient-to-br from-green-900 via-green-800 to-emerald-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
           {/* Background Pattern */}
@@ -35,17 +38,18 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
               <div className="flex items-center justify-center sm:justify-start flex-wrap gap-4 mb-6">
                 <div className="text-center sm:text-left">
                   <span className="inline-block text-green-200 text-sm font-bold tracking-widest uppercase mb-3 bg-white/10 px-4 py-2 rounded-full backdrop-blur-sm">
-                    {locale === 'ms' ? '💬 Hubungi Kami' : '💬 Contact Us'}
+                    {isId ? '💬 Hubungi Kami' : isMs ? '💬 Hubungi Kami' : '💬 Contact Us'}
                   </span>
                   <h1 className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-2 leading-tight">
-                    {locale === 'ms' ? 'Pusat' : 'Support'} <span className="text-yellow-400">{locale === 'ms' ? 'Sokongan' : 'Center'}</span>
+                    {isId ? 'Pusat' : isMs ? 'Pusat' : 'Support'} <span className="text-yellow-400">{isId ? 'Dukungan' : isMs ? 'Sokongan' : 'Center'}</span>
                   </h1>
                   <p className="text-lg sm:text-xl text-white/90 flex items-center justify-center sm:justify-start gap-2">
                     <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />
-                    {locale === 'ms'
-                      ? 'Pasukan pakar kami sedia membantu anda'
-                      : 'Our expert team is ready to help you'
-                    }
+                    {isId
+                      ? 'Tim ahli kami siap membantu Anda'
+                      : isMs
+                        ? 'Pasukan pakar kami sedia membantu anda'
+                        : 'Our expert team is ready to help you'}
                   </p>
                 </div>
               </div>
@@ -62,7 +66,9 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <SupportForm locale={locale} />
+              <div className="premium-panel-strong rounded-[28px] p-4 sm:p-6">
+                <SupportForm locale={locale} />
+              </div>
             </motion.div>
 
             {/* Help Notice */}
@@ -72,11 +78,15 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
               transition={{ delay: 0.4 }}
               className="mt-8"
             >
-              <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 border border-blue-200">
+              <div className="premium-panel rounded-[24px] bg-gradient-to-r from-blue-50 to-green-50 p-6 border border-blue-200">
                 <div className="flex items-start gap-3">
                   <FontAwesomeIcon icon={faCircleQuestion} className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
                   <p className="text-sm text-gray-700">
-                    {locale === 'ms' ? (
+                    {isId ? (
+                      <>
+                        <strong>Tips:</strong> Agar respons lebih cepat, sertakan detail lengkap tentang masalah Anda dan informasi kebun yang relevan.
+                      </>
+                    ) : isMs ? (
                       <>
                         <strong>Petua:</strong> Untuk mendapat respons lebih pantas, sertakan butiran lengkap tentang isu anda dan maklumat ladang yang berkaitan.
                       </>
@@ -97,37 +107,37 @@ export default function SupportPageClient({ locale }: SupportPageClientProps) {
               transition={{ delay: 0.6 }}
               className="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4"
             >
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="premium-panel rounded-xl p-4 shadow-sm">
                 <div className="text-center">
                   <div className="text-2xl mb-2">⚡</div>
                   <div className="text-xs font-semibold text-gray-900 mb-1">
-                    {locale === 'ms' ? 'Respons Pantas' : 'Quick Response'}
+                    {isId ? 'Respons Cepat' : isMs ? 'Respons Pantas' : 'Quick Response'}
                   </div>
                   <div className="text-xs text-gray-600">
-                    {locale === 'ms' ? '12-16 jam' : '12-16 hours'}
+                    {isId ? '12-16 jam' : isMs ? '12-16 jam' : '12-16 hours'}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="premium-panel rounded-xl p-4 shadow-sm">
                 <div className="text-center">
                   <div className="text-2xl mb-2">👥</div>
                   <div className="text-xs font-semibold text-gray-900 mb-1">
-                    {locale === 'ms' ? 'Pakar Bertauliah' : 'Expert Team'}
+                    {isId ? 'Tim Ahli' : isMs ? 'Pakar Bertauliah' : 'Expert Team'}
                   </div>
                   <div className="text-xs text-gray-600">
-                    {locale === 'ms' ? 'Sokongan Profesional' : 'Professional Support'}
+                    {isId ? 'Dukungan Profesional' : isMs ? 'Sokongan Profesional' : 'Professional Support'}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm">
+              <div className="premium-panel rounded-xl p-4 shadow-sm">
                 <div className="text-center">
                   <div className="text-2xl mb-2">🌐</div>
                   <div className="text-xs font-semibold text-gray-900 mb-1">
-                    {locale === 'ms' ? 'Dwibahasa' : 'Bilingual'}
+                    {isId ? 'Tiga Bahasa' : isMs ? 'Dwibahasa' : 'Multilingual'}
                   </div>
-                  <div className="text-xs text-gray-600">EN / MS</div>
+                  <div className="text-xs text-gray-600">EN / MS / ID</div>
                 </div>
               </div>
             </motion.div>

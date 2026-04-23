@@ -3,17 +3,7 @@ import { db } from './firebase';
 
 /** Get upload limit for a given plan */
 function getUploadLimitForPlan(planId: string): number {
-  const plan = planId?.toLowerCase().trim();
-  switch (plan) {
-    case 'start':
-      return 2;
-    case 'smart':
-      return 5;
-    case 'precision':
-      return -1; // Unlimited
-    default:
-      return 2;
-  }
+  return 2;
 }
 
 export interface Membership {
@@ -311,13 +301,12 @@ export function hasFullAccess(membership: Membership | null): boolean {
  */
 export function canAccessAIAssistant(membership: Membership | null): boolean {
   if (!membership) return false;
-  const planId = String(membership.planId || '').toLowerCase().trim();
-  
-  // Must have a valid plan
-  if (planId === '' || planId === 'none') return false;
-  
-  // Check if within 1-year contract period
-  return isWithinContractPeriod(membership);
+
+  if (!isWithinContractPeriod(membership)) return false;
+
+  const uploadsUsed = membership.uploadsUsedThisMonth || 0;
+  const uploadLimit = membership.uploadLimit || 2;
+  return uploadsUsed < uploadLimit;
 }
 
 /**

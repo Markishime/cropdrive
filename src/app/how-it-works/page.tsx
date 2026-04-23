@@ -4,13 +4,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { safeGetLocalStorage, isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
 
 export default function HowItWorksPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language } = useTranslation(currentLanguage);
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -23,7 +25,7 @@ export default function HowItWorksPage() {
   useEffect(() => {
     if (!mounted) return;
 
-    const handleLanguageChange = (newLang?: 'en' | 'ms') => {
+    const handleLanguageChange = (newLang?: Language) => {
       const lang = newLang || getCurrentLanguage();
       if (lang !== currentLanguage) {
         setCurrentLanguage(lang);
@@ -33,7 +35,7 @@ export default function HowItWorksPage() {
     // Listen for storage events (works across tabs/windows)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'cropdrive-language' && e.newValue) {
-        handleLanguageChange(e.newValue as 'en' | 'ms');
+        handleLanguageChange(e.newValue as Language);
       }
     };
 
@@ -72,8 +74,8 @@ export default function HowItWorksPage() {
 
   // Get video URLs from environment variables or fallback to local paths
   // These videos are publicly accessible to all users (no authentication required)
-  const getVideoUrl = (language: 'en' | 'ms') => {
-    if (language === 'ms') {
+  const getVideoUrl = (language: Language) => {
+    if (language === 'ms' || language === 'id') {
       const url = process.env.NEXT_PUBLIC_VIDEO_MALAYSIAN_URL || '/videos/CropDrive Intro Malaysian.mp4';
       // Ensure URL is absolute if it's a Firebase Storage URL
       if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -157,37 +159,29 @@ export default function HowItWorksPage() {
   const steps = [
     {
       number: '1',
-      title: language === 'ms' ? 'Muat Naik Keputusan Ujian Anda' : 'Upload Your Test Results',
-      desc: language === 'ms' 
-        ? 'Mulakan dengan memuat naik hasil analisis tanah dan daun anda terus ke platform. Format yang diterima termasuk kebanyakan laporan makmal standard. Petani boleh memuat naik fail melalui akaun CropDrive mereka, manakala organisasi dan makmal boleh mengintegrasikan muat naik pukal.'
-        : 'Start by uploading your soil and leaf analysis results directly to the platform. Accepted formats include most standard laboratory reports. Farmers can upload files through their CropDrive account, while organizations and laboratories can integrate bulk uploads.',
+      title: copy('Upload Your Test Results', 'Muat Naik Keputusan Ujian Anda'),
+      desc: copy('Start by uploading your soil and leaf analysis results directly to the platform. Accepted formats include most standard laboratory reports. Farmers can upload files through their CropDrive account, while organizations and laboratories can integrate bulk uploads.', 'Mulakan dengan memuat naik hasil analisis tanah dan daun anda terus ke platform. Format yang diterima termasuk kebanyakan laporan makmal standard. Petani boleh memuat naik fail melalui akaun CropDrive mereka, manakala organisasi dan makmal boleh mengintegrasikan muat naik pukal.'),
       icon: '📤',
       image: '/images/how-it-works/1. Upload Your Report (Image 01)_optimized.jpg'
     },
     {
       number: '2',
-      title: language === 'ms' ? 'Analisis AI' : 'AI Analysis',
-      desc: language === 'ms'
-        ? 'AI Agronomis CropDrive mentafsir data ujian menggunakan model agronomi yang dibangunkan dari penyelidikan antarabangsa dan disahkan dalam keadaan lapangan tropika. Sistem mengenal pasti jurang nutrien, isu kesihatan tanah, dan ketidakseimbangan, kemudian mereka bentuk strategi persenyawaan dan penambahbaikan yang disesuaikan.'
-        : "CropDrive's AI Agronomist interprets the test data using agronomic models developed from international research and validated in tropical field conditions. The system identifies nutrient gaps, soil health issues, and imbalances, then designs tailored fertilization and improvement strategies.",
+      title: copy('AI Analysis', 'Analisis AI'),
+      desc: copy("CropDrive's AI Agronomist interprets the test data using agronomic models developed from international research and validated in tropical field conditions. The system identifies nutrient gaps, soil health issues, and imbalances, then designs tailored fertilization and improvement strategies.", 'AI Agronomis CropDrive mentafsir data ujian menggunakan model agronomi yang dibangunkan dari penyelidikan antarabangsa dan disahkan dalam keadaan lapangan tropika. Sistem mengenal pasti jurang nutrien, isu kesihatan tanah, dan ketidakseimbangan, kemudian mereka bentuk strategi persenyawaan dan penambahbaikan yang disesuaikan.'),
       icon: '🤖',
       image: '/images/how-it-works/2. AI Analyzes Data (Image 02)_optimized.jpg'
     },
     {
       number: '3',
-      title: language === 'ms' ? 'Terima Laporan Anda' : 'Receive Your Report',
-      desc: language === 'ms'
-        ? 'Dalam beberapa minit, pengguna menerima laporan nasihat khusus lapangan yang merangkumi: Cadangan baja dengan kadar dan masa, Strategi penambahbaikan kesihatan tanah, Anggaran keseimbangan nutrien dan ROI, Kesan yang dijangka terhadap produktiviti.'
-        : 'Within minutes, users receive a field-specific advisory report that includes: Fertilizer recommendations with rates and timing, Soil health improvement strategy, Nutrient balance and ROI estimates, Expected impact on productivity.',
+      title: copy('Receive Your Report', 'Terima Laporan Anda'),
+      desc: copy('Within minutes, users receive a field-specific advisory report that includes: Fertilizer recommendations with rates and timing, Soil health improvement strategy, Nutrient balance and ROI estimates, Expected impact on productivity.', 'Dalam beberapa minit, pengguna menerima laporan nasihat khusus lapangan yang merangkumi: Cadangan baja dengan kadar dan masa, Strategi penambahbaikan kesihatan tanah, Anggaran keseimbangan nutrien dan ROI, Kesan yang dijangka terhadap produktiviti.'),
       icon: '📋',
       image: '/images/how-it-works/3. Receive Recommendations (Image 03)_optimized.jpg'
     },
     {
       number: '4',
-      title: language === 'ms' ? 'Laksanakan Cadangan' : 'Apply Recommendations',
-      desc: language === 'ms'
-        ? 'Petani dan estet menggunakan laporan untuk menyesuaikan penggunaan input dan meningkatkan prestasi hasil. Untuk organisasi, CropDrive menyediakan analitik agregat dan integrasi pilihan ke dalam sistem pemantauan untuk pengurusan projek atau rantaian bekalan.'
-        : 'Farmers and estates use the report to adjust input use and improve yield performance. For organizations, CropDrive provides aggregated analytics and optional integration into monitoring systems for project or supply chain management.',
+      title: copy('Apply Recommendations', 'Laksanakan Cadangan'),
+      desc: copy('Farmers and estates use the report to adjust input use and improve yield performance. For organizations, CropDrive provides aggregated analytics and optional integration into monitoring systems for project or supply chain management.', 'Petani dan estet menggunakan laporan untuk menyesuaikan penggunaan input dan meningkatkan prestasi hasil. Untuk organisasi, CropDrive menyediakan analitik agregat dan integrasi pilihan ke dalam sistem pemantauan untuk pengurusan projek atau rantaian bekalan.'),
       icon: '🌱',
       image: '/images/how-it-works/4. Implement & Track (Image 04)_optimized.jpg'
     }
@@ -212,13 +206,10 @@ export default function HowItWorksPage() {
             className="text-center"
           >
             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Cara Ia' : 'How It'} <span className="text-yellow-400">{language === 'ms' ? 'Berfungsi' : 'Works'}</span>
+              {copy('How It', 'Cara Ia')} <span className="text-yellow-400">{copy('Works', 'Berfungsi')}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'CropDrive™ menukar keputusan ujian makmal pertanian kepada keputusan agronomi yang jelas. Prosesnya mudah, cepat, dan disokong oleh sains.'
-                : 'CropDrive™ turns agricultural laboratory test results into clear agronomic decisions. The process is simple, fast, and backed by science.'
-              }
+              {copy('CropDrive™ turns agricultural laboratory test results into clear agronomic decisions. The process is simple, fast, and backed by science.', 'CropDrive™ menukar keputusan ujian makmal pertanian kepada keputusan agronomi yang jelas. Prosesnya mudah, cepat, dan disokong oleh sains.')}
             </p>
           </motion.div>
         </div>
@@ -317,8 +308,8 @@ export default function HowItWorksPage() {
                 </h3>
                 <p className="text-white/80">
                   {language === 'ms'
-                    ? 'Muat naik Gambar, PDF, atau Excel (SPLAB, farm_test_data)'
-                    : 'Upload Images, PDF, or Excel (SPLAB, farm_test_data)'
+                    ? 'Muat naik Gambar, PDF, atau Excel (SPLAB, farm_data)'
+                    : 'Upload Images, PDF, or Excel (SPLAB, farm_data)'
                   }
                 </p>
               </motion.div>
@@ -355,10 +346,12 @@ export default function HowItWorksPage() {
               >
                 <div className="text-4xl mb-3">✅</div>
                 <h3 className="text-xl font-bold text-white mb-2">
-                  {language === 'ms' ? 'Cadangan Berpandukan MPOB & GAP' : 'MPOB & GAP-Based Recommendations'}
+                  {language === 'id' ? 'Rekomendasi Berbasis ISPO & GAP' : language === 'ms' ? 'Cadangan Berpandukan MPOB & GAP' : 'MPOB & GAP-Based Recommendations'}
                 </h3>
                 <p className="text-white/80">
-                  {language === 'ms'
+                  {language === 'id'
+                    ? 'Rekomendasi disusun berdasarkan standar Indonesian Sustainable Palm Oil (ISPO) dan Good Agricultural Practices (GAP) global terbaru'
+                    : language === 'ms'
                     ? 'Cadangan berpandukan garis panduan MPOB dan Amalan Pertanian Baik (GAP) global terkini'
                     : 'Recommendations are based on MPOB guidelines and the latest global Good Agricultural Practices (GAP)'
                   }

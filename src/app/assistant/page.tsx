@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { auth } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -27,7 +27,7 @@ import Button from '@/components/ui/Button';
 
 export default function AssistantPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [iframeKey, setIframeKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const { user, loading: authLoading, refreshUser } = useAuth();
@@ -35,6 +35,8 @@ export default function AssistantPage() {
   const searchParams = useSearchParams();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { language } = useTranslation(mounted ? currentLang : 'en');
+  const isMs = language === 'ms';
+  const isId = language === 'id';
   const [analysisIdToLoad, setAnalysisIdToLoad] = useState<string | null>(null);
   const [analysisDataLoaded, setAnalysisDataLoaded] = useState(false);
 
@@ -64,6 +66,8 @@ export default function AssistantPage() {
   const [membershipChecked, setMembershipChecked] = useState(false);
   const [isWithinContract, setIsWithinContract] = useState(true);
   const [contractEndDate, setContractEndDate] = useState<Date | null>(null);
+  const [assistantAccessAllowed, setAssistantAccessAllowed] = useState(true);
+  const [membershipUploadLimitReached, setMembershipUploadLimitReached] = useState(false);
 
   // Get iframe origin from the iframe src if available, otherwise from env/default
   const getIframeOrigin = () => {
@@ -125,17 +129,23 @@ export default function AssistantPage() {
         
         if (result?.success) {
           setIsWithinContract(result.data.isWithinContract);
+          setAssistantAccessAllowed(result.data.canAccessAI !== false);
+          setMembershipUploadLimitReached(!!result.data.hasReachedUploadLimit);
           if (result.data.contractEndDate) {
             setContractEndDate(new Date(result.data.contractEndDate));
           }
         } else {
           // If API fails, fallback to local check
           setIsWithinContract(true);
+          setAssistantAccessAllowed(true);
+          setMembershipUploadLimitReached(false);
         }
       } catch (error) {
         console.error('Error checking membership:', error);
         // Fallback to allowing access if API fails
         setIsWithinContract(true);
+        setAssistantAccessAllowed(true);
+        setMembershipUploadLimitReached(false);
       } finally {
         setMembershipChecked(true);
       }
@@ -357,7 +367,7 @@ export default function AssistantPage() {
   useEffect(() => {
     if (!mounted) return;
     
-    const handleLanguageChange = (newLang?: 'en' | 'ms') => {
+    const handleLanguageChange = (newLang?: Language) => {
       const lang = newLang || getCurrentLanguage();
       if (lang !== currentLang) {
         setCurrentLang(lang);
@@ -381,7 +391,7 @@ export default function AssistantPage() {
     // Method 1: Listen for storage events (works across tabs/windows)
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'cropdrive-language' && e.newValue) {
-        handleLanguageChange(e.newValue as 'en' | 'ms');
+        handleLanguageChange(e.newValue as Language);
       }
     };
     
@@ -418,10 +428,7 @@ export default function AssistantPage() {
   // Note: This now uses the Stripe contract year end (same as "Full Access Until" on payment page)
   const isSubscriptionExpired = (): boolean => {
     if (!user) return false;
-    
-    // If user has no plan or plan is 'none', they need to subscribe
-    if (!user.plan || user.plan === 'none') return true;
-    
+
     // Use contract-based check from API if available
     if (membershipChecked) {
       return !isWithinContract;
@@ -433,14 +440,13 @@ export default function AssistantPage() {
 
   const subscriptionExpired = user && membershipChecked ? isSubscriptionExpired() : false;
   const subscriptionCancelled = user?.subscriptionStatus === 'canceled';
+  const assistantLockedByLimit = Boolean(
+    user && membershipChecked && !subscriptionExpired && membershipUploadLimitReached && !assistantAccessAllowed
+  );
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
-    }
-    // Redirect users without plans to pricing
-    if (user && (!user.plan || user.plan === 'none')) {
-      router.push('/pricing');
     }
   }, [user, authLoading, router]);
 
@@ -826,7 +832,7 @@ export default function AssistantPage() {
                   userId: currentUserId,
                   reportId: result.reportId,
                   uploadsUsed: result.uploadsUsed ?? 0,
-                  uploadsLimit: result.uploadsLimit ?? 10,
+                  uploadsLimit: result.uploadsLimit ?? 2,
                 };
                 console.log('📢 Dispatching analysisReportSaved event:', eventDetail);
                 window.dispatchEvent(new CustomEvent('analysisReportSaved', {
@@ -838,7 +844,7 @@ export default function AssistantPage() {
                   detail: {
                     userId: currentUserId,
                     uploadsUsed: result.uploadsUsed ?? 0,
-                    uploadsLimit: result.uploadsLimit ?? 10,
+                    uploadsLimit: result.uploadsLimit ?? 2,
                   }
                 }));
                 console.log('✅ Events dispatched: analysisReportSaved and userDataUpdated');
@@ -875,34 +881,14 @@ export default function AssistantPage() {
               // Upload limit exceeded
               toast.error(
                 language === 'ms' 
-                  ? `❌ Had muat naik tercapai (${result.uploadsUsed}/${result.uploadsLimit}). Sila naik taraf pelan anda.`
-                  : `❌ Upload limit reached (${result.uploadsUsed}/${result.uploadsLimit}). Please upgrade your plan.`,
+                  ? `❌ Had laporan tercapai (${result.uploadsUsed}/${result.uploadsLimit}). Maksimum 2 laporan setiap akaun.`
+                  : `❌ Report limit reached (${result.uploadsUsed}/${result.uploadsLimit}). Maximum 2 reports per account.`,
                 { duration: 6000 }
               );
               
               // Refresh user data
               await refreshUser?.();
               
-              // Show upgrade prompt
-              setTimeout(() => {
-                toast(
-                  (t) => (
-                    <div className="flex items-center gap-3">
-                      <span>{language === 'ms' ? 'Naik taraf untuk terus menganalisis' : 'Upgrade to continue analyzing'}</span>
-                      <button
-                        onClick={() => {
-                          toast.dismiss(t.id);
-                          router.push('/pricing');
-                        }}
-                        className="px-3 py-1 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-                      >
-                        {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
-                      </button>
-                    </div>
-                  ),
-                  { duration: 8000, icon: '⬆️' }
-                );
-              }, 500);
               return;
             } else {
               // API returned non-200 or success=false
@@ -933,7 +919,7 @@ export default function AssistantPage() {
             // Fallback: Save directly to Firestore (security rules will validate)
             console.error('❌ API save failed, trying direct Firestore save...', apiError);
             try {
-              const { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc } = await import('firebase/firestore');
+              const { collection, addDoc, serverTimestamp, doc, updateDoc, increment, getDoc, query, where, getDocs } = await import('firebase/firestore');
               const { db: firestoreDb } = await import('@/lib/firebase');
               
               // Fetch current user data from Firestore to check limits
@@ -949,14 +935,45 @@ export default function AssistantPage() {
               
               const currentUserData = userDocSnap.data();
               const uploadsUsed = currentUserData?.uploadsUsed || 0;
-              const uploadsLimit = currentUserData?.uploadsLimit || 0;
+              const uploadsLimit = currentUserData?.uploadsLimit || 2;
+
+              const userEmail = String(currentUserData?.email || '').trim();
+              const whatsappNumber = String(currentUserData?.phoneNumber || '').trim();
+              const countryRegion = String(currentUserData?.countryRegion || currentUserData?.farmLocation || '').trim();
+
+              if (!userEmail || !whatsappNumber || !countryRegion) {
+                toast.error(
+                  language === 'ms'
+                    ? 'Lengkapkan Emel, nombor WhatsApp, dan Negara/Wilayah di profil anda sebelum jana laporan.'
+                    : 'Complete Email, WhatsApp number, and Country/Region in your profile before generating reports.',
+                  { duration: 7000 }
+                );
+                return;
+              }
+
+              const reportsRef = collection(firestoreDb, 'analysis_results');
+              const q1 = query(reportsRef, where('userId', '==', currentUserId), where('status', '==', 'completed'));
+              const q2 = query(reportsRef, where('user_id', '==', currentUserId), where('status', '==', 'completed'));
+              const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+              const uniqueReportIds = new Set<string>();
+              snap1.forEach((d) => uniqueReportIds.add(d.id));
+              snap2.forEach((d) => uniqueReportIds.add(d.id));
+              if (uniqueReportIds.size >= 2) {
+                toast.error(
+                  language === 'ms'
+                    ? 'Maksimum 2 laporan setiap akaun telah dicapai.'
+                    : 'Maximum 2 reports per account has been reached.',
+                  { duration: 7000 }
+                );
+                return;
+              }
               
               // Check upload limit first
               if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
                 toast.error(
                   language === 'ms' 
-                    ? `❌ Had muat naik tercapai (${uploadsUsed}/${uploadsLimit}). Sila naik taraf pelan anda.`
-                    : `❌ Upload limit reached (${uploadsUsed}/${uploadsLimit}). Please upgrade your plan.`,
+                    ? `❌ Had laporan tercapai (${uploadsUsed}/${uploadsLimit}). Maksimum 2 laporan setiap akaun.`
+                    : `❌ Report limit reached (${uploadsUsed}/${uploadsLimit}). Maximum 2 reports per account.`,
                   { duration: 6000 }
                 );
                 return;
@@ -1110,37 +1127,13 @@ export default function AssistantPage() {
         // Handle feature restriction notifications
         if (data.type === 'FEATURE_RESTRICTED') {
           const message = language === 'ms'
-            ? `Ciri ini hanya tersedia untuk pelan ${data.requiredPlan || 'lebih tinggi'}. Sila naik taraf pelan anda.`
-            : `This feature is only available for ${data.requiredPlan || 'higher'} plan. Please upgrade your plan.`;
+            ? 'Ciri ini sementara tidak tersedia dalam mod percuma.'
+            : 'This feature is currently unavailable in free mode.';
           
           toast.error(message, {
             duration: 5000,
             icon: '🔒',
           });
-          
-          // Show a follow-up toast with action after a short delay
-          setTimeout(() => {
-            toast(
-              (t) => (
-                <div className="flex items-center gap-3">
-                  <span>{language === 'ms' ? 'Lihat pelan tersedia' : 'View available plans'}</span>
-                  <button
-                    onClick={() => {
-                      toast.dismiss(t.id);
-                      router.push('/pricing');
-                    }}
-                    className="px-3 py-1 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
-                  >
-                    {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
-                  </button>
-                </div>
-              ),
-              {
-                duration: 6000,
-                icon: '💡',
-              }
-            );
-          }, 500);
         }
       } catch (error) {
         console.error('Error handling iframe message:', error);
@@ -1251,20 +1244,6 @@ export default function AssistantPage() {
     );
   }
 
-  // Show loading/redirect screen for users without plans (redirect handled in useEffect above)
-  if (!user.plan || user.plan === 'none') {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-        <div className="flex flex-col items-center space-y-4">
-          <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">
-            {language === 'ms' ? 'Mengalihkan ke halaman pelan...' : 'Redirecting to plans...'}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   // Show subscription expired screen
   if (subscriptionExpired) {
     return (
@@ -1272,22 +1251,26 @@ export default function AssistantPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-lg w-full bg-white rounded-3xl p-8 shadow-2xl text-center"
+          className="max-w-lg w-full premium-panel-strong rounded-[30px] p-8 text-center"
         >
           <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <FontAwesomeIcon icon={faCircleXmark} className="w-10 h-10 text-red-600" />
           </div>
           
           <h1 className="text-2xl font-black text-gray-900 mb-3">
-            {language === 'ms' ? 'Langganan Tamat' : 'Subscription Expired'}
+            {isId ? 'Langganan Berakhir' : isMs ? 'Langganan Tamat' : 'Subscription Expired'}
           </h1>
           
           <p className="text-gray-600 mb-6">
             {subscriptionCancelled
-              ? (language === 'ms' 
+                ? (isId
+                  ? 'Langganan Anda telah dibatalkan. Namun, Anda masih dapat menggunakan semua fitur hingga akhir periode pembayaran tahun berjalan.'
+                  : isMs 
                   ? 'Langganan anda telah dibatalkan. Walau bagaimanapun, anda masih boleh menggunakan semua ciri sehingga akhir tempoh pembayaran tahun semasa.' 
                   : 'Your subscription has been cancelled. However, you can still use all features until the end of your current payment year.')
-              : (language === 'ms' 
+                : (isId
+                  ? 'Langganan Anda telah berakhir. Silakan berlangganan paket baru untuk terus menggunakan CropDrive AI Assistant.'
+                  : isMs 
                   ? 'Langganan anda telah tamat. Sila langgan pelan baru untuk terus menggunakan Pembantu AI CropDrive.' 
                   : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.')
             }
@@ -1299,12 +1282,12 @@ export default function AssistantPage() {
                 <Link href="/payment-method" className="block">
                   <Button className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white hover:from-amber-600 hover:to-orange-600 py-4 font-bold rounded-xl shadow-lg text-lg">
                     <FontAwesomeIcon icon={faArrowsRotate} className="w-5 h-5 mr-2" />
-                    {language === 'ms' ? 'Buka Semula Langganan' : 'Re-open Subscription'}
+                    {isId ? 'Aktifkan Langganan Kembali' : isMs ? 'Buka Semula Langganan' : 'Re-open Subscription'}
                   </Button>
                 </Link>
                 <Link href="/pricing" className="block">
                   <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
-                    {language === 'ms' ? 'Lihat Pelan Lain' : 'View Other Plans'}
+                    {isId ? 'Lihat Paket Lain' : isMs ? 'Lihat Pelan Lain' : 'View Other Plans'}
                   </Button>
                 </Link>
               </>
@@ -1313,12 +1296,12 @@ export default function AssistantPage() {
                 <Link href="/pricing" className="block">
                   <Button className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800 py-4 font-bold rounded-xl shadow-lg text-lg">
                     <FontAwesomeIcon icon={faCreditCard} className="w-5 h-5 mr-2" />
-                    {language === 'ms' ? 'Lihat Pelan' : 'View Plans'}
+                    {isId ? 'Lihat Paket' : isMs ? 'Lihat Pelan' : 'View Plans'}
                   </Button>
                 </Link>
                 <Link href="/payment-method" className="block">
                   <Button className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 py-3 font-bold rounded-xl">
-                    {language === 'ms' ? 'Urus Langganan' : 'Manage Subscription'}
+                    {isId ? 'Kelola Langganan' : isMs ? 'Urus Langganan' : 'Manage Subscription'}
                   </Button>
                 </Link>
               </>
@@ -1326,7 +1309,9 @@ export default function AssistantPage() {
           </div>
           
           <p className="text-xs text-gray-400 mt-6">
-            {language === 'ms' 
+            {isId 
+              ? 'Butuh bantuan? Hubungi tim dukungan kami.' 
+              : isMs 
               ? 'Perlukan bantuan? Hubungi sokongan kami.' 
               : 'Need help? Contact our support team.'}
           </p>
@@ -1335,19 +1320,99 @@ export default function AssistantPage() {
     );
   }
 
-  // Note: We no longer block access when upload limit is exceeded
-  // Users can always access the assistant to view their history
-  // The iframe will receive canUploadNew: false and can handle showing history-only mode
-  // A warning banner will be shown above to inform users about the limit
+  if (assistantLockedByLimit) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#07130d] via-[#10281f] to-[#0f172a] px-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-2xl w-full rounded-[32px] border border-white/10 bg-white/95 p-8 shadow-[0_24px_80px_rgba(15,23,42,0.35)]"
+        >
+          <div className="mb-6 flex items-center justify-between gap-4">
+            <div>
+              <span className="inline-flex rounded-full bg-amber-100 px-4 py-2 text-xs font-black uppercase tracking-[0.24em] text-amber-700">
+                {language === 'id' ? 'Akses Asisten AI' : language === 'ms' ? 'Akses Pembantu AI' : 'AI Assistant Access'}
+              </span>
+              <h1 className="mt-4 text-3xl font-black text-slate-900">
+                {language === 'id'
+                  ? 'Batas unggahan Anda sudah habis'
+                  : language === 'ms'
+                    ? 'Had muat naik anda telah habis'
+                    : 'You have used all available uploads'}
+              </h1>
+            </div>
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-slate-950 shadow-lg">
+              <FontAwesomeIcon icon={faTriangleExclamation} className="w-8 h-8" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 rounded-[28px] bg-slate-950 p-6 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] sm:grid-cols-3">
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
+                {language === 'id' ? 'Terpakai' : language === 'ms' ? 'Digunakan' : 'Used'}
+              </p>
+              <p className="mt-2 text-3xl font-black">{uploadsUsed}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
+                {language === 'id' ? 'Kuota' : language === 'ms' ? 'Kuota' : 'Allowance'}
+              </p>
+              <p className="mt-2 text-3xl font-black">{uploadsLimit === -1 ? '∞' : uploadsLimit}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase tracking-[0.24em] text-white/55">
+                {language === 'id' ? 'Kontrak aktif sampai' : language === 'ms' ? 'Kontrak aktif sehingga' : 'Contract active until'}
+              </p>
+              <p className="mt-2 text-lg font-bold text-emerald-300">
+                {contractEndDate
+                  ? contractEndDate.toLocaleDateString(language === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : '...'}
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-6 text-base leading-7 text-slate-600">
+            {language === 'id'
+              ? 'Anda masih dapat menggunakan Dashboard, Palmira, halaman riwayat, pembayaran, tutorial, dan layanan lain selama kontrak 12 bulan Anda masih aktif. Hanya AI Assistant yang dinonaktifkan setelah kuota unggahan habis.'
+              : language === 'ms'
+                ? 'Anda masih boleh menggunakan Dashboard, Palmira, halaman sejarah, pembayaran, tutorial, dan perkhidmatan lain selagi kontrak 12 bulan anda masih aktif. Hanya AI Assistant yang dinyahaktif selepas kuota muat naik habis.'
+                : 'You can still use the Dashboard, Palmira, history pages, billing, tutorials, and other services while your 12-month contract remains active. Only the AI Assistant is disabled after your upload allowance is exhausted.'}
+          </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-3">
+            <Link href="/reports" className="block">
+              <Button className="w-full rounded-2xl bg-slate-900 py-4 font-bold text-white hover:bg-slate-800">
+                {language === 'id' ? 'Buka Riwayat' : language === 'ms' ? 'Buka Sejarah' : 'Open History'}
+              </Button>
+            </Link>
+            <Link href="/payment-method" className="block">
+              <Button className="w-full rounded-2xl bg-gradient-to-r from-emerald-600 to-green-700 py-4 font-bold text-white hover:from-emerald-700 hover:to-green-800">
+                {language === 'id' ? 'Kelola paket' : language === 'ms' ? 'Urus pelan' : 'Manage plan'}
+              </Button>
+            </Link>
+            <Link href="/palmira" className="block">
+              <Button className="w-full rounded-2xl bg-amber-100 py-4 font-bold text-amber-900 hover:bg-amber-200">
+                {language === 'id' ? 'Buka Palmira' : language === 'ms' ? 'Buka Palmira' : 'Open Palmira'}
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="h-screen flex flex-col premium-page-shell premium-mesh">
       {/* Enhanced Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="bg-gradient-to-r from-green-900 via-green-800 to-green-900 shadow-lg border-b-4 border-yellow-400"
+        className="bg-gradient-to-r from-green-900 via-green-800 to-green-900 shadow-lg border-b border-white/10"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -1365,7 +1430,9 @@ export default function AssistantPage() {
                   <FontAwesomeIcon icon={faBolt} className="w-5 h-5 text-yellow-400" />
                 </h1>
                 <p className="text-sm text-white/80 font-medium">
-                  {language === 'ms' 
+                  {isId 
+                    ? 'Analisis Laporan Laboratorium dengan AI' 
+                    : isMs 
                     ? 'Analisis Laporan Makmal dengan AI' 
                     : 'Lab Report Analysis with AI'
                   }
@@ -1375,7 +1442,7 @@ export default function AssistantPage() {
 
             <div className="flex items-center gap-3">
               {/* Connection Status Indicator */}
-              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
+              <div className="hidden md:flex premium-glass-card items-center gap-2 rounded-lg px-3 py-1.5">
                 <div className={`w-2 h-2 rounded-full ${
                   connectionStatus === 'connected' 
                     ? 'bg-green-400 animate-pulse' 
@@ -1385,10 +1452,10 @@ export default function AssistantPage() {
                 }`} />
                 <span className="text-xs font-medium text-white">
                   {connectionStatus === 'connected' 
-                    ? (language === 'ms' ? 'Disambung' : 'Connected')
+                    ? (isId ? 'Terhubung' : isMs ? 'Disambung' : 'Connected')
                     : connectionStatus === 'disconnected'
-                    ? (language === 'ms' ? 'Terputus' : 'Disconnected')
-                    : (language === 'ms' ? 'Menyambung...' : 'Connecting...')
+                    ? (isId ? 'Terputus' : isMs ? 'Terputus' : 'Disconnected')
+                    : (isId ? 'Menghubungkan...' : isMs ? 'Menyambung...' : 'Connecting...')
                   }
                 </span>
               </div>
@@ -1397,12 +1464,12 @@ export default function AssistantPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleRefresh}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                className="flex items-center gap-2 premium-glass-card rounded-xl px-4 py-2.5 text-white transition-all duration-200 hover:bg-white/20 font-semibold"
+                title={isId ? 'Segarkan' : isMs ? 'Muat Semula' : 'Refresh'}
               >
                 <FontAwesomeIcon icon={faArrowsRotate} className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm">
-                  {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                  {isId ? 'Segarkan' : isMs ? 'Muat Semula' : 'Refresh'}
                 </span>
               </motion.button>
 
@@ -1410,12 +1477,12 @@ export default function AssistantPage() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={handleFullscreen}
-                className="flex items-center gap-2 px-4 py-2.5 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white rounded-xl transition-all duration-200 border border-white/20 font-semibold"
-                title={language === 'ms' ? 'Skrin Penuh' : 'Fullscreen'}
+                className="flex items-center gap-2 premium-glass-card rounded-xl px-4 py-2.5 text-white transition-all duration-200 hover:bg-white/20 font-semibold"
+                title={isId ? 'Layar Penuh' : isMs ? 'Skrin Penuh' : 'Fullscreen'}
               >
                 <FontAwesomeIcon icon={faMaximize} className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm">
-                  {language === 'ms' ? 'Penuh' : 'Full'}
+                  {isId ? 'Penuh' : isMs ? 'Penuh' : 'Full'}
                 </span>
               </motion.button>
 
@@ -1430,14 +1497,16 @@ export default function AssistantPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="bg-gradient-to-r from-amber-500 to-orange-500 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
+          className="premium-cta-band text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
         >
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 text-white flex-shrink-0" />
                 <p className="text-sm font-semibold">
-                  {language === 'ms' 
+                  {isId 
+                    ? `⚠️ Langganan Anda telah dibatalkan. Akses akan berakhir pada ${new Date(user.currentPeriodEnd).toLocaleDateString('id-ID', { dateStyle: 'long' })}. Setelah itu, Anda tidak akan bisa mengakses AI assistant.`
+                    : isMs 
                     ? `⚠️ Langganan anda telah dibatalkan. Akses akan tamat pada ${new Date(user.currentPeriodEnd).toLocaleDateString('ms-MY', { dateStyle: 'long' })}. Selepas itu, anda tidak akan dapat mengakses pembantu AI.`
                     : `⚠️ Your subscription has been cancelled. Access will end on ${new Date(user.currentPeriodEnd).toLocaleDateString('en-US', { dateStyle: 'long' })}. After that, you won't be able to access the AI assistant.`
                   }
@@ -1450,7 +1519,7 @@ export default function AssistantPage() {
                   className="flex items-center gap-2 px-4 py-2 bg-white text-amber-600 rounded-xl font-bold text-sm shadow-md hover:bg-amber-50 transition"
                 >
                   <FontAwesomeIcon icon={faArrowsRotate} className="w-4 h-4" />
-                  {language === 'ms' ? 'Aktifkan Semula' : 'Reactivate'}
+                  {isId ? 'Aktifkan Kembali' : isMs ? 'Aktifkan Semula' : 'Reactivate'}
                 </motion.button>
               </Link>
             </div>
@@ -1464,29 +1533,24 @@ export default function AssistantPage() {
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: subscriptionCancelled ? 0.3 : 0.2 }}
-          className="bg-gradient-to-r from-orange-500 to-amber-500 text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
+          className="premium-cta-band text-white py-3 px-4 sm:px-6 lg:px-8 shadow-md"
         >
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
                 <FontAwesomeIcon icon={faTriangleExclamation} className="w-5 h-5 text-white flex-shrink-0" />
                 <p className="text-sm font-semibold">
-                  {language === 'ms' 
+                  {isId 
+                    ? `⚠️ Anda telah mencapai batas unggah (${uploadsUsed}/${uploadsLimit}). Anda masih dapat melihat riwayat analisis, tetapi tidak dapat mengunggah analisis baru.`
+                    : isMs 
                     ? `⚠️ Anda telah mencapai had muat naik (${uploadsUsed}/${uploadsLimit}). Anda masih boleh melihat sejarah analisis, tetapi tidak boleh memuat naik analisis baharu.`
                     : `⚠️ You've reached your upload limit (${uploadsUsed}/${uploadsLimit}). You can still view your analysis history, but cannot upload new analyses.`
                   }
                 </p>
               </div>
-              <Link href="/pricing">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center gap-2 px-4 py-2 bg-white text-orange-600 rounded-xl font-bold text-sm shadow-md hover:bg-orange-50 transition"
-                >
-                  <FontAwesomeIcon icon={faChartLine} className="w-4 h-4" />
-                  {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
-                </motion.button>
-              </Link>
+              <span className="text-sm font-semibold text-white/90">
+                {isId ? 'Maksimum 2 laporan per akun' : isMs ? 'Maksimum 2 laporan setiap akaun' : 'Maximum 2 reports per account'}
+              </span>
             </div>
           </div>
         </motion.div>
@@ -1504,16 +1568,20 @@ export default function AssistantPage() {
             <div className="flex items-center gap-3">
               <FontAwesomeIcon icon={faCircleInfo} className="w-5 h-5 text-blue-200 flex-shrink-0" />
               <p className="text-sm font-semibold">
-                {language === 'ms' 
-                  ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) → Tunggu 5-8 minit → Dapatkan analisis terperinci!'
-                  : '💡 Quick Guide: Upload lab report (Image/PDF/Excel - SPLAB, farm_test_data) → Wait 5-8 minutes → Get detailed analysis!'
+                {isId 
+                  ? '💡 Panduan Cepat: Unggah laporan laboratorium (Gambar/PDF/Excel - SPLAB, farm_data) → Tunggu 5-8 menit → Dapatkan analisis terperinci!'
+                  : isMs 
+                  ? '💡 Panduan Pantas: Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_data) → Tunggu 5-8 minit → Dapatkan analisis terperinci!'
+                  : '💡 Quick Guide: Upload lab report (Image/PDF/Excel - SPLAB, farm_data) → Wait 5-8 minutes → Get detailed analysis!'
                 }
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs font-medium bg-white/10 px-3 py-1.5 rounded-full">
               <FontAwesomeIcon icon={faCircleCheck} className="w-4 h-4" />
               <span>
-                {language === 'ms'
+                {isId
+                  ? 'Rekomendasi berdasarkan standar Indonesian Sustainable Palm Oil (ISPO) dan Good Agricultural Practices (GAP) global'
+                  : isMs
                   ? 'Cadangan berpandukan garis panduan MPOB & Amalan Pertanian Baik (GAP) global'
                   : 'Recommendations based on MPOB guidelines and best global Good Agricultural Practices (GAP)'}
               </span>
@@ -1545,15 +1613,15 @@ export default function AssistantPage() {
               />
               <div>
                 <p className="text-xl font-bold text-gray-800 mb-2">
-                  {language === 'ms' ? 'Memuatkan Pembantu AI...' : 'Loading AI Assistant...'}
+                  {isId ? 'Memuatkan AI Assistant...' : isMs ? 'Memuatkan Pembantu AI...' : 'Loading AI Assistant...'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  {language === 'ms' ? 'Sila tunggu sebentar' : 'Please wait a moment'}
+                  {isId ? 'Mohon tunggu sebentar' : isMs ? 'Sila tunggu sebentar' : 'Please wait a moment'}
                 </p>
               </div>
               <div className="flex items-center justify-center gap-2 text-xs text-gray-500">
                 <div className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></div>
-                <span>{language === 'ms' ? 'Menyambung ke pelayan AI' : 'Connecting to AI server'}</span>
+                <span>{isId ? 'Menghubungkan ke server AI' : isMs ? 'Menyambung ke pelayan AI' : 'Connecting to AI server'}</span>
               </div>
             </div>
           </motion.div>

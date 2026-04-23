@@ -6,8 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { getPlanById } from '@/lib/subscriptions';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faGauge,
@@ -28,7 +27,7 @@ interface SidebarItemProps {
   icon: React.ReactNode;
   label: string;
   labelMs: string;
-  language: 'en' | 'ms';
+  language: Language;
   isActive: boolean;
   isCollapsed: boolean;
   onClick?: () => void;
@@ -77,7 +76,7 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
 export const Sidebar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const { user } = useAuth();
@@ -131,8 +130,8 @@ export const Sidebar: React.FC = () => {
     localStorage.setItem('sidebar-collapsed', String(newCollapsed));
   };
 
-  // Dynamic sidebar items based on user's plan
-  const hasPlan = user && user.plan && user.plan !== 'none';
+  // Free transition: all logged-in users can access all features
+  // Removed plan-based filtering - hasPlan always true for authenticated users
   
   // Helper function to check if pathname matches item href (handles locale-prefixed routes)
   const isPathActive = (itemHref: string, currentPathname: string): boolean => {
@@ -141,9 +140,9 @@ export const Sidebar: React.FC = () => {
       return true;
     }
     // Match locale-prefixed paths (e.g., /en/dashboard, /ms/dashboard)
-    const localePattern = /^\/(en|ms)\//;
+    const localePattern = /^\/(en|ms|id)\//;
     if (localePattern.test(currentPathname)) {
-      const pathWithoutLocale = currentPathname.replace(/^\/(en|ms)/, '');
+      const pathWithoutLocale = currentPathname.replace(/^\/(en|ms|id)/, '');
       return pathWithoutLocale === itemHref || pathWithoutLocale.startsWith(itemHref + '/');
     }
     return false;
@@ -164,43 +163,29 @@ export const Sidebar: React.FC = () => {
       labelMs: 'Papan Pemuka',
       showAlways: true
     },
-    // AI Assistant - only for users with plans
+    // AI Assistant - now available to all authenticated users
     {
       href: '/assistant',
       icon: <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />,
       label: 'AI Assistant',
       labelMs: 'Pembantu AI',
-      showAlways: false,
-      requiresPlan: true
+      showAlways: true
     },
-    // Palmira Chatbot - only for users with plans
+    // Palmira Chatbot - now available to all authenticated users
     {
       href: '/palmira',
       icon: <FontAwesomeIcon icon={faRobot} className="w-5 h-5" />,
       label: 'Palmira',
       labelMs: 'Palmira',
-      showAlways: false,
-      requiresPlan: true
+      showAlways: true
     },
-    // Reports - only for users with plans
+    // Reports - now available to all authenticated users
     {
       href: '/reports',
       icon: <FontAwesomeIcon icon={faFileAlt} className="w-5 h-5" />,
       label: 'Reports History',
       labelMs: 'Sejarah Laporan',
-      showAlways: false,
-      requiresPlan: true
-    },
-    // Payment Method - only for users with plans
-    {
-      href: '/payment-method',
-      icon: <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-      </svg>,
-      label: 'Payment Method',
-      labelMs: 'Kaedah Bayaran',
-      showAlways: false,
-      requiresPlan: true
+      showAlways: true
     },
     {
       href: '/tutorials',
@@ -215,23 +200,20 @@ export const Sidebar: React.FC = () => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
       </svg>,
       label: 'Plans & Pricing',
-      labelMs: 'Pelan & Harga',
+      labelMs: 'Akses Percuma',
       showAlways: true
     },
-    // Support - only for users with plans
+    // Support - now available to all authenticated users
     {
       href: '/support',
       icon: <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />,
       label: 'Support',
       labelMs: 'Sokongan',
-      showAlways: false,
-      requiresPlan: true
+      showAlways: true
     },
   ].filter(item => {
-    if (item.showAlways) return true;
-    if (item.requiresPlan && hasPlan) return true;
-    // if (item.requiresAdmin && isAdmin) return true;
-    return false;
+    // All items showAlways=true now that plan gating is removed
+    return item.showAlways;
   });
 
   const SidebarContent = () => (
@@ -247,7 +229,7 @@ export const Sidebar: React.FC = () => {
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover w-full h-full"
+                  className="object-cover"
                   priority
                 />
               </div>
@@ -260,7 +242,7 @@ export const Sidebar: React.FC = () => {
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover w-full h-full"
+                  className="object-cover"
                   priority
                 />
               </div>
@@ -314,16 +296,6 @@ export const Sidebar: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-white truncate text-sm sm:text-base">{user.displayName || 'User'}</p>
                   <p className="text-xs text-white/70 truncate">{user.email}</p>
-                  {hasPlan && user.plan && (
-                    <div className="mt-1.5">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-yellow-400 text-green-900">
-                        {(() => {
-                          const plan = getPlanById(user.plan);
-                          return plan ? (language === 'ms' ? plan.nameMs : plan.name) : user.plan.toUpperCase();
-                        })()}
-                      </span>
-                    </div>
-                  )}
                 </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import React, { useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import Button from '@/components/ui/Button';
 import Card, { CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/lib/auth';
@@ -19,7 +19,7 @@ function SuccessPageContent() {
   const { user } = useAuth();
   const [planActivated, setPlanActivated] = React.useState(false);
   const [mounted, setMounted] = React.useState(false);
-  const [currentLanguage, setCurrentLanguage] = React.useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = React.useState<Language>('en');
 
   React.useEffect(() => {
     setMounted(true);

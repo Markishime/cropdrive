@@ -37,17 +37,7 @@ function parseDate(value: any, fallback: Date): Date {
 
 /** Get upload limit for a given plan */
 function getUploadLimitForPlan(planId: string): number {
-  const plan = planId?.toLowerCase().trim();
-  switch (plan) {
-    case 'start':
-      return 2;
-    case 'smart':
-      return 5;
-    case 'precision':
-      return -1; // Unlimited
-    default:
-      return 2;
-  }
+  return 2;
 }
 
 /**
@@ -265,11 +255,7 @@ export function hasReachedUploadLimit(membership: Membership | null): boolean {
  */
 export function canAccessPalmira(membership: Membership | null): boolean {
   if (!membership) return false;
-  const planId = String(membership.planId || '').toLowerCase().trim();
-  
-  // Must have a valid plan
-  if (planId === '' || planId === 'none') return false;
-  
+
   // Check if within 1-year contract period
   return isWithinContractPeriod(membership);
 }
@@ -301,11 +287,12 @@ export function isContractExpired(membership: Membership | null): boolean {
 
 /**
  * Check if user can access AI assistant/chatbot functionality.
- * Users within contract can access AI assistant; only after contract expires
- * do they lose access.
+ * AI assistant access is stricter than Palmira access. Users must still be
+ * within the 1-year contract, and they must have uploads remaining for the
+ * current period.
  */
 export function canAccessAIAssistant(membership: Membership | null): boolean {
-  return canAccessPalmira(membership);
+  return canPerformAnalysis(membership);
 }
 
 /**

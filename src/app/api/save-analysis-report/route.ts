@@ -4,6 +4,7 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { getMembershipAdmin, canPerformAnalysis, isContractExpired } from '@/lib/membership-admin';
 
 // Initialize Firebase Admin if not already initialized
 let adminAuth: any = null;
@@ -27,6 +28,42 @@ if (!getApps().length) {
   }
 }
 
+const OIL_PALM_ISSUE_PATTERNS: Array<{ key: string; patterns: RegExp[] }> = [
+  { key: 'potassium', patterns: [/\bpotassium\b/i, /\bk\b deficiency/i, /mop/i] },
+  { key: 'magnesium', patterns: [/\bmagnesium\b/i, /\bmg\b deficiency/i, /dolomite/i, /kieserite/i] },
+  { key: 'nitrogen', patterns: [/\bnitrogen\b/i, /\bn\b deficiency/i, /urea/i, /ammonium/i] },
+  { key: 'phosphorus', patterns: [/\bphosphorus\b/i, /\bphosphate\b/i, /\bp\b deficiency/i] },
+  { key: 'boron', patterns: [/\bboron\b/i, /borate/i] },
+  { key: 'acidity', patterns: [/low ph/i, /acid/i, /acidity/i, /liming/i, /lime application/i] },
+  { key: 'organic', patterns: [/organic matter/i, /soil structure/i, /mulch/i, /compost/i] },
+  { key: 'water', patterns: [/drainage/i, /waterlogging/i, /moisture stress/i, /drought/i] },
+];
+
+function normalizeRecommendations(recommendations: unknown, analysisData: any): string[] {
+  const direct = Array.isArray(recommendations) ? recommendations : [];
+  const nested = Array.isArray(analysisData?.recommendations) ? analysisData.recommendations : [];
+  return [...direct, ...nested]
+    .filter((item) => typeof item === 'string')
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+}
+
+function extractIssueTags(summary: unknown, normalizedRecs: string[], analysisData: any): string[] {
+  const textBlob = [
+    typeof summary === 'string' ? summary : '',
+    ...normalizedRecs,
+    typeof analysisData?.summary === 'string' ? analysisData.summary : '',
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  const matched = OIL_PALM_ISSUE_PATTERNS
+    .filter((item) => item.patterns.some((pattern) => pattern.test(textBlob)))
+    .map((item) => item.key);
+
+  return Array.from(new Set(matched));
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -39,6 +76,9 @@ export async function POST(request: NextRequest) {
       fileUrl,
       analysisData 
     } = body;
+
+    const normalizedRecommendations = normalizeRecommendations(recommendations, analysisData);
+    const issueTags = extractIssueTags(summary, normalizedRecommendations, analysisData);
 
     // Validate required fields
     if (!userId || !title || !type) {
@@ -78,54 +118,81 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Check user's upload limits before saving
-    // Note: Even if subscription is cancelled, limits still apply until period end
-    if (adminDb) {
-      const userDoc = await adminDb.collection('users').doc(userId).get();
-      if (userDoc.exists) {
-        const userData = userDoc.data();
-        const uploadsUsed = userData?.uploadsUsed || 0;
-        const uploadsLimit = userData?.uploadsLimit || 10;
-        const subscriptionStatus = userData?.subscriptionStatus;
-        const currentPeriodEnd = userData?.currentPeriodEnd;
-        
-        console.log(`📊 Checking upload limits for user ${userId}: ${uploadsUsed}/${uploadsLimit}, status: ${subscriptionStatus}`);
-        
-        // If subscription is cancelled, check if we're still within the period end
-        if (subscriptionStatus === 'canceled' && currentPeriodEnd) {
-          const periodEndDate = currentPeriodEnd.toDate ? currentPeriodEnd.toDate() : new Date(currentPeriodEnd);
-          const now = new Date();
-          if (now >= periodEndDate) {
-            console.log(`❌ User ${userId} subscription period has ended`);
-            return NextResponse.json(
-              { 
-                error: 'Subscription expired',
-                message: 'Your subscription period has ended. Please subscribe to a new plan to continue.',
-                uploadsUsed,
-                uploadsLimit 
-              },
-              { status: 403 }
-            );
-          }
-        }
-        
-        // Check if user has exceeded their limit (unless unlimited: -1)
-        // This applies regardless of subscription status (as long as within period end)
-        if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
-          console.log(`❌ User ${userId} has exceeded upload limit: ${uploadsUsed}/${uploadsLimit}`);
-          return NextResponse.json(
-            { 
-              error: 'Upload limit exceeded',
-              message: 'You have reached your upload limit. Please upgrade your plan for more analyses.',
-              uploadsUsed,
-              uploadsLimit 
-            },
-            { status: 403 }
-          );
-        }
-      } else {
-        console.warn(`⚠️ User document not found for ${userId}`);
+    if (!adminDb) {
+      return NextResponse.json(
+        { error: 'Admin database is not configured' },
+        { status: 500 }
+      );
+    }
+
+    const userDoc = await adminDb.collection('users').doc(userId).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+    const userEmail = String(userData?.email || '').trim();
+    const whatsappNumber = String(userData?.phoneNumber || '').trim();
+    const countryRegion = String(userData?.countryRegion || userData?.farmLocation || '').trim();
+
+    if (!userEmail || !whatsappNumber || !countryRegion) {
+      return NextResponse.json(
+        {
+          error: 'Incomplete profile',
+          message: 'Complete Email, WhatsApp number, and Country/Region in your profile before generating reports.',
+          missing: {
+            email: !userEmail,
+            whatsapp: !whatsappNumber,
+            countryRegion: !countryRegion,
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const reportsRef = adminDb.collection('analysis_results');
+    const q1 = reportsRef.where('userId', '==', userId).where('status', '==', 'completed');
+    const q2 = reportsRef.where('user_id', '==', userId).where('status', '==', 'completed');
+    const [snapshot1, snapshot2] = await Promise.all([q1.get(), q2.get()]);
+    const uniqueReportIds = new Set<string>();
+    snapshot1.forEach((doc: any) => uniqueReportIds.add(doc.id));
+    snapshot2.forEach((doc: any) => uniqueReportIds.add(doc.id));
+
+    const MAX_REPORTS_PER_USER = 2;
+    if (uniqueReportIds.size >= MAX_REPORTS_PER_USER) {
+      return NextResponse.json(
+        {
+          error: 'Report cap reached',
+          message: `Maximum ${MAX_REPORTS_PER_USER} reports per account reached.`,
+          uploadsUsed: uniqueReportIds.size,
+          uploadsLimit: MAX_REPORTS_PER_USER,
+        },
+        { status: 403 }
+      );
+    }
+
+    const membership = await getMembershipAdmin(userId);
+    if (!canPerformAnalysis(membership)) {
+      const uploadsUsed = membership?.uploadsUsedThisMonth || 0;
+      const uploadsLimit = 2;
+
+      if (isContractExpired(membership)) {
+        return NextResponse.json(
+          {
+            error: 'Subscription expired',
+            message: 'Your 12-month contract has ended. Please subscribe to a new plan to continue.',
+            uploadsUsed,
+            uploadsLimit,
+          },
+          { status: 403 }
+        );
       }
+
+      return NextResponse.json(
+        {
+          error: 'Upload limit exceeded',
+          message: 'You have reached your upload limit. Please upgrade your plan for more analyses.',
+          uploadsUsed,
+          uploadsLimit,
+        },
+        { status: 403 }
+      );
     }
 
     // Save report to Firestore
@@ -136,10 +203,14 @@ export async function POST(request: NextRequest) {
       type: type as 'soil' | 'leaf',
       summary: summary || '',
       recommendations: recommendations || 0,
+      recommendationsList: normalizedRecommendations,
       status: 'completed' as const,
       date: new Date().toISOString().split('T')[0],
       fileUrl: fileUrl || null,
       analysisData: analysisData || null,
+      issueTags,
+      step2Issues: issueTags,
+      recurringIssues: issueTags,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
@@ -151,6 +222,24 @@ export async function POST(request: NextRequest) {
       // Save the analysis report
       const docRef = await adminDb.collection('analysis_results').add(reportData);
       console.log(`✅ Report saved with ID: ${docRef.id}`);
+
+      // Internal mirror for CropDrive operations/admin visibility.
+      await adminDb.collection('internal_reports').add({
+        reportId: docRef.id,
+        userId,
+        userEmail,
+        whatsappNumber,
+        countryRegion,
+        title,
+        type,
+        summary: summary || '',
+        recommendations: recommendations || 0,
+        recommendationsList: normalizedRecommendations,
+        fileUrl: fileUrl || null,
+        issueTags,
+        step2Issues: issueTags,
+        createdAt: FieldValue.serverTimestamp(),
+      });
       
       // Get current user data before incrementing
       const userDocBefore = await adminDb.collection('users').doc(userId).get();
@@ -171,7 +260,7 @@ export async function POST(request: NextRequest) {
       const updatedUserData = updatedUserDoc.exists ? updatedUserDoc.data() : null;
       
       const finalUploadsUsed = updatedUserData?.uploadsUsed || (uploadsUsedBefore + 1);
-      const finalUploadsLimit = updatedUserData?.uploadsLimit || 10;
+      const finalUploadsLimit = 2;
       
       console.log(`✅ Report saved and upload count incremented for user ${userId}: ${finalUploadsUsed}/${finalUploadsLimit}`);
       console.log(`📄 Report ID: ${docRef.id}`);

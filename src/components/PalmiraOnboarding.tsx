@@ -17,10 +17,11 @@ import {
 import Button from './ui/Button';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
+import type { Language } from '@/i18n';
 
 interface PalmiraOnboardingProps {
   onComplete: () => void;
-  language: 'en' | 'ms';
+  language: Language;
 }
 
 const CUSTOMER_GROUPS = [
@@ -59,7 +60,7 @@ const CONVERSATION_STYLES = [
 export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboardingProps) {
   const { user } = useAuth();
   const [step, setStep] = useState(1);
-  const [selectedLanguage, setSelectedLanguage] = useState<'en' | 'ms'>(language);
+  const [selectedLanguage, setSelectedLanguage] = useState<Language>(language);
   const [customerGroup, setCustomerGroup] = useState<string>('');
   const [conversationStyle, setConversationStyle] = useState<string>('');
   const [consentTranscripts, setConsentTranscripts] = useState(false);

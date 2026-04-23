@@ -39,6 +39,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           phoneNumber: firebaseUser.phoneNumber || userData.phoneNumber,
           farmName: userData.farmName,
           farmLocation: userData.farmLocation,
+          countryRegion: userData.countryRegion || userData.farmLocation,
           language: userData.language || 'ms',
           registrationDate: userData.registrationDate?.toDate() || new Date(),
           plan: userData.plan || 'none',
@@ -50,7 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           stripeSubscriptionId: userData.stripeSubscriptionId,
           paymentMethod: userData.paymentMethod || undefined,
           uploadsUsed: userData.uploadsUsed || 0,
-          uploadsLimit: userData.uploadsLimit || 0,
+          uploadsLimit: userData.uploadsLimit || 2,
           lastLogin: new Date(),
           preferences: userData.preferences || {
             notifications: true,
@@ -72,7 +73,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
           plan: 'none',
           status: 'active',
           uploadsUsed: 0,
-          uploadsLimit: 0,
+          uploadsLimit: 2,
           lastLogin: new Date(),
           preferences: {
             notifications: true,
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   };
 
-  const signIn = async (email: string, password: string, language: 'en' | 'ms' = 'ms'): Promise<void> => {
+  const signIn = async (email: string, password: string, language: 'en' | 'ms' | 'id' = 'ms'): Promise<void> => {
     try {
       setLoading(true);
       const result: UserCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -129,7 +130,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
             type: 'info',
             title: 'Login Detected',
             titleMs: 'Log Masuk Dikesan',
-            message: `You successfully logged in on ${new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', { dateStyle: 'full' })}.`,
+            message: `You successfully logged in on ${new Date().toLocaleDateString(language === 'ms' ? 'ms-MY' : language === 'id' ? 'id-ID' : 'en-US', { dateStyle: 'full' })}.`,
             messageMs: `Anda berjaya log masuk pada ${new Date().toLocaleDateString('ms-MY', { dateStyle: 'full' })}.`,
             read: false,
             createdAt: serverTimestamp(),
@@ -160,7 +161,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Sign up function
-  const signUp = async (userData: SignUpData, language: 'en' | 'ms' = 'ms'): Promise<void> => {
+  const signUp = async (userData: SignUpData, language: 'en' | 'ms' | 'id' = 'ms'): Promise<void> => {
     let createdUser: FirebaseUser | null = null;
     try {
       setLoading(true);
@@ -193,12 +194,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
         phoneNumber: userData.phoneNumber,
         farmName: userData.farmName,
         farmLocation: userData.farmLocation,
+        countryRegion: userData.countryRegion || userData.farmLocation,
         language: userData.language || language,
         registrationDate: new Date(),
         plan: 'none',
         status: 'active',
         uploadsUsed: 0,
-        uploadsLimit: 0,
+        uploadsLimit: 2,
         lastLogin: new Date(),
         preferences: {
           notifications: true,
@@ -261,7 +263,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Sign out function
-  const signOut = async (language: 'en' | 'ms' = 'ms'): Promise<void> => {
+  const signOut = async (language: 'en' | 'ms' | 'id' = 'ms'): Promise<void> => {
     try {
       await firebaseSignOut(auth);
     } catch (error) {
@@ -271,7 +273,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   };
 
   // Update profile function
-  const updateProfile = async (updates: Partial<User>, language: 'en' | 'ms' = 'ms'): Promise<void> => {
+  const updateProfile = async (updates: Partial<User>, language: 'en' | 'ms' | 'id' = 'ms'): Promise<void> => {
     if (!user) return;
 
     try {

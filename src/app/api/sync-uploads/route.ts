@@ -48,9 +48,14 @@ export async function POST(req: NextRequest) {
       console.log(`🔄 Updating uploadsUsed from ${currentUploadsUsed} to ${actualCount}`);
       await adminDb.collection('users').doc(userId).update({
         uploadsUsed: actualCount,
+        uploadsLimit: 2,
         updatedAt: admin.firestore.FieldValue.serverTimestamp(),
       });
     } else {
+      await adminDb.collection('users').doc(userId).update({
+        uploadsLimit: 2,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
       console.log(`✅ uploadsUsed already correct: ${actualCount}`);
     }
 

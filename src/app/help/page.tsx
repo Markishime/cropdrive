@@ -23,7 +23,8 @@ import {
   faPhone,
   faLocationDot,
 } from '@fortawesome/free-solid-svg-icons';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { useAuth } from '@/lib/auth';
 import SupportForm from '@/components/SupportForm';
 import toast from 'react-hot-toast';
@@ -143,7 +144,7 @@ interface ContactFormData {
 
 export default function HelpCenterPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [expandedFAQs, setExpandedFAQs] = useState<Set<number>>(new Set());
@@ -175,6 +176,10 @@ export default function HelpCenterPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
+  const faqQuestion = (faq: FAQ) => copy(faq.question, faq.questionMs);
+  const faqAnswer = (faq: FAQ) => copy(faq.answer, faq.answerMs);
+  const categoryLabel = (category?: Category) => category ? copy(category.label, category.labelMs) : '';
 
   const toggleFAQ = (index: number) => {
     const newExpanded = new Set(expandedFAQs);
@@ -190,8 +195,8 @@ export default function HelpCenterPage() {
     const matchesSearch = searchQuery === '' ||
       faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faq.questionMs.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faq.answerMs.toLowerCase().includes(searchQuery.toLowerCase());
+      faqQuestion(faq).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faqAnswer(faq).toLowerCase().includes(searchQuery.toLowerCase());
 
     const matchesCategory = selectedCategory === 'all' || faq.category === selectedCategory;
 
@@ -207,19 +212,13 @@ export default function HelpCenterPage() {
     e.preventDefault();
     
     if (!contactFormData.name || !contactFormData.email || !contactFormData.message) {
-      toast.error(language === 'ms' 
-        ? 'Sila isi semua medan yang diperlukan' 
-        : 'Please fill in all required fields'
-      );
+      toast.error(copy('Please fill in all required fields', 'Sila isi semua medan yang diperlukan'));
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(contactFormData.email)) {
-      toast.error(language === 'ms' 
-        ? 'Sila masukkan alamat e-mel yang sah' 
-        : 'Please enter a valid email address'
-      );
+      toast.error(copy('Please enter a valid email address', 'Sila masukkan alamat e-mel yang sah'));
       return;
     }
 
@@ -237,9 +236,7 @@ export default function HelpCenterPage() {
       const data = await response.json();
 
       if (response.ok && data.success !== false) {
-        toast.success(language === 'ms' 
-          ? 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.' 
-          : 'Your message has been sent! We\'ll get back to you soon.',
+        toast.success(copy('Your message has been sent! We\'ll get back to you soon.', 'Mesej anda telah dihantar! Kami akan menghubungi anda tidak lama lagi.'),
           { duration: 5000 }
         );
         setContactFormData({
@@ -254,10 +251,7 @@ export default function HelpCenterPage() {
       }
     } catch (error) {
       console.error('Contact form error:', error);
-      toast.error(language === 'ms' 
-        ? 'Gagal menghantar mesej. Sila cuba lagi atau e-mel kami terus.' 
-        : 'Failed to send message. Please try again or email us directly.'
-      );
+      toast.error(copy('Failed to send message. Please try again or email us directly.', 'Gagal menghantar mesej. Sila cuba lagi atau e-mel kami terus.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -281,13 +275,10 @@ export default function HelpCenterPage() {
             className="text-center"
           >
             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Pusat' : 'Help'} <span className="text-yellow-400">{language === 'ms' ? 'Bantuan' : 'Center'}</span>
+              {copy('Help', 'Pusat')} <span className="text-yellow-400">{copy('Center', 'Bantuan')}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
-                ? 'Dapatkan bantuan dan sokongan untuk platform AI pintar CropDrive. Cari jawapan kepada soalan lazim atau hubungi pasukan sokongan kami.'
-                : 'Get help and support for the CropDrive smart AI platform. Find answers to frequently asked questions or contact our support team.'
-              }
+              {copy('Get help and support for the CropDrive smart AI platform. Find answers to frequently asked questions or contact our support team.', 'Dapatkan bantuan dan sokongan untuk platform AI pintar CropDrive. Cari jawapan kepada soalan lazim atau hubungi pasukan sokongan kami.')}
             </p>
           </motion.div>
         </div>
@@ -304,13 +295,10 @@ export default function HelpCenterPage() {
         >
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-              {language === 'ms' ? 'Apa Yang Boleh Kami Bantu?' : 'What Can We Help You With?'}
+              {copy('What Can We Help You With?', 'Apa Yang Boleh Kami Bantu?')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {language === 'ms'
-                ? 'Platform CropDrive menawarkan sokongan komprehensif untuk semua keperluan analisis ladang kelapa sawit anda.'
-                : 'The CropDrive platform offers comprehensive support for all your palm oil farm analysis needs.'
-              }
+              {copy('The CropDrive platform offers comprehensive support for all your palm oil farm analysis needs.', 'Platform CropDrive menawarkan sokongan komprehensif untuk semua keperluan analisis ladang kelapa sawit anda.')}
             </p>
           </div>
 
@@ -383,13 +371,10 @@ export default function HelpCenterPage() {
         >
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-              {language === 'ms' ? 'Soalan Lazim' : 'Frequently Asked Questions'}
+              {copy('Frequently Asked Questions', 'Soalan Lazim')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {language === 'ms'
-                ? 'Cari jawapan kepada soalan yang paling kerap ditanya.'
-                : 'Find answers to the most frequently asked questions.'
-              }
+              {copy('Find answers to the most frequently asked questions.', 'Cari jawapan kepada soalan yang paling kerap ditanya.')}
             </p>
           </div>
 
@@ -399,14 +384,14 @@ export default function HelpCenterPage() {
               {/* Search */}
               <div className="flex-1 w-full">
                 <label htmlFor="faq-search" className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ms' ? 'Cari Soalan' : 'Search Questions'}
+                  {copy('Search Questions', 'Cari Soalan')}
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="faq-search"
                     type="text"
-                    placeholder={language === 'ms' ? 'Cari soalan...' : 'Search questions...'}
+                    placeholder={copy('Search questions...', 'Cari soalan...')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
@@ -417,7 +402,7 @@ export default function HelpCenterPage() {
               {/* Category Filter */}
               <div className="md:w-64 w-full">
                 <label htmlFor="category-filter" className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ms' ? 'Kategori' : 'Category'}
+                  {copy('Category', 'Kategori')}
                 </label>
                 <select
                   id="category-filter"
@@ -426,11 +411,11 @@ export default function HelpCenterPage() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all bg-white"
                 >
                   <option value="all">
-                    {language === 'ms' ? 'Semua Kategori' : 'All Categories'}
+                    {copy('All Categories', 'Semua Kategori')}
                   </option>
                   {categories.map(category => (
                     <option key={category.id} value={category.id}>
-                      {language === 'ms' ? category.labelMs : category.label}
+                      {categoryLabel(category)}
                     </option>
                   ))}
                 </select>
@@ -460,13 +445,13 @@ export default function HelpCenterPage() {
                     })()}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-2">
-                        {language === 'ms' ? faq.questionMs : faq.question}
+                        {faqQuestion(faq)}
                       </h3>
                       <div className="flex items-center">
                         <span className="text-xs sm:text-sm text-gray-600 bg-gray-100 px-2.5 py-1 rounded-full font-medium">
                           {(() => {
                             const category = categories.find(cat => cat.id === faq.category);
-                            return language === 'ms' ? category?.labelMs : category?.label;
+                            return categoryLabel(category);
                           })()}
                         </span>
                       </div>
@@ -488,7 +473,7 @@ export default function HelpCenterPage() {
                   >
                     <div className="pt-3 border-t border-gray-100">
                       <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
-                        {language === 'ms' ? faq.answerMs : faq.answer}
+                        {faqAnswer(faq)}
                       </p>
                     </div>
                   </motion.div>
@@ -501,13 +486,10 @@ export default function HelpCenterPage() {
             <div className="text-center py-12 sm:py-16">
               <FontAwesomeIcon icon={faCircleQuestion} className="w-16 h-16 sm:w-20 sm:h-20 text-gray-300 mx-auto mb-4 sm:mb-6" />
               <h3 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-2 sm:mb-3">
-                {language === 'ms' ? 'Tiada Soalan Dijumpai' : 'No Questions Found'}
+                {copy('No Questions Found', 'Tiada Soalan Dijumpai')}
               </h3>
               <p className="text-base sm:text-lg text-gray-600 max-w-md mx-auto">
-                {language === 'ms'
-                  ? 'Cuba cari dengan kata kunci yang berbeza.'
-                  : 'Try searching with different keywords.'
-                }
+                {copy('Try searching with different keywords.', 'Cuba cari dengan kata kunci yang berbeza.')}
               </p>
             </div>
           )}
@@ -522,13 +504,10 @@ export default function HelpCenterPage() {
         >
           <div className="text-center mb-12">
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6">
-              {language === 'ms' ? 'Hubungi Kami' : 'Contact Us'}
+              {copy('Contact Us', 'Hubungi Kami')}
             </h2>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              {language === 'ms'
-                ? 'Tidak menemui jawapan yang anda cari? Pasukan sokongan kami sedia membantu.'
-                : "Can't find the answer you're looking for? Our support team is here to help."
-              }
+              {copy("Can't find the answer you're looking for? Our support team is here to help.", 'Tidak menemui jawapan yang anda cari? Pasukan sokongan kami sedia membantu.')}
             </p>
           </div>
 
@@ -537,7 +516,7 @@ export default function HelpCenterPage() {
             <div className="space-y-6 sm:space-y-8">
               <div className="bg-white rounded-xl shadow-lg p-6 sm:p-8 border border-gray-100">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-5 sm:mb-6">
-                  {language === 'ms' ? 'Maklumat Hubungan' : 'Contact Information'}
+                  {copy('Contact Information', 'Maklumat Hubungan')}
                 </h3>
 
                 <div className="space-y-5 sm:space-y-6">
@@ -547,14 +526,11 @@ export default function HelpCenterPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
-                        {language === 'ms' ? 'Emel' : 'Email'}
+                        {copy('Email', 'Emel')}
                       </h4>
                       <p className="text-gray-700 font-medium">support@cropdrive.com</p>
                       <p className="text-sm text-gray-500 mt-1.5">
-                        {language === 'ms'
-                          ? 'Kami membalas dalam 12-16 jam'
-                          : 'We respond within 12-16 hours'
-                        }
+                        {copy('We respond within 12-16 hours', 'Kami membalas dalam 12-16 jam')}
                       </p>
                     </div>
                   </div>
@@ -565,14 +541,11 @@ export default function HelpCenterPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
-                        {language === 'ms' ? 'Telefon' : 'Phone'}
+                        {copy('Phone', 'Telefon')}
                       </h4>
                       <p className="text-gray-700 font-medium">+60 3-1234 5678</p>
                       <p className="text-sm text-gray-500 mt-1.5">
-                        {language === 'ms'
-                          ? 'Isnin - Jumaat, 9:00 AM - 6:00 PM MST'
-                          : 'Monday - Friday, 9:00 AM - 6:00 PM MST'
-                        }
+                        {copy('Monday - Friday, 9:00 AM - 6:00 PM MST', 'Isnin - Jumaat, 9:00 AM - 6:00 PM MST')}
                       </p>
                     </div>
                   </div>
@@ -583,7 +556,7 @@ export default function HelpCenterPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="font-semibold text-gray-900 mb-1">
-                        {language === 'ms' ? 'Alamat' : 'Address'}
+                        {copy('Address', 'Alamat')}
                       </h4>
                       <p className="text-gray-700 font-medium">
                         CropDrive OP Advisor™<br />
@@ -597,23 +570,23 @@ export default function HelpCenterPage() {
               {/* Response Times */}
               <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-6 sm:p-8 border-2 border-green-200 shadow-md">
                 <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 sm:mb-5">
-                  {language === 'ms' ? 'Masa Respons' : 'Response Times'}
+                  {copy('Response Times', 'Masa Respons')}
                 </h3>
                 <div className="space-y-3 sm:space-y-4">
                   <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">
                     <span className="text-sm sm:text-base text-gray-700 font-medium">
-                      {language === 'ms' ? 'Sokongan Emel' : 'Email Support'}
+                      {copy('Email Support', 'Sokongan Emel')}
                     </span>
                     <span className="font-bold text-green-700 text-sm sm:text-base">
-                      {language === 'ms' ? '12-16 jam' : '12-16 hours'}
+                      {copy('12-16 hours', '12-16 jam')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">
                     <span className="text-sm sm:text-base text-gray-700 font-medium">
-                      {language === 'ms' ? 'Analisis AI' : 'AI Analysis'}
+                      {copy('AI Analysis', 'Analisis AI')}
                     </span>
                     <span className="font-bold text-green-700 text-sm sm:text-base">
-                      {language === 'ms' ? '2-15 minit' : '2-15 minutes'}
+                      {copy('2-15 minutes', '2-15 minit')}
                     </span>
                   </div>
                   <div className="flex items-center justify-between bg-white/60 rounded-lg px-4 py-3">

@@ -1,13 +1,15 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
+import { type Language } from '@/i18n';
 import Button from './ui/Button';
 import toast from 'react-hot-toast';
+import { useLanguage } from './LanguageProvider';
 
 interface NavLink {
   href: string;
@@ -20,20 +22,29 @@ export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
-  const { user, signOut } = useAuth();
+  const [showLanguageMenu, setShowLanguageMenu] = useState(false);
+  const [showGetStartedDropdown, setShowGetStartedDropdown] = useState(false);
+  const { user } = useAuth();
+  const { language: currentLang, setLanguage } = useLanguage();
   const router = useRouter();
+  const pathname = usePathname();
+  const desktopLanguageMenuRef = useRef<HTMLDivElement>(null);
+  const mobileLanguageMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
-    setCurrentLang(lang);
   }, []);
 
   const language = mounted ? currentLang : 'en';
+  const translateLabel = (english: string, malay: string, indonesian = malay) => (
+    language === 'en' ? english : language === 'id' ? indonesian : malay
+  );
 
-  // State for dropdown menu
-  const [showDropdown, setShowDropdown] = useState(false);
+  const languageOptions: Array<{ value: Language; code: string; label: string }> = [
+    { value: 'en', code: 'EN', label: 'English' },
+    { value: 'ms', code: 'MS', label: 'Bahasa Melayu' },
+    { value: 'id', code: 'ID', label: 'Bahasa Indonesia' },
+  ];
 
   // Nav links - Marketing-focused navigation (sidebar handles authenticated pages)
   const getNavLinks = (): NavLink[] => {
@@ -66,17 +77,134 @@ export const Navbar: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleLanguage = () => {
-    const newLanguage = language === 'en' ? 'ms' : 'en';
-    localStorage.setItem('cropdrive-language', newLanguage);
-    
-    // Dispatch custom event before reload so components can react
-    window.dispatchEvent(new CustomEvent('languageChanged', { 
-      detail: { language: newLanguage } 
-    }));
-    
-    window.location.reload();
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+      const insideDesktop = desktopLanguageMenuRef.current?.contains(target);
+      const insideMobile = mobileLanguageMenuRef.current?.contains(target);
+
+      if (!insideDesktop && !insideMobile) {
+        setShowLanguageMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    return () => document.removeEventListener('mousedown', handlePointerDown);
+  }, []);
+
+  const getLocalizedPath = (newLanguage: Language) => {
+    if (!pathname) {
+      return pathname;
+    }
+
+    if (/^\/(en|ms|id)(?=\/|$)/.test(pathname)) {
+      return pathname.replace(/^\/(en|ms|id)(?=\/|$)/, `/${newLanguage}`);
+    }
+
+    return pathname;
   };
+
+  const handleLanguageSelect = (newLanguage: Language) => {
+    setShowLanguageMenu(false);
+
+    if (newLanguage === currentLang) {
+      return;
+    }
+
+    const nextPath = getLocalizedPath(newLanguage);
+
+    setLanguage(newLanguage);
+
+    if (nextPath && nextPath !== pathname) {
+      router.push(nextPath);
+    }
+
+    toast.success(
+      newLanguage === 'id'
+        ? 'Bahasa diubah ke Bahasa Indonesia'
+        : newLanguage === 'ms'
+        ? 'Bahasa ditukar ke Bahasa Melayu'
+        : 'Language changed to English'
+    );
+  };
+
+  const renderLanguageDropdown = (mobile = false) => (
+    <div ref={mobile ? mobileLanguageMenuRef : desktopLanguageMenuRef} className="relative">
+      <button
+        onClick={() => setShowLanguageMenu((current) => !current)}
+        className={`relative flex items-center gap-2 rounded-full p-1 transition-all duration-300 ${
+          scrolled
+            ? 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+            : 'bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm'
+        } cursor-pointer`}
+        aria-haspopup="menu"
+        aria-expanded={showLanguageMenu}
+        title={translateLabel('Choose language', 'Pilih bahasa', 'Pilih bahasa')}
+      >
+        <span className={`rounded-full px-3 py-1.5 text-xs font-black tracking-[0.24em] ${scrolled ? 'bg-white text-green-700' : 'bg-white text-green-800'}`}>
+          {language.toUpperCase()}
+        </span>
+        <svg
+          className={`mr-2 h-4 w-4 transition-transform duration-200 ${showLanguageMenu ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      <AnimatePresence>
+        {showLanguageMenu && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.18 }}
+            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
+              scrolled
+                ? 'border-green-200 bg-white/95'
+                : 'border-yellow-400/30 bg-gray-900/95'
+            } ${mobile ? 'md:hidden' : ''}`}
+            role="menu"
+          >
+            <div className="p-2">
+              {languageOptions.map((option) => {
+                const active = option.value === currentLang;
+
+                return (
+                  <button
+                    key={option.value}
+                    onClick={() => handleLanguageSelect(option.value)}
+                    className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-all duration-200 ${
+                      active
+                        ? scrolled
+                          ? 'bg-green-50 text-green-700'
+                          : 'bg-yellow-400/20 text-yellow-300'
+                        : scrolled
+                        ? 'text-gray-700 hover:bg-green-50/80'
+                        : 'text-white hover:bg-white/10'
+                    }`}
+                    role="menuitem"
+                  >
+                    <div>
+                      <div className="text-sm font-bold">{option.label}</div>
+                      <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>{option.code}</div>
+                    </div>
+                    {active && (
+                      <span className={`text-xs font-bold uppercase tracking-[0.2em] ${scrolled ? 'text-green-600' : 'text-yellow-300'}`}>
+                        {translateLabel('Active', 'Aktif', 'Aktif')}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
 
   const navbarClasses = `
     fixed top-0 left-0 right-0 z-[100] transition-all duration-500
@@ -102,7 +230,7 @@ export const Navbar: React.FC = () => {
                 alt="CropDrive Logo"
                 width={40}
                 height={40}
-                className="object-cover w-full h-full"
+                className="object-cover"
                 priority
               />
             </div>
@@ -134,7 +262,7 @@ export const Navbar: React.FC = () => {
                     : 'text-white'
                 }`}
               >
-                {language === 'ms' ? link.labelMs : link.label}
+                {language === 'en' ? link.label : link.labelMs}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
@@ -143,17 +271,17 @@ export const Navbar: React.FC = () => {
             {!user && (
               <div 
                 className="relative"
-                onMouseEnter={() => setShowDropdown(true)}
-                onMouseLeave={() => setShowDropdown(false)}
+                onMouseEnter={() => setShowGetStartedDropdown(true)}
+                onMouseLeave={() => setShowGetStartedDropdown(false)}
               >
                 <button
                   className={`font-semibold text-xs lg:text-sm uppercase tracking-wide transition-all duration-300 hover:text-yellow-400 flex items-center space-x-1 relative group whitespace-nowrap ${
                     scrolled ? 'text-gray-700' : 'text-white'
-                  }`}
+                  } cursor-pointer`}
                 >
-                  <span>{language === 'ms' ? 'Mula' : 'Get Started'}</span>
+                  <span>{translateLabel('Get Started', 'Mula', 'Mulai')}</span>
                   <svg 
-                    className={`w-4 h-4 transition-transform duration-300 ${showDropdown ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 transition-transform duration-300 ${showGetStartedDropdown ? 'rotate-180' : ''}`}
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -165,7 +293,7 @@ export const Navbar: React.FC = () => {
 
                 {/* Dropdown Menu - Modern Glass Effect */}
                 <AnimatePresence>
-                  {showDropdown && (
+                  {showGetStartedDropdown && (
                     <motion.div
                       initial={{ opacity: 0, y: -10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -187,11 +315,11 @@ export const Navbar: React.FC = () => {
                               : 'text-white hover:bg-yellow-400/20 hover:text-yellow-300'
                           } ${index > 0 ? 'border-t' : ''} ${scrolled ? 'border-gray-200' : 'border-gray-700'}`}
                         >
-                          <div className="font-bold text-base mb-1">{language === 'ms' ? item.labelMs : item.label}</div>
+                          <div className="font-bold text-base mb-1">{language === 'en' ? item.label : item.labelMs}</div>
                           <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>
                             {item.label === 'For Farmers' 
-                              ? (language === 'ms' ? 'Untuk petani kelapa sawit individu' : 'Individual palm oil farmers & smallholders')
-                              : (language === 'ms' ? 'Untuk ladang dan organisasi besar' : 'Large plantations & organizations')
+                              ? translateLabel('Individual palm oil farmers & smallholders', 'Untuk petani kelapa sawit individu', 'Untuk petani kelapa sawit individu')
+                              : translateLabel('Large plantations & organizations', 'Untuk ladang dan organisasi besar', 'Untuk perkebunan dan organisasi besar')
                             }
                           </div>
                         </Link>
@@ -202,71 +330,20 @@ export const Navbar: React.FC = () => {
               </div>
             )}
 
-            {/* Language Switcher - Toggle Switch */}
-            <button
-              onClick={toggleLanguage}
-              className={`relative flex items-center rounded-full p-1 transition-all duration-300 ${
-                scrolled
-                  ? 'bg-gray-200 hover:bg-gray-300'
-                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
-              }`}
-              title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
-            >
-              <div className="relative flex items-center">
-                {/* Background slider */}
-                <motion.div
-                  className={`absolute left-0 h-8 rounded-full ${
-                    scrolled ? 'bg-white shadow-lg' : 'bg-white shadow-xl'
-                  }`}
-                  initial={false}
-                  animate={{
-                    x: language === 'en' ? 0 : 44,
-                    width: 44,
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
-                  }}
-                />
-                {/* EN Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'en'
-                      ? 'text-green-700'
-                      : scrolled
-                        ? 'text-gray-500'
-                        : 'text-white/60'
-                  }`}
-                >
-                  EN
-                </span>
-                {/* MS Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'ms'
-                      ? 'text-green-700'
-                      : scrolled
-                        ? 'text-gray-500'
-                        : 'text-white/60'
-                  }`}
-                >
-                  MS
-                </span>
-              </div>
-            </button>
+            {/* Language Switcher */}
+            {renderLanguageDropdown()}
 
             {/* Auth & Actions */}
             {user ? (
               <div className="flex items-center">
                 {/* Dashboard Button */}
                 <Link href="/dashboard">
-                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap ${
+                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap cursor-pointer ${
                     scrolled
                       ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
                       : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
                   }`}>
-                    {language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
+                    {translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}
                   </button>
                 </Link>
               </div>
@@ -278,7 +355,7 @@ export const Navbar: React.FC = () => {
                       ? 'text-gray-700 hover:bg-gray-100'
                       : 'text-white hover:bg-white/10'
                   }`}>
-                    {language === 'ms' ? 'Masuk' : 'Login'}
+                    {translateLabel('Login', 'Masuk', 'Masuk')}
                   </button>
                 </Link>
                 <Link href="/register">
@@ -287,7 +364,7 @@ export const Navbar: React.FC = () => {
                       ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
                       : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
                   }`}>
-                    {language === 'ms' ? 'Daftar' : 'Register'}
+                    {translateLabel('Register', 'Daftar', 'Daftar')}
                   </button>
                 </Link>
               </div>
@@ -296,67 +373,16 @@ export const Navbar: React.FC = () => {
 
           {/* Mobile menu button */}
           <div className="md:hidden flex items-center space-x-2">
-            {/* Mobile Language Switcher - Toggle Switch */}
-            <button
-              onClick={toggleLanguage}
-              className={`relative flex items-center rounded-full p-1 transition-all duration-300 ${
-                scrolled
-                  ? 'bg-gray-200 hover:bg-gray-300'
-                  : 'bg-white/20 hover:bg-white/30 backdrop-blur-sm'
-              }`}
-              title={language === 'ms' ? 'Switch to English' : 'Tukar ke Bahasa Malaysia'}
-            >
-              <div className="relative flex items-center">
-                {/* Background slider */}
-                <motion.div
-                  className={`absolute left-0 h-8 rounded-full ${
-                    scrolled ? 'bg-white shadow-lg' : 'bg-white shadow-xl'
-                  }`}
-                  initial={false}
-                  animate={{
-                    x: language === 'en' ? 0 : 44,
-                    width: 44,
-                  }}
-                  transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 25,
-                  }}
-                />
-                {/* EN Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'en'
-                      ? 'text-green-700'
-                      : scrolled
-                        ? 'text-gray-500'
-                        : 'text-white/60'
-                  }`}
-                >
-                  EN
-                </span>
-                {/* MS Option */}
-                <span
-                  className={`relative z-10 px-3.5 py-1.5 text-xs font-bold transition-colors duration-200 w-11 text-center ${
-                    language === 'ms'
-                      ? 'text-green-700'
-                      : scrolled
-                        ? 'text-gray-500'
-                        : 'text-white/60'
-                  }`}
-                >
-                  MS
-                </span>
-              </div>
-            </button>
+            {/* Mobile Language Switcher */}
+            {renderLanguageDropdown(true)}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`p-2 rounded-lg transition-colors duration-200 z-[110] relative ${
                 scrolled
                   ? 'text-gray-700 hover:bg-gray-100'
                   : 'text-white hover:bg-white/10'
-              }`}
-              aria-label={isOpen ? (language === 'ms' ? 'Tutup menu' : 'Close menu') : (language === 'ms' ? 'Buka menu' : 'Open menu')}
+              } cursor-pointer`}
+              aria-label={isOpen ? translateLabel('Close menu', 'Tutup menu', 'Tutup menu') : translateLabel('Open menu', 'Buka menu', 'Buka menu')}
               style={{ position: 'relative', zIndex: 110 }}
             >
               <svg
@@ -429,7 +455,7 @@ export const Navbar: React.FC = () => {
                     className="block text-white hover:text-yellow-400 font-semibold text-base py-3 px-3 rounded-lg hover:bg-white/10 transition-all duration-200"
                     onClick={() => setIsOpen(false)}
                   >
-                    {language === 'ms' ? link.labelMs : link.label}
+                    {language === 'en' ? link.label : link.labelMs}
                   </Link>
                 ))}
 
@@ -437,7 +463,7 @@ export const Navbar: React.FC = () => {
                 {!user && (
                   <div className="pt-4 mt-4 border-t border-gray-700">
                     <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 px-3">
-                      {language === 'ms' ? 'Mula' : 'Get Started'}
+                      {translateLabel('Get Started', 'Mula', 'Mulai')}
                     </div>
                     {getStartedLinks.map((link) => (
                       <Link
@@ -446,7 +472,7 @@ export const Navbar: React.FC = () => {
                         className="block text-white hover:text-yellow-400 font-medium text-sm transition-colors duration-200 py-2.5 px-3 rounded-lg hover:bg-white/10"
                         onClick={() => setIsOpen(false)}
                       >
-                        {language === 'ms' ? link.labelMs : link.label}
+                        {language === 'en' ? link.label : link.labelMs}
                       </Link>
                     ))}
                   </div>
@@ -456,19 +482,19 @@ export const Navbar: React.FC = () => {
                   {user ? (
                     <Link href="/dashboard" onClick={() => setIsOpen(false)} className="w-full">
                       <Button size="md" className="w-full">
-                        {language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
+                        {translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}
                       </Button>
                     </Link>
                   ) : (
                     <div className="flex flex-col space-y-2">
                       <Link href="/login" onClick={() => setIsOpen(false)} className="w-full">
                         <Button size="md" variant="outline" className="w-full">
-                          {language === 'ms' ? 'Log Masuk' : 'Login'}
+                          {translateLabel('Login', 'Log Masuk', 'Masuk')}
                         </Button>
                       </Link>
                       <Link href="/register" onClick={() => setIsOpen(false)} className="w-full">
                         <Button size="md" className="w-full">
-                          {language === 'ms' ? 'Daftar' : 'Register'}
+                          {translateLabel('Register', 'Daftar', 'Daftar')}
                         </Button>
                       </Link>
                     </div>

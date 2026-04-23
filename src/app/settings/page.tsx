@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage, setLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, setLanguage, type Language } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -29,7 +29,7 @@ import { updatePassword as firebaseUpdatePassword, EmailAuthProvider, reauthenti
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [notifications, setNotifications] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(true);
   const [saving, setSaving] = useState(false);

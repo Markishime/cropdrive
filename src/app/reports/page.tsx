@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFileAlt,
@@ -39,7 +39,7 @@ interface Report {
 
 export default function ReportsPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
   const [loadingReports, setLoadingReports] = useState(true);
@@ -552,7 +552,7 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50">
+    <div className="min-h-screen premium-page-shell premium-mesh">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
@@ -615,7 +615,7 @@ export default function ReportsPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-12"
         >
-          <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 border border-gray-100">
+          <div className="premium-panel rounded-[28px] p-6 lg:p-8">
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-end">
               <div className="flex-1 w-full">
                 <label htmlFor="reports-search" className="block text-sm font-medium text-gray-700 mb-2">
@@ -646,7 +646,7 @@ export default function ReportsPage() {
           className="mb-24"
         >
           {filteredReports.length === 0 ? (
-            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 sm:p-16 text-center">
+            <div className="premium-panel-strong rounded-[30px] p-12 sm:p-16 text-center">
               <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-xl mx-auto mb-6 flex items-center justify-center">
                 <FontAwesomeIcon icon={faFileAlt} className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
               </div>
@@ -675,7 +675,7 @@ export default function ReportsPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: index * 0.1 }}
-                  className="bg-white rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-all duration-300 overflow-hidden"
+                  className="premium-panel rounded-[28px] overflow-hidden transition-all duration-300 hover:-translate-y-0.5"
                 >
                   <div className="p-6 sm:p-8">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
@@ -747,7 +747,7 @@ export default function ReportsPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+            className="premium-panel-strong max-w-4xl w-full max-h-[90vh] overflow-hidden rounded-[30px] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4 flex items-center justify-between">
@@ -1254,7 +1254,7 @@ export default function ReportsPage() {
                                   allSections.push(
                                     <div key={key} className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
                                       <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
-                                        {language === 'ms' ? 'Piawaian MPOB' : 'MPOB Standards'}
+                                        {language === 'id' ? 'Standar ISPO' : language === 'ms' ? 'Piawaian MPOB' : 'MPOB Standards'}
                                       </h4>
                                       <div className="overflow-x-auto">
                                         <table className="w-full">

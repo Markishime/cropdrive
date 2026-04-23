@@ -3,6 +3,7 @@
 import React, { useEffect } from 'react';
 import { useAuth } from '@/lib/auth';
 import { usePathname, useRouter } from 'next/navigation';
+import { useLanguage } from './LanguageProvider';
 import Navbar from './Navbar';
 import AuthenticatedNavbar from './AuthenticatedNavbar';
 import Sidebar from './Sidebar';
@@ -17,6 +18,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const { user, loading } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const { language } = useLanguage();
 
   // Removed automatic redirect to dashboard - logged in users can access landing page
 
@@ -38,14 +40,14 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
 
   // For login/register/forgot-password pages - no layout
   if (shouldHideLayout) {
-    return <>{children}</>;
+    return <React.Fragment key={language}>{children}</React.Fragment>;
   }
 
   // If user is logged in - show AuthenticatedNavbar + Sidebar for dashboard pages, Navbar for landing page
   if (user) {
     // Dashboard pages (protected routes) - show sidebar and authenticated navbar
     // When logged in, these pages show sidebar + authenticated navbar (like tutorials)
-    const dashboardPages = ['/dashboard', '/assistant', '/palmira', '/reports', '/payment-method', '/tutorials', '/support', '/profile', '/settings', '/pricing', '/admin'];
+    const dashboardPages = ['/dashboard', '/assistant', '/palmira', '/reports', '/tutorials', '/support', '/profile', '/settings', '/pricing', '/admin'];
 
     // Check if pathname matches dashboard pages (handles both regular and locale-prefixed routes)
     const isDashboardPage = dashboardPages.some(page => {
@@ -54,9 +56,9 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
         return true;
       }
       // Match locale-prefixed paths (e.g., /en/dashboard, /ms/dashboard)
-      const localePattern = /^\/(en|ms)\//;
+      const localePattern = /^\/(en|ms|id)\//;
       if (localePattern.test(pathname)) {
-        const pathWithoutLocale = pathname.replace(/^\/(en|ms)/, '');
+        const pathWithoutLocale = pathname.replace(/^\/(en|ms|id)/, '');
         return pathWithoutLocale === page || pathWithoutLocale.startsWith(page + '/');
       }
       return false;
@@ -64,7 +66,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     
     if (isDashboardPage) {
       return (
-        <div className="flex h-screen overflow-hidden bg-gray-50">
+        <div key={language} className="flex h-screen overflow-hidden bg-gray-50">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden w-0 min-w-0">
             <AuthenticatedNavbar />
@@ -78,7 +80,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     
     // Landing page and other public pages - show regular navbar (Navbar component handles user display)
     return (
-      <div className="min-h-screen flex flex-col">
+      <div key={language} className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1">
           {children}
@@ -93,7 +95,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const showFloatingAvatar = pathname !== '/palmira' && !pathname.startsWith('/palmira/');
   
   return (
-    <div className="min-h-screen flex flex-col">
+    <div key={language} className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
         {children}

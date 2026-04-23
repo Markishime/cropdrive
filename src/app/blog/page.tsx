@@ -23,9 +23,8 @@ import {
   faXmark,
   faExternalLink,
 } from '@fortawesome/free-solid-svg-icons';
-import { useTranslation, getCurrentLanguage } from '@/i18n';
-import { db } from '@/lib/firebase';
-import { collection, query, orderBy, onSnapshot, QuerySnapshot, DocumentData } from 'firebase/firestore';
+import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 
 interface BlogPost {
   id: string;
@@ -47,6 +46,7 @@ interface BlogPost {
   image: string;
   featured?: boolean;
   published?: boolean;
+  sourceUrl?: string;
 }
 
 const BLOG_IMAGES_BASE = '/images/blog';
@@ -331,7 +331,7 @@ const categories = [
 
 export default function BlogPage() {
   const [mounted, setMounted] = useState(false);
-  const [currentLanguage, setCurrentLanguage] = useState<'en' | 'ms'>('en');
+  const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -342,10 +342,25 @@ export default function BlogPage() {
   const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [newsletterMessage, setNewsletterMessage] = useState('');
 
+  const getLocalizedText = (english: string, malay: string) => {
+    if (currentLanguage === 'id') {
+      return toIndonesianText(malay || english);
+    }
+
+    return currentLanguage === 'ms' ? malay : english;
+  };
+
+  const getLocalizedTags = (english: string[], malay: string[]) => {
+    if (currentLanguage === 'id') {
+      return (malay.length > 0 ? malay : english).map((tag) => toIndonesianText(tag));
+    }
+
+    return currentLanguage === 'ms' ? malay : english;
+  };
+
   const handlePostClick = (post: BlogPost) => {
-    const isAGS = post.id.includes('ags');
-    if (isAGS) {
-      window.open('https://agriglobalsolutions.com', '_blank');
+    if (post.sourceUrl) {
+      window.open(post.sourceUrl, '_blank', 'noopener,noreferrer');
     } else {
       setSelectedPost(post);
     }
@@ -360,7 +375,7 @@ export default function BlogPage() {
     
     if (!newsletterEmail || !newsletterEmail.includes('@')) {
       setNewsletterStatus('error');
-      setNewsletterMessage(language === 'ms' ? 'Sila masukkan alamat emel yang sah' : 'Please enter a valid email address');
+      setNewsletterMessage(currentLanguage === 'id' ? 'Silakan masukkan alamat email yang valid' : language === 'ms' ? 'Sila masukkan alamat emel yang sah' : 'Please enter a valid email address');
       return;
     }
 
@@ -382,8 +397,8 @@ export default function BlogPage() {
         setNewsletterStatus('success');
         setNewsletterMessage(
           data.alreadySubscribed
-            ? (language === 'ms' ? 'Anda sudah melanggan!' : 'You are already subscribed!')
-            : (language === 'ms' ? 'Berjaya melanggan! Semak peti masuk anda.' : 'Successfully subscribed! Check your inbox.')
+            ? (currentLanguage === 'id' ? 'Anda sudah berlangganan!' : language === 'ms' ? 'Anda sudah melanggan!' : 'You are already subscribed!')
+            : (currentLanguage === 'id' ? 'Berhasil berlangganan! Periksa kotak masuk Anda.' : language === 'ms' ? 'Berjaya melanggan! Semak peti masuk anda.' : 'Successfully subscribed! Check your inbox.')
         );
         setNewsletterEmail('');
         
@@ -394,12 +409,12 @@ export default function BlogPage() {
         }, 5000);
       } else {
         setNewsletterStatus('error');
-        setNewsletterMessage(data.error || (language === 'ms' ? 'Gagal melanggan. Sila cuba lagi.' : 'Failed to subscribe. Please try again.'));
+        setNewsletterMessage(data.error || (currentLanguage === 'id' ? 'Gagal berlangganan. Silakan coba lagi.' : language === 'ms' ? 'Gagal melanggan. Sila cuba lagi.' : 'Failed to subscribe. Please try again.'));
       }
     } catch (error) {
       console.error('Newsletter subscription error:', error);
       setNewsletterStatus('error');
-      setNewsletterMessage(language === 'ms' ? 'Ralat berlaku. Sila cuba lagi.' : 'An error occurred. Please try again.');
+      setNewsletterMessage(currentLanguage === 'id' ? 'Terjadi kesalahan. Silakan coba lagi.' : language === 'ms' ? 'Ralat berlaku. Sila cuba lagi.' : 'An error occurred. Please try again.');
     }
   };
 
@@ -409,83 +424,26 @@ export default function BlogPage() {
     setCurrentLanguage(lang);
   }, []);
 
-  // Real-time blog posts listener using Firestore
   useEffect(() => {
     if (!mounted) return;
 
     setLoading(true);
 
-    // Set up Firestore real-time listener
-    const q = query(
-      collection(db, 'blog_posts'),
-      orderBy('date', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(
-      q,
-      (snapshot: QuerySnapshot<DocumentData>) => {
-        try {
-          const posts = snapshot.docs
-            .map((doc) => {
-              const data = doc.data();
-              const post: BlogPost = {
-                id: doc.id,
-                title: data.title || '',
-                titleMs: data.titleMs || '',
-                excerpt: data.excerpt || '',
-                excerptMs: data.excerptMs || '',
-                content: data.content || '',
-                contentMs: data.contentMs || '',
-                author: data.author || '',
-                authorMs: data.authorMs || '',
-                date: data.date?.toDate?.()?.toISOString() || data.date || '',
-                readTime: data.readTime || '',
-                readTimeMs: data.readTimeMs || '',
-                category: data.category || '',
-                categoryMs: data.categoryMs || '',
-                tags: data.tags || [],
-                tagsMs: data.tagsMs || [],
-                image: getBlogImageSrc(data.image),
-                featured: data.featured || false,
-                published: data.published !== false,
-              };
-              return post;
-            })
-            .filter((post) => post.published !== false); // Only show published posts
-          
-          if (posts.length > 0) {
-            setBlogPosts(posts);
-          } else {
-            // Fallback to static posts if Firestore is empty
-            setBlogPosts(staticBlogPosts);
-          }
-        } catch (error) {
-          console.error('Error processing blog posts:', error);
-          setBlogPosts(staticBlogPosts);
-        } finally {
-          setLoading(false);
+    fetch('/api/blog/posts?source=ags')
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data.posts) && data.posts.length > 0) {
+          setBlogPosts(data.posts);
+          return;
         }
-      },
-      (error: Error) => {
-        console.error('Error listening to blog posts:', error);
-        // Fallback to static posts on error
-        setBlogPosts(staticBlogPosts);
-        setLoading(false);
-        
-        // Also try fetching via API as backup
-        fetch('/api/blog/posts')
-          .then(res => res.json())
-          .then(data => {
-            if (data.posts && data.posts.length > 0) {
-              setBlogPosts(data.posts);
-            }
-          })
-          .catch(err => console.error('API fallback also failed:', err));
-      }
-    );
 
-    // Cleanup listener on unmount
-    return () => unsubscribe();
+        setBlogPosts(staticBlogPosts);
+      })
+      .catch((error) => {
+        console.error('Error fetching AGS blog posts:', error);
+        setBlogPosts(staticBlogPosts);
+      })
+      .finally(() => setLoading(false));
   }, [mounted]);
 
   // Listen for language changes
@@ -518,14 +476,14 @@ export default function BlogPage() {
 
   // Get all unique tags
   const allTags = Array.from(
-    new Set(displayPosts.flatMap(post => language === 'ms' ? post.tagsMs : post.tags))
+    new Set(displayPosts.flatMap(post => getLocalizedTags(post.tags, post.tagsMs)))
   );
 
   const filteredPosts = displayPosts.filter(post => {
     const matchesSearch = searchQuery === '' ||
-      (language === 'ms' ? post.titleMs : post.title).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (language === 'ms' ? post.excerptMs : post.excerpt).toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (language === 'ms' ? post.tagsMs : post.tags).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      getLocalizedText(post.title, post.titleMs).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getLocalizedText(post.excerpt, post.excerptMs).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      getLocalizedTags(post.tags, post.tagsMs).some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
     let matchesCategory = true;
     if (selectedCategory !== 'all') {
@@ -540,7 +498,7 @@ export default function BlogPage() {
 
     const matchesTags = selectedTags.length === 0 ||
       selectedTags.some(tag =>
-        (language === 'ms' ? post.tagsMs : post.tags).includes(tag)
+        getLocalizedTags(post.tags, post.tagsMs).includes(tag)
       );
 
     return matchesSearch && matchesCategory && matchesTags;
@@ -559,7 +517,7 @@ export default function BlogPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+    return date.toLocaleDateString(currentLanguage === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -567,7 +525,7 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-blue-50 relative">
+    <div className="min-h-screen premium-page-shell premium-mesh relative">
       {/* Decorative Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-1/4 left-0 w-96 h-96 bg-green-200/20 rounded-full blur-3xl"></div>
@@ -604,12 +562,14 @@ export default function BlogPage() {
             
             <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-6 xs:mb-8 leading-tight font-heading px-2">
               <span className="bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-400 bg-clip-text text-transparent animate-gradient">
-                {language === 'ms' ? 'Blog' : 'Blog'}
+                {currentLanguage === 'id' ? 'Blog' : language === 'ms' ? 'Blog' : 'Blog'}
               </span>
             </h1>
             
             <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed font-body px-3 xs:px-4">
-              {language === 'ms'
+              {currentLanguage === 'id'
+                ? 'Wawasan terbaru tentang CropDrive AI, layanan konsultasi AGS, teknologi pertanian, dan inovasi dalam industri kelapa sawit Malaysia.'
+                : language === 'ms'
                 ? 'Pandangan terkini tentang CropDrive AI, perkhidmatan perundingan AGS, teknologi pertanian, dan inovasi dalam industri kelapa sawit Malaysia.'
                 : 'Latest insights on CropDrive AI, AGS consultancy services, agricultural technology, and innovations in Malaysia\'s palm oil industry.'
               }
@@ -624,7 +584,7 @@ export default function BlogPage() {
                 className="text-center"
               >
                 <div className="text-3xl md:text-4xl font-black text-yellow-400 mb-1">{blogPosts.length}+</div>
-                <div className="text-sm text-white/80">{language === 'ms' ? 'Artikel' : 'Articles'}</div>
+                <div className="text-sm text-white/80">{currentLanguage === 'id' ? 'Artikel' : language === 'ms' ? 'Artikel' : 'Articles'}</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -633,7 +593,7 @@ export default function BlogPage() {
                 className="text-center"
               >
                 <div className="text-3xl md:text-4xl font-black text-yellow-400 mb-1">AI</div>
-                <div className="text-sm text-white/80">{language === 'ms' ? 'Teknologi' : 'Technology'}</div>
+                <div className="text-sm text-white/80">{currentLanguage === 'id' ? 'Teknologi' : language === 'ms' ? 'Teknologi' : 'Technology'}</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -642,7 +602,7 @@ export default function BlogPage() {
                 className="text-center"
               >
                 <div className="text-3xl md:text-4xl font-black text-yellow-400 mb-1">24/7</div>
-                <div className="text-sm text-white/80">{language === 'ms' ? 'Sokongan' : 'Support'}</div>
+                <div className="text-sm text-white/80">{currentLanguage === 'id' ? 'Dukungan' : language === 'ms' ? 'Sokongan' : 'Support'}</div>
               </motion.div>
             </div>
           </motion.div>
@@ -674,19 +634,19 @@ export default function BlogPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mb-24"
         >
-          <div className="bg-white rounded-xl shadow-lg p-5 sm:p-6 lg:p-8 border border-gray-100">
+          <div className="premium-panel-strong rounded-[28px] p-5 sm:p-6 lg:p-8">
             <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 items-end">
               {/* Search */}
               <div className="flex-1 w-full">
                 <label htmlFor="blog-search" className="block text-sm font-medium text-gray-700 mb-2 font-body">
-                  {language === 'ms' ? 'Cari Artikel' : 'Search Articles'}
+                  {currentLanguage === 'id' ? 'Cari Artikel' : language === 'ms' ? 'Cari Artikel' : 'Search Articles'}
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
                   <input
                     id="blog-search"
                     type="text"
-                    placeholder={language === 'ms' ? 'Cari artikel...' : 'Search articles...'}
+                    placeholder={currentLanguage === 'id' ? 'Cari artikel...' : language === 'ms' ? 'Cari artikel...' : 'Search articles...'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
@@ -697,7 +657,7 @@ export default function BlogPage() {
               {/* Category Filter */}
               <div className="lg:w-64 w-full">
                 <label htmlFor="blog-category-filter" className="block text-sm font-medium text-gray-700 mb-2 font-body">
-                  {language === 'ms' ? 'Kategori' : 'Category'}
+                  {currentLanguage === 'id' ? 'Kategori' : language === 'ms' ? 'Kategori' : 'Category'}
                 </label>
                 <select
                   id="blog-category-filter"
@@ -707,7 +667,7 @@ export default function BlogPage() {
                 >
                   {categories.map(category => (
                     <option key={category.id} value={category.id}>
-                      {language === 'ms' ? category.labelMs : category.label}
+                      {currentLanguage === 'id' ? toIndonesianText(category.labelMs || category.label) : language === 'ms' ? category.labelMs : category.label}
                     </option>
                   ))}
                 </select>
@@ -718,7 +678,7 @@ export default function BlogPage() {
             {allTags.length > 0 && (
               <div className="mt-5 sm:mt-6">
                 <p className="text-sm font-medium text-gray-700 mb-3 font-body">
-                  {language === 'ms' ? 'Tag:' : 'Tags:'}
+                  {currentLanguage === 'id' ? 'Tag:' : language === 'ms' ? 'Tag:' : 'Tags:'}
                 </p>
                 <div className="flex flex-wrap gap-2 sm:gap-3">
                   {allTags.map(tag => (
@@ -728,7 +688,7 @@ export default function BlogPage() {
                       className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 ${
                         selectedTags.includes(tag)
                           ? 'bg-green-600 text-white shadow-md hover:bg-green-700'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-sm'
+                                : 'bg-white/80 text-gray-700 hover:bg-white hover:shadow-sm'
                       }`}
                     >
                       {tag}
@@ -751,7 +711,7 @@ export default function BlogPage() {
             <div className="flex items-center gap-4 mb-12">
               <div className="h-1 w-16 bg-gradient-to-r from-green-600 to-green-400 rounded-full flex-shrink-0" aria-hidden="true" />
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
-              {language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
+              {currentLanguage === 'id' ? 'Artikel Pilihan' : language === 'ms' ? 'Artikel Pilihan' : 'Featured Articles'}
             </h2>
               <div className="flex-1 h-1 bg-gradient-to-r from-green-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
@@ -759,12 +719,12 @@ export default function BlogPage() {
             {/* Magazine Style Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8">
               {featuredPosts.map((post, index) => {
-                const title = language === 'ms' ? post.titleMs : post.title;
-                const excerpt = language === 'ms' ? post.excerptMs : post.excerpt;
-                const category = language === 'ms' ? post.categoryMs : post.category;
-                const author = language === 'ms' ? post.authorMs : post.author;
-                const readTime = language === 'ms' ? post.readTimeMs : post.readTime;
-                const tags = language === 'ms' ? post.tagsMs : post.tags;
+                const title = getLocalizedText(post.title, post.titleMs);
+                const excerpt = getLocalizedText(post.excerpt, post.excerptMs);
+                const category = getLocalizedText(post.category, post.categoryMs);
+                const author = getLocalizedText(post.author, post.authorMs);
+                const readTime = getLocalizedText(post.readTime, post.readTimeMs);
+                const tags = getLocalizedTags(post.tags, post.tagsMs);
                 const isAGS = post.id.includes('ags');
                 const isCropDrive = post.id.includes('cropdrive');
                 
@@ -808,7 +768,7 @@ export default function BlogPage() {
                         {/* Featured Badge */}
                         <div className="absolute top-6 right-6">
                           <span className="bg-yellow-400 text-gray-900 px-3 py-1.5 rounded-full text-xs font-black">
-                            {language === 'ms' ? 'Pilihan' : 'Featured'}
+                            {currentLanguage === 'id' ? 'Pilihan' : language === 'ms' ? 'Pilihan' : 'Featured'}
                           </span>
                         </div>
                         
@@ -859,24 +819,24 @@ export default function BlogPage() {
             <div className="flex items-center gap-4 min-w-0 flex-1">
               <div className="h-1 w-16 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full flex-shrink-0" aria-hidden="true" />
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 font-heading tracking-tight">
-              {language === 'ms' ? 'Semua Artikel' : 'All Articles'}
+              {currentLanguage === 'id' ? 'Semua Artikel' : language === 'ms' ? 'Semua Artikel' : 'All Articles'}
             </h2>
               <div className="flex-1 h-1 bg-gradient-to-r from-blue-400 to-transparent rounded-full min-w-0" aria-hidden="true" />
             </div>
             <div className="text-sm sm:text-base text-gray-600 font-body bg-gradient-to-r from-green-100 to-blue-100 px-4 py-2 rounded-full font-bold border border-green-200 flex-shrink-0">
-              {filteredPosts.length} {language === 'ms' ? 'artikel' : 'articles'}
+              {filteredPosts.length} {currentLanguage === 'id' ? 'artikel' : language === 'ms' ? 'artikel' : 'articles'}
             </div>
           </div>
 
           {regularPosts.length > 0 ? (
             <div className="space-y-8">
               {regularPosts.map((post, index) => {
-                const title = language === 'ms' ? post.titleMs : post.title;
-                const excerpt = language === 'ms' ? post.excerptMs : post.excerpt;
-                const category = language === 'ms' ? post.categoryMs : post.category;
-                const author = language === 'ms' ? post.authorMs : post.author;
-                const readTime = language === 'ms' ? post.readTimeMs : post.readTime;
-                const tags = language === 'ms' ? post.tagsMs : post.tags;
+                const title = getLocalizedText(post.title, post.titleMs);
+                const excerpt = getLocalizedText(post.excerpt, post.excerptMs);
+                const category = getLocalizedText(post.category, post.categoryMs);
+                const author = getLocalizedText(post.author, post.authorMs);
+                const readTime = getLocalizedText(post.readTime, post.readTimeMs);
+                const tags = getLocalizedTags(post.tags, post.tagsMs);
                 const isCropDrive = post.id.includes('cropdrive');
                 const isAGS = post.id.includes('ags');
                 const isEven = index % 2 === 0;
@@ -977,13 +937,15 @@ export default function BlogPage() {
               })}
             </div>
           ) : (
-          <div className="bg-white rounded-xl shadow-lg p-16 sm:p-20 text-center border border-gray-100">
+          <div className="premium-panel-strong rounded-[28px] p-16 sm:p-20 text-center">
               <div className="text-6xl mb-4" aria-hidden="true">🔍</div>
               <h3 className="text-2xl md:text-3xl font-black text-gray-900 font-heading mb-4">
-                {language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
+                {currentLanguage === 'id' ? 'Tidak Ada Artikel yang Ditemukan' : language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
             </h3>
               <p className="text-base sm:text-lg text-gray-600 font-body leading-relaxed">
-              {language === 'ms'
+                {currentLanguage === 'id'
+                  ? 'Coba sesuaikan filter pencarian Anda untuk menemukan lebih banyak artikel.'
+                  : language === 'ms'
                   ? 'Cuba menyesuaikan penapis carian anda untuk mencari lebih banyak artikel.'
                   : 'Try adjusting your search filters to find more articles.'}
             </p>
@@ -998,29 +960,31 @@ export default function BlogPage() {
           transition={{ duration: 0.6, delay: 0.8 }}
           className="mb-24"
         >
-          <div className="relative bg-gradient-to-br from-green-600 via-green-700 to-blue-700 rounded-3xl p-8 lg:p-12 text-center text-white shadow-2xl overflow-hidden border-4 border-green-500/30">
+          <div className="premium-cta-band relative rounded-[32px] p-8 lg:p-12 text-center text-white overflow-hidden border border-white/10">
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} aria-hidden="true" />
             <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">🌱</div>
             <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">🌾</div>
             <div className="max-w-2xl mx-auto relative z-10">
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
-                {language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
+                {currentLanguage === 'id' ? 'Jangan Sampai Ketinggalan!' : language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
               </h2>
               <p className="text-base sm:text-lg md:text-xl text-green-50 mb-8 leading-relaxed font-body">
-                {language === 'ms'
+                {currentLanguage === 'id'
+                  ? 'Dapatkan pembaruan terbaru tentang CropDrive AI, layanan AGS, teknologi pertanian, dan berita industri kelapa sawit langsung ke kotak masuk Anda.'
+                  : language === 'ms'
                   ? 'Dapatkan kemas kini terkini tentang CropDrive AI, perkhidmatan AGS, teknologi pertanian, dan berita industri kelapa sawit terus ke peti masuk anda.'
                   : 'Get the latest updates on CropDrive AI, AGS services, agricultural technology, and palm oil industry news delivered straight to your inbox.'}
               </p>
               <form onSubmit={handleNewsletterSubscribe} className="flex flex-col sm:flex-row gap-3 sm:gap-4 max-w-md mx-auto">
                 <label htmlFor="newsletter-email" className="sr-only">
-                  {language === 'ms' ? 'Alamat emel' : 'Email address'}
+                  {currentLanguage === 'id' ? 'Alamat email' : language === 'ms' ? 'Alamat emel' : 'Email address'}
                 </label>
                 <input
                   id="newsletter-email"
                   type="email"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  placeholder={language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
+                  placeholder={currentLanguage === 'id' ? 'Alamat email Anda' : language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
                   className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
                   disabled={newsletterStatus === 'loading'}
                   required
@@ -1039,10 +1003,10 @@ export default function BlogPage() {
                   }`}
                 >
                   {newsletterStatus === 'loading'
-                    ? (language === 'ms' ? 'Memproses...' : 'Processing...')
+                    ? (currentLanguage === 'id' ? 'Memproses...' : language === 'ms' ? 'Memproses...' : 'Processing...')
                     : newsletterStatus === 'success'
                     ? '✓'
-                    : language === 'ms' ? 'Langgan' : 'Subscribe'}
+                    : currentLanguage === 'id' ? 'Berlangganan' : language === 'ms' ? 'Langgan' : 'Subscribe'}
                 </button>
               </form>
               {newsletterMessage && (
@@ -1054,7 +1018,7 @@ export default function BlogPage() {
               )}
               {!newsletterMessage && (
                 <p className="text-sm text-green-100 mt-4 opacity-80 font-body">
-                  {language === 'ms' ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.' : 'No spam. Just high-quality content about CropDrive and AGS.'}
+                  {currentLanguage === 'id' ? 'Tanpa spam. Hanya konten berkualitas tinggi tentang CropDrive dan AGS.' : language === 'ms' ? 'Tiada spam. Hanya kandungan berkualiti tinggi tentang CropDrive dan AGS.' : 'No spam. Just high-quality content about CropDrive and AGS.'}
                 </p>
               )}
             </div>
@@ -1083,8 +1047,8 @@ export default function BlogPage() {
             <button
               onClick={closeModal}
               className="absolute top-6 right-6 z-10 bg-white/90 backdrop-blur-md p-3 rounded-full hover:bg-white transition-all shadow-lg hover:scale-110"
-              aria-label={language === 'ms' ? 'Tutup' : 'Close'}
-              title={language === 'ms' ? 'Tutup' : 'Close'}
+              aria-label={currentLanguage === 'id' ? 'Tutup' : language === 'ms' ? 'Tutup' : 'Close'}
+              title={currentLanguage === 'id' ? 'Tutup' : language === 'ms' ? 'Tutup' : 'Close'}
             >
               <FontAwesomeIcon icon={faXmark} className="w-5 h-5 text-gray-700" />
             </button>
@@ -1095,7 +1059,7 @@ export default function BlogPage() {
               <div className="relative h-64 md:h-80 overflow-hidden">
                 <Image
                   src={getBlogImageSrc(selectedPost.image)}
-                  alt={language === 'ms' ? selectedPost.titleMs : selectedPost.title}
+                  alt={getLocalizedText(selectedPost.title, selectedPost.titleMs)}
                   fill
                   className="object-cover"
                   sizes="100vw"

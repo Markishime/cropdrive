@@ -14,12 +14,14 @@ export async function generateMetadata({ params }: SupportPageProps): Promise<Me
 
   const titles = {
     en: 'Support - CropDrive',
-    ms: 'Sokongan - CropDrive'
+    ms: 'Sokongan - CropDrive',
+    id: 'Dukungan - CropDrive'
   };
 
   const descriptions = {
     en: 'Get help from our support team. Contact us with any questions about your oil palm farm management.',
-    ms: 'Dapatkan bantuan daripada pasukan sokongan kami. Hubungi kami dengan sebarang soalan tentang pengurusan ladang kelapa sawit anda.'
+    ms: 'Dapatkan bantuan daripada pasukan sokongan kami. Hubungi kami dengan sebarang soalan tentang pengurusan ladang kelapa sawit anda.',
+    id: 'Dapatkan bantuan dari tim dukungan kami. Hubungi kami jika Anda memiliki pertanyaan tentang pengelolaan kebun kelapa sawit Anda.'
   };
 
   return {
@@ -32,7 +34,7 @@ export default async function SupportPage({ params }: SupportPageProps) {
   const { locale } = await params;
 
   // Validate locale
-  if (!['en', 'ms'].includes(locale)) {
+  if (!['en', 'ms', 'id'].includes(locale)) {
     notFound();
   }
 
