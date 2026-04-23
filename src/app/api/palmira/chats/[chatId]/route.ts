@@ -29,7 +29,7 @@ export async function GET(
     const membership = await getMembershipAdmin(userId);
     if (!canAccessPalmira(membership)) {
       return NextResponse.json(
-        { success: false, error: 'Palmira access requires a plan' },
+        { success: false, error: 'Palmira access is currently unavailable for this account' },
         { status: 403 }
       );
     }
@@ -123,7 +123,7 @@ export async function DELETE(
     const membership = await getMembershipAdmin(userId);
     if (!canAccessPalmira(membership)) {
       return NextResponse.json(
-        { success: false, error: 'Palmira access requires a plan' },
+        { success: false, error: 'Palmira access is currently unavailable for this account' },
         { status: 403 }
       );
     }

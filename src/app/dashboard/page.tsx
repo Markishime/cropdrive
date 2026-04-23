@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation } from '@/i18n';
-import { getPlanById } from '@/lib/subscriptions';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import toast from 'react-hot-toast';
@@ -219,11 +218,9 @@ export default function DashboardPage() {
     return null;
   }
 
-  const userPlan = (user.plan && user.plan !== 'none') ? getPlanById(user.plan) : null;
-  const hasPurchasedPlan = user.plan && user.plan !== 'none';
   // Ensure uploadsUsed and uploadsLimit are numbers (handle undefined/null)
   const uploadsUsed = user.uploadsUsed ?? 0;
-  const uploadsLimit = user.uploadsLimit ?? 0;
+  const uploadsLimit = user.uploadsLimit ?? 2;
   const uploadsRemaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
   const uploadPercentage = uploadsLimit === -1 ? 100 : uploadsLimit > 0 ? (uploadsUsed / uploadsLimit) * 100 : 0;
   const isUploadLimitExceeded = uploadsLimit !== -1 && uploadsUsed >= uploadsLimit;
@@ -235,28 +232,9 @@ export default function DashboardPage() {
     uploadsRemaining,
     uploadPercentage,
     isUploadLimitExceeded,
-    userPlan: user.plan,
-    hasPurchasedPlan
+    userPlan: user.plan
   });
   const daysActive = Math.floor((Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24));
-  
-  // Real-time activity based on user data
-  const recentActivity = hasPurchasedPlan ? [
-    {
-      id: 1,
-      type: 'analysis',
-      title: language === 'ms' ? 'Analisis Laporan Daun' : 'Leaf Report Analysis',
-      date: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      status: 'completed'
-    },
-    {
-      id: 2,
-      type: 'upload',
-      title: language === 'ms' ? 'Muat Naik Laporan Tanah' : 'Soil Report Upload',
-      date: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-      status: 'completed'
-    }
-  ] : [];
 
   return (
     <ProtectedRoute>
@@ -316,218 +294,144 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Current Plan Card - Only show if user has purchased a plan */}
-              {hasPurchasedPlan && userPlan && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.8, delay: 0.5 }}
-                  className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20 shadow-2xl"
-                >
-                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                        <svg className="w-8 h-8 text-green-900" fill="currentColor" viewBox="0 0 20 20">
-                          <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-                          <path fillRule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clipRule="evenodd" />
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs text-white/70 font-semibold uppercase">
-                          {language === 'ms' ? 'Pelan Semasa' : 'Current Plan'}
-                        </p>
-                        <p className="text-2xl font-black text-white">
-                          {language === 'ms' ? userPlan.nameMs : userPlan.name}
-                        </p>
-                      </div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.5 }}
+                className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20 shadow-2xl"
+              >
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
+                      <svg className="w-8 h-8 text-green-900" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm11.707-2.707a1 1 0 00-1.414-1.414L9 9.172 7.707 7.879a1 1 0 00-1.414 1.414L9 12l4.707-4.707z" clipRule="evenodd" />
+                      </svg>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <p className="text-3xl font-black text-yellow-400">
-                          RM{userPlan.monthlyPrice}
-                        </p>
-                        <p className="text-xs text-white/70">
-                          {language === 'ms' ? '/bulan' : '/month'}
-                        </p>
-                      </div>
-                      <Link href="/pricing">
-                        <motion.button
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className="bg-yellow-400 hover:bg-yellow-500 text-green-900 px-4 py-2 rounded-xl font-bold flex items-center gap-2 transition"
-                        >
-                          {language === 'ms' ? 'Naik Taraf' : 'Upgrade'}
-                          <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
-                        </motion.button>
-                      </Link>
+                    <div>
+                      <p className="text-xs text-white/70 font-semibold uppercase">
+                        {language === 'ms' ? 'Akses Akaun' : 'Account Access'}
+                      </p>
+                      <p className="text-2xl font-black text-white">
+                        {language === 'ms' ? 'Semua Ciri AI Percuma' : 'All AI Features Are Free'}
+                      </p>
                     </div>
                   </div>
-                </motion.div>
-              )}
+                  <div className="text-left md:text-right">
+                    <p className="text-sm text-white/80 font-semibold">
+                      {language === 'ms' ? 'Had muat naik laporan:' : 'Report upload limit:'}
+                    </p>
+                    <p className="text-3xl font-black text-yellow-400">
+                      2
+                    </p>
+                    <p className="text-xs text-white/70">
+                      {language === 'ms' ? 'setiap pengguna' : 'per user'}
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
             </motion.div>
           </div>
         </section>
         {/* Notifications moved to AuthenticatedNavbar */}
 
-        {/* Current Plan Details - Show plan features */}
-        {hasPurchasedPlan && userPlan && (
-          <section className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-                className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl border-2 border-green-200 overflow-hidden"
-              >
-                {/* Plan Header */}
-                <div className="bg-gradient-to-r from-green-600 via-green-700 to-green-800 p-8 text-white">
-                  <div className="flex items-start justify-between flex-wrap gap-4">
+        <section className="py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl border-2 border-green-200 overflow-hidden"
+            >
+              <div className="bg-gradient-to-r from-green-600 via-green-700 to-green-800 p-8 text-white">
+                <div className="flex items-start justify-between flex-wrap gap-4">
+                  <div className="flex-1">
+                    <div className="inline-block bg-yellow-400 text-green-900 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider mb-4">
+                      {language === 'ms' ? '✓ Akses Percuma Aktif' : '✓ Free Access Active'}
+                    </div>
+                    <h2 className="text-4xl font-black mb-2">
+                      {language === 'ms' ? 'Akses AI CropDrive' : 'CropDrive AI Access'}
+                    </h2>
+                    <p className="text-green-100 text-lg">
+                      {language === 'ms'
+                        ? 'Laman web, AI Assistant, dan Palmira kini percuma untuk semua pengguna.'
+                        : 'The website, AI Assistant, and Palmira are now free for all users.'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-5xl font-black text-yellow-400">
+                      2
+                    </div>
+                    <div className="text-green-100 text-sm">
+                      {language === 'ms' ? 'maksimum laporan setiap pengguna' : 'maximum reports per user'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-8">
+                <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {language === 'ms' ? 'Akses & Had Laporan Anda' : 'Your Access & Report Limit'}
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border-2 border-green-200">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-600">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                     <div className="flex-1">
-                      <div className="inline-block bg-yellow-400 text-green-900 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider mb-4">
-                        {language === 'ms' ? '✓ Pelan Aktif' : '✓ Active Plan'}
-                      </div>
-                      <h2 className="text-4xl font-black mb-2">
-                        {language === 'ms' ? userPlan.nameMs : userPlan.name}
-                      </h2>
-                      <p className="text-green-100 text-lg">
-                        {language === 'ms' 
-                          ? 'Terima kasih kerana mempercayai CropDrive untuk meningkatkan hasil ladang anda!'
-                          : 'Thank you for trusting CropDrive to improve your farm yields!'
-                        }
+                      <p className="font-semibold text-gray-900">
+                        {language === 'ms' ? 'Akses Penuh AI & Palmira' : 'Full AI & Palmira Access'}
+                      </p>
+                      <p className="text-sm text-green-700 font-medium mt-1">
+                        {language === 'ms' ? 'Percuma untuk semua pengguna berdaftar' : 'Free for all registered users'}
                       </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-5xl font-black text-yellow-400">
-                        RM{userPlan.monthlyPrice}
-                      </div>
-                      <div className="text-green-100 text-sm">
-                        {language === 'ms' ? '/bulan' : '/month'}
-                      </div>
-                    </div>
                   </div>
-                </div>
-
-                {/* Plan Features */}
-                <div className="p-8">
-                  <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
-                    <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    {language === 'ms' ? 'Ciri-ciri Pelan Anda' : 'Your Plan Features'}
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {userPlan.features.map((feature, index) => (
-                      <motion.div
-                        key={index}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.4, delay: index * 0.05 }}
-                        className={`flex items-start gap-3 p-4 rounded-xl ${
-                          feature.included 
-                            ? 'bg-green-50 border-2 border-green-200' 
-                            : 'bg-gray-50 border-2 border-gray-200 opacity-50'
-                        }`}
-                      >
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
-                          feature.included ? 'bg-green-600' : 'bg-gray-400'
-                        }`}>
-                          {feature.included ? (
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </div>
-                        <div className="flex-1">
-                          <p className={`font-semibold ${
-                            feature.included ? 'text-gray-900' : 'text-gray-500'
-                          }`}>
-                            {language === 'ms' ? feature.nameMs : feature.name}
-                          </p>
-                          {feature.limit && feature.included && (
-                            <p className="text-sm text-green-700 font-medium mt-1">
-                              {language === 'ms' ? `Had: ${feature.limit}` : `Limit: ${feature.limit}`}
-                            </p>
-                          )}
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-8 flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1">
-                      <Button 
-                        onClick={() => router.push('/assistant')}
-                        className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg"
-                      >
-                        {language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
-                      </Button>
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border-2 border-green-200">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-600">
+                      <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
                     </div>
                     <div className="flex-1">
-                      <Button 
-                        onClick={() => router.push('/pricing')}
-                        variant="outline" 
-                        className="w-full py-4 border-2 border-green-600 text-green-700 hover:bg-green-50 font-bold"
-                      >
-                        {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
-                      </Button>
+                      <p className="font-semibold text-gray-900">
+                        {language === 'ms' ? 'Had Muat Naik Laporan' : 'Report Upload Limit'}
+                      </p>
+                      <p className="text-sm text-green-700 font-medium mt-1">
+                        {language === 'ms' ? 'Maksimum 2 laporan bagi setiap pengguna' : 'Maximum of 2 reports per user'}
+                      </p>
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            </div>
-          </section>
-        )}
 
-        {/* No Plan Message */}
-        {!hasPurchasedPlan && (
-          <section className="py-8">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="bg-gradient-to-br from-yellow-50 via-orange-50 to-red-50 rounded-2xl p-8 border-4 border-yellow-400 shadow-xl flex flex-col items-center justify-center text-center"
-              >
-                <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-6 shadow-2xl">
-                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h3 className="text-3xl font-black text-gray-900 mb-4">
-                  {language === 'ms' ? '🔒 Tiada Pelan Aktif' : '🔒 No Active Plan'}
-                </h3>
-                <p className="text-gray-700 text-lg mb-6 max-w-md font-medium">
-                  {language === 'ms'
-                    ? 'Beli pelan untuk mula menggunakan CropDrive™ Oil Palm AI Advisor dan menganalisis laporan makmal anda.'
-                    : 'Purchase a plan to start using the CropDrive™ Oil Palm AI Advisor and analyze your lab reports.'
-                  }
-                </p>
-                <Link href="/pricing" className="w-full max-w-md">
-                  <Button className="w-full py-5 text-xl font-black bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-2xl transform hover:scale-105 transition-all">
-                    {language === 'ms' ? '🛒 Beli Pelan Sekarang' : '🛒 Buy a Plan Now'}
+                <div className="mt-8">
+                  <Button
+                    onClick={() => router.push('/assistant')}
+                    className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg"
+                  >
+                    {language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
                   </Button>
-                </Link>
-              </motion.div>
-            </div>
-          </section>
-        )}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </section>
 
         {/* CropDrive AI Advisor - Centered */}
-        {hasPurchasedPlan && (
-          <section className="py-8">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                whileHover={{ scale: 1.01 }}
-                className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 border border-green-500 shadow-xl text-white"
-              >
+        <section className="py-8">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              whileHover={{ scale: 1.01 }}
+              className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 border border-green-500 shadow-xl text-white"
+            >
                 <div className="flex items-start space-x-4 mb-6">
                   <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
                     <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
@@ -572,30 +476,31 @@ export default function DashboardPage() {
                   )}
                 </div>
 
-                {!isUploadLimitExceeded ? (
-                  <Button 
-                    onClick={() => router.push('/assistant')}
-                    className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg"
+              {!isUploadLimitExceeded ? (
+                <Button
+                  onClick={() => router.push('/assistant')}
+                  className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg"
+                >
+                  {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
+                </Button>
+              ) : (
+                <div>
+                  <p className="text-yellow-300 text-sm mb-4 font-semibold bg-yellow-500/20 p-3 rounded-lg">
+                    {language === 'ms'
+                      ? '⚠️ Had 2 muat naik laporan telah dicapai untuk akaun ini.'
+                      : '⚠️ The 2-report upload limit has been reached for this account.'}
+                  </p>
+                  <Button
+                    onClick={() => router.push('/reports')}
+                    className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg"
                   >
-                    {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
+                    {language === 'ms' ? '📄 Lihat Laporan Anda' : '📄 View Your Reports'}
                   </Button>
-                ) : (
-                  <div>
-                    <p className="text-yellow-300 text-sm mb-4 font-semibold bg-yellow-500/20 p-3 rounded-lg">
-                      {language === 'ms' ? '⚠️ Had muat naik tercapai' : '⚠️ Upload limit reached'}
-                    </p>
-                    <Button 
-                      onClick={() => router.push('/payment-method')}
-                      className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg"
-                    >
-                      {language === 'ms' ? '⬆️ Naik Taraf Pelan' : '⬆️ Upgrade Plan'}
-                    </Button>
-                  </div>
-                )}
-              </motion.div>
-            </div>
-          </section>
-        )}
+                </div>
+              )}
+            </motion.div>
+          </div>
+        </section>
 
       </div>
     </ProtectedRoute>

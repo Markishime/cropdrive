@@ -374,7 +374,7 @@ export async function POST(request: NextRequest) {
     // who are still within their paid period (full access until period end).
     if (!canAccessPalmira(membership)) {
       return NextResponse.json(
-        { success: false, error: 'Palmira access requires a plan' },
+        { success: false, error: 'Palmira access is currently unavailable for this account' },
         { status: 403 }
       );
     }

@@ -1834,14 +1834,14 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   </h3>
                   <p className="text-sm text-blue-700 leading-relaxed mb-3">
                     {language === 'ms'
-                      ? `Anda telah menggunakan ${uploadsUsedThisMonth} daripada ${uploadLimit === -1 ? 'tanpa had' : uploadLimit} muat naik bulan ini. Anda masih boleh melihat sejarah analisis dan sembang anda.`
-                      : `You have used ${uploadsUsedThisMonth} of ${uploadLimit === -1 ? 'unlimited' : uploadLimit} uploads this month. You can still view your analysis history and chats.`}
+                      ? `Anda telah menggunakan ${uploadsUsedThisMonth} daripada ${uploadLimit === -1 ? 'tanpa had' : uploadLimit} muat naik. Had maksimum ialah 2 laporan setiap pengguna. Anda masih boleh melihat sejarah analisis dan sembang anda.`
+                      : `You have used ${uploadsUsedThisMonth} of ${uploadLimit === -1 ? 'unlimited' : uploadLimit} uploads. The maximum is 2 reports per user. You can still view your analysis history and chats.`}
                   </p>
                   <button
-                    onClick={() => router.push('/pricing')}
+                    onClick={() => router.push('/reports')}
                     className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                   >
-                    {language === 'ms' ? 'Naik Taraf Pelan' : 'Upgrade Plan'}
+                    {language === 'ms' ? 'Lihat Laporan' : 'View Reports'}
                   </button>
                 </motion.div>
               </motion.div>
