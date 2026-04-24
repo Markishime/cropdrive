@@ -80,12 +80,12 @@ export default function TermsPage() {
               </svg>
             </div>
             <h1 className="text-5xl md:text-7xl font-black mb-6 font-heading">
-              {language === 'ms' ? 'Syarat Perkhidmatan' : 'Terms of Service'}
+              {language === 'ms' ? 'Terma dan Syarat' : 'Terms and Conditions'}
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
               {language === 'ms' 
-                ? 'Syarat dan peraturan penggunaan platform kami'
-                : 'Terms and rules for using our platform'
+                ? 'Terma dan Syarat Penggunaan CropDrive.ai'
+                : 'Terms and Conditions of Use for CropDrive.ai'
               }
             </p>
           </motion.div>
@@ -110,128 +110,96 @@ export default function TermsPage() {
                   <div className="prose prose-lg max-w-none">
                     <div className="space-y-6 text-gray-700">
                       <p className="text-sm text-gray-500 mb-6">
-                        Last updated: 30 December 2025
+                        Effective: April 2026 &nbsp;|&nbsp; Available to users in Malaysia and Indonesia only.
                       </p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Operator</h2>
-                      <p>
-                        The operator of www.cropdrive.ai and the CropDrive OP Advisor service is AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia. Contact email: contact@agriglobalsolutions.com.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Acceptance of these Terms</h2>
+                      <p>By registering for, accessing, or using CropDrive.ai, you agree to these Terms and Conditions. If you do not agree, do not use the service.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Definitions</h2>
-                      <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>"AGS"</strong> means AGS – Agriculture Global Solutions OÜ.</li>
-                        <li><strong>"Website"</strong> means www.cropdrive.ai and any pages, subpages, and related interfaces operated under the CropDrive OP Advisor brand.</li>
-                        <li><strong>"Service"</strong> means the digital agronomy advisory and decision-support service provided through the Website, including subscriptions, user accounts, digital outputs, and any related digital content.</li>
-                        <li><strong>"User"</strong> means any person accessing or using the Website or Service.</li>
-                        <li><strong>"Consumer"</strong> means a natural person acting outside trade, business, or profession.</li>
-                        <li><strong>"Business Client"</strong> means any legal entity or any natural person acting for trade, business, or profession.</li>
-                        <li><strong>"Subscription"</strong> means a Consumer subscription plan displayed on the Website.</li>
-                        <li><strong>"Business Services"</strong> means services provided to Business Clients outside the Subscription plans, including customization, configuration, integration, enterprise support, bespoke deliverables, and any tailored development of digital tools.</li>
-                      </ul>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. About the Service</h2>
+                      <p>CropDrive.ai is a digital agronomy support service that allows registered users to upload soil test results and leaf test results for analysis. The service is currently available only for users located in Malaysia and Indonesia.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Scope, acceptance, and precedence</h2>
-                      <p>
-                        These Terms govern access to and use of the Website and Service. Access to the Website or use of the Service constitutes acceptance of these Terms. Business Services are provided under a separate written agreement concluded between AGS and the Business Client. The separate written agreement prevails over these Terms for the scope covered by the separate written agreement.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Eligibility</h2>
+                      <p>You may use CropDrive.ai only if you are legally able to agree to these Terms and if you are located in Malaysia or Indonesia. By using the service, you confirm that the uploaded test results relate to farms, fields, or operations for which you are authorized to submit data.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Service channels, intended users, and market presentation</h2>
-                      <p>
-                        The Website offers Subscriptions intended for Malaysian oil palm farmers, with pricing displayed in Malaysian Ringgit (RM). Subscription checkout is offered for Consumer purchases only. Business Services are discussed and agreed case by case, with scope, deliverables, acceptance criteria, timelines, pricing, payment methods, and payment schedules defined in the separate written agreement. Market presentation on the Website does not limit mandatory rights arising under applicable law in the User place of residence.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Free Service</h2>
+                      <p>CropDrive.ai is currently offered free of charge to farmers. We reserve the right to change, limit, suspend, or discontinue the service, in whole or in part, at any time.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Eligibility and age</h2>
-                      <p>
-                        Purchase and registration are intended for adults. By registering an account or purchasing a Subscription, the User represents age 18 or above.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Required Registration Information</h2>
+                      <p>To use CropDrive.ai, you must provide a valid WhatsApp number, a valid email address, and your location. You agree that this information is accurate and kept reasonably up to date.</p>
+                      <p>This contact information will be used only for important service-related communication, including important changes, updates, developments, security notices, technical issues, and support communication. It will also be used if we need to contact you in relation to a problem with your account or uploaded files.</p>
+                      <p>We will not use your contact details for unwanted phone calls. We will not sell your contact details to third parties. We will not share your contact details for third-party marketing.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Accounts, credentials, and security</h2>
-                      <p>
-                        Use of the Service requires an account. The User undertakes to provide accurate, complete, and current account information and to maintain confidentiality of credentials. The User bears responsibility for activity performed through the account. AGS reserves the right to suspend, restrict, or terminate access where a material breach, fraud indicators, abuse, or a security risk is identified, including to protect the Service, other users, and third-party systems supporting hosting, authentication, and payments.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Upload Limits</h2>
+                      <p>Each registered member may upload test results for analysis only twice per calendar year. This means a maximum of two upload events per year per member, whether the upload contains soil test results, leaf test results, or both.</p>
+                      <p>If you need additional uploads, you may contact us and request extra access. Any such additional access is at our discretion.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Inputs required for Consumer Subscriptions</h2>
-                      <p>
-                        The Service delivers advisory outputs based on user-provided inputs. Consumer Subscriptions are designed around the upload and analysis of soil test results and leaf tissue analysis. Failure to provide required inputs, provision of incomplete inputs, or provision of inaccurate inputs limits the Service outputs and affects performance expectations.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Uploaded Reports and Data You Provide</h2>
+                      <p>By uploading a soil test report, leaf test report, or related file, you confirm that you have the right to upload it and to allow CropDrive.ai to process it for analysis.</p>
+                      <p>You also understand that uploaded files may contain farm information or other details. CropDrive.ai will use the agronomic content of these reports to provide analysis and to improve the service.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Advisory outputs and yield outcomes</h2>
-                      <p>
-                        The Service provides agronomic advisory outputs intended to support yield improvement when the User follows the advisory plan with sustained compliance. Yield improvement is a target outcome linked to user compliance, quality of input data, timing of field operations, site conditions, palm age, soil properties, nutrient availability, pest pressure, disease pressure, weather, and comparable external variables outside AGS control. No fixed yield figure, financial outcome, or field performance outcome is warranted. The User remains responsible for farm management decisions, procurement decisions, and field implementation.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Personal Information in Uploaded Reports</h2>
+                      <p>CropDrive.ai is designed to use agronomic data such as soil and leaf test values. CropDrive.ai is not intended to use personal names, contact details, or other personal identifiers that may appear inside uploaded reports for marketing, sales, or unrelated profiling.</p>
+                      <p>If personal details appear inside an uploaded report, those details will not be included in aggregate datasets used for service improvement, benchmarking, analytics, or product development.</p>
+                      <p>We do not intentionally use personal names, phone numbers, email addresses, addresses, or similar identifiers appearing inside uploaded reports for any purpose other than what is technically necessary to operate, secure, support, or troubleshoot the service.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Ordering, contract formation, and delivery for Consumer Subscriptions</h2>
-                      <p>
-                        Subscription plans, pricing, billing interval, and key commercial conditions are displayed on the Website prior to checkout. Payment is processed through Stripe Checkout on Stripe-hosted pages. A binding contract for a Subscription is formed upon successful payment confirmation and activation of Subscription access linked to the User account. Digital access starts after payment confirmation and activation. Where activation does not occur after payment confirmation, the User should contact contact@agriglobalsolutions.com for investigation and resolution.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Aggregate and Anonymized Data</h2>
+                      <p>By using CropDrive.ai, you agree that we may access, use, store, analyze, and combine agronomic data from uploaded soil and leaf test results in aggregated and anonymized form.</p>
+                      <p>This includes, for example, nutrient values, pH, soil characteristics, leaf nutrient values, regional trends, crop-related patterns, and similar non-personal analytical data.</p>
+                      <p>This aggregated and anonymized data may be used by CropDrive.ai to improve the platform, improve recommendations, develop new features, conduct benchmarking, generate statistics, train and improve models, and better understand agronomic patterns.</p>
+                      <p>Aggregate data will not include your personal contact details.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">10. Payments</h2>
-                      <p>
-                        Consumer Subscription payments are processed through Stripe Checkout and are linked to the Subscription plans shown on the Website. Stripe terms govern the payment processing on Stripe-hosted pages. Business Services payment methods and payment schedules are defined in the separate written agreement.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">10. Contact Details and Location Data</h2>
+                      <p>Your WhatsApp number, email address, and location are required for account operation and service communication. Your location may also be used to support country eligibility, regional agronomic interpretation, service quality control, and platform development.</p>
+                      <p>We will not sell this information. We will not disclose it to unrelated third parties for marketing purposes.</p>
+                      <p>Where strictly necessary to operate, host, maintain, secure, or support the service, limited access may be given to technical service providers acting on our behalf and under confidentiality and data protection obligations. We may also disclose information where required by law.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">11. Subscription term, renewal, and cancellation for Consumer Subscriptions</h2>
-                      <p>
-                        For the flexible Installment plan (Pay Over Time), billing occurs in monthly instalments and the Subscription carries a 12-month minimum term. Cancellation is permitted at any time, with cancellation taking effect as a non-renewal at the end of the minimum term, and cancellation does not release the User from payment of remaining instalments due within the 12-month minimum term.
-                      </p>
-                      <p>
-                        For the Pay Upfront plan, billing occurs as a single annual payment for a one-year term, cancellation is permitted at any time as a non-renewal, and access continues until the end of the paid annual term.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">11. No Third-Party Marketing</h2>
+                      <p>CropDrive.ai will not share your WhatsApp number, email address, or identifiable uploaded report information with third parties for advertising, solicitation, resale, lead generation, or unrelated commercial use.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">12. Fees, refunds, and charge disputes</h2>
-                      <p>
-                        All fees are non-refundable after payment. Mandatory rights under applicable law remain unaffected. Where a duplicate charge or billing error is identified, AGS processes correction after verification. Billing dispute communications should be sent to contact@agriglobalsolutions.com with the account email, payment date, and payment amount.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">12. Support and User Contact</h2>
+                      <p>You may contact us at any time to report bugs, technical problems, errors, and usability issues, or to request help with the service.</p>
+                      <p>We may contact you through WhatsApp or email for support, important updates, security notices, product changes, usage issues, or service developments.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">13. Consumer withdrawal rights where mandatory law grants such rights</h2>
-                      <p>
-                        Certain jurisdictions grant statutory withdrawal rights for distance contracts. For digital services supplied immediately after purchase, mandatory rules in some jurisdictions treat express consent to immediate supply and acknowledgement of withdrawal-right loss as a condition for immediate supply. Where such mandatory rules apply, checkout collects the required consent and acknowledgement before immediate supply starts. Mandatory rights remain unaffected.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">13. No Guarantee of Results</h2>
+                      <p>CropDrive.ai provides informational and decision-support outputs only. Analysis results, interpretations, and recommendations depend on the quality, completeness, readability, and accuracy of the files and data you upload.</p>
+                      <p>We do not guarantee that any recommendation will increase yield, improve profitability, prevent disease, correct nutritional problems, or produce any specific agronomic or commercial result.</p>
+                      <p>The service does not replace field inspection, laboratory quality control, local professional judgement, or your own responsibility for farm decisions.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">14. User data, confidentiality, and aggregation</h2>
-                      <p>
-                        The User retains rights in uploaded content and uploaded data. The User grants AGS a limited licence to process uploaded content and uploaded data for service delivery, account support, fraud prevention, security, troubleshooting, and quality management. AGS does not disclose personal data contained in uploaded soil and leaf test reports for commercial purposes or unrelated purposes. AGS aggregates non-personal agronomic variables from reports, including chemical composition values, for scientific and analytical purposes, with aggregation designed to exclude personal identifiers and direct attribution to an identifiable individual.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">14. Service Availability</h2>
+                      <p>We aim to keep CropDrive.ai available and functioning properly, but we do not guarantee uninterrupted service, continuous availability, or error-free operation.</p>
+                      <p>The platform may be updated, changed, interrupted, delayed, or temporarily unavailable at any time.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">15. Intellectual property and licence</h2>
-                      <p>
-                        All Website content, software, workflows, designs, trademarks, and service elements remain the property of AGS or licensors. A Subscription grants a limited, personal, non-exclusive, non-transferable right to access and use the Service during an active Subscription term, subject to these Terms. Business Services licensing and ownership terms are defined in the separate written agreement. Copying, redistribution, resale, sublicensing, reverse engineering, or creation of derivative works from the Service or Website content is prohibited without prior written permission from AGS.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">15. Accuracy of User Inputs</h2>
+                      <p>You are responsible for ensuring that the files and information you upload are accurate, lawful, and relevant. You must not upload false, misleading, manipulated, harmful, illegal, or unauthorized material.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">16. Acceptable use</h2>
-                      <p>
-                        The User undertakes to refrain from unauthorised access attempts, interference with service operation, interference with security controls, uploading malware, introducing harmful code, and use of the Service for unlawful activity. AGS reserves the right to take protective action, including suspension or termination, where unacceptable use is identified.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">16. Proper Use</h2>
+                      <p>You agree not to misuse the service. This includes attempting to interfere with the platform, bypass limits, upload malicious files, scrape the system, use another person's account without permission, or use the service in any unlawful or abusive manner.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">17. Third-party systems</h2>
-                      <p>
-                        The Service depends on third-party providers for hosting, analytics, authentication, and payments. Planned maintenance and urgent security updates occur as required. AGS does not assume responsibility for outages or failures originating from third-party systems outside AGS control, subject to mandatory law.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">17. Intellectual Property</h2>
+                      <p>CropDrive.ai, including its software, workflows, design, analysis methods, written outputs, data structures, and related content, remains the property of CropDrive.ai or its licensors, except for materials you lawfully upload.</p>
+                      <p>You keep your rights in the files you upload. You grant CropDrive.ai the right to process, store, analyze, and use those files and their agronomic content as described in these Terms.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">18. Support</h2>
-                      <p>
-                        Support is provided through contact@agriglobalsolutions.com. Target response time is within 24 hours, subject to workload and issue complexity.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">18. Suspension or Termination</h2>
+                      <p>We may suspend, restrict, or terminate access to CropDrive.ai if we believe these Terms have been breached, if the service is being misused, if account information is false, if uploads are unauthorized, or if suspension is needed for legal, security, operational, or technical reasons.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">19. Changes to the Service and these Terms</h2>
-                      <p>
-                        AGS updates the Service for security, performance, compliance, and feature development. AGS updates these Terms from time to time. Updated Terms apply to new purchases from the publication date. For ongoing Subscriptions, updated Terms apply from the next renewal date, unless mandatory law requires a different approach.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">19. Data Retention and Deletion</h2>
+                      <p>We may retain uploaded files, agronomic data, account records, logs, and service communications for as long as reasonably necessary to operate the service, maintain security, resolve disputes, improve the platform, meet legal obligations, and preserve aggregate analytical datasets.</p>
+                      <p>You may request account closure or deletion of your personal contact data, subject to legal, technical, audit, backup, and operational limitations.</p>
+                      <p>Aggregate or anonymized data that no longer identifies you may continue to be retained and used.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">20. Liability</h2>
-                      <p>
-                        The Service provides advisory outputs and decision-support information. Farm decisions and implementation remain the User responsibility. For Consumers, liability limitations apply only to the extent permitted by mandatory consumer law. For Business Clients, liability is limited to direct damages and excludes indirect loss, loss of profit, and consequential loss to the extent permitted by law. Nothing in these Terms excludes liability for intent or liability which mandatory law treats as non-excludable.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">20. Changes to These Terms</h2>
+                      <p>We may update these Terms from time to time. If we make material changes, we may notify you through the platform, by WhatsApp, or by email. Continued use of CropDrive.ai after an update means you accept the updated Terms.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">21. Governing law and jurisdiction</h2>
-                      <p>
-                        These Terms are governed by the laws of Estonia, excluding conflict-of-law rules. Mandatory consumer protection rules applicable in the Consumer place of habitual residence remain unaffected. Jurisdiction lies with the competent courts of Estonia, subject to mandatory consumer forum rules applicable to Consumer claims.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">21. Limitation of Liability</h2>
+                      <p>To the fullest extent permitted by law, CropDrive.ai and its operators are not liable for indirect, incidental, special, consequential, or business losses arising from use of the service, including loss of profit, loss of yield, loss of data, loss of opportunity, or decisions made based on platform outputs.</p>
+                      <p>Use of the service is at your own risk.</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">22. Language</h2>
-                      <p>
-                        The Website provides an English version and a Bahasa Malaysia version through a language toggle. For Malaysia consumer disclosures, the Bahasa Malaysia version governs where a conflict exists.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">22. Governing Language</h2>
+                      <p>If these Terms are translated into another language, the English version controls in case of inconsistency, unless local law requires otherwise.</p>
+
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">23. Contact</h2>
+                      <p>If you have questions, need support, want to report a bug, want to request additional uploads, or want to raise a data-related concern, you may contact CropDrive.ai through the contact details provided on the platform.</p>
                     </div>
                   </div>
                 </CardContent>

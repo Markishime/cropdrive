@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
@@ -10,12 +10,110 @@ import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
 import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { faEye, faEyeSlash, faCheckCircle, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
 
 // Hide navbar for this page
 export const dynamic = 'force-dynamic';
 
+const TERMS_SECTIONS = [
+  {
+    title: '1. Acceptance of these Terms',
+    body: 'By registering for, accessing, or using CropDrive.ai, you agree to these Terms and Conditions. If you do not agree, do not use the service.',
+  },
+  {
+    title: '2. About the Service',
+    body: 'CropDrive.ai is a digital agronomy support service that allows registered users to upload soil test results and leaf test results for analysis. The service is currently available only for users located in Malaysia and Indonesia.',
+  },
+  {
+    title: '3. Eligibility',
+    body: 'You may use CropDrive.ai only if you are legally able to agree to these Terms and if you are located in Malaysia or Indonesia. By using the service, you confirm that the uploaded test results relate to farms, fields, or operations for which you are authorized to submit data.',
+  },
+  {
+    title: '4. Free Service',
+    body: 'CropDrive.ai is currently offered free of charge to farmers. We reserve the right to change, limit, suspend, or discontinue the service, in whole or in part, at any time.',
+  },
+  {
+    title: '5. Required Registration Information',
+    body: 'To use CropDrive.ai, you must provide a valid WhatsApp number, a valid email address, and your location. You agree that this information is accurate and kept reasonably up to date.\n\nThis contact information will be used only for important service-related communication, including important changes, updates, developments, security notices, technical issues, and support communication. It will also be used if we need to contact you in relation to a problem with your account or uploaded files.\n\nWe will not use your contact details for unwanted phone calls. We will not sell your contact details to third parties. We will not share your contact details for third-party marketing.',
+  },
+  {
+    title: '6. Upload Limits',
+    body: 'Each registered member may upload test results for analysis only twice per calendar year. This means a maximum of two upload events per year per member, whether the upload contains soil test results, leaf test results, or both.\n\nIf you need additional uploads, you may contact us and request extra access. Any such additional access is at our discretion.',
+  },
+  {
+    title: '7. Uploaded Reports and Data You Provide',
+    body: 'By uploading a soil test report, leaf test report, or related file, you confirm that you have the right to upload it and to allow CropDrive.ai to process it for analysis.\n\nYou also understand that uploaded files may contain farm information or other details. CropDrive.ai will use the agronomic content of these reports to provide analysis and to improve the service.',
+  },
+  {
+    title: '8. Personal Information in Uploaded Reports',
+    body: 'CropDrive.ai is designed to use agronomic data such as soil and leaf test values. CropDrive.ai is not intended to use personal names, contact details, or other personal identifiers that may appear inside uploaded reports for marketing, sales, or unrelated profiling.\n\nIf personal details appear inside an uploaded report, those details will not be included in aggregate datasets used for service improvement, benchmarking, analytics, or product development.\n\nWe do not intentionally use personal names, phone numbers, email addresses, addresses, or similar identifiers appearing inside uploaded reports for any purpose other than what is technically necessary to operate, secure, support, or troubleshoot the service.',
+  },
+  {
+    title: '9. Aggregate and Anonymized Data',
+    body: 'By using CropDrive.ai, you agree that we may access, use, store, analyze, and combine agronomic data from uploaded soil and leaf test results in aggregated and anonymized form.\n\nThis includes, for example, nutrient values, pH, soil characteristics, leaf nutrient values, regional trends, crop-related patterns, and similar non-personal analytical data.\n\nThis aggregated and anonymized data may be used by CropDrive.ai to improve the platform, improve recommendations, develop new features, conduct benchmarking, generate statistics, train and improve models, and better understand agronomic patterns.\n\nAggregate data will not include your personal contact details.',
+  },
+  {
+    title: '10. Contact Details and Location Data',
+    body: 'Your WhatsApp number, email address, and location are required for account operation and service communication. Your location may also be used to support country eligibility, regional agronomic interpretation, service quality control, and platform development.\n\nWe will not sell this information. We will not disclose it to unrelated third parties for marketing purposes.\n\nWhere strictly necessary to operate, host, maintain, secure, or support the service, limited access may be given to technical service providers acting on our behalf and under confidentiality and data protection obligations. We may also disclose information where required by law.',
+  },
+  {
+    title: '11. No Third-Party Marketing',
+    body: 'CropDrive.ai will not share your WhatsApp number, email address, or identifiable uploaded report information with third parties for advertising, solicitation, resale, lead generation, or unrelated commercial use.',
+  },
+  {
+    title: '12. Support and User Contact',
+    body: 'You may contact us at any time to report bugs, technical problems, errors, and usability issues, or to request help with the service.\n\nWe may contact you through WhatsApp or email for support, important updates, security notices, product changes, usage issues, or service developments.',
+  },
+  {
+    title: '13. No Guarantee of Results',
+    body: 'CropDrive.ai provides informational and decision-support outputs only. Analysis results, interpretations, and recommendations depend on the quality, completeness, readability, and accuracy of the files and data you upload.\n\nWe do not guarantee that any recommendation will increase yield, improve profitability, prevent disease, correct nutritional problems, or produce any specific agronomic or commercial result.\n\nThe service does not replace field inspection, laboratory quality control, local professional judgement, or your own responsibility for farm decisions.',
+  },
+  {
+    title: '14. Service Availability',
+    body: 'We aim to keep CropDrive.ai available and functioning properly, but we do not guarantee uninterrupted service, continuous availability, or error-free operation.\n\nThe platform may be updated, changed, interrupted, delayed, or temporarily unavailable at any time.',
+  },
+  {
+    title: '15. Accuracy of User Inputs',
+    body: 'You are responsible for ensuring that the files and information you upload are accurate, lawful, and relevant. You must not upload false, misleading, manipulated, harmful, illegal, or unauthorized material.',
+  },
+  {
+    title: '16. Proper Use',
+    body: 'You agree not to misuse the service. This includes attempting to interfere with the platform, bypass limits, upload malicious files, scrape the system, use another person\'s account without permission, or use the service in any unlawful or abusive manner.',
+  },
+  {
+    title: '17. Intellectual Property',
+    body: 'CropDrive.ai, including its software, workflows, design, analysis methods, written outputs, data structures, and related content, remains the property of CropDrive.ai or its licensors, except for materials you lawfully upload.\n\nYou keep your rights in the files you upload. You grant CropDrive.ai the right to process, store, analyze, and use those files and their agronomic content as described in these Terms.',
+  },
+  {
+    title: '18. Suspension or Termination',
+    body: 'We may suspend, restrict, or terminate access to CropDrive.ai if we believe these Terms have been breached, if the service is being misused, if account information is false, if uploads are unauthorized, or if suspension is needed for legal, security, operational, or technical reasons.',
+  },
+  {
+    title: '19. Data Retention and Deletion',
+    body: 'We may retain uploaded files, agronomic data, account records, logs, and service communications for as long as reasonably necessary to operate the service, maintain security, resolve disputes, improve the platform, meet legal obligations, and preserve aggregate analytical datasets.\n\nYou may request account closure or deletion of your personal contact data, subject to legal, technical, audit, backup, and operational limitations.\n\nAggregate or anonymized data that no longer identifies you may continue to be retained and used.',
+  },
+  {
+    title: '20. Changes to These Terms',
+    body: 'We may update these Terms from time to time. If we make material changes, we may notify you through the platform, by WhatsApp, or by email. Continued use of CropDrive.ai after an update means you accept the updated Terms.',
+  },
+  {
+    title: '21. Limitation of Liability',
+    body: 'To the fullest extent permitted by law, CropDrive.ai and its operators are not liable for indirect, incidental, special, consequential, or business losses arising from use of the service, including loss of profit, loss of yield, loss of data, loss of opportunity, or decisions made based on platform outputs.\n\nUse of the service is at your own risk.',
+  },
+  {
+    title: '22. Governing Language',
+    body: 'If these Terms are translated into another language, the English version controls in case of inconsistency, unless local law requires otherwise.',
+  },
+  {
+    title: '23. Contact',
+    body: 'If you have questions, need support, want to report a bug, want to request additional uploads, or want to raise a data-related concern, you may contact CropDrive.ai through the contact details provided on the platform.',
+  },
+];
+
 export default function RegisterPage() {
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
+  const termsScrollRef = useRef<HTMLDivElement>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -56,6 +154,30 @@ export default function RegisterPage() {
 
   const { language, t } = useTranslation(mounted ? currentLanguage : 'en');
   const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
+
+  const handleOpenTermsModal = () => {
+    if (!agreeToTerms) setHasScrolledToBottom(false);
+    setShowTermsModal(true);
+  };
+
+  const handleTermsScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 50;
+    if (atBottom) setHasScrolledToBottom(true);
+  };
+
+  const handleAcceptTerms = () => {
+    if (!hasScrolledToBottom) {
+      toast.error(copy('Please scroll through and read the full Terms and Conditions before accepting.', 'Sila tatal dan baca keseluruhan Terma dan Syarat sebelum menerima.'));
+      return;
+    }
+    setAgreeToTerms(true);
+    setShowTermsModal(false);
+  };
+
+  const handleCloseTermsModal = () => {
+    setShowTermsModal(false);
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -213,6 +335,116 @@ export default function RegisterPage() {
               </motion.p>
             </div>
           </motion.div>
+
+          {/* Terms & Conditions Modal */}
+          {showTermsModal && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="terms-modal-title"
+            >
+              {/* Backdrop */}
+              <div
+                className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                onClick={handleCloseTermsModal}
+              />
+              {/* Modal card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.25 }}
+                className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col overflow-hidden"
+                style={{ maxHeight: '90vh' }}
+              >
+                {/* Modal Header */}
+                <div className="px-5 xs:px-6 sm:px-8 pt-5 xs:pt-6 pb-4 border-b border-gray-200 flex items-start justify-between gap-4">
+                  <div>
+                    <h3 id="terms-modal-title" className="text-lg xs:text-xl font-black text-gray-900">
+                      {copy('Terms and Conditions of Use', 'Terma dan Syarat Penggunaan')}
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {copy('Scroll to the bottom, then click Accept.', 'Tatal ke bawah, kemudian klik Terima.')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCloseTermsModal}
+                    className="shrink-0 text-gray-400 hover:text-gray-600 transition-colors mt-1"
+                    aria-label="Close"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Scrollable Terms Body */}
+                <div
+                  ref={termsScrollRef}
+                  onScroll={handleTermsScroll}
+                  className="overflow-y-auto flex-1 px-5 xs:px-6 sm:px-8 py-4"
+                >
+                  {TERMS_SECTIONS.map((section, idx) => (
+                    <div key={idx} className="mb-5">
+                      <h4 className="text-sm font-black text-gray-900 mb-1">{section.title}</h4>
+                      {section.body.split('\n\n').map((para, pIdx) => (
+                        <p key={pIdx} className="text-xs xs:text-sm text-gray-700 mb-2 leading-relaxed">{para}</p>
+                      ))}
+                    </div>
+                  ))}
+                  <p className="text-xs text-gray-400 text-center italic py-2">
+                    {copy('— End of Terms and Conditions —', '— Akhir Terma dan Syarat —')}
+                  </p>
+                </div>
+
+                {/* Scroll status banner */}
+                {!hasScrolledToBottom ? (
+                  <div className="px-5 xs:px-6 sm:px-8 py-2 bg-yellow-50 border-t border-yellow-200 flex items-center gap-2">
+                    <svg className="w-4 h-4 text-yellow-600 shrink-0 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    <p className="text-xs text-yellow-700 font-semibold">
+                      {copy('Please scroll to the bottom to enable acceptance.', 'Sila tatal ke bawah untuk mengaktifkan penerimaan.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="px-5 xs:px-6 sm:px-8 py-2 bg-green-50 border-t border-green-200 flex items-center gap-2">
+                    <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4 text-green-600 shrink-0" />
+                    <p className="text-xs text-green-700 font-semibold">
+                      {copy('You have read the full Terms and Conditions.', 'Anda telah membaca keseluruhan Terma dan Syarat.')}
+                    </p>
+                  </div>
+                )}
+
+                {/* Modal Footer */}
+                <div className="px-5 xs:px-6 sm:px-8 py-4 border-t border-gray-200 flex flex-col xs:flex-row gap-3">
+                  <motion.button
+                    type="button"
+                    onClick={handleAcceptTerms}
+                    disabled={!hasScrolledToBottom}
+                    className="flex-1 bg-gradient-to-r from-green-600 to-green-700 text-white font-black py-3 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wide text-sm flex items-center justify-center gap-2"
+                    whileHover={hasScrolledToBottom ? { scale: 1.02 } : {}}
+                    whileTap={hasScrolledToBottom ? { scale: 0.98 } : {}}
+                  >
+                    <FontAwesomeIcon icon={faCheckCircle} className="w-4 h-4" />
+                    {copy('I Accept', 'Saya Terima')}
+                  </motion.button>
+                  <motion.button
+                    type="button"
+                    onClick={handleCloseTermsModal}
+                    className="flex-1 xs:flex-none bg-gray-100 text-gray-700 font-bold py-3 px-5 rounded-xl hover:bg-gray-200 transition-all text-sm flex items-center justify-center gap-2 border border-gray-200"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <FontAwesomeIcon icon={faTimesCircle} className="w-4 h-4" />
+                    {copy('Close', 'Tutup')}
+                  </motion.button>
+                </div>
+              </motion.div>
+            </div>
+          )}
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -382,24 +614,51 @@ export default function RegisterPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-start">
-                    <input
-                      type="checkbox"
-                      id="agreeToTerms"
-                      checked={agreeToTerms}
-                      onChange={(e) => setAgreeToTerms(e.target.checked)}
-                      className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 mt-1 cursor-pointer"
-                    />
-                    <label htmlFor="agreeToTerms" className="ml-2 text-sm text-gray-700">
-                      {copy('I agree to the', 'Saya bersetuju dengan')}{' '}
-                      <Link href="/terms" className="text-green-700 hover:text-green-800 font-bold">
-                        {copy('Terms of Service', 'Syarat Perkhidmatan')}
-                      </Link>
+                  <div className="flex items-start gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (agreeToTerms) {
+                          setAgreeToTerms(false);
+                        } else {
+                          handleOpenTermsModal();
+                        }
+                      }}
+                      className="mt-0.5 shrink-0 w-5 h-5 rounded border-2 flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-green-400"
+                      style={{
+                        backgroundColor: agreeToTerms ? '#16a34a' : 'white',
+                        borderColor: agreeToTerms ? '#16a34a' : '#d1d5db',
+                      }}
+                      aria-checked={agreeToTerms}
+                      role="checkbox"
+                      aria-label={copy('Agree to Terms and Conditions', 'Bersetuju dengan Terma dan Syarat')}
+                    >
+                      {agreeToTerms && (
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </button>
+                    <p className="text-sm text-gray-700">
+                      {copy('I have read and agree to the', 'Saya telah membaca dan bersetuju dengan')}{' '}
+                      <button
+                        type="button"
+                        onClick={handleOpenTermsModal}
+                        className="text-green-700 hover:text-green-800 font-bold underline transition-colors"
+                      >
+                        {copy('Terms and Conditions', 'Terma dan Syarat')}
+                      </button>
                       {' '}{copy('and', 'dan')}{' '}
-                      <Link href="/privacy" className="text-green-700 hover:text-green-800 font-bold">
+                      <Link href="/privacy" className="text-green-700 hover:text-green-800 font-bold underline">
                         {copy('Privacy Policy', 'Dasar Privasi')}
                       </Link>
-                    </label>
+                      {agreeToTerms && (
+                        <span className="ml-2 inline-flex items-center gap-1 text-green-700 font-semibold text-xs">
+                          <FontAwesomeIcon icon={faCheckCircle} className="w-3.5 h-3.5" />
+                          {copy('Accepted', 'Diterima')}
+                        </span>
+                      )}
+                    </p>
                   </div>
 
                   <motion.button
