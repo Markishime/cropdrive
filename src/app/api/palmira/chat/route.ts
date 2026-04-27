@@ -3,6 +3,7 @@ import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { adminAuth, adminDb } from '@/lib/firebase-admin';
 import { getMembershipAdmin, canAccessPalmira } from '@/lib/membership-admin';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { toIndonesianText } from '@/i18n/id';
 
 // Using adminDb from firebase-admin
 
@@ -290,15 +291,16 @@ function tokenizeForSearch(input: string): string[] {
   ).slice(0, 24);
 }
 
-async function retrieveRelevantKnowledgeBase(userMessage: string, language: 'en' | 'ms'): Promise<KnowledgeBaseRef[]> {
+async function retrieveRelevantKnowledgeBase(userMessage: string, language: 'en' | 'ms' | 'id'): Promise<KnowledgeBaseRef[]> {
   const terms = tokenizeForSearch(userMessage);
   let snapshot;
 
   try {
+    const langFilter = language === 'id' ? ['id', 'ms', 'both'] : [language, 'both'];
     snapshot = await adminDb
       .collection('palmira_knowledge_base')
       .where('isActive', '==', true)
-      .where('language', 'in', [language, 'both'])
+      .where('language', 'in', langFilter)
       .limit(40)
       .get();
   } catch {
@@ -502,7 +504,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate AI response using Google Gemini (use truncated finalMessage to avoid oversized prompts)
-    const promptLanguage: 'en' | 'ms' = onboardingData?.language === 'ms' ? 'ms' : 'en';
+    const promptLanguage: 'en' | 'ms' | 'id' = onboardingData?.language === 'ms' ? 'ms' : onboardingData?.language === 'id' ? 'id' : 'en';
     const knowledgeBaseRefs = await retrieveRelevantKnowledgeBase(finalMessage, promptLanguage);
 
     const aiResponseRaw = await generateAIResponse(
@@ -596,12 +598,12 @@ function buildSystemPrompt(
   const userType = onboardingData?.userType || 'farmer';
   const conversationStyle = onboardingData?.conversationStyle || 'short_direct';
 
-  const completenessRule = language === 'ms'
+  const completenessRule = (language === 'ms' || language === 'id')
     ? `KETEPATAN DAN KELENGKAPAN (WAJIB): Jawab soalan pengguna SEPENUHNYA dan dengan tepat. Jika pengguna minta terangkan langkah 1 hingga 5, berikan SEMUA langkah 1, 2, 3, 4, dan 5—jangan berhenti di langkah 1 atau beri jawapan separa. Baca soalan dengan teliti dan lengkapkan setiap bahagian yang diminta.`
     : `ACCURACY AND COMPLETENESS (MANDATORY): Answer the user's question FULLY and correctly. If the user asks to explain steps 1 to 5, cover ALL steps 1, 2, 3, 4, and 5—do not stop at step 1 or give a partial answer. Read the question carefully and address every part requested.`;
 
   const styleInstructions: Record<string, string> = {
-    short_direct: language === 'ms'
+    short_direct: (language === 'ms' || language === 'id')
       ? `MODE SEMASA: SHORT DIRECT (Ringkas & Langsung)
 Anda MESTI menjawab dalam gaya SHORT sahaja. Setiap respons:
 1. Langsung ke titik. Maksimum 8 ayat. Tiada perenggan panjang.
@@ -616,7 +618,7 @@ You MUST respond in SHORT style only. Every response:
 3. DO NOT ask follow-up questions unless strictly necessary.
 4. Answer the question asked FULLY (if they ask for A through E, cover all).
 OUTPUT: Plain prose only, up to 8 sentences.`,
-    checklist_only: language === 'ms'
+    checklist_only: (language === 'ms' || language === 'id')
       ? `MODE SEMASA: CHECKLIST ONLY (Senarai Semak Sahaja)
 Anda MESTI menjawab dalam gaya CHECKLIST sahaja. Tiada lain.
 1. Setiap respons WAJIB senarai semak sahaja. JANGAN guna perenggan, ayat berterusan, atau penjelasan panjang.
@@ -631,7 +633,7 @@ You MUST respond in CHECKLIST style only. Nothing else.
 3. Include ALL items needed to answer the question fully. If the user asks for steps 1–6, provide Item 1, 2, 3, 4, 5, 6. No limit on number of items—complete the answer.
 4. Do not start with a paragraph—go straight to the checklist. Start with Item 1.
 OUTPUT: Checklist only, complete.`,
-    diagnostic_interview: language === 'ms'
+    diagnostic_interview: (language === 'ms' || language === 'id')
       ? `MODE SEMASA: DIAGNOSTIC INTERVIEW (Temu Bual Diagnostik)
 Anda MESTI menjawab dalam gaya DIAGNOSTIC sahaja. Setiap respons mestilah salah satu:
 A) SATU soalan sahaja – untuk mendapat maklumat (jangan tanya lebih satu soalan dalam satu mesej).
@@ -646,7 +648,7 @@ In diagnostic mode, when you are explaining, use paragraphs and answer FULLY—d
 Flow: Ask one question → wait for answer → either one follow-up question OR your complete answer in paragraph form (never checklist).`,
   };
   const styleBlock = (styleInstructions[conversationStyle] ?? styleInstructions.short_direct)
-    + (language === 'ms'
+    + ((language === 'ms' || language === 'id')
       ? `\n\nINGAT: Respons ini MESTI mengikut MODE SEMASA di atas. Jangan langgar format.`
       : `\n\nREMEMBER: This response MUST follow the CURRENT MODE above. Do not break the format.`);
 
@@ -664,7 +666,7 @@ Flow: Ask one question → wait for answer → either one follow-up question OR 
       : 'FORMAT RULES (MANDATORY):\n- Do NOT use markdown headings. In checklist mode, output MUST be checklist "Item N: ..." only. Include all items needed.';
 
   // Comprehensive knowledge base about CropDrive system
-  const systemKnowledge = language === 'ms'
+  const systemKnowledge = (language === 'ms' || language === 'id')
     ? `
 ## PENGETAHUAN SISTEM CROPDRIVE
 
@@ -883,7 +885,7 @@ My principles:
 `;
 
   // Get user type for personalization
-  const userTypeLabel = language === 'ms'
+  const userTypeLabel = (language === 'ms' || language === 'id')
     ? (userType === 'smallholder' ? 'petani kecil' : 
        userType === 'estate' ? 'kakitangan estet' : 
        userType === 'dealer' ? 'pemborong' :
@@ -895,7 +897,7 @@ My principles:
        userType === 'researcher' ? 'penyelidik' : 'pengguna')
     : userType;
 
-  let prompt = language === 'ms'
+  let prompt = (language === 'ms' || language === 'id')
     ? `Anda adalah Palmira, pembantu agronomi AI yang bekerja dengan CropDrive, dibangunkan dan diuruskan oleh AGS (Agriculture Global Solutions). Anda pakar dalam agronomi kelapa sawit Malaysia dan membantu petani, kakitangan estet, dan profesional pertanian dengan nasihat pakar mengenai penanaman kelapa sawit, pengurusan perosak, penyakit, pembajaan, dan pengoptimuman hasil.
 
 PERSONALITI ANDA:
@@ -981,14 +983,14 @@ ${systemKnowledge}`;
       reportText += '\n\nSummary: ' + reportData.summary;
     }
     
-    prompt += language === 'ms'
+    prompt += (language === 'ms' || language === 'id')
       ? `\n\nLaporan aktif pengguna:\n${reportText || JSON.stringify(reportData, null, 2)}\n\nGunakan maklumat dari laporan ini untuk memberikan jawapan yang lebih tepat. Bantu pengguna memahami hasil analisis, terangkan tahap nutrien, dan cadangkan tindakan berdasarkan cadangan AI dalam laporan. Baca SEMUA kandungan laporan dengan teliti dan jawab berdasarkan soalan pengguna.`
       : `\n\nUser's active report:\n${reportText || JSON.stringify(reportData, null, 2)}\n\nUse information from this report to provide more accurate answers. Help the user understand the analysis results, explain nutrient levels, and suggest actions based on the AI recommendations in the report. Read ALL report content carefully and respond based on the user's question.`;
   }
   
   // Check if PDF context is provided
   if (pdfContext && pdfFileName) {
-    prompt += language === 'ms'
+    prompt += (language === 'ms' || language === 'id')
       ? `\n\n🚨 KECEMASAN - DOKUMEN PDF DILAMPIRKAN - WAJIB GUNA!
 Pengguna telah melampirkan dokumen PDF: "${pdfFileName}"
 
@@ -1025,9 +1027,13 @@ CRITICAL: PDF content will be provided in the user message between "=== PDF CONT
       })
       .join('\n\n');
 
-    prompt += language === 'ms'
+    prompt += (language === 'ms' || language === 'id')
       ? `\n\nRujukan pangkalan pengetahuan yang relevan telah disediakan. Gunakan maklumat ini untuk memberikan jawapan yang konsisten dan tepat.\n\n${knowledgeContext}`
       : `\n\nRelevant knowledge base references have been provided. Use this information to provide consistent and accurate answers.\n\n${knowledgeContext}`;
+  }
+
+  if (language === 'id') {
+    prompt = 'WAJIB: Balas SEMUA mesej dalam Bahasa Indonesia yang baku. Jangan gunakan Bahasa Melayu Malaysia. Gunakan istilah pertanian Indonesia yang tepat (contoh: ISPO bukan MPOB, kebun bukan ladang, unggah bukan muat naik).\n\n' + toIndonesianText(prompt);
   }
 
   return prompt;
@@ -1257,7 +1263,9 @@ INSTRUCTIONS:
 
     // Fallback response
     const language = onboardingData?.language || 'en';
-    const fallbackResponse = language === 'ms'
+    const fallbackResponse = language === 'id'
+      ? 'Maaf, Palmira mengalami kesalahan saat memproses pertanyaan Anda. Silakan coba lagi dalam beberapa saat.'
+      : language === 'ms'
       ? 'Maaf, Palmira menghadapi ralat semasa memproses soalan anda. Sila cuba lagi dalam beberapa saat.'
       : 'Palmira ran into a problem while processing your question. Please try again in a moment.';
 

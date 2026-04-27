@@ -181,7 +181,7 @@ export default function AssistantPage() {
         
         if (!analysisDoc.exists()) {
           console.error('❌ Analysis not found:', analysisIdToLoad);
-          toast.error(language === 'ms' ? 'Analisis tidak dijumpai' : 'Analysis not found');
+          toast.error(language === 'id' ? 'Analisis tidak ditemukan' : language === 'ms' ? 'Analisis tidak dijumpai' : 'Analysis not found');
           setAnalysisIdToLoad(null);
           return;
         }
@@ -195,7 +195,7 @@ export default function AssistantPage() {
         const analysisUserId = analysisData.userId || analysisData.user_id;
         if (!analysisUserId) {
           console.error('❌ Analysis has no userId field');
-          toast.error(language === 'ms' ? 'Data analisis tidak sah' : 'Invalid analysis data');
+          toast.error(language === 'id' ? 'Data analisis tidak valid' : language === 'ms' ? 'Data analisis tidak sah' : 'Invalid analysis data');
           setAnalysisIdToLoad(null);
           return;
         }
@@ -211,7 +211,7 @@ export default function AssistantPage() {
             match: analysisUserIdStr === currentUserIdStr,
             analysisDataKeys: Object.keys(analysisData)
           });
-          toast.error(language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
+          toast.error(language === 'id' ? 'Anda tidak memiliki akses ke analisis ini' : language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
           setAnalysisIdToLoad(null);
           return;
         }
@@ -245,7 +245,7 @@ export default function AssistantPage() {
         console.log('✅ Analysis data fetched and processed');
       } catch (error) {
         console.error('❌ Error fetching analysis:', error);
-        toast.error(language === 'ms' ? 'Ralat memuatkan analisis' : 'Error loading analysis');
+        toast.error(language === 'id' ? 'Kesalahan memuat analisis' : language === 'ms' ? 'Ralat memuatkan analisis' : 'Error loading analysis');
         setAnalysisIdToLoad(null);
       }
     };
@@ -297,7 +297,7 @@ export default function AssistantPage() {
       
       console.log('✅ Sent analysis data in multiple formats');
       setAnalysisDataLoaded(true);
-      toast.success(language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
+      toast.success(language === 'id' ? 'Analisis dimuat dalam Asisten AI' : language === 'ms' ? 'Analisis dimuatkan dalam Pembantu AI' : 'Analysis loaded in AI Assistant');
       
       // Don't clear URL parameter immediately - let iframe read it first
       // Clear it after a delay
@@ -351,7 +351,7 @@ export default function AssistantPage() {
         setTimeout(trySend, delay);
       } else {
         console.error('❌ Failed to send analysis data after', maxAttempts, 'attempts');
-        toast.error(language === 'ms' ? 'Gagal memuatkan analisis. Sila cuba lagi.' : 'Failed to load analysis. Please try again.');
+        toast.error(language === 'id' ? 'Gagal memuat analisis. Silakan coba lagi.' : language === 'ms' ? 'Gagal memuatkan analisis. Sila cuba lagi.' : 'Failed to load analysis. Please try again.');
       }
     };
     
@@ -687,7 +687,7 @@ export default function AssistantPage() {
           const firebaseUser = auth.currentUser;
           if (!firebaseUser || !firebaseUser.uid) {
             console.error('❌ No authenticated user found:', { firebaseUser });
-            toast.error(language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
+            toast.error(language === 'id' ? 'Sesi habis. Silakan masuk kembali.' : language === 'ms' ? 'Sesi tamat. Sila log masuk semula.' : 'Session expired. Please login again.');
             return;
           }
 
@@ -785,11 +785,13 @@ export default function AssistantPage() {
               // Verify we got the expected data
               if (!result.reportId) {
                 console.error('❌ API returned success but no reportId:', result);
-                toast.error(language === 'ms' ? 'Ralat: ID laporan tidak ditemui.' : 'Error: Report ID not found.');
+                toast.error(language === 'id' ? 'Kesalahan: ID laporan tidak ditemukan.' : language === 'ms' ? 'Ralat: ID laporan tidak ditemui.' : 'Error: Report ID not found.');
               }
               
               toast.success(
-                language === 'ms' 
+                language === 'id'
+                  ? '✅ Laporan analisis telah disimpan!'
+                  : language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
                   : '✅ Analysis report saved!',
                 {
@@ -820,7 +822,7 @@ export default function AssistantPage() {
                   }
                 } catch (refreshError: any) {
                   console.error('❌ Error refreshing user data:', refreshError);
-                  toast.error(language === 'ms' ? 'Ralat menyegar data pengguna' : 'Error refreshing user data');
+                  toast.error(language === 'id' ? 'Kesalahan menyegarkan data pengguna' : language === 'ms' ? 'Ralat menyegar data pengguna' : 'Error refreshing user data');
                 }
               } else {
                 console.warn('⚠️ refreshUser function not available');
@@ -868,7 +870,9 @@ export default function AssistantPage() {
                 const remaining = result.uploadsLimit === -1 ? 'unlimited' : result.uploadsLimit - result.uploadsUsed;
                 console.log(`📊 Upload status: ${result.uploadsUsed}/${result.uploadsLimit}, Remaining: ${remaining}`);
                 toast(
-                  language === 'ms' 
+                  language === 'id'
+                    ? `📊 Sisa analisis: ${remaining === 'unlimited' ? '∞' : remaining}`
+                    : language === 'ms' 
                     ? `📊 Baki analisis: ${remaining === 'unlimited' ? '∞' : remaining}`
                     : `📊 Remaining analyses: ${remaining === 'unlimited' ? '∞' : remaining}`,
                   { duration: 3000 }
@@ -880,7 +884,9 @@ export default function AssistantPage() {
               console.log('❌ Upload limit exceeded:', result);
               // Upload limit exceeded
               toast.error(
-                language === 'ms' 
+                language === 'id'
+                  ? `❌ Batas laporan tercapai (${result.uploadsUsed}/${result.uploadsLimit}). Maksimum 2 laporan setiap akun.`
+                  : language === 'ms' 
                   ? `❌ Had laporan tercapai (${result.uploadsUsed}/${result.uploadsLimit}). Maksimum 2 laporan setiap akaun.`
                   : `❌ Report limit reached (${result.uploadsUsed}/${result.uploadsLimit}). Maximum 2 reports per account.`,
                 { duration: 6000 }
@@ -906,7 +912,9 @@ export default function AssistantPage() {
               if (response.ok && !result.success) {
                 console.error('❌ API returned ok but success=false:', result);
                 toast.error(
-                  language === 'ms' 
+                  language === 'id'
+                    ? `❌ Kesalahan menyimpan laporan: ${result.error || result.details || 'Unknown error'}`
+                    : language === 'ms' 
                     ? `❌ Ralat menyimpan laporan: ${result.error || result.details || 'Unknown error'}`
                     : `❌ Error saving report: ${result.error || result.details || 'Unknown error'}`,
                   { duration: 5000 }
@@ -929,7 +937,7 @@ export default function AssistantPage() {
               
               if (!userDocSnap.exists()) {
                 console.error('❌ User document not found in Firestore:', currentUserId);
-                toast.error(language === 'ms' ? 'Profil pengguna tidak ditemui.' : 'User profile not found.');
+                toast.error(language === 'id' ? 'Profil pengguna tidak ditemukan.' : language === 'ms' ? 'Profil pengguna tidak ditemui.' : 'User profile not found.');
                 return;
               }
               
@@ -943,7 +951,9 @@ export default function AssistantPage() {
 
               if (!userEmail || !whatsappNumber || !countryRegion) {
                 toast.error(
-                  language === 'ms'
+                  language === 'id'
+                    ? 'Lengkapi Email, nomor WhatsApp, dan Negara/Wilayah di profil Anda sebelum membuat laporan.'
+                    : language === 'ms'
                     ? 'Lengkapkan Emel, nombor WhatsApp, dan Negara/Wilayah di profil anda sebelum jana laporan.'
                     : 'Complete Email, WhatsApp number, and Country/Region in your profile before generating reports.',
                   { duration: 7000 }
@@ -960,7 +970,9 @@ export default function AssistantPage() {
               snap2.forEach((d) => uniqueReportIds.add(d.id));
               if (uniqueReportIds.size >= 2) {
                 toast.error(
-                  language === 'ms'
+                  language === 'id'
+                    ? 'Batas maksimum 2 laporan per akun telah tercapai.'
+                    : language === 'ms'
                     ? 'Maksimum 2 laporan setiap akaun telah dicapai.'
                     : 'Maximum 2 reports per account has been reached.',
                   { duration: 7000 }
@@ -971,7 +983,9 @@ export default function AssistantPage() {
               // Check upload limit first
               if (uploadsLimit !== -1 && uploadsUsed >= uploadsLimit) {
                 toast.error(
-                  language === 'ms' 
+                  language === 'id'
+                    ? `❌ Batas laporan tercapai (${uploadsUsed}/${uploadsLimit}). Maksimum 2 laporan setiap akun.`
+                    : language === 'ms' 
                     ? `❌ Had laporan tercapai (${uploadsUsed}/${uploadsLimit}). Maksimum 2 laporan setiap akaun.`
                     : `❌ Report limit reached (${uploadsUsed}/${uploadsLimit}). Maximum 2 reports per account.`,
                   { duration: 6000 }
@@ -1016,7 +1030,9 @@ export default function AssistantPage() {
               }
               
               toast.success(
-                language === 'ms' 
+                language === 'id'
+                  ? '✅ Laporan analisis telah disimpan!'
+                  : language === 'ms' 
                   ? '✅ Laporan analisis telah disimpan!' 
                   : '✅ Analysis report saved!',
                 {
@@ -1090,7 +1106,9 @@ export default function AssistantPage() {
             } catch (firestoreError: any) {
               console.error('❌ Error saving report directly to Firestore:', firestoreError);
               toast.error(
-                language === 'ms' 
+                language === 'id'
+                  ? `Kesalahan menyimpan laporan: ${firestoreError.message || 'Unknown error'}`
+                  : language === 'ms' 
                   ? `Ralat menyimpan laporan: ${firestoreError.message || 'Unknown error'}` 
                   : `Error saving report: ${firestoreError.message || 'Unknown error'}`
               );
@@ -1126,7 +1144,9 @@ export default function AssistantPage() {
 
         // Handle feature restriction notifications
         if (data.type === 'FEATURE_RESTRICTED') {
-          const message = language === 'ms'
+          const message = language === 'id'
+            ? 'Fitur ini sementara tidak tersedia dalam mode gratis.'
+            : language === 'ms'
             ? 'Ciri ini sementara tidak tersedia dalam mod percuma.'
             : 'This feature is currently unavailable in free mode.';
           
@@ -1237,7 +1257,7 @@ export default function AssistantPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">
-            {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+            {language === 'id' ? 'Memuat...' : language === 'ms' ? 'Memuatkan...' : 'Loading...'}
           </p>
         </div>
       </div>

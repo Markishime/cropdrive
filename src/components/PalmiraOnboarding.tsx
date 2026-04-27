@@ -25,12 +25,12 @@ interface PalmiraOnboardingProps {
 }
 
 const CUSTOMER_GROUPS = [
-  { id: 'smallholder', label: 'Smallholder Farmer', labelMs: 'Petani Kecil' },
-  { id: 'estate', label: 'Estate Staff', labelMs: 'Kakitangan Estet' },
-  { id: 'dealer', label: 'Agricultural Input Dealer/Reseller', labelMs: 'Peniaga Input Pertanian/Penjual Semula' },
-  { id: 'student', label: 'Student', labelMs: 'Pelajar' },
-  { id: 'lab', label: 'Agricultural Lab Staff', labelMs: 'Kakitangan Makmal Pertanian' },
-  { id: 'academic', label: 'Academic', labelMs: 'Ahli Akademik' },
+  { id: 'smallholder', label: 'Smallholder Farmer', labelMs: 'Petani Kecil', labelId: 'Petani Kecil' },
+  { id: 'estate', label: 'Estate Staff', labelMs: 'Kakitangan Estet', labelId: 'Staf Kebun' },
+  { id: 'dealer', label: 'Agricultural Input Dealer/Reseller', labelMs: 'Peniaga Input Pertanian/Penjual Semula', labelId: 'Penyalur Input Pertanian/Pengecer' },
+  { id: 'student', label: 'Student', labelMs: 'Pelajar', labelId: 'Pelajar' },
+  { id: 'lab', label: 'Agricultural Lab Staff', labelMs: 'Kakitangan Makmal Pertanian', labelId: 'Staf Laboratorium Pertanian' },
+  { id: 'academic', label: 'Academic', labelMs: 'Ahli Akademik', labelId: 'Akademisi' },
 ];
 
 const CONVERSATION_STYLES = [
@@ -38,22 +38,28 @@ const CONVERSATION_STYLES = [
     id: 'diagnostic_interview',
     label: 'Diagnostic Interview',
     labelMs: 'Temu Bual Diagnostik',
+    labelId: 'Wawancara Diagnostik',
     description: 'Bot asks all required questions first, then gives step-by-step checklists',
     descriptionMs: 'Bot bertanya semua soalan yang diperlukan terlebih dahulu, kemudian memberikan senarai semak langkah demi langkah',
+    descriptionId: 'Bot menanyakan semua pertanyaan yang diperlukan terlebih dahulu, kemudian memberikan daftar periksa langkah demi langkah',
   },
   {
     id: 'checklist_only',
     label: 'Checklist Only',
     labelMs: 'Senarai Semak Sahaja',
+    labelId: 'Hanya Daftar Periksa',
     description: 'Fewer questions, direct checklist output',
     descriptionMs: 'Kurang soalan, output senarai semak langsung',
+    descriptionId: 'Lebih sedikit pertanyaan, langsung output daftar periksa',
   },
   {
     id: 'short_direct',
     label: 'Short Direct Answers',
     labelMs: 'Jawapan Ringkas dan Langsung',
+    labelId: 'Jawaban Singkat dan Langsung',
     description: 'Brief answers in short steps',
     descriptionMs: 'Jawapan ringkas dalam langkah pendek',
+    descriptionId: 'Jawaban singkat dalam langkah-langkah pendek',
   },
 ];
 
@@ -71,7 +77,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
   const handleSubmit = async () => {
     if (!customerGroup || !conversationStyle) {
       toast.error(
-        selectedLanguage === 'ms'
+        selectedLanguage === 'id'
+          ? 'Harap lengkapi semua informasi yang diperlukan'
+          : selectedLanguage === 'ms'
           ? 'Sila lengkapkan semua maklumat yang diperlukan'
           : 'Please complete all required information'
       );
@@ -80,7 +88,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
 
     if (!consentTranscripts || !consentFarmProfile) {
       toast.error(
-        selectedLanguage === 'ms'
+        selectedLanguage === 'id'
+          ? 'Harap berikan persetujuan untuk semua pilihan yang diperlukan'
+          : selectedLanguage === 'ms'
           ? 'Sila berikan persetujuan untuk semua pilihan yang diperlukan'
           : 'Please provide consent for all required options'
       );
@@ -118,7 +128,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
       }
 
       toast.success(
-        selectedLanguage === 'ms'
+        selectedLanguage === 'id'
+          ? 'Pendaftaran berhasil! Selamat datang di Palmira.'
+          : selectedLanguage === 'ms'
           ? 'Pendaftaran berjaya! Selamat datang ke Palmira.'
           : 'Registration successful! Welcome to Palmira.'
       );
@@ -127,7 +139,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
     } catch (error: any) {
       console.error('Error saving onboarding:', error);
       toast.error(
-        selectedLanguage === 'ms'
+        selectedLanguage === 'id'
+          ? 'Kesalahan menyimpan informasi. Silakan coba lagi.'
+          : selectedLanguage === 'ms'
           ? 'Ralat menyimpan maklumat. Sila cuba lagi.'
           : 'Error saving information. Please try again.'
       );
@@ -167,7 +181,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
             />
           </motion.div>
           <h1 className="text-3xl font-black text-green-900 mb-2">
-            {selectedLanguage === 'ms' ? 'Mula' : 'Getting Started'}
+            {selectedLanguage === 'id' ? 'Mulai' : selectedLanguage === 'ms' ? 'Mula' : 'Getting Started'}
           </h1>
         </div>
 
@@ -213,10 +227,12 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
               >
                 <div>
                   <h2 className="text-2xl font-bold text-green-900 mb-2">
-                    {selectedLanguage === 'ms' ? 'Pilih Bahasa Anda' : 'Select Your Language'}
+                    {selectedLanguage === 'id' ? 'Pilih Bahasa Anda' : selectedLanguage === 'ms' ? 'Pilih Bahasa Anda' : 'Select Your Language'}
                   </h2>
                   <p className="text-gray-600 mb-6">
-                    {selectedLanguage === 'ms'
+                    {selectedLanguage === 'id'
+                      ? 'Pilih bahasa pilihan Anda untuk Palmira.'
+                      : selectedLanguage === 'ms'
                       ? 'Pilih bahasa pilihan anda untuk Palmira.'
                       : 'Choose your preferred language for Palmira.'}
                   </p>
@@ -255,6 +271,23 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         <div className="w-5 h-5 rounded-full bg-green-600 border-4 border-green-200"></div>
                       )}
                     </label>
+                    <label className="flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all hover:border-green-400">
+                      <input
+                        type="radio"
+                        name="language"
+                        value="id"
+                        checked={selectedLanguage === 'id'}
+                        onChange={() => setSelectedLanguage('id')}
+                        className="w-5 h-5 text-green-600 mr-4"
+                      />
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900">Bahasa Indonesia</div>
+                        <div className="text-sm text-gray-600">Gunakan Bahasa Indonesia untuk semua interaksi.</div>
+                      </div>
+                      {selectedLanguage === 'id' && (
+                        <div className="w-5 h-5 rounded-full bg-green-600 border-4 border-green-200"></div>
+                      )}
+                    </label>
                   </div>
                 </div>
 
@@ -262,10 +295,10 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                   <Button
                     onClick={() => setStep(2)}
                     className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2"
-                    title={selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
-                    aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
+                    title={selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
+                    aria-label={selectedLanguage === 'id' ? 'Selanjutnya ke langkah berikutnya' : selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
-                    <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
+                    <span>{selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
                     <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
@@ -283,10 +316,12 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
               >
                 <div>
                   <h2 className="text-2xl font-bold text-green-900 mb-2">
-                    {selectedLanguage === 'ms' ? 'Pilih Kumpulan Pelanggan Anda' : 'Select Your Customer Group'}
+                    {selectedLanguage === 'id' ? 'Pilih Kelompok Pelanggan Anda' : selectedLanguage === 'ms' ? 'Pilih Kumpulan Pelanggan Anda' : 'Select Your Customer Group'}
                   </h2>
                   <p className="text-gray-600 mb-6">
-                    {selectedLanguage === 'ms'
+                    {selectedLanguage === 'id'
+                      ? 'Bantu kami menyesuaikan pengalaman Anda'
+                      : selectedLanguage === 'ms'
                       ? 'Bantu kami menyesuaikan pengalaman anda'
                       : 'Help us personalize your experience'}
                   </p>
@@ -305,7 +340,7 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                           className="w-5 h-5 text-green-600 mr-4"
                         />
                         <div className="flex-1 font-medium text-gray-900">
-                          {selectedLanguage === 'ms' ? group.labelMs : group.label}
+                          {selectedLanguage === 'id' ? group.labelId : selectedLanguage === 'ms' ? group.labelMs : group.label}
                         </div>
                         {customerGroup === group.id && (
                           <div className="w-5 h-5 rounded-full bg-green-600 border-4 border-green-200"></div>
@@ -330,10 +365,10 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     onClick={() => setStep(3)}
                     disabled={!customerGroup}
                     className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
-                    title={selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
-                    aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
+                    title={selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
+                    aria-label={selectedLanguage === 'id' ? 'Selanjutnya ke langkah berikutnya' : selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
-                    <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
+                    <span>{selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
                     <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
@@ -351,10 +386,12 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
               >
                 <div>
                   <h2 className="text-2xl font-bold text-green-900 mb-2">
-                    {selectedLanguage === 'ms' ? 'Pilih Gaya Perbualan' : 'Select Conversation Style'}
+                    {selectedLanguage === 'id' ? 'Pilih Gaya Percakapan' : selectedLanguage === 'ms' ? 'Pilih Gaya Perbualan' : 'Select Conversation Style'}
                   </h2>
                   <p className="text-gray-600 mb-6">
-                    {selectedLanguage === 'ms'
+                    {selectedLanguage === 'id'
+                      ? 'Bagaimana Anda ingin berinteraksi dengan Palmira?'
+                      : selectedLanguage === 'ms'
                       ? 'Bagaimanakah anda ingin berinteraksi dengan Palmira?'
                       : 'How would you like to interact with Palmira?'}
                   </p>
@@ -378,10 +415,10 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         />
                         <div className="flex-1">
                           <div className="font-semibold text-gray-900 mb-1">
-                            {selectedLanguage === 'ms' ? style.labelMs : style.label}
+                            {selectedLanguage === 'id' ? style.labelId : selectedLanguage === 'ms' ? style.labelMs : style.label}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {selectedLanguage === 'ms' ? style.descriptionMs : style.description}
+                            {selectedLanguage === 'id' ? style.descriptionId : selectedLanguage === 'ms' ? style.descriptionMs : style.description}
                           </div>
                         </div>
                         {conversationStyle === style.id && (
@@ -407,10 +444,10 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     onClick={() => setStep(4)}
                     disabled={!conversationStyle}
                     className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
-                    title={selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
-                    aria-label={selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
+                    title={selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}
+                    aria-label={selectedLanguage === 'id' ? 'Selanjutnya ke langkah berikutnya' : selectedLanguage === 'ms' ? 'Seterusnya ke langkah seterusnya' : 'Next step'}
                   >
-                    <span>{selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
+                    <span>{selectedLanguage === 'id' ? 'Selanjutnya' : selectedLanguage === 'ms' ? 'Seterusnya' : 'Next'}</span>
                     <FontAwesomeIcon icon={faArrowRight} className="w-4 h-4" />
                   </Button>
                 </div>
@@ -428,10 +465,12 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
               >
                 <div>
                   <h2 className="text-2xl font-bold text-green-900 mb-2">
-                    {selectedLanguage === 'ms' ? 'Privasi & Persetujuan Data' : 'Privacy & Data Consent'}
+                    {selectedLanguage === 'id' ? 'Privasi & Persetujuan Data' : selectedLanguage === 'ms' ? 'Privasi & Persetujuan Data' : 'Privacy & Data Consent'}
                   </h2>
                   <p className="text-gray-600 mb-6">
-                    {selectedLanguage === 'ms'
+                    {selectedLanguage === 'id'
+                      ? 'Privasi Anda penting bagi kami'
+                      : selectedLanguage === 'ms'
                       ? 'Privasi anda penting bagi kami'
                       : 'Your privacy matters to us'}
                   </p>
@@ -439,7 +478,9 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     <label className="flex items-start justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
                       <div className="flex-1">
                         <div className="font-semibold text-gray-900 mb-1">
-                          {selectedLanguage === 'ms'
+                          {selectedLanguage === 'id'
+                            ? 'Simpan transkrip percakapan untuk referensi masa depan'
+                            : selectedLanguage === 'ms'
                             ? 'Simpan transkrip sembang untuk rujukan masa hadapan'
                             : 'Save chat transcripts for future reference'}
                         </div>
@@ -449,14 +490,16 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         checked={consentTranscripts}
                         onChange={e => setConsentTranscripts(e.target.checked)}
                         className="toggle-switch"
-                        aria-label={selectedLanguage === 'ms' ? 'Simpan transkrip sembang' : 'Save chat transcripts'}
+                        aria-label={selectedLanguage === 'id' ? 'Simpan transkrip percakapan' : selectedLanguage === 'ms' ? 'Simpan transkrip sembang' : 'Save chat transcripts'}
                       />
                     </label>
 
                     <label className="flex items-start justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
                       <div className="flex-1">
                         <div className="font-semibold text-gray-900 mb-1">
-                          {selectedLanguage === 'ms'
+                          {selectedLanguage === 'id'
+                            ? 'Simpan data profil kebun'
+                            : selectedLanguage === 'ms'
                             ? 'Simpan data profil ladang'
                             : 'Save farm profile data'}
                         </div>
@@ -466,14 +509,16 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         checked={consentFarmProfile}
                         onChange={e => setConsentFarmProfile(e.target.checked)}
                         className="toggle-switch"
-                        aria-label={selectedLanguage === 'ms' ? 'Simpan data profil ladang' : 'Save farm profile data'}
+                        aria-label={selectedLanguage === 'id' ? 'Simpan data profil kebun' : selectedLanguage === 'ms' ? 'Simpan data profil ladang' : 'Save farm profile data'}
                       />
                     </label>
 
                     <label className="flex items-start justify-between p-4 rounded-xl border-2 border-gray-200 hover:border-gray-300 cursor-pointer">
                       <div className="flex-1">
                         <div className="font-semibold text-gray-900 mb-1">
-                          {selectedLanguage === 'ms'
+                          {selectedLanguage === 'id'
+                            ? 'Izinkan penggunaan transkrip anonim untuk peningkatan internal'
+                            : selectedLanguage === 'ms'
                             ? 'Benarkan penggunaan transkrip tanpa nama untuk penambahbaikan dalaman'
                             : 'Allow use of anonymized transcripts for internal improvement'}
                         </div>
@@ -483,12 +528,14 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                         checked={consentAnonymized}
                         onChange={e => setConsentAnonymized(e.target.checked)}
                         className="toggle-switch"
-                        aria-label={selectedLanguage === 'ms' ? 'Benarkan penggunaan transkrip tanpa nama' : 'Allow anonymized transcripts'}
+                        aria-label={selectedLanguage === 'id' ? 'Izinkan transkrip anonim' : selectedLanguage === 'ms' ? 'Benarkan penggunaan transkrip tanpa nama' : 'Allow anonymized transcripts'}
                       />
                     </label>
                   </div>
                   <p className="text-sm text-gray-500 mt-4">
-                    {selectedLanguage === 'ms'
+                    {selectedLanguage === 'id'
+                      ? 'Anda dapat mengubah pengaturan ini kapan saja di profil Anda.'
+                      : selectedLanguage === 'ms'
                       ? 'Anda boleh menukar tetapan ini pada bila-bila masa dalam profil anda.'
                       : 'You can change these settings anytime in your profile.'}
                   </p>
@@ -509,14 +556,18 @@ export default function PalmiraOnboarding({ onComplete, language }: PalmiraOnboa
                     onClick={handleSubmit}
                     disabled={loading || !consentTranscripts || !consentFarmProfile}
                     className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 disabled:opacity-50"
-                    title={loading ? (selectedLanguage === 'ms' ? 'Menyimpan...' : 'Saving...') : (selectedLanguage === 'ms' ? 'Teruskan' : 'Continue')}
-                    aria-label={loading ? (selectedLanguage === 'ms' ? 'Menyimpan...' : 'Saving...') : (selectedLanguage === 'ms' ? 'Teruskan dan selesaikan' : 'Continue and complete')}
+                    title={loading ? (selectedLanguage === 'id' ? 'Menyimpan...' : selectedLanguage === 'ms' ? 'Menyimpan...' : 'Saving...') : (selectedLanguage === 'id' ? 'Lanjutkan' : selectedLanguage === 'ms' ? 'Teruskan' : 'Continue')}
+                    aria-label={loading ? (selectedLanguage === 'id' ? 'Menyimpan...' : selectedLanguage === 'ms' ? 'Menyimpan...' : 'Saving...') : (selectedLanguage === 'id' ? 'Lanjutkan dan selesaikan' : selectedLanguage === 'ms' ? 'Teruskan dan selesaikan' : 'Continue and complete')}
                   >
                     <span>
                       {loading
-                        ? selectedLanguage === 'ms'
+                        ? selectedLanguage === 'id'
+                          ? 'Menyimpan...'
+                          : selectedLanguage === 'ms'
                           ? 'Menyimpan...'
                           : 'Saving...'
+                        : selectedLanguage === 'id'
+                        ? 'Lanjutkan'
                         : selectedLanguage === 'ms'
                         ? 'Teruskan'
                         : 'Continue'}
