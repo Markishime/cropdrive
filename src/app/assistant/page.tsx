@@ -205,15 +205,37 @@ export default function AssistantPage() {
         const currentUserIdStr = String(currentUserId);
         
         if (analysisUserIdStr !== currentUserIdStr) {
-          console.error('❌ Unauthorized access to analysis', {
-            analysisUserId: analysisUserIdStr,
-            currentUserId: currentUserIdStr,
-            match: analysisUserIdStr === currentUserIdStr,
-            analysisDataKeys: Object.keys(analysisData)
-          });
-          toast.error(language === 'id' ? 'Anda tidak memiliki akses ke analisis ini' : language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
-          setAnalysisIdToLoad(null);
-          return;
+          // Before rejecting, check if the current user is an admin
+          // (admins are allowed to view any user's analysis via the admin panel)
+          try {
+            const adminToken = await auth.currentUser?.getIdToken();
+            if (adminToken) {
+              const adminCheckRes = await fetch('/api/admin/check', {
+                headers: { Authorization: `Bearer ${adminToken}` },
+              });
+              const adminCheckData = await adminCheckRes.json();
+              if (adminCheckData?.isAdmin) {
+                console.log('✅ Admin access: bypassing ownership check');
+                // Fall through — admin can proceed
+              } else {
+                console.error('❌ Unauthorized access to analysis', {
+                  analysisUserId: analysisUserIdStr,
+                  currentUserId: currentUserIdStr,
+                });
+                toast.error(language === 'id' ? 'Anda tidak memiliki akses ke analisis ini' : language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
+                setAnalysisIdToLoad(null);
+                return;
+              }
+            } else {
+              setAnalysisIdToLoad(null);
+              return;
+            }
+          } catch (adminCheckError) {
+            console.error('Error checking admin status:', adminCheckError);
+            toast.error(language === 'id' ? 'Anda tidak memiliki akses ke analisis ini' : language === 'ms' ? 'Anda tidak mempunyai akses kepada analisis ini' : 'You do not have access to this analysis');
+            setAnalysisIdToLoad(null);
+            return;
+          }
         }
         
         console.log('✅ Authorization check passed');

@@ -13,6 +13,7 @@ import {
   faBookOpen,
   faChartLine,
   faFolderOpen,
+  faFlask,
   faSpinner,
   faArrowRight,
 } from '@fortawesome/free-solid-svg-icons';
@@ -109,6 +110,13 @@ export default function AdminHubPage() {
       title: t('Subscriber Analytics', 'Analitik Pelanggan'),
       titleMs: 'Analitik Pelanggan',
       desc: t('Track growth and geographic distribution across markets.', 'Jejak pertumbuhan dan taburan geografi merentas pasaran.'),
+    },
+    {
+      href: '/admin/analysis-history',
+      icon: faFlask,
+      title: t('Analysis History', 'Sejarah Analisis'),
+      titleMs: 'Sejarah Analisis',
+      desc: t('View all users\' analysis results and download PDF reports.', 'Lihat semua keputusan analisis pengguna dan muat turun laporan PDF.'),
     },
   ];
 
