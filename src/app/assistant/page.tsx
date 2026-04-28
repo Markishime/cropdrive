@@ -112,46 +112,13 @@ export default function AssistantPage() {
     }
   }, [searchParams]);
 
-  // Check membership using the API (same logic as Palmira page - uses Stripe contract year end)
+  // AI Assistant and Palmira are free for all registered users — no subscription check.
   useEffect(() => {
     if (authLoading || !user) return;
-    
-    const checkMembership = async () => {
-      try {
-        const firebaseUser = auth.currentUser;
-        if (!firebaseUser) return;
-        
-        const token = await firebaseUser.getIdToken();
-        const response = await fetch('/api/membership', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const result = await response.json();
-        
-        if (result?.success) {
-          setIsWithinContract(result.data.isWithinContract);
-          setAssistantAccessAllowed(result.data.canAccessAI !== false);
-          setMembershipUploadLimitReached(!!result.data.hasReachedUploadLimit);
-          if (result.data.contractEndDate) {
-            setContractEndDate(new Date(result.data.contractEndDate));
-          }
-        } else {
-          // If API fails, fallback to local check
-          setIsWithinContract(true);
-          setAssistantAccessAllowed(true);
-          setMembershipUploadLimitReached(false);
-        }
-      } catch (error) {
-        console.error('Error checking membership:', error);
-        // Fallback to allowing access if API fails
-        setIsWithinContract(true);
-        setAssistantAccessAllowed(true);
-        setMembershipUploadLimitReached(false);
-      } finally {
-        setMembershipChecked(true);
-      }
-    };
-    
-    checkMembership();
+    setIsWithinContract(true);
+    setAssistantAccessAllowed(true);
+    setMembershipUploadLimitReached(false);
+    setMembershipChecked(true);
   }, [user, authLoading]);
   
   // Store analysis data to send when iframe is ready
@@ -446,25 +413,10 @@ export default function AssistantPage() {
     };
   }, [currentLang, mounted]);
 
-  // Check if subscription has expired using contract year end from API
-  // Note: This now uses the Stripe contract year end (same as "Full Access Until" on payment page)
-  const isSubscriptionExpired = (): boolean => {
-    if (!user) return false;
-
-    // Use contract-based check from API if available
-    if (membershipChecked) {
-      return !isWithinContract;
-    }
-    
-    // Fallback to local check while API is loading (be permissive)
-    return false;
-  };
-
-  const subscriptionExpired = user && membershipChecked ? isSubscriptionExpired() : false;
-  const subscriptionCancelled = user?.subscriptionStatus === 'canceled';
-  const assistantLockedByLimit = Boolean(
-    user && membershipChecked && !subscriptionExpired && membershipUploadLimitReached && !assistantAccessAllowed
-  );
+  // AI Assistant and Palmira are free for all registered users.
+  const subscriptionExpired = false;
+  const subscriptionCancelled = false;
+  const assistantLockedByLimit = false;
 
   useEffect(() => {
     if (!authLoading && !user) {
