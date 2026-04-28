@@ -73,6 +73,10 @@
     "sharp": "^0.34.5",
     "tailwindcss": "^4.2.2"
   },
+  "optionalDependencies": {
+    "@next/swc-linux-x64-gnu": "15.5.15",
+    "@next/swc-linux-x64-musl": "15.5.15"
+  },
   "overrides": {
     "glob": "^10.4.5",
     "fast-xml-parser": "^5.3.4",
