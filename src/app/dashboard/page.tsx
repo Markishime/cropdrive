@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
-import { useTranslation } from '@/i18n';
+import { useTranslation, type Language } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import toast from 'react-hot-toast';
@@ -17,14 +17,14 @@ import { db, auth } from '@/lib/firebase';
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ms'>('en');
+  const [currentLang, setCurrentLang] = useState<Language>('en');
 
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
-    const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+    const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
     setCurrentLang(lang);
   }, []);
 
@@ -79,7 +79,7 @@ export default function DashboardPage() {
   // Listen for language changes
   useEffect(() => {
     const handleStorageChange = () => {
-      const lang = (localStorage.getItem('cropdrive-language') || 'en') as 'en' | 'ms';
+      const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
       setCurrentLang(lang);
     };
     
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-4 bg-white/10 px-4 py-2 rounded-full border border-yellow-400/30"
                   >
-                    {language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
+                    {language === 'id' ? 'Dasbor' : language === 'ms' ? 'Papan Pemuka' : 'Dashboard'}
                   </motion.span>
                   <motion.h1
                     initial={{ opacity: 0, y: 30 }}
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                     transition={{ duration: 0.8, delay: 0.3 }}
                     className="text-4xl sm:text-5xl md:text-6xl font-black text-white mb-4 leading-tight"
                   >
-                    {language === 'ms' ? 'Selamat kembali' : 'Welcome back'},<br />
+                    {language === 'id' ? 'Selamat datang kembali' : language === 'ms' ? 'Selamat kembali' : 'Welcome back'},<br />
                     <span className="text-yellow-400">
                       {user.displayName}!
                     </span>
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                     className="text-lg sm:text-xl text-white/90 max-w-2xl flex items-center gap-2"
                   >
                     <FontAwesomeIcon icon={faWandSparkles} className="w-5 h-5 text-yellow-400" />
-                    {language === 'ms' ? 'Papan pemuka analisis ladang AI anda' : 'Your AI farm analysis dashboard'}
+                    {language === 'id' ? 'Dasbor analisis kebun AI Anda' : language === 'ms' ? 'Papan pemuka analisis ladang AI anda' : 'Your AI farm analysis dashboard'}
                   </motion.p>
                 </div>
 
@@ -309,22 +309,22 @@ export default function DashboardPage() {
                     </div>
                     <div>
                       <p className="text-xs text-white/70 font-semibold uppercase">
-                        {language === 'ms' ? 'Akses Akaun' : 'Account Access'}
+                        {language === 'id' ? 'Akses Akun' : language === 'ms' ? 'Akses Akaun' : 'Account Access'}
                       </p>
                       <p className="text-2xl font-black text-white">
-                        {language === 'ms' ? 'Semua Ciri AI Percuma' : 'All AI Features Are Free'}
+                        {language === 'id' ? 'Semua Fitur AI Gratis' : language === 'ms' ? 'Semua Ciri AI Percuma' : 'All AI Features Are Free'}
                       </p>
                     </div>
                   </div>
                   <div className="text-left md:text-right">
                     <p className="text-sm text-white/80 font-semibold">
-                      {language === 'ms' ? 'Had muat naik laporan:' : 'Report upload limit:'}
+                      {language === 'id' ? 'Batas unggah laporan:' : language === 'ms' ? 'Had muat naik laporan:' : 'Report upload limit:'}
                     </p>
                     <p className="text-3xl font-black text-yellow-400">
                       2
                     </p>
                     <p className="text-xs text-white/70">
-                      {language === 'ms' ? 'setiap pengguna' : 'per user'}
+                      {language === 'id' ? 'setiap pengguna' : language === 'ms' ? 'setiap pengguna' : 'per user'}
                     </p>
                   </div>
                 </div>
@@ -346,13 +346,15 @@ export default function DashboardPage() {
                 <div className="flex items-start justify-between flex-wrap gap-4">
                   <div className="flex-1">
                     <div className="inline-block bg-yellow-400 text-green-900 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider mb-4">
-                      {language === 'ms' ? '✓ Akses Percuma Aktif' : '✓ Free Access Active'}
+                      {language === 'id' ? '✓ Akses Gratis Aktif' : language === 'ms' ? '✓ Akses Percuma Aktif' : '✓ Free Access Active'}
                     </div>
                     <h2 className="text-4xl font-black mb-2">
-                      {language === 'ms' ? 'Akses AI CropDrive' : 'CropDrive AI Access'}
+                      {language === 'id' ? 'Akses AI CropDrive' : language === 'ms' ? 'Akses AI CropDrive' : 'CropDrive AI Access'}
                     </h2>
                     <p className="text-green-100 text-lg">
-                      {language === 'ms'
+                      {language === 'id'
+                        ? 'Website, AI Assistant, dan Palmira kini gratis untuk semua pengguna.'
+                        : language === 'ms'
                         ? 'Laman web, AI Assistant, dan Palmira kini percuma untuk semua pengguna.'
                         : 'The website, AI Assistant, and Palmira are now free for all users.'}
                     </p>
@@ -362,7 +364,7 @@ export default function DashboardPage() {
                       2
                     </div>
                     <div className="text-green-100 text-sm">
-                      {language === 'ms' ? 'maksimum laporan setiap pengguna' : 'maximum reports per user'}
+                      {language === 'id' ? 'maksimum laporan setiap pengguna' : language === 'ms' ? 'maksimum laporan setiap pengguna' : 'maximum reports per user'}
                     </div>
                   </div>
                 </div>
@@ -373,7 +375,7 @@ export default function DashboardPage() {
                   <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  {language === 'ms' ? 'Akses & Had Laporan Anda' : 'Your Access & Report Limit'}
+                  {language === 'id' ? 'Akses & Batas Laporan Anda' : language === 'ms' ? 'Akses & Had Laporan Anda' : 'Your Access & Report Limit'}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -385,10 +387,10 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">
-                        {language === 'ms' ? 'Akses Penuh AI & Palmira' : 'Full AI & Palmira Access'}
+                        {language === 'id' ? 'Akses Penuh AI & Palmira' : language === 'ms' ? 'Akses Penuh AI & Palmira' : 'Full AI & Palmira Access'}
                       </p>
                       <p className="text-sm text-green-700 font-medium mt-1">
-                        {language === 'ms' ? 'Percuma untuk semua pengguna berdaftar' : 'Free for all registered users'}
+                        {language === 'id' ? 'Gratis untuk semua pengguna terdaftar' : language === 'ms' ? 'Percuma untuk semua pengguna berdaftar' : 'Free for all registered users'}
                       </p>
                     </div>
                   </div>
@@ -400,10 +402,10 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1">
                       <p className="font-semibold text-gray-900">
-                        {language === 'ms' ? 'Had Muat Naik Laporan' : 'Report Upload Limit'}
+                        {language === 'id' ? 'Batas Unggah Laporan' : language === 'ms' ? 'Had Muat Naik Laporan' : 'Report Upload Limit'}
                       </p>
                       <p className="text-sm text-green-700 font-medium mt-1">
-                        {language === 'ms' ? 'Maksimum 2 laporan bagi setiap pengguna' : 'Maximum of 2 reports per user'}
+                        {language === 'id' ? 'Maksimum 2 laporan per pengguna' : language === 'ms' ? 'Maksimum 2 laporan bagi setiap pengguna' : 'Maximum of 2 reports per user'}
                       </p>
                     </div>
                   </div>
@@ -414,7 +416,7 @@ export default function DashboardPage() {
                     onClick={() => router.push('/assistant')}
                     className="w-full py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold shadow-lg"
                   >
-                    {language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
+                    {language === 'id' ? '🤖 Mulai Analisis AI' : language === 'ms' ? '🤖 Mulakan Analisis AI' : '🤖 Start AI Analysis'}
                   </Button>
                 </div>
               </div>
@@ -444,7 +446,9 @@ export default function DashboardPage() {
                       <span className="text-yellow-400">⚡</span>
                     </h3>
                     <p className="text-white/90 text-sm">
-                      {language === 'ms'
+                      {language === 'id'
+                        ? 'Unggah laporan laboratorium (Gambar/PDF/Excel - SPLAB, farm_test_data) dan dapatkan analisis AI dalam 5-8 menit.'
+                        : language === 'ms'
                         ? 'Muat naik laporan makmal (Gambar/PDF/Excel - SPLAB, farm_test_data) dan dapatkan analisis AI dalam 5-8 minit.'
                         : 'Upload lab reports (Image/PDF/Excel - SPLAB, farm_test_data) and get AI analysis in 5-8 minutes.'
                       }
@@ -456,7 +460,7 @@ export default function DashboardPage() {
                 <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold">
-                      {language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
+                      {language === 'id' ? 'Penggunaan Unggahan' : language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
                     </span>
                     <span className="text-sm font-bold">
                       {uploadsUsed} / {uploadsLimit === -1 ? '∞' : uploadsLimit}
@@ -481,12 +485,14 @@ export default function DashboardPage() {
                   onClick={() => router.push('/assistant')}
                   className="w-full py-4 bg-green-350 text-green-700 hover:bg-gray-50 font-bold shadow-lg"
                 >
-                  {language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
+                  {language === 'id' ? '🤖 Mulai Analisis Sekarang' : language === 'ms' ? '🤖 Mulakan Analisis Sekarang' : '🤖 Start Analysis Now'}
                 </Button>
               ) : (
                 <div>
                   <p className="text-yellow-300 text-sm mb-4 font-semibold bg-yellow-500/20 p-3 rounded-lg">
-                    {language === 'ms'
+                    {language === 'id'
+                      ? '⚠️ Batas 2 unggahan laporan telah tercapai untuk akun ini.'
+                      : language === 'ms'
                       ? '⚠️ Had 2 muat naik laporan telah dicapai untuk akaun ini.'
                       : '⚠️ The 2-report upload limit has been reached for this account.'}
                   </p>
@@ -494,7 +500,7 @@ export default function DashboardPage() {
                     onClick={() => router.push('/reports')}
                     className="w-full py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-500 hover:to-yellow-600 font-bold shadow-lg"
                   >
-                    {language === 'ms' ? '📄 Lihat Laporan Anda' : '📄 View Your Reports'}
+                    {language === 'id' ? '📄 Lihat Laporan Anda' : language === 'ms' ? '📄 Lihat Laporan Anda' : '📄 View Your Reports'}
                   </Button>
                 </div>
               )}

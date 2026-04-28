@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -37,6 +37,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import toast from 'react-hot-toast';
 import type { Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 
 function stripMarkdownHeadingsOutsideCodeBlocks(text: string): string {
   if (!text) return text;
@@ -195,21 +196,19 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
         setSavingConversationStyle(false);
         if (assistantMessageId) {
           toast.success(
-            language === 'ms'
-              ? 'Menjana semula respons dengan gaya baru…'
-              : 'Regenerating response with new style…'
+            language === 'id' ? toIndonesianText('Menjana semula respons dengan gaya baru…') : language === 'ms' ? 'Menjana semula respons dengan gaya baru…' : 'Regenerating response with new style…'
           );
           handleRegenerate(assistantMessageId);
         } else {
           toast.success(
-            language === 'ms' ? 'Gaya jawapan dikemas kini' : 'Answer style updated'
+            language === 'id' ? toIndonesianText('Gaya jawapan dikemas kini') : language === 'ms' ? 'Gaya jawapan dikemas kini' : 'Answer style updated'
           );
         }
       } else throw new Error(result.error);
     } catch (err: any) {
       console.error('Error saving conversation style:', err);
       toast.error(
-        language === 'ms' ? 'Ralat menyimpan gaya' : 'Error saving style'
+        language === 'id' ? toIndonesianText('Ralat menyimpan gaya') : language === 'ms' ? 'Ralat menyimpan gaya' : 'Error saving style'
       );
     } finally {
       setSavingConversationStyle(false);
@@ -254,7 +253,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       }
     } catch (error) {
       console.error('Error loading farm profile:', error);
-      toast.error(language === 'ms' ? 'Ralat memuatkan profil ladang' : 'Error loading farm profile');
+      toast.error(language === 'id' ? toIndonesianText('Ralat memuatkan profil ladang') : language === 'ms' ? 'Ralat memuatkan profil ladang' : 'Error loading farm profile');
     } finally {
       setFarmProfileLoading(false);
     }
@@ -418,7 +417,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: language === 'ms' ? 'Sembang Baharu' : 'New Chat',
+          title: language === 'id' ? 'Chat Baru' : language === 'ms' ? 'Sembang Baharu' : 'New Chat',
           reportId: selectedReport,
         }),
       });
@@ -491,6 +490,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
           pdfUploadId: outgoingPdfUploadId,
           chatId: currentChatId || undefined,
           reportId: selectedReport || undefined,
+          language,
         }),
       });
 
@@ -523,9 +523,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
     } catch (error: any) {
       console.error('Error sending message:', error);
       toast.error(
-        language === 'ms'
-          ? 'Palmira menghadapi ralat semasa memproses soalan anda. Sila cuba lagi dalam beberapa saat.'
-          : 'Palmira ran into an error while processing your question. Please try again in a moment.'
+        language === 'id' ? toIndonesianText('Palmira menghadapi ralat semasa memproses soalan anda. Sila cuba lagi dalam beberapa saat.') : language === 'ms' ? 'Palmira menghadapi ralat semasa memproses soalan anda. Sila cuba lagi dalam beberapa saat.' : 'Palmira ran into an error while processing your question. Please try again in a moment.'
       );
 
       if (!options?.skipUserBubble) {
@@ -545,16 +543,14 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
   const handleLikeMessage = (messageId: string) => {
     setFeedback(prev => ({ ...prev, [messageId]: prev[messageId] === 'like' ? null : 'like' }));
     toast.success(
-      language === 'ms' ? 'Terima kasih atas maklum balas anda!' : 'Thanks for your feedback!'
+      language === 'id' ? 'Terima kasih atas masukan Anda!' : language === 'ms' ? 'Terima kasih atas maklum balas anda!' : 'Thanks for your feedback!'
     );
   };
 
   const handleDislikeMessage = (messageId: string) => {
     setFeedback(prev => ({ ...prev, [messageId]: prev[messageId] === 'dislike' ? null : 'dislike' }));
     toast.success(
-      language === 'ms'
-        ? 'Maklum balas diterima. Kami akan gunakan ini untuk menambah baik Palmira.'
-        : 'Feedback recorded. We’ll use this to improve Palmira.'
+      language === 'id' ? toIndonesianText('Maklum balas diterima. Kami akan gunakan ini untuk menambah baik Palmira.') : language === 'ms' ? 'Maklum balas diterima. Kami akan gunakan ini untuk menambah baik Palmira.' : 'Feedback recorded. We’ll use this to improve Palmira.'
     );
   };
 
@@ -586,6 +582,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               message: previousUserMessage.content,
               chatId: currentChatId || undefined,
               reportId: selectedReport || undefined,
+              language,
             }),
           });
 
@@ -613,9 +610,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
         } catch (error: any) {
           console.error('Error regenerating message:', error);
           toast.error(
-            language === 'ms'
-              ? 'Ralat menjana semula mesej. Sila cuba lagi.'
-              : 'Error regenerating message. Please try again.'
+            language === 'id' ? toIndonesianText('Ralat menjana semula mesej. Sila cuba lagi.') : language === 'ms' ? 'Ralat menjana semula mesej. Sila cuba lagi.' : 'Error regenerating message. Please try again.'
           );
         } finally {
           setLoading(false);
@@ -626,18 +621,14 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
     }
 
     toast.error(
-      language === 'ms'
-        ? 'Tiada mesej pengguna untuk dijana semula.'
-        : 'No previous user message found to regenerate.'
+      language === 'id' ? toIndonesianText('Tiada mesej pengguna untuk dijana semula.') : language === 'ms' ? 'Tiada mesej pengguna untuk dijana semula.' : 'No previous user message found to regenerate.'
     );
   };
 
   const handleExportTranscript = () => {
     if (messages.length === 0) {
       toast.error(
-        language === 'ms'
-          ? 'Tiada mesej untuk dieksport'
-          : 'No messages to export'
+        language === 'id' ? 'Tidak ada pesan untuk diekspor' : language === 'ms' ? 'Tiada mesej untuk dieksport' : 'No messages to export'
       );
       return;
     }
@@ -661,18 +652,14 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
     URL.revokeObjectURL(url);
 
     toast.success(
-      language === 'ms'
-        ? 'Transkrip telah dieksport'
-        : 'Transcript exported'
+      language === 'id' ? toIndonesianText('Transkrip telah dieksport') : language === 'ms' ? 'Transkrip telah dieksport' : 'Transcript exported'
     );
   };
 
   const handleEscalate = async () => {
     if (!currentChatId) {
       toast.error(
-        language === 'ms'
-          ? 'Sila mulakan sembang terlebih dahulu'
-          : 'Please start a chat first'
+        language === 'id' ? toIndonesianText('Sila mulakan sembang terlebih dahulu') : language === 'ms' ? 'Sila mulakan sembang terlebih dahulu' : 'Please start a chat first'
       );
       return;
     }
@@ -694,17 +681,13 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       const result = await response.json();
       if (result.success) {
         toast.success(
-          language === 'ms'
-            ? 'Perbualan anda telah ditandakan untuk susulan manusia'
-            : 'Your conversation has been flagged for human follow-up'
+          language === 'id' ? 'Percakapan Anda telah ditandakan untuk tindak lanjut manusia' : language === 'ms' ? 'Perbualan anda telah ditandakan untuk susulan manusia' : 'Your conversation has been flagged for human follow-up'
         );
       }
     } catch (error) {
       console.error('Error escalating:', error);
       toast.error(
-        language === 'ms'
-          ? 'Ralat menandakan perbualan'
-          : 'Error flagging conversation'
+        language === 'id' ? toIndonesianText('Ralat menandakan perbualan') : language === 'ms' ? 'Ralat menandakan perbualan' : 'Error flagging conversation'
       );
     }
   };
@@ -753,9 +736,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
 
     if (!isValidType) {
       toast.error(
-        language === 'ms'
-          ? 'Jenis fail tidak disokong. Sila pilih PDF, Word, Excel, atau imej.'
-          : 'File type not supported. Please select PDF, Word, Excel, or image.'
+        language === 'id' ? toIndonesianText('Jenis fail tidak disokong. Sila pilih PDF, Word, Excel, atau imej.') : language === 'ms' ? 'Jenis fail tidak disokong. Sila pilih PDF, Word, Excel, atau imej.' : 'File type not supported. Please select PDF, Word, Excel, or image.'
       );
       // Reset file input
       if (fileInputRef.current) {
@@ -773,7 +754,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       try {
         const currentUser = auth.currentUser;
         if (!currentUser) {
-          toast.error(language === 'ms' ? 'Sila log masuk terlebih dahulu' : 'Please log in first');
+          toast.error(language === 'id' ? toIndonesianText('Sila log masuk terlebih dahulu') : language === 'ms' ? 'Sila log masuk terlebih dahulu' : 'Please log in first');
           return;
         }
 
@@ -839,9 +820,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
           } else {
             console.warn('PDF extraction returned very short content');
             toast.error(
-              language === 'ms'
-                ? 'PDF dipproses tetapi kandungan terlalu pendek. Kandungan mungkin tidak boleh dibaca.'
-                : 'PDF processed but content is too short. Content may be unreadable.'
+              language === 'id' ? toIndonesianText('PDF dipproses tetapi kandungan terlalu pendek. Kandungan mungkin tidak boleh dibaca.') : language === 'ms' ? 'PDF dipproses tetapi kandungan terlalu pendek. Kandungan mungkin tidak boleh dibaca.' : 'PDF processed but content is too short. Content may be unreadable.'
             );
             setPdfContext(null);
             setPdfExtractionInfo(null);
@@ -849,9 +828,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
         } else {
           console.warn('PDF extraction returned no content');
           toast.error(
-            language === 'ms'
-              ? 'Tidak dapat mengekstrak kandungan PDF. PDF mungkin rosak atau tidak mengandungi teks.'
-              : 'Could not extract PDF content. PDF may be corrupted or contain no text.'
+            language === 'id' ? toIndonesianText('Tidak dapat mengekstrak kandungan PDF. PDF mungkin rosak atau tidak mengandungi teks.') : language === 'ms' ? 'Tidak dapat mengekstrak kandungan PDF. PDF mungkin rosak atau tidak mengandungi teks.' : 'Could not extract PDF content. PDF may be corrupted or contain no text.'
           );
           setPdfContext(null);
           setPdfExtractionInfo(null);
@@ -859,9 +836,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
       } catch (error: any) {
         console.error('Error extracting PDF:', error);
         toast.error(
-          language === 'ms'
-            ? 'Ralat memproses PDF. Fail akan dihantar tanpa kandungan diekstrak.'
-            : 'Error processing PDF. File will be sent without extracted content.'
+          language === 'id' ? toIndonesianText('Ralat memproses PDF. Fail akan dihantar tanpa kandungan diekstrak.') : language === 'ms' ? 'Ralat memproses PDF. Fail akan dihantar tanpa kandungan diekstrak.' : 'Error processing PDF. File will be sent without extracted content.'
         );
       } finally {
         setExtractingPDF(false);
@@ -925,8 +900,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 <button
                   onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors ml-auto"
-                  title={sidebarCollapsed ? (language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'ms' ? 'Runtuhkan' : 'Collapse')}
-                  aria-label={sidebarCollapsed ? (language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'ms' ? 'Runtuhkan' : 'Collapse')}
+                  title={sidebarCollapsed ? (language === 'id' ? toIndonesianText('Kembangkan') : language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'id' ? toIndonesianText('Runtuhkan') : language === 'ms' ? 'Runtuhkan' : 'Collapse')}
+                  aria-label={sidebarCollapsed ? (language === 'id' ? toIndonesianText('Kembangkan') : language === 'ms' ? 'Kembangkan' : 'Expand') : (language === 'id' ? toIndonesianText('Runtuhkan') : language === 'ms' ? 'Runtuhkan' : 'Collapse')}
                 >
                   <FontAwesomeIcon 
                     icon={sidebarCollapsed ? faChevronRight : faChevronLeft} 
@@ -942,7 +917,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400 }}
-              title={sidebarCollapsed ? (language === 'ms' ? 'Sembang Baharu' : 'New Chat') : undefined}
+              title={sidebarCollapsed ? (language === 'id' ? 'Chat Baru' : language === 'ms' ? 'Sembang Baharu' : 'New Chat') : undefined}
             >
               <motion.div
                 initial={{ rotate: 0 }}
@@ -951,7 +926,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               >
                 <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
               </motion.div>
-              {!sidebarCollapsed && (language === 'ms' ? 'Sembang Baharu' : 'New Chat')}
+              {!sidebarCollapsed && (language === 'id' ? 'Chat Baru' : language === 'ms' ? 'Sembang Baharu' : 'New Chat')}
             </motion.button>
 
             {/* Home Button */}
@@ -965,7 +940,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400 }}
-              title={sidebarCollapsed ? (language === 'ms' ? 'Laman Utama' : 'Home') : undefined}
+              title={sidebarCollapsed ? (language === 'id' ? toIndonesianText('Laman Utama') : language === 'ms' ? 'Laman Utama' : 'Home') : undefined}
             >
               <motion.div
                 animate={{ rotate: showHomepage ? 360 : 0 }}
@@ -973,7 +948,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               >
                 <FontAwesomeIcon icon={faHome} className="w-5 h-5" />
               </motion.div>
-              {!sidebarCollapsed && (language === 'ms' ? 'Laman Utama' : 'Home')}
+              {!sidebarCollapsed && (language === 'id' ? toIndonesianText('Laman Utama') : language === 'ms' ? 'Laman Utama' : 'Home')}
             </motion.button>
 
 
@@ -981,7 +956,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             <div className="flex-1 overflow-y-auto px-2 sm:px-4 py-2 min-h-0">
               {!sidebarCollapsed && (
                 <div className="text-xs font-bold text-gray-500 uppercase mb-2 font-heading">
-                  {language === 'ms' ? 'Sejarah' : 'History'}
+                  {language === 'id' ? toIndonesianText('Sejarah') : language === 'ms' ? 'Sejarah' : 'History'}
                 </div>
               )}
               <div className="space-y-1">
@@ -1001,7 +976,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                           : 'hover:bg-gray-100 text-gray-700'
                       }`}
                       title={chat.title}
-                      aria-label={`${language === 'ms' ? 'Buka sembang' : 'Open chat'}: ${chat.title}`}
+                      aria-label={`${language === 'id' ? 'Buka chat' : language === 'ms' ? 'Buka sembang' : 'Open chat'}: ${chat.title}`}
                     >
                       <FontAwesomeIcon icon={faMessage} className="w-4 h-4 flex-shrink-0" />
                       {!sidebarCollapsed && (
@@ -1022,7 +997,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         setShowDeleteModal(true);
                       }}
                       className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 rounded transition-all"
-                      title={language === 'ms' ? 'Padam sembang' : 'Delete chat'}
+                      title={language === 'id' ? 'Hapus chat' : language === 'ms' ? 'Padam sembang' : 'Delete chat'}
                     >
                       <FontAwesomeIcon icon={faTrash} className="w-4 h-4 text-red-500" />
                     </button>
@@ -1037,11 +1012,11 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 onClick={loadFarmProfile}
                 disabled={farmProfileLoading}
                 className={`w-full ${sidebarCollapsed ? 'px-2 py-2 justify-center' : 'px-4 py-2'} text-left rounded-lg hover:bg-gray-100 flex items-center gap-3 text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
-                title={language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
-                aria-label={language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
+                title={language === 'id' ? toIndonesianText('Profil Ladang') : language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
+                aria-label={language === 'id' ? toIndonesianText('Profil Ladang') : language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
               >
                 <FontAwesomeIcon icon={faSeedling} className="w-5 h-5 flex-shrink-0" />
-                {!sidebarCollapsed && (language === 'ms' ? 'Profil Ladang' : 'Farm Profile')}
+                {!sidebarCollapsed && (language === 'id' ? toIndonesianText('Profil Ladang') : language === 'ms' ? 'Profil Ladang' : 'Farm Profile')}
               </button>
               {/* Knowledge base removed (per product decision) */}
             </div>
@@ -1058,14 +1033,14 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <button
                 onClick={() => setSidebarOpen(true)}
                 className="p-2 hover:bg-gray-100 rounded-lg"
-                title={language === 'ms' ? 'Buka menu sisi' : 'Open sidebar'}
-                aria-label={language === 'ms' ? 'Buka menu sisi' : 'Open sidebar'}
+                title={language === 'id' ? 'Buka menu samping' : language === 'ms' ? 'Buka menu sisi' : 'Open sidebar'}
+                aria-label={language === 'id' ? 'Buka menu samping' : language === 'ms' ? 'Buka menu sisi' : 'Open sidebar'}
               >
                 <FontAwesomeIcon icon={faMessage} className="w-5 h-5 text-gray-600" />
               </button>
             )}
             <h2 className="font-bold text-gray-900 font-heading">
-              {currentChat?.title || (language === 'ms' ? 'Sembang Baharu' : 'New Chat')}
+              {currentChat?.title || (language === 'id' ? 'Chat Baru' : language === 'ms' ? 'Sembang Baharu' : 'New Chat')}
             </h2>
           </div>
 
@@ -1073,8 +1048,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             <button
               onClick={() => setShowSearch(true)}
               className="p-2 hover:bg-gray-100 rounded-lg"
-              title={language === 'ms' ? 'Cari' : 'Search'}
-              aria-label={language === 'ms' ? 'Cari' : 'Search'}
+              title={language === 'id' ? toIndonesianText('Cari') : language === 'ms' ? 'Cari' : 'Search'}
+              aria-label={language === 'id' ? toIndonesianText('Cari') : language === 'ms' ? 'Cari' : 'Search'}
             >
               <FontAwesomeIcon icon={faSearch} className="w-5 h-5 text-gray-600" />
             </button>
@@ -1082,8 +1057,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             <button
               onClick={() => setShowKeyboardShortcuts(true)}
               className="p-2 hover:bg-gray-100 rounded-lg"
-              title={language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
-              aria-label={language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
+              title={language === 'id' ? 'Pintasan Keyboard' : language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
+              aria-label={language === 'id' ? 'Pintasan Keyboard' : language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
             >
               <FontAwesomeIcon icon={faBars} className="w-5 h-5 text-gray-600" />
             </button>
@@ -1099,17 +1074,15 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               >
                 <FontAwesomeIcon icon={faMapMarkerAlt} className="w-4 h-4" />
                 {selectedFarm
-                  ? farms.find(f => f.id === selectedFarm)?.name || (language === 'ms' ? 'Pilih Ladang' : 'Select Farm')
-                  : language === 'ms'
-                  ? 'Pilih Ladang'
-                  : 'Select Farm'}
+                  ? farms.find(f => f.id === selectedFarm)?.name || (language === 'id' ? toIndonesianText('Pilih Ladang') : language === 'ms' ? 'Pilih Ladang' : 'Select Farm')
+                  : language === 'id' ? toIndonesianText('Pilih Ladang') : language === 'ms' ? 'Pilih Ladang' : 'Select Farm'}
                 <FontAwesomeIcon icon={faChevronDown} className="w-4 h-4" />
               </button>
               {showFarmDropdown && (
                 <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
                   {farms.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
-                      {language === 'ms' ? 'Tiada ladang tersedia' : 'No farms available'}
+                      {language === 'id' ? 'Tidak ada kebun tersedia' : language === 'ms' ? 'Tiada ladang tersedia' : 'No farms available'}
                     </div>
                   ) : (
                     farms.map(farm => (
@@ -1145,17 +1118,15 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               >
                 <FontAwesomeIcon icon={faFileAlt} className="w-4 h-4" />
                 {selectedReport
-                  ? reports.find(r => r.id === selectedReport)?.title || (language === 'ms' ? 'Pilih Laporan' : 'Select Report')
-                  : language === 'ms'
-                  ? 'Pilih Laporan'
-                  : 'Select Report'}
+                  ? reports.find(r => r.id === selectedReport)?.title || (language === 'id' ? toIndonesianText('Pilih Laporan') : language === 'ms' ? 'Pilih Laporan' : 'Select Report')
+                  : language === 'id' ? toIndonesianText('Pilih Laporan') : language === 'ms' ? 'Pilih Laporan' : 'Select Report'}
                 <FontAwesomeIcon icon={faChevronDown} className="w-4 h-4" />
               </button>
               {showReportDropdown && (
                 <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-60 overflow-y-auto">
                   {reports.length === 0 ? (
                     <div className="p-3 text-sm text-gray-500">
-                      {language === 'ms' ? 'Tiada laporan tersedia' : 'No reports available'}
+                      {language === 'id' ? 'Tidak ada laporan tersedia' : language === 'ms' ? 'Tiada laporan tersedia' : 'No reports available'}
                     </div>
                   ) : (
                     reports.map(report => (
@@ -1186,7 +1157,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             <button
               onClick={handleExportTranscript}
               className="p-2 hover:bg-gray-100 rounded-lg"
-              title={language === 'ms' ? 'Eksport Transkrip' : 'Export Transcript'}
+              title={language === 'id' ? toIndonesianText('Eksport Transkrip') : language === 'ms' ? 'Eksport Transkrip' : 'Export Transcript'}
             >
               <FontAwesomeIcon icon={faDownload} className="w-5 h-5 text-gray-600" />
             </button>
@@ -1197,7 +1168,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               className="px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
             >
               <FontAwesomeIcon icon={faExclamationTriangle} className="w-4 h-4" />
-              {language === 'ms' ? 'Eskalasi' : 'Escalate'}
+              {language === 'id' ? toIndonesianText('Eskalasi') : language === 'ms' ? 'Eskalasi' : 'Escalate'}
             </button>
 
           </div>
@@ -1235,7 +1206,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3, duration: 0.5 }}
                 >
-                  {language === 'ms' ? 'Selamat Datang,' : 'Welcome back,'} {user?.displayName || user?.email?.split('@')[0] || 'User'}!
+                  {language === 'id' ? toIndonesianText('Selamat Datang,') : language === 'ms' ? 'Selamat Datang,' : 'Welcome back,'} {user?.displayName || user?.email?.split('@')[0] || 'User'}!
                 </motion.h1>
                 <motion.p
                   className="text-base text-green-700 font-medium mb-1"
@@ -1243,7 +1214,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35, duration: 0.5 }}
                 >
-                  {language === 'ms' ? 'Palmira sedia membantu anda.' : 'Palmira is ready to help.'}
+                  {language === 'id' ? toIndonesianText('Palmira sedia membantu anda.') : language === 'ms' ? 'Palmira sedia membantu anda.' : 'Palmira is ready to help.'}
                 </motion.p>
                 <motion.p
                   className="text-lg text-gray-600 mb-8 max-w-lg mx-auto"
@@ -1252,12 +1223,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   transition={{ delay: 0.4, duration: 0.5 }}
                 >
                   {canAccessAI
-                    ? (language === 'ms'
-                        ? 'Dapatkan pandangan segera tentang laporan tanah dan daun anda, nasihat baja, dan tip praktikal untuk ladang kelapa sawit—semua dalam satu tempat.'
-                        : 'Get instant insights on your soil and leaf reports, fertilizer recommendations, and practical tips for your oil palm farm—all in one place.')
-                    : (language === 'ms'
-                        ? 'Anda boleh melihat laporan dan sejarah sembang anda. Keahlian diperlukan untuk menggunakan Palmira.'
-                        : 'You can view your reports and chat history. Membership is required to use Palmira.')}
+                    ? (language === 'id' ? toIndonesianText('Dapatkan pandangan segera tentang laporan tanah dan daun anda, nasihat baja, dan tip praktikal untuk ladang kelapa sawit—semua dalam satu tempat.') : language === 'ms' ? 'Dapatkan pandangan segera tentang laporan tanah dan daun anda, nasihat baja, dan tip praktikal untuk ladang kelapa sawit—semua dalam satu tempat.' : 'Get instant insights on your soil and leaf reports, fertilizer recommendations, and practical tips for your oil palm farm—all in one place.')
+                    : (language === 'id' ? toIndonesianText('Anda boleh melihat laporan dan sejarah sembang anda. Keahlian diperlukan untuk menggunakan Palmira.') : language === 'ms' ? 'Anda boleh melihat laporan dan sejarah sembang anda. Keahlian diperlukan untuk menggunakan Palmira.' : 'You can view your reports and chat history. Membership is required to use Palmira.')}
                 </motion.p>
                 <motion.div
                   className="grid grid-cols-1 md:grid-cols-2 gap-6"
@@ -1285,12 +1252,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         <FontAwesomeIcon icon={faMessage} className="w-8 h-8 text-green-600 mx-auto mb-3 group-hover:text-green-700" />
                       </motion.div>
                       <h3 className="font-bold text-gray-900 mb-2 font-heading">
-                        {language === 'ms' ? 'Mulakan Sembang' : 'Start a Chat'}
+                        {language === 'id' ? toIndonesianText('Mulakan Sembang') : language === 'ms' ? 'Mulakan Sembang' : 'Start a Chat'}
                       </h3>
                       <p className="text-sm text-gray-600">
-                        {language === 'ms'
-                          ? 'Tanya Palmira tentang nutrien, cadangan baja, atau langkah seterusnya—dapatkan jawapan serta-merta.'
-                          : 'Ask Palmira about nutrients, fertilizer advice, or next steps—get answers in seconds.'}
+                        {language === 'id' ? toIndonesianText('Tanya Palmira tentang nutrien, cadangan baja, atau langkah seterusnya—dapatkan jawapan serta-merta.') : language === 'ms' ? 'Tanya Palmira tentang nutrien, cadangan baja, atau langkah seterusnya—dapatkan jawapan serta-merta.' : 'Ask Palmira about nutrients, fertilizer advice, or next steps—get answers in seconds.'}
                       </p>
                     </motion.button>
                   ) : (
@@ -1301,12 +1266,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     >
                       <FontAwesomeIcon icon={faMessage} className="w-8 h-8 text-gray-400 mx-auto mb-3" />
                       <h3 className="font-bold text-gray-500 mb-2 font-heading">
-                        {language === 'ms' ? 'Sembang AI Terhad' : 'AI Chat Restricted'}
+                        {language === 'id' ? 'Chat AI Terbatas' : language === 'ms' ? 'Sembang AI Terhad' : 'AI Chat Restricted'}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        {language === 'ms'
-                          ? 'Memerlukan keahlian aktif'
-                          : 'Requires active membership'}
+                        {language === 'id' ? toIndonesianText('Memerlukan keahlian aktif') : language === 'ms' ? 'Memerlukan keahlian aktif' : 'Requires active membership'}
                       </p>
                     </motion.div>
                   )}
@@ -1328,12 +1291,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       <FontAwesomeIcon icon={faFileAlt} className="w-8 h-8 text-green-600 mx-auto mb-3 group-hover:text-green-700" />
                     </motion.div>
                     <h3 className="font-bold text-gray-900 mb-2 font-heading">
-                      {language === 'ms' ? 'Lihat Laporan' : 'View Reports'}
+                      {language === 'id' ? toIndonesianText('Lihat Laporan') : language === 'ms' ? 'Lihat Laporan' : 'View Reports'}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      {language === 'ms'
-                        ? 'Semak dan bandingkan analisis tanah dan daun anda—semua dalam satu tempat.'
-                        : 'Review and compare your soil and leaf analyses—all in one place.'}
+                      {language === 'id' ? toIndonesianText('Semak dan bandingkan analisis tanah dan daun anda—semua dalam satu tempat.') : language === 'ms' ? 'Semak dan bandingkan analisis tanah dan daun anda—semua dalam satu tempat.' : 'Review and compare your soil and leaf analyses—all in one place.'}
                     </p>
                   </motion.button>
                 </motion.div>
@@ -1375,7 +1336,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
                     >
-                      {language === 'ms' ? 'Selamat datang ke Palmira!' : 'Welcome to Palmira!'}
+                      {language === 'id' ? toIndonesianText('Selamat datang ke Palmira!') : language === 'ms' ? 'Selamat datang ke Palmira!' : 'Welcome to Palmira!'}
                     </motion.h2>
                     <motion.p
                       className="text-base text-gray-600 mb-6"
@@ -1383,9 +1344,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4 }}
                     >
-                      {language === 'ms'
-                        ? 'Mula perbualan dengan menaip mesej di bawah'
-                        : 'Start a conversation by typing a message below'}
+                      {language === 'id' ? toIndonesianText('Mula perbualan dengan menaip mesej di bawah') : language === 'ms' ? 'Mula perbualan dengan menaip mesej di bawah' : 'Start a conversation by typing a message below'}
                     </motion.p>
                     <motion.div
                       className="flex justify-center gap-3"
@@ -1499,11 +1458,11 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                             whileHover={{ scale: 1.1, backgroundColor: '#f3f4f6' }}
                             whileTap={{ scale: 0.95 }}
                             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                            title={language === 'ms' ? 'Salin' : 'Copy'}
-                            aria-label={language === 'ms' ? 'Salin' : 'Copy'}
+                            title={language === 'id' ? toIndonesianText('Salin') : language === 'ms' ? 'Salin' : 'Copy'}
+                            aria-label={language === 'id' ? toIndonesianText('Salin') : language === 'ms' ? 'Salin' : 'Copy'}
                             onClick={() => {
                               navigator.clipboard.writeText(message.content);
-                              toast.success(language === 'ms' ? 'Disalin ke papan keratan' : 'Copied to clipboard');
+                              toast.success(language === 'id' ? toIndonesianText('Disalin ke papan keratan') : language === 'ms' ? 'Disalin ke papan keratan' : 'Copied to clipboard');
                             }}
                           >
                             <FontAwesomeIcon icon={faCopy} className="w-4 h-4 text-gray-600" />
@@ -1514,8 +1473,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                             className={`p-2 rounded-lg transition-colors ${
                               feedback[message.id] === 'like' ? 'bg-green-100' : 'hover:bg-green-100'
                             }`}
-                            title={language === 'ms' ? 'Suka' : 'Like'}
-                            aria-label={language === 'ms' ? 'Suka' : 'Like'}
+                            title={language === 'id' ? toIndonesianText('Suka') : language === 'ms' ? 'Suka' : 'Like'}
+                            aria-label={language === 'id' ? toIndonesianText('Suka') : language === 'ms' ? 'Suka' : 'Like'}
                             onClick={() => handleLikeMessage(message.id)}
                           >
                             <FontAwesomeIcon
@@ -1533,8 +1492,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                                 ? 'bg-red-100'
                                 : 'hover:bg-red-100'
                             }`}
-                            title={language === 'ms' ? 'Tidak suka' : 'Dislike'}
-                            aria-label={language === 'ms' ? 'Tidak suka' : 'Dislike'}
+                            title={language === 'id' ? toIndonesianText('Tidak suka') : language === 'ms' ? 'Tidak suka' : 'Dislike'}
+                            aria-label={language === 'id' ? toIndonesianText('Tidak suka') : language === 'ms' ? 'Tidak suka' : 'Dislike'}
                             onClick={() => handleDislikeMessage(message.id)}
                           >
                             <FontAwesomeIcon
@@ -1548,8 +1507,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                             whileHover={{ scale: 1.1, backgroundColor: '#e0f2fe' }}
                             whileTap={{ scale: 0.95 }}
                             className="p-2 hover:bg-blue-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title={language === 'ms' ? 'Muat semula' : 'Regenerate'}
-                            aria-label={language === 'ms' ? 'Muat semula' : 'Regenerate'}
+                            title={language === 'id' ? 'Buat Ulang' : language === 'ms' ? 'Muat semula' : 'Regenerate'}
+                            aria-label={language === 'id' ? 'Buat Ulang' : language === 'ms' ? 'Muat semula' : 'Regenerate'}
                             disabled={loading && regeneratingMessageId === message.id}
                             onClick={() => handleRegenerate(message.id)}
                           >
@@ -1563,7 +1522,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         </motion.div>
                         <div className="mt-2 pt-2 border-t border-gray-100">
                           <p className="text-xs text-gray-500 mb-1.5">
-                            {language === 'ms' ? 'Gaya jawapan:' : 'Answer style:'}
+                            {language === 'id' ? 'Gaya jawaban:' : language === 'ms' ? 'Gaya jawapan:' : 'Answer style:'}
                           </p>
                           <div className="flex flex-wrap gap-1.5">
                             {CONVERSATION_STYLES.map((style) => (
@@ -1579,9 +1538,9 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                                     ? 'bg-green-600 text-white'
                                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 } disabled:opacity-60`}
-                                title={language === 'ms' ? style.descMs : style.descEn}
+                                title={language === 'id' ? toIndonesianText(style.descMs) : language === 'ms' ? style.descMs : style.descEn}
                               >
-                                {language === 'ms' ? style.labelMs : style.labelEn}
+                                {language === 'id' ? toIndonesianText(style.labelMs) : language === 'ms' ? style.labelMs : style.labelEn}
                               </motion.button>
                             ))}
                           </div>
@@ -1689,21 +1648,21 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   <motion.button
                     onClick={() => fileInputRef.current?.click()}
                     className="p-3 hover:bg-gray-200 rounded-xl transition-colors"
-                    title={language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
-                    aria-label={language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
+                    title={language === 'id' ? toIndonesianText('Lampirkan fail') : language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
+                    aria-label={language === 'id' ? toIndonesianText('Lampirkan fail') : language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
                     whileHover={{ scale: 1.1 }}
                     whileTap={{ scale: 0.95 }}
                   >
                     <FontAwesomeIcon icon={faPaperclip} className="w-5 h-5 text-gray-600" />
                   </motion.button>
                   <label className="hidden">
-                    {language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
+                    {language === 'id' ? toIndonesianText('Lampirkan fail') : language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
                     <input
                       ref={fileInputRef}
                       type="file"
                       className="hidden"
                       accept="application/pdf,.pdf,.doc,.docx,.xlsx,.xls,.jpg,.jpeg,.png,image/jpeg,image/png"
-                      aria-label={language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
+                      aria-label={language === 'id' ? toIndonesianText('Lampirkan fail') : language === 'ms' ? 'Lampirkan fail' : 'Attach file'}
                       onChange={handleFileSelect}
                     />
                   </label>
@@ -1723,7 +1682,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                             }
                           }}
                           className="text-green-700 hover:text-green-900"
-                          title={language === 'ms' ? 'Buang fail' : 'Remove file'}
+                          title={language === 'id' ? toIndonesianText('Buang fail') : language === 'ms' ? 'Buang fail' : 'Remove file'}
                         >
                           <FontAwesomeIcon icon={faTimes} className="w-4 h-4" />
                         </button>
@@ -1756,7 +1715,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       {extractingPDF && (
                         <div className="text-xs text-green-600 font-body flex items-center gap-1">
                           <div className="animate-spin w-3 h-3 border border-green-600 border-t-transparent rounded-full"></div>
-                          {language === 'ms' ? 'Memproses...' : 'Processing...'}
+                          {language === 'id' ? toIndonesianText('Memproses...') : language === 'ms' ? 'Memproses...' : 'Processing...'}
                         </div>
                       )}
                     </div>
@@ -1767,9 +1726,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     onChange={e => setInput(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder={
-                      language === 'ms'
-                        ? 'Taip mesej anda di sini...'
-                        : 'Type your message here...'
+                      language === 'id' ? toIndonesianText('Taip mesej anda di sini...') : language === 'ms' ? 'Taip mesej anda di sini...' : 'Type your message here...'
                     }
                     className="flex-1 px-4 py-3 bg-transparent focus:outline-none resize-none min-h-[52px] max-h-32 placeholder-gray-400 font-body"
                     rows={1}
@@ -1783,8 +1740,8 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                         ? 'bg-green-600 hover:bg-green-700 text-white shadow-md hover:shadow-lg'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
-                    title={language === 'ms' ? 'Hantar mesej' : 'Send message'}
-                    aria-label={language === 'ms' ? 'Hantar mesej' : 'Send message'}
+                    title={language === 'id' ? 'Kirim pesan' : language === 'ms' ? 'Hantar mesej' : 'Send message'}
+                    aria-label={language === 'id' ? 'Kirim pesan' : language === 'ms' ? 'Hantar mesej' : 'Send message'}
                     whileHover={input.trim() && !loading ? { scale: 1.05 } : {}}
                     whileTap={input.trim() && !loading ? { scale: 0.95 } : {}}
                   >
@@ -1799,9 +1756,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 >
                   <p className="text-xs text-gray-500 flex items-center gap-2">
                     <FontAwesomeIcon icon={faRobot} className="w-4 h-4" />
-                    {language === 'ms'
-                      ? 'Palmira boleh membuat kesilapan. Sila semak maklumat penting.'
-                      : 'Palmira can make mistakes. Please check important information.'}
+                    {language === 'id' ? toIndonesianText('Palmira boleh membuat kesilapan. Sila semak maklumat penting.') : language === 'ms' ? 'Palmira boleh membuat kesilapan. Sila semak maklumat penting.' : 'Palmira can make mistakes. Please check important information.'}
                   </p>
                 </motion.div>
               </>
@@ -1830,7 +1785,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     <FontAwesomeIcon icon={faFileAlt} className="w-10 h-10 text-blue-600 mx-auto mb-3" />
                   </motion.div>
                   <h3 className="font-bold text-blue-800 mb-3 text-lg font-heading">
-                    {language === 'ms' ? 'Had Muat Naik Dicapai' : 'Upload Limit Reached'}
+                    {language === 'id' ? toIndonesianText('Had Muat Naik Dicapai') : language === 'ms' ? 'Had Muat Naik Dicapai' : 'Upload Limit Reached'}
                   </h3>
                   <p className="text-sm text-blue-700 leading-relaxed mb-3">
                     {language === 'ms'
@@ -1841,7 +1796,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     onClick={() => router.push('/reports')}
                     className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
                   >
-                    {language === 'ms' ? 'Lihat Laporan' : 'View Reports'}
+                    {language === 'id' ? toIndonesianText('Lihat Laporan') : language === 'ms' ? 'Lihat Laporan' : 'View Reports'}
                   </button>
                 </motion.div>
               </motion.div>
@@ -1871,12 +1826,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     <FontAwesomeIcon icon={faExclamationTriangle} className="w-10 h-10 text-amber-600 mx-auto mb-3" />
                   </motion.div>
                 <h3 className="font-bold text-amber-800 mb-3 text-lg font-heading">
-                  {language === 'ms' ? 'Akses AI Terhad' : 'AI Access Restricted'}
+                  {language === 'id' ? 'Akses AI Terbatas' : language === 'ms' ? 'Akses AI Terhad' : 'AI Access Restricted'}
                 </h3>
                   <p className="text-sm text-amber-700 leading-relaxed">
-                    {language === 'ms'
-                      ? 'Anda memerlukan keahlian aktif untuk menggunakan Palmira. Anda masih boleh melihat laporan dan sejarah sembang anda.'
-                      : 'You need an active membership to use Palmira. You can still view your reports and chat history.'}
+                    {language === 'id' ? toIndonesianText('Anda memerlukan keahlian aktif untuk menggunakan Palmira. Anda masih boleh melihat laporan dan sejarah sembang anda.') : language === 'ms' ? 'Anda memerlukan keahlian aktif untuk menggunakan Palmira. Anda masih boleh melihat laporan dan sejarah sembang anda.' : 'You need an active membership to use Palmira. You can still view your reports and chat history.'}
                   </p>
                   <motion.div
                     className="mt-4 flex justify-center gap-2"
@@ -1922,13 +1875,13 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-gray-900">
-                  {language === 'ms' ? 'Cari dalam Sembang' : 'Search in Chat'}
+                  {language === 'id' ? 'Cari dalam Chat' : language === 'ms' ? 'Cari dalam Sembang' : 'Search in Chat'}
                 </h3>
                 <button
                   onClick={() => setShowSearch(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg"
-                  title={language === 'ms' ? 'Tutup' : 'Close'}
-                  aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                  title={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
+                  aria-label={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
                 >
                   <FontAwesomeIcon icon={faTimes} className="w-5 h-5 text-gray-600" />
                 </button>
@@ -1937,7 +1890,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <div className="mb-4">
                 <input
                   type="text"
-                  placeholder={language === 'ms' ? 'Cari mesej...' : 'Search messages...'}
+                  placeholder={language === 'id' ? toIndonesianText('Cari mesej...') : language === 'ms' ? 'Cari mesej...' : 'Search messages...'}
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
@@ -1948,7 +1901,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <div className="overflow-y-auto max-h-96">
                 {searchQuery && searchResults.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">
-                    {language === 'ms' ? 'Tiada hasil dijumpai' : 'No results found'}
+                    {language === 'id' ? 'Tidak ada hasil' : language === 'ms' ? 'Tiada hasil dijumpai' : 'No results found'}
                   </p>
                 ) : searchResults.length > 0 ? (
                   <motion.div
@@ -1977,7 +1930,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                           <span className={`text-sm font-medium ${
                             message.role === 'user' ? 'text-green-700' : 'text-gray-700'
                           }`}>
-                            {message.role === 'user' ? (language === 'ms' ? 'Anda' : 'You') : 'Palmira'}
+                            {message.role === 'user' ? (language === 'id' ? toIndonesianText('Anda') : language === 'ms' ? 'Anda' : 'You') : 'Palmira'}
                           </span>
                           <span className="text-xs text-gray-500">
                             {new Date(message.createdAt).toLocaleString()}
@@ -1989,7 +1942,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   </motion.div>
                 ) : searchQuery === '' ? (
                   <p className="text-gray-500 text-center py-8">
-                    {language === 'ms' ? 'Taip untuk mencari mesej' : 'Type to search messages'}
+                    {language === 'id' ? 'Ketik untuk mencari pesan' : language === 'ms' ? 'Taip untuk mencari mesej' : 'Type to search messages'}
                   </p>
                 ) : null}
               </div>
@@ -2030,12 +1983,10 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   <FontAwesomeIcon icon={faTrash} className="w-8 h-8 text-red-500" />
                 </motion.div>
                 <h3 className="text-xl font-black text-gray-900 mb-2 font-heading">
-                  {language === 'ms' ? 'Padam Sembang' : 'Delete Chat'}
+                  {language === 'id' ? 'Hapus chat' : language === 'ms' ? 'Padam Sembang' : 'Delete Chat'}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {language === 'ms'
-                    ? 'Adakah anda pasti mahu memadam sembang ini? Tindakan ini tidak boleh dibuat asal.'
-                    : 'Are you sure you want to delete this chat? This action cannot be undone.'
+                  {language === 'id' ? toIndonesianText('Adakah anda pasti mahu memadam sembang ini? Tindakan ini tidak boleh dibuat asal.') : language === 'ms' ? 'Adakah anda pasti mahu memadam sembang ini? Tindakan ini tidak boleh dibuat asal.' : 'Are you sure you want to delete this chat? This action cannot be undone.'
                   }
                 </p>
                 <div className="flex gap-3">
@@ -2045,7 +1996,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {language === 'ms' ? 'Batal' : 'Cancel'}
+                    {language === 'id' ? toIndonesianText('Batal') : language === 'ms' ? 'Batal' : 'Cancel'}
                   </motion.button>
                   <motion.button
                     onClick={async () => {
@@ -2071,20 +2022,20 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                           }
                           setShowDeleteModal(false);
                           setChatToDelete(null);
-                          toast.success(language === 'ms' ? 'Sembang berjaya dipadam' : 'Chat deleted successfully');
+                          toast.success(language === 'id' ? 'Chat berhasil dihapus' : language === 'ms' ? 'Sembang berjaya dipadam' : 'Chat deleted successfully');
                         } else {
-                          toast.error(language === 'ms' ? 'Gagal memadam sembang' : 'Failed to delete chat');
+                          toast.error(language === 'id' ? 'Gagal menghapus chat' : language === 'ms' ? 'Gagal memadam sembang' : 'Failed to delete chat');
                         }
                       } catch (error) {
                         console.error('Error deleting chat:', error);
-                        toast.error(language === 'ms' ? 'Ralat memadam sembang' : 'Error deleting chat');
+                        toast.error(language === 'id' ? 'Kesalahan menghapus chat' : language === 'ms' ? 'Ralat memadam sembang' : 'Error deleting chat');
                       }
                     }}
                     className="flex-1 px-4 py-2 text-white bg-red-600 hover:bg-red-700 rounded-lg font-medium transition-colors"
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                   >
-                    {language === 'ms' ? 'Padam' : 'Delete'}
+                    {language === 'id' ? toIndonesianText('Padam') : language === 'ms' ? 'Padam' : 'Delete'}
                   </motion.button>
                 </div>
               </div>
@@ -2118,13 +2069,13 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-gray-900 flex items-center gap-3 font-heading">
                   <FontAwesomeIcon icon={faSeedling} className="w-6 h-6 text-green-600" />
-                  {language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
+                  {language === 'id' ? toIndonesianText('Profil Ladang') : language === 'ms' ? 'Profil Ladang' : 'Farm Profile'}
                 </h2>
                 <button
                   onClick={() => setShowFarmProfile(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title={language === 'ms' ? 'Tutup' : 'Close'}
-                  aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                  title={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
+                  aria-label={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
                 >
                   <FontAwesomeIcon icon={faTimes} className="w-5 h-5 text-gray-600" />
                 </button>
@@ -2139,7 +2090,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="text-sm font-medium text-gray-500 mb-1">
-                        {language === 'ms' ? 'Jenis Pengguna' : 'User Type'}
+                        {language === 'id' ? toIndonesianText('Jenis Pengguna') : language === 'ms' ? 'Jenis Pengguna' : 'User Type'}
                       </label>
                       <p className="text-gray-900 font-bold capitalize font-body">
                         {onboardingData.userType?.replace('_', ' ') || 'N/A'}
@@ -2147,7 +2098,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="text-sm font-medium text-gray-500 mb-1">
-                        {language === 'ms' ? 'Bahasa' : 'Language'}
+                        {language === 'id' ? toIndonesianText('Bahasa') : language === 'ms' ? 'Bahasa' : 'Language'}
                       </label>
                       <p className="text-gray-900 font-bold uppercase font-body">
                         {onboardingData.language || 'N/A'}
@@ -2155,7 +2106,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="text-sm font-medium text-gray-500 mb-1">
-                        {language === 'ms' ? 'Gaya Perbualan' : 'Conversation Style'}
+                        {language === 'id' ? 'Gaya Percakapan' : language === 'ms' ? 'Gaya Perbualan' : 'Conversation Style'}
                       </label>
                       <p className="text-gray-900 font-bold capitalize font-body">
                         {onboardingData.conversationStyle?.replace('_', ' ') || 'N/A'}
@@ -2163,17 +2114,17 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                     </div>
                     <div className="bg-gray-50 p-4 rounded-lg">
                       <label className="text-sm font-medium text-gray-500 mb-1">
-                        {language === 'ms' ? 'Status' : 'Status'}
+                        {language === 'id' ? toIndonesianText('Status') : language === 'ms' ? 'Status' : 'Status'}
                       </label>
                       <p className="text-gray-900 font-bold font-body">
-                        {onboardingData.completed ? (language === 'ms' ? 'Lengkap' : 'Completed') : (language === 'ms' ? 'Tidak Lengkap' : 'Incomplete')}
+                        {onboardingData.completed ? (language === 'id' ? toIndonesianText('Lengkap') : language === 'ms' ? 'Lengkap' : 'Completed') : (language === 'id' ? toIndonesianText('Tidak Lengkap') : language === 'ms' ? 'Tidak Lengkap' : 'Incomplete')}
                       </p>
                     </div>
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">
                     <h3 className="text-lg font-bold text-gray-900 mb-3 font-heading">
-                      {language === 'ms' ? 'Kebenaran' : 'Consents'}
+                      {language === 'id' ? toIndonesianText('Kebenaran') : language === 'ms' ? 'Kebenaran' : 'Consents'}
                     </h3>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
@@ -2182,7 +2133,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                           className={`w-5 h-5 ${onboardingData.consentTranscripts ? 'text-green-600' : 'text-gray-400'}`} 
                         />
                         <span className="text-gray-700">
-                          {language === 'ms' ? 'Kebenaran Transkrip' : 'Transcript Consent'}
+                          {language === 'id' ? 'Persetujuan Transkrip' : language === 'ms' ? 'Kebenaran Transkrip' : 'Transcript Consent'}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -2191,7 +2142,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                           className={`w-5 h-5 ${onboardingData.consentFarmProfile ? 'text-green-600' : 'text-gray-400'}`} 
                         />
                         <span className="text-gray-700">
-                          {language === 'ms' ? 'Kebenaran Profil Ladang' : 'Farm Profile Consent'}
+                          {language === 'id' ? 'Persetujuan Profil Kebun' : language === 'ms' ? 'Kebenaran Profil Ladang' : 'Farm Profile Consent'}
                         </span>
                       </div>
                       {onboardingData.consentAnonymized !== undefined && (
@@ -2201,7 +2152,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                             className={`w-5 h-5 ${onboardingData.consentAnonymized ? 'text-green-600' : 'text-gray-400'}`} 
                           />
                           <span className="text-gray-700">
-                            {language === 'ms' ? 'Kebenaran Data Tanpa Nama' : 'Anonymized Data Consent'}
+                            {language === 'id' ? 'Persetujuan Data Anonim' : language === 'ms' ? 'Kebenaran Data Tanpa Nama' : 'Anonymized Data Consent'}
                           </span>
                         </div>
                       )}
@@ -2216,7 +2167,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                       if (!isNaN(date.getTime())) {
                         return (
                           <div className="text-sm text-gray-500 font-body">
-                            {language === 'ms' ? 'Selesai pada' : 'Completed on'}: {date.toLocaleString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                            {language === 'id' ? 'Diselesaikan pada' : language === 'ms' ? 'Selesai pada' : 'Completed on'}: {date.toLocaleString(language === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US', {
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric',
@@ -2239,9 +2190,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 <div className="text-center py-12">
                   <FontAwesomeIcon icon={faExclamationTriangle} className="w-16 h-16 text-amber-500 mx-auto mb-4" />
                   <p className="text-gray-600">
-                    {language === 'ms' 
-                      ? 'Profil ladang belum lengkap. Sila lengkapkan onboarding terlebih dahulu.'
-                      : 'Farm profile is not complete. Please complete onboarding first.'}
+                    {language === 'id' ? toIndonesianText('Profil ladang belum lengkap. Sila lengkapkan onboarding terlebih dahulu.') : language === 'ms' ? 'Profil ladang belum lengkap. Sila lengkapkan onboarding terlebih dahulu.' : 'Farm profile is not complete. Please complete onboarding first.'}
                   </p>
                 </div>
               )}
@@ -2274,13 +2223,13 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-black text-gray-900 font-heading">
-                  {language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
+                  {language === 'id' ? 'Pintasan Keyboard' : language === 'ms' ? 'Pintasan Papan Kekunci' : 'Keyboard Shortcuts'}
                 </h2>
                 <button
                   onClick={() => setShowKeyboardShortcuts(false)}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  title={language === 'ms' ? 'Tutup' : 'Close'}
-                  aria-label={language === 'ms' ? 'Tutup' : 'Close'}
+                  title={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
+                  aria-label={language === 'id' ? toIndonesianText('Tutup') : language === 'ms' ? 'Tutup' : 'Close'}
                 >
                   <FontAwesomeIcon icon={faTimes} className="w-5 h-5 text-gray-600" />
                 </button>
@@ -2288,7 +2237,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               <div className="space-y-4 font-body">
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-700">
-                    {language === 'ms' ? 'Sembang Baharu' : 'New Chat'}
+                    {language === 'id' ? 'Chat Baru' : language === 'ms' ? 'Sembang Baharu' : 'New Chat'}
                   </span>
                   <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono font-semibold">
                     {typeof window !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + N
@@ -2296,7 +2245,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-700">
-                    {language === 'ms' ? 'Cari' : 'Search'}
+                    {language === 'id' ? toIndonesianText('Cari') : language === 'ms' ? 'Cari' : 'Search'}
                   </span>
                   <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono font-semibold">
                     {typeof window !== 'undefined' && navigator.platform.includes('Mac') ? '⌘' : 'Ctrl'} + F
@@ -2304,7 +2253,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-700">
-                    {language === 'ms' ? 'Hantar Mesej' : 'Send Message'}
+                    {language === 'id' ? 'Kirim pesan' : language === 'ms' ? 'Hantar Mesej' : 'Send Message'}
                   </span>
                   <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono font-semibold">
                     Enter
@@ -2312,7 +2261,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-700">
-                    {language === 'ms' ? 'Baris Baharu' : 'New Line'}
+                    {language === 'id' ? 'Baris Baru' : language === 'ms' ? 'Baris Baharu' : 'New Line'}
                   </span>
                   <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono font-semibold">
                     Shift + Enter
@@ -2320,7 +2269,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
                 </div>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <span className="text-gray-700">
-                    {language === 'ms' ? 'Tutup Modal' : 'Close Modal'}
+                    {language === 'id' ? toIndonesianText('Tutup Modal') : language === 'ms' ? 'Tutup Modal' : 'Close Modal'}
                   </span>
                   <kbd className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-mono font-semibold">
                     Esc
@@ -2329,9 +2278,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
               </div>
               <div className="mt-6 pt-4 border-t border-gray-200">
                 <p className="text-sm text-gray-500 text-center font-body">
-                  {language === 'ms'
-                    ? 'Tip: Gunakan pintasan ini untuk navigasi yang lebih pantas!'
-                    : 'Tip: Use these shortcuts for faster navigation!'}
+                  {language === 'id' ? toIndonesianText('Tip: Gunakan pintasan ini untuk navigasi yang lebih pantas!') : language === 'ms' ? 'Tip: Gunakan pintasan ini untuk navigasi yang lebih pantas!' : 'Tip: Use these shortcuts for faster navigation!'}
                 </p>
               </div>
             </motion.div>

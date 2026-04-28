@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { useTranslation, getCurrentLanguage, LANGUAGE_CHANGE_EVENT, type Language } from '@/i18n';
 import PalmiraOnboarding from '@/components/PalmiraOnboarding';
 import PalmiraDashboard from '@/components/PalmiraDashboard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -35,6 +35,20 @@ export default function PalmiraPage() {
     setMounted(true);
     const lang = getCurrentLanguage();
     setCurrentLang(lang);
+  }, []);
+
+  // Listen for language changes from the site switcher
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLang(lang);
+    };
+    window.addEventListener('storage', handleLanguageChange);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => {
+      window.removeEventListener('storage', handleLanguageChange);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    };
   }, []);
 
   // Redirect unauthenticated users (avoid side-effects during render)
@@ -91,7 +105,9 @@ export default function PalmiraPage() {
       // Only show "Subscription Expired" if contract has ended (after 1 year)
       if (contractExpired) {
         toast.error(
-          currentLang === 'ms'
+          currentLang === 'id'
+            ? 'Langganan Anda telah berakhir. Silakan berlangganan paket baru.'
+            : currentLang === 'ms'
             ? 'Langganan anda telah tamat. Sila langgan pelan baharu.'
             : 'Your subscription has expired. Please subscribe to a new plan.'
         );
@@ -144,7 +160,7 @@ export default function PalmiraPage() {
         <div className="flex flex-col items-center space-y-4">
           <FontAwesomeIcon icon={faSpinner} className="w-12 h-12 animate-spin text-green-600" spin />
           <p className="text-gray-600 font-medium">
-            {currentLang === 'ms' ? 'Memuatkan...' : 'Loading...'}
+            {currentLang === 'id' ? 'Memuat...' : currentLang === 'ms' ? 'Memuatkan...' : 'Loading...'}
           </p>
         </div>
       </div>
@@ -169,10 +185,12 @@ export default function PalmiraPage() {
             <FontAwesomeIcon icon={faCircleExclamation} className="w-10 h-10 text-red-600" />
           </div>
           <h1 className="text-2xl font-black text-gray-900 mb-3">
-            {currentLang === 'ms' ? 'Langganan Tamat' : 'Subscription Expired'}
+            {currentLang === 'id' ? 'Langganan Berakhir' : currentLang === 'ms' ? 'Langganan Tamat' : 'Subscription Expired'}
           </h1>
           <p className="text-gray-600 mb-6">
-            {currentLang === 'ms'
+            {currentLang === 'id'
+              ? 'Langganan Anda telah berakhir. Silakan berlangganan paket baru untuk melanjutkan penggunaan CropDrive AI Assistant.'
+              : currentLang === 'ms'
               ? 'Langganan anda telah tamat. Sila langgan pelan baharu untuk terus menggunakan CropDrive AI Assistant.'
               : 'Your subscription has expired. Please subscribe to a new plan to continue using CropDrive AI Assistant.'}
           </p>
@@ -180,7 +198,7 @@ export default function PalmiraPage() {
             onClick={() => router.push('/pricing')}
             className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-xl transition"
           >
-            {currentLang === 'ms' ? 'Langgan Semula' : 'Subscribe Again'}
+            {currentLang === 'id' ? 'Berlangganan Lagi' : currentLang === 'ms' ? 'Langgan Semula' : 'Subscribe Again'}
           </button>
         </motion.div>
       </div>

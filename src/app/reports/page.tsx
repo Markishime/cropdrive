@@ -439,7 +439,9 @@ export default function ReportsPage() {
       await deleteDoc(doc(db, 'analysis_results', reportId));
       setReports(reports.filter(r => r.id !== reportId));
       toast.success(
-        language === 'ms' 
+        language === 'id' 
+          ? '✓ Laporan berhasil dihapus' 
+          : language === 'ms' 
           ? '✓ Laporan berjaya dipadam' 
           : '✓ Report successfully deleted',
         {
@@ -450,7 +452,9 @@ export default function ReportsPage() {
     } catch (error) {
       console.error('Error deleting report:', error);
       toast.error(
-        language === 'ms' 
+        language === 'id' 
+          ? '✗ Kesalahan menghapus laporan. Silakan coba lagi.' 
+          : language === 'ms' 
           ? '✗ Ralat memadam laporan. Sila cuba lagi.' 
           : '✗ Error deleting report. Please try again.',
         {
@@ -521,7 +525,8 @@ export default function ReportsPage() {
       } else {
         console.error('❌ Report document does not exist:', report.id);
         toast.error(
-          language === 'ms' 
+          language === 'id' ? 'Laporan tidak ditemukan' 
+            : language === 'ms' 
             ? 'Laporan tidak dijumpai' 
             : 'Report not found'
         );
@@ -529,7 +534,8 @@ export default function ReportsPage() {
     } catch (error) {
       console.error('❌ Error fetching full report:', error);
       toast.error(
-        language === 'ms' 
+        language === 'id' ? 'Kesalahan memuat laporan' 
+          : language === 'ms' 
           ? 'Ralat memuatkan laporan' 
           : 'Error loading report'
       );
@@ -544,7 +550,7 @@ export default function ReportsPage() {
         <div className="flex flex-col items-center space-y-4">
           <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-gray-600 font-medium">
-            {language === 'ms' ? 'Memuatkan...' : 'Loading...'}
+            {language === 'id' ? 'Memuat...' : language === 'ms' ? 'Memuatkan...' : 'Loading...'}
           </p>
         </div>
       </div>
@@ -567,10 +573,12 @@ export default function ReportsPage() {
             className="text-center"
           >
             <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Sejarah' : 'Analysis'} <span className="text-yellow-400">{language === 'ms' ? 'Analisis' : 'History'}</span>
+              {language === 'id' ? 'Riwayat' : language === 'ms' ? 'Sejarah' : 'Analysis'} <span className="text-yellow-400">{language === 'id' ? 'Analisis' : language === 'ms' ? 'Analisis' : 'History'}</span>
             </h1>
             <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms'
+              {language === 'id'
+                ? 'Lihat semua laporan analisis yang telah selesai dan akses rekomendasi agronomi Anda.'
+                : language === 'ms'
                 ? 'Lihat semua laporan analisis yang telah selesai dan akses cadangan agronomi anda.'
                 : 'View all completed analysis reports and access your agronomic recommendations.'
               }
@@ -587,10 +595,10 @@ export default function ReportsPage() {
                   }, 100);
                 }}
                 className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition"
-                title={language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                title={language === 'id' ? 'Muat Ulang' : language === 'ms' ? 'Muat Semula' : 'Refresh'}
               >
                 <FontAwesomeIcon icon={faArrowsRotate} className={`w-5 h-5 ${loadingReports ? 'animate-spin' : ''}`} spin={loadingReports} />
-                {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+                {language === 'id' ? 'Muat Ulang' : language === 'ms' ? 'Muat Semula' : 'Refresh'}
               </motion.button>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -599,7 +607,7 @@ export default function ReportsPage() {
                 className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 px-6 py-3 rounded-lg font-black flex items-center gap-2 transition shadow-lg hover:shadow-xl"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
-                {language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
+                {language === 'id' ? 'Analisis Baru' : language === 'ms' ? 'Analisis Baharu' : 'New Analysis'}
               </motion.button>
             </div>
           </motion.div>
@@ -619,7 +627,7 @@ export default function ReportsPage() {
             <div className="flex flex-col md:flex-row gap-4 sm:gap-6 items-end">
               <div className="flex-1 w-full">
                 <label htmlFor="reports-search" className="block text-sm font-medium text-gray-700 mb-2">
-                  {language === 'ms' ? 'Cari Laporan' : 'Search Reports'}
+                  {language === 'id' ? 'Cari Laporan' : language === 'ms' ? 'Cari Laporan' : 'Search Reports'}
                 </label>
                 <div className="relative">
                   <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
@@ -627,7 +635,7 @@ export default function ReportsPage() {
                     id="reports-search"
                     name="reports-search"
                     type="text"
-                    placeholder={language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
+                    placeholder={language === 'id' ? 'Cari laporan...' : language === 'ms' ? 'Cari laporan...' : 'Search reports...'}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent transition-all"
@@ -651,10 +659,12 @@ export default function ReportsPage() {
                 <FontAwesomeIcon icon={faFileAlt} className="w-8 h-8 sm:w-10 sm:h-10 text-gray-400" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4">
-                {language === 'ms' ? 'Tiada Laporan Dijumpai' : 'No Reports Found'}
+                {language === 'id' ? 'Tidak Ada Laporan Ditemukan' : language === 'ms' ? 'Tiada Laporan Dijumpai' : 'No Reports Found'}
               </h3>
               <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
-                {language === 'ms'
+                {language === 'id'
+                  ? 'Coba cari dengan kata kunci lain atau unggah laporan baru'
+                  : language === 'ms'
                   ? 'Cuba cari dengan kata kunci lain atau muat naik laporan baharu'
                   : 'Try searching with different keywords or upload a new report'
                 }
@@ -664,7 +674,7 @@ export default function ReportsPage() {
                 className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-bold hover:from-green-700 hover:to-green-800 transition shadow-lg hover:shadow-xl"
               >
                 <FontAwesomeIcon icon={faPlus} className="w-5 h-5" />
-                {language === 'ms' ? 'Muat Naik Laporan' : 'Upload Report'}
+                {language === 'id' ? 'Unggah Laporan' : language === 'ms' ? 'Muat Naik Laporan' : 'Upload Report'}
               </button>
             </div>
           ) : (
@@ -697,7 +707,7 @@ export default function ReportsPage() {
                           <div className="flex items-center gap-4 text-sm text-gray-500">
                             <span className="flex items-center gap-2">
                               <FontAwesomeIcon icon={faCalendar} className="w-4 h-4" />
-                              {new Date(report.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                              {new Date(report.date).toLocaleDateString(language === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US', {
                                 year: 'numeric',
                                 month: 'long',
                                 day: 'numeric'
@@ -712,17 +722,17 @@ export default function ReportsPage() {
                         <button
                           onClick={() => router.push(`/assistant?analysisId=${report.id}`)}
                           className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-bold hover:from-blue-700 hover:to-blue-800 transition shadow-lg hover:shadow-xl"
-                          title={language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}
+                          title={language === 'id' ? 'Buka Analisis Terbaru' : language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}
                         >
                           <FontAwesomeIcon icon={faMessage} className="w-5 h-5" />
-                          <span>{language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}</span>
+                          <span>{language === 'id' ? 'Buka Analisis Terbaru' : language === 'ms' ? 'Buka Analisis Terkini' : 'Open Recent Analysis'}</span>
                         </button>
                         
                         <button
                           onClick={() => handleDeleteClick(report)}
                           disabled={deletingId === report.id}
                           className="flex items-center justify-center w-12 h-12 text-red-600 hover:bg-red-50 rounded-lg transition disabled:opacity-50 border border-red-200 hover:border-red-300"
-                          title={language === 'ms' ? 'Padam' : 'Delete'}
+                          title={language === 'id' ? 'Hapus' : language === 'ms' ? 'Padam' : 'Delete'}
                         >
                           {deletingId === report.id ? (
                             <div className="w-5 h-5 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
@@ -755,8 +765,8 @@ export default function ReportsPage() {
               <button
                 onClick={() => setSelectedReport(null)}
                 className="text-white hover:bg-white/20 rounded-lg p-2 transition"
-                aria-label={language === 'ms' ? 'Tutup' : 'Close'}
-                title={language === 'ms' ? 'Tutup' : 'Close'}
+                aria-label={language === 'id' ? 'Tutup' : language === 'ms' ? 'Tutup' : 'Close'}
+                title={language === 'id' ? 'Tutup' : language === 'ms' ? 'Tutup' : 'Close'}
               >
                 <FontAwesomeIcon icon={faXmark} className="w-6 h-6" />
               </button>
@@ -767,7 +777,7 @@ export default function ReportsPage() {
                   <div className="flex flex-col items-center gap-4">
                     <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
                     <p className="text-gray-600 font-medium">
-                      {language === 'ms' ? 'Memuatkan data laporan...' : 'Loading report data...'}
+                      {language === 'id' ? 'Memuat data laporan...' : language === 'ms' ? 'Memuatkan data laporan...' : 'Loading report data...'}
                     </p>
                   </div>
                 </div>
@@ -776,13 +786,13 @@ export default function ReportsPage() {
                   {/* Basic Information */}
                   <div>
                     <h3 className="text-xl font-black text-gray-900 mb-6">
-                      {language === 'ms' ? 'Maklumat Asas' : 'Basic Information'}
+                      {language === 'id' ? 'Informasi Dasar' : language === 'ms' ? 'Maklumat Asas' : 'Basic Information'}
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {fullReportData.title && (
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
                           <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-                            {language === 'ms' ? 'Tajuk Laporan' : 'Report Title'}
+                            {language === 'id' ? 'Judul Laporan' : language === 'ms' ? 'Tajuk Laporan' : 'Report Title'}
                           </h4>
                           <p className="text-gray-900 font-bold text-lg">{fullReportData.title}</p>
                         </div>
@@ -790,10 +800,10 @@ export default function ReportsPage() {
                       {fullReportData.date && (
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
                           <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-                            {language === 'ms' ? 'Tarikh Analisis' : 'Analysis Date'}
+                            {language === 'id' ? 'Tanggal Analisis' : language === 'ms' ? 'Tarikh Analisis' : 'Analysis Date'}
                           </h4>
                           <p className="text-gray-900 font-bold text-lg">
-                            {new Date(fullReportData.date).toLocaleDateString(language === 'ms' ? 'ms-MY' : 'en-US', {
+                            {new Date(fullReportData.date).toLocaleDateString(language === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US', {
                               year: 'numeric',
                               month: 'long',
                               day: 'numeric'
@@ -812,21 +822,21 @@ export default function ReportsPage() {
                               : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
                           }`}>
                             {fullReportData.status === 'completed' 
-                              ? (language === 'ms' ? 'Selesai' : 'Completed')
-                              : (language === 'ms' ? 'Sedang Diproses' : 'Processing')}
+                              ? (language === 'id' ? 'Selesai' : language === 'ms' ? 'Selesai' : 'Completed')
+                              : (language === 'id' ? 'Sedang Diproses' : language === 'ms' ? 'Sedang Diproses' : 'Processing')}
                           </span>
                         </div>
                       )}
                       {fullReportData.type && (
                         <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-5 rounded-xl border border-gray-200 shadow-sm">
                           <h4 className="text-xs font-semibold text-gray-600 mb-2 uppercase tracking-wide">
-                            {language === 'ms' ? 'Jenis Analisis' : 'Analysis Type'}
+                            {language === 'id' ? 'Jenis Analisis' : language === 'ms' ? 'Jenis Analisis' : 'Analysis Type'}
                           </h4>
                           <p className="text-gray-900 font-bold text-lg capitalize">
                             {fullReportData.type === 'soil' 
-                              ? (language === 'ms' ? 'Tanah' : 'Soil')
+                              ? (language === 'id' ? 'Tanah' : language === 'ms' ? 'Tanah' : 'Soil')
                               : fullReportData.type === 'leaf'
-                              ? (language === 'ms' ? 'Daun' : 'Leaf')
+                              ? (language === 'id' ? 'Daun' : language === 'ms' ? 'Daun' : 'Leaf')
                               : fullReportData.type}
                           </p>
                         </div>
@@ -838,7 +848,7 @@ export default function ReportsPage() {
                   {(fullReportData.summary || fullReportData.analysisData?.summary) && (
                     <div>
                       <h3 className="text-xl font-black text-gray-900 mb-6">
-                        {language === 'ms' ? 'Ringkasan Analisis' : 'Analysis Summary'}
+                        {language === 'id' ? 'Ringkasan Analisis' : language === 'ms' ? 'Ringkasan Analisis' : 'Analysis Summary'}
                       </h3>
                       <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6 shadow-sm">
                         <p className="text-gray-800 whitespace-pre-wrap leading-relaxed text-base font-medium">
@@ -859,7 +869,7 @@ export default function ReportsPage() {
                     
                     if (!hasRecommendations) return null;
                     
-                    const displayRecommendations = (language === 'ms' && Array.isArray(recommendationsMs) && recommendationsMs.length > 0) 
+                    const displayRecommendations = ((language === 'ms' || language === 'id') && Array.isArray(recommendationsMs) && recommendationsMs.length > 0) 
                       ? recommendationsMs 
                       : (Array.isArray(recommendations) && recommendations.length > 0) 
                         ? recommendations 
@@ -868,7 +878,7 @@ export default function ReportsPage() {
                     return (
                       <div>
                         <h3 className="text-xl font-black text-gray-900 mb-6">
-                          {language === 'ms' ? 'Cadangan Agronomi' : 'Agronomic Recommendations'}
+                          {language === 'id' ? 'Rekomendasi Agronomi' : language === 'ms' ? 'Cadangan Agronomi' : 'Agronomic Recommendations'}
                         </h3>
                         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border border-green-200 p-6 shadow-sm">
                           {displayRecommendations ? (
@@ -885,7 +895,9 @@ export default function ReportsPage() {
                           ) : (
                             <div className="bg-white p-4 rounded-lg border border-green-100">
                               <p className="text-gray-700 text-center">
-                                {language === 'ms' 
+                                {language === 'id' 
+                                  ? `${recommendationsCount || 0} rekomendasi tersedia`
+                                  : language === 'ms' 
                                   ? `${recommendationsCount || 0} cadangan tersedia`
                                   : `${recommendationsCount || 0} recommendations available`}
                               </p>
@@ -933,7 +945,7 @@ export default function ReportsPage() {
                     return (
                       <div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-8 mt-6">
-                          {language === 'ms' ? 'Keputusan Analisis Lengkap' : 'Complete Analysis Results'}
+                          {language === 'id' ? 'Hasil Analisis Lengkap' : language === 'ms' ? 'Keputusan Analisis Lengkap' : 'Complete Analysis Results'}
                         </h3>
                         <div className="space-y-8">
                           {(() => {
@@ -1083,7 +1095,7 @@ export default function ReportsPage() {
                             allSections.push(
                               <div key="soil-nutrients" className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm mb-6">
                                 <h4 className="text-xl font-bold text-gray-900 mb-6 pb-3 border-b-2 border-gray-300">
-                                  {language === 'ms' ? 'Nilai Nutrien Tanah' : 'Soil Nutrient Values'}
+                                  {language === 'id' ? 'Nilai Nutrien Tanah' : language === 'ms' ? 'Nilai Nutrien Tanah' : 'Soil Nutrient Values'}
                                 </h4>
                                 <div className="overflow-x-auto">
                                   <table className="w-full">
@@ -1114,10 +1126,10 @@ export default function ReportsPage() {
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                               {data.ph >= 5.0 && data.ph <= 6.5 
-                                                ? (language === 'ms' ? 'Optimal' : 'Optimal')
+                                                ? (language === 'id' ? 'Optimal' : language === 'ms' ? 'Optimal' : 'Optimal')
                                                 : data.ph >= 4.5 && data.ph <= 7.0
-                                                ? (language === 'ms' ? 'Boleh Diterima' : 'Acceptable')
-                                                : (language === 'ms' ? 'Perlu Perhatian' : 'Needs Attention')}
+                                                ? (language === 'id' ? 'Dapat Diterima' : language === 'ms' ? 'Boleh Diterima' : 'Acceptable')
+                                                : (language === 'id' ? 'Perlu Perhatian' : language === 'ms' ? 'Perlu Perhatian' : 'Needs Attention')}
                                             </span>
                                           </td>
                                         </tr>
@@ -1137,10 +1149,10 @@ export default function ReportsPage() {
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                               {data.nitrogen >= 2.0 
-                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                ? (language === 'id' ? 'Cukup' : language === 'ms' ? 'Cukup' : 'Sufficient')
                                                 : data.nitrogen >= 1.5
-                                                ? (language === 'ms' ? 'Rendah' : 'Low')
-                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                                ? (language === 'id' ? 'Rendah' : language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'id' ? 'Sangat Rendah' : language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
                                             </span>
                                           </td>
                                         </tr>
@@ -1160,10 +1172,10 @@ export default function ReportsPage() {
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                               {data.phosphorus >= 0.15 
-                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                ? (language === 'id' ? 'Cukup' : language === 'ms' ? 'Cukup' : 'Sufficient')
                                                 : data.phosphorus >= 0.10
-                                                ? (language === 'ms' ? 'Rendah' : 'Low')
-                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                                ? (language === 'id' ? 'Rendah' : language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'id' ? 'Sangat Rendah' : language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
                                             </span>
                                           </td>
                                         </tr>
@@ -1183,10 +1195,10 @@ export default function ReportsPage() {
                                                 : 'bg-red-100 text-red-800'
                                             }`}>
                                               {data.potassium >= 0.80 
-                                                ? (language === 'ms' ? 'Cukup' : 'Sufficient')
+                                                ? (language === 'id' ? 'Cukup' : language === 'ms' ? 'Cukup' : 'Sufficient')
                                                 : data.potassium >= 0.60
-                                                ? (language === 'ms' ? 'Rendah' : 'Low')
-                                                : (language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
+                                                ? (language === 'id' ? 'Rendah' : language === 'ms' ? 'Rendah' : 'Low')
+                                                : (language === 'id' ? 'Sangat Rendah' : language === 'ms' ? 'Sangat Rendah' : 'Very Low')}
                                             </span>
                                           </td>
                                         </tr>

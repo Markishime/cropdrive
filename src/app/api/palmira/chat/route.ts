@@ -382,7 +382,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body: any = await request.json();
-    const { message, pdfContext, pdfFileName, pdfUploadId, chatId, reportId, context } = body;
+    const { message, pdfContext, pdfFileName, pdfUploadId, chatId, reportId, context, language: requestLanguage } = body;
 
     if (!message || message.trim().length === 0) {
       return NextResponse.json(
@@ -503,15 +503,26 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Generate AI response using Google Gemini (use truncated finalMessage to avoid oversized prompts)
-    const promptLanguage: 'en' | 'ms' | 'id' = onboardingData?.language === 'ms' ? 'ms' : onboardingData?.language === 'id' ? 'id' : 'en';
+    // Use request language (current UI language) if provided, fallback to onboarding language
+    const promptLanguage: 'en' | 'ms' | 'id' =
+      requestLanguage === 'id' || requestLanguage === 'ms'
+        ? requestLanguage
+        : onboardingData?.language === 'ms'
+        ? 'ms'
+        : onboardingData?.language === 'id'
+        ? 'id'
+        : 'en';
+    // Merge into onboarding data so buildSystemPrompt uses the current UI language
+    const effectiveOnboardingData = onboardingData
+      ? { ...onboardingData, language: promptLanguage }
+      : onboardingData;
     const knowledgeBaseRefs = await retrieveRelevantKnowledgeBase(finalMessage, promptLanguage);
 
     const aiResponseRaw = await generateAIResponse(
       finalMessage,
       resolvedPdfContext,
       resolvedPdfFileName,
-      onboardingData,
+      effectiveOnboardingData,
       activeReportData,
       currentChatId,
       userId,

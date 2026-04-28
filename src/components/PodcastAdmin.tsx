@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
@@ -15,6 +15,7 @@ import {
   faXmark,
   faCircleXmark,
   faSeedling,
+  faRefresh,
 } from '@fortawesome/free-solid-svg-icons';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getYouTubeVideoId } from '@/lib/youtube';
@@ -41,6 +42,9 @@ export default function PodcastAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<PodcastEpisode | null>(null);
   const [saving, setSaving] = useState(false);
@@ -57,45 +61,59 @@ export default function PodcastAdmin() {
 
   const { t } = useTranslation(language);
 
-  useEffect(() => {
-    setLanguage(getCurrentLanguage());
-    checkAdmin();
-  }, []);
-
-  useEffect(() => {
-    if (isAdmin) loadEpisodes();
-  }, [isAdmin]);
-
-  const checkAdmin = async () => {
+  const loadEpisodes = useCallback(async () => {
     if (!auth.currentUser) return;
-    try {
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/admin/check', { headers: { Authorization: `Bearer ${token}` } });
-      const data = await res.json();
-      setIsAdmin(!!data?.isAdmin);
-      if (!data?.isAdmin) setError('Admin access required');
-    } catch {
-      setIsAdmin(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadEpisodes = async () => {
-    if (!auth.currentUser) return;
-    setLoading(true);
-    setError(null);
     try {
       const token = await auth.currentUser.getIdToken();
       const res = await fetch('/api/podcasts/admin', { headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to load');
       setEpisodes(data.episodes || []);
+      setLastUpdated(new Date());
     } catch (e: any) {
       setError(e.message || 'Failed to load podcasts');
-    } finally {
-      setLoading(false);
     }
+  }, []);
+
+  // Wait for Firebase auth to be ready, then check admin status
+  useEffect(() => {
+    setLanguage(getCurrentLanguage());
+    if (!user || !auth.currentUser) return;
+
+    const run = async () => {
+      try {
+        const token = await auth.currentUser!.getIdToken();
+        const res = await fetch('/api/admin/check', { headers: { Authorization: `Bearer ${token}` } });
+        const data = await res.json();
+        setIsAdmin(!!data?.isAdmin);
+        if (!data?.isAdmin) setError('Admin access required');
+      } catch {
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, [user]);
+
+  // Load data when admin confirmed
+  useEffect(() => {
+    if (!isAdmin) return;
+    setLoading(true);
+    loadEpisodes().finally(() => setLoading(false));
+  }, [isAdmin, loadEpisodes]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!isAdmin) return;
+    intervalRef.current = setInterval(() => { loadEpisodes(); }, 30000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isAdmin, loadEpisodes]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadEpisodes();
+    setRefreshing(false);
   };
 
   const openAdd = () => {
@@ -244,8 +262,23 @@ export default function PodcastAdmin() {
               <p className="text-gray-600 font-body">
                 {language === 'ms' ? 'Tambah dan urus episod podcast (YouTube).' : 'Add and manage podcast episodes (YouTube).'}
               </p>
+              {lastUpdated && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {language === 'ms' ? 'Dikemas kini' : 'Updated'}: {lastUpdated.toLocaleTimeString()}
+                </p>
+              )}
             </div>
             <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-600 hover:bg-gray-50 font-medium flex items-center gap-2 disabled:opacity-50"
+                title={language === 'ms' ? 'Muat semula' : 'Refresh'}
+              >
+                <FontAwesomeIcon icon={faRefresh} className={refreshing ? 'animate-spin' : ''} />
+                {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+              </button>
               <button
                 type="button"
                 onClick={seed}

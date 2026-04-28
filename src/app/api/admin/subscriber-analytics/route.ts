@@ -41,6 +41,19 @@ export async function GET(request: NextRequest) {
     const growthByMonth = new Map<string, number>();
     const geoCounts = new Map<string, number>();
 
+    const usersList: Array<{
+      uid: string;
+      name: string;
+      email: string;
+      phone: string;
+      countryRegion: string;
+      country: string;
+      registrationDate: string | null;
+      plan: string;
+      uploadsUsed: number;
+      uploadsLimit: number;
+    }> = [];
+
     usersSnap.forEach((doc: any) => {
       const data = doc.data() || {};
       const registrationDate =
@@ -52,6 +65,26 @@ export async function GET(request: NextRequest) {
       const countryRegion = String(data.countryRegion || data.farmLocation || 'Unknown');
       const country = parseCountry(countryRegion);
       geoCounts.set(country, (geoCounts.get(country) || 0) + 1);
+
+      usersList.push({
+        uid: doc.id,
+        name: String(data.displayName || data.name || 'Unknown User'),
+        email: String(data.email || ''),
+        phone: String(data.phone || data.phoneNumber || ''),
+        countryRegion,
+        country,
+        registrationDate: registrationDate.toISOString(),
+        plan: String(data.plan || data.subscriptionPlan || 'free'),
+        uploadsUsed: Number(data.uploadsUsed || 0),
+        uploadsLimit: Number(data.uploadsLimit ?? 2),
+      });
+    });
+
+    // Sort users by registration date (newest first)
+    usersList.sort((a, b) => {
+      if (!a.registrationDate) return 1;
+      if (!b.registrationDate) return -1;
+      return new Date(b.registrationDate).getTime() - new Date(a.registrationDate).getTime();
     });
 
     const growth = Array.from(growthByMonth.entries())
@@ -68,7 +101,9 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
+        totalUsers: usersSnap.size,
         totalSubscribers: usersSnap.size,
+        users: usersList,
         growth,
         geography,
         priorityMarkets: {

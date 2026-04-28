@@ -70,7 +70,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     if (!email || !password) {
-      toast.error(language === 'ms' ? 'Sila isi semua maklumat' : 'Please fill in all fields');
+      toast.error(language === 'id' ? 'Harap isi semua informasi' : language === 'ms' ? 'Sila isi semua maklumat' : 'Please fill in all fields');
       return;
     }
 
@@ -177,7 +177,7 @@ export default function LoginPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                {language === 'ms' ? 'Selamat Kembali' : 'Welcome Back'}
+                {language === 'id' ? 'Selamat Datang Kembali' : language === 'ms' ? 'Selamat Kembali' : 'Welcome Back'}
               </motion.h2>
               <motion.p 
                 className="text-green-100 text-base xs:text-lg px-4"
@@ -185,7 +185,9 @@ export default function LoginPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {language === 'ms'
+                {language === 'id'
+                  ? 'Masuk ke akun CropDrive Anda'
+                  : language === 'ms'
                   ? 'Log masuk ke akaun CropDrive anda'
                   : 'Sign in to your CropDrive account'
                 }
@@ -201,14 +203,18 @@ export default function LoginPage() {
           >
             {justRegistered && (
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800">
-                {language === 'ms'
+                {language === 'id'
+                  ? 'Harap periksa email Anda dan klik tautan verifikasi untuk mengaktifkan akun Anda sebelum masuk.'
+                  : language === 'ms'
                   ? 'Sila semak emel anda dan klik pautan pengesahan untuk mengaktifkan akaun anda sebelum log masuk.'
                   : 'Please check your email and click the verification link to activate your account before signing in.'}
               </div>
             )}
             {justVerified && (
               <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-sm text-green-800 font-medium">
-                {language === 'ms'
+                {language === 'id'
+                  ? '✓ Email Anda telah diverifikasi! Anda sekarang dapat masuk.'
+                  : language === 'ms'
                   ? '✓ E-mel anda telah disahkan! Anda kini boleh log masuk.'
                   : '✓ Your email has been verified! You can now sign in.'}
               </div>
@@ -231,12 +237,12 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-sm font-bold text-gray-700 mb-2">
-                  {language === 'ms' ? 'Kata Laluan' : 'Password'}
+                  {language === 'id' ? 'Kata Sandi' : language === 'ms' ? 'Kata Laluan' : 'Password'}
                 </label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
-                    placeholder={language === 'ms' ? 'Kata laluan anda' : 'Your password'}
+                    placeholder={language === 'id' ? 'Kata sandi Anda' : language === 'ms' ? 'Kata laluan anda' : 'Your password'}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
@@ -266,7 +272,7 @@ export default function LoginPage() {
                     className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
                   />
                   <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-green-700 transition-colors">
-                    {language === 'ms' ? 'Ingat saya' : 'Remember me'}
+                    {language === 'id' ? 'Ingat saya' : language === 'ms' ? 'Ingat saya' : 'Remember me'}
                   </span>
                 </label>
 
@@ -274,7 +280,7 @@ export default function LoginPage() {
                   href="/forgot-password"
                   className="text-sm text-green-700 hover:text-green-800 font-bold transition-colors"
                 >
-                  {language === 'ms' ? 'Lupa Kata Laluan?' : 'Forgot Password?'}
+                  {language === 'id' ? 'Lupa Kata Sandi?' : language === 'ms' ? 'Lupa Kata Laluan?' : 'Forgot Password?'}
                 </Link>
               </div>
 
@@ -291,22 +297,22 @@ export default function LoginPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                     </svg>
-                    {language === 'ms' ? 'Sedang Log Masuk...' : 'Signing In...'}
+                    {language === 'id' ? 'Sedang Masuk...' : language === 'ms' ? 'Sedang Log Masuk...' : 'Signing In...'}
                   </span>
                 ) : (
-                  language === 'ms' ? 'Log Masuk' : 'Sign In'
+                  language === 'id' ? 'Masuk' : language === 'ms' ? 'Log Masuk' : 'Sign In'
                 )}
               </motion.button>
             </form>
 
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-600">
-                {language === 'ms' ? 'Tiada akaun?' : "Don't have an account?"}{' '}
+                {language === 'id' ? 'Belum punya akun?' : language === 'ms' ? 'Tiada akaun?' : "Don't have an account?"}{' '}
                 <Link
                   href="/register"
                   className="text-green-700 hover:text-green-800 font-bold transition-colors"
                 >
-                  {language === 'ms' ? 'Daftar di sini' : 'Sign up here'}
+                  {language === 'id' ? 'Daftar di sini' : language === 'ms' ? 'Daftar di sini' : 'Sign up here'}
                 </Link>
               </p>
             </div>
@@ -323,7 +329,7 @@ export default function LoginPage() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+              {language === 'id' ? 'Kembali ke Beranda' : language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
             </Link>
           </motion.div>
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/lib/auth';
 import { auth } from '@/lib/firebase';
 import { PalmiraKnowledgeBaseDocument } from '@/types';
@@ -17,7 +17,8 @@ import {
   CheckCircle,
   Globe,
   FileText,
-  Tag
+  Tag,
+  RefreshCw,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -28,6 +29,9 @@ export default function PalmiraKnowledgeBaseAdmin() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   // Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -50,46 +54,8 @@ export default function PalmiraKnowledgeBaseAdmin() {
 
   const { t } = useTranslation(language);
 
-  useEffect(() => {
-    const lang = getCurrentLanguage();
-    setLanguage(lang);
-    checkAdminStatus();
-    loadDocuments();
-  }, []);
-
-  const checkAdminStatus = async () => {
+  const loadDocuments = useCallback(async () => {
     if (!auth.currentUser) return;
-    
-    try {
-      const token = await auth.currentUser.getIdToken();
-      const response = await fetch('/api/admin/check', {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setIsAdmin(data.isAdmin || false);
-        if (!data.isAdmin) {
-          setError('You do not have admin access');
-        }
-      } else {
-        setIsAdmin(false);
-        setError('You do not have admin access');
-      }
-    } catch (err) {
-      console.error('Error checking admin status:', err);
-      setIsAdmin(false);
-    }
-  };
-
-  const loadDocuments = async () => {
-    if (!auth.currentUser) return;
-    
-    setLoading(true);
-    setError(null);
-    
     try {
       const token = await auth.currentUser.getIdToken();
       const params = new URLSearchParams();
@@ -98,30 +64,68 @@ export default function PalmiraKnowledgeBaseAdmin() {
       if (filterActive) params.append('isActive', filterActive);
       
       const response = await fetch(`/api/palmira/admin/knowledge-base?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
       
-      if (!response.ok) {
-        throw new Error('Failed to load documents');
-      }
+      if (!response.ok) throw new Error('Failed to load documents');
       
       const result = await response.json();
       setDocuments(result.data || []);
+      setLastUpdated(new Date());
     } catch (err: any) {
       console.error('Error loading documents:', err);
       setError(err.message || 'Failed to load documents');
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [filterCategory, filterLanguage, filterActive]);
 
+  // Wait for Firebase auth to be ready, then check admin status
   useEffect(() => {
-    if (isAdmin) {
-      loadDocuments();
-    }
-  }, [filterCategory, filterLanguage, filterActive, isAdmin]);
+    setLanguage(getCurrentLanguage());
+    if (!user || !auth.currentUser) return;
+
+    const run = async () => {
+      try {
+        const token = await auth.currentUser!.getIdToken();
+        const response = await fetch('/api/admin/check', {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setIsAdmin(data.isAdmin || false);
+          if (!data.isAdmin) setError('You do not have admin access');
+        } else {
+          setIsAdmin(false);
+          setError('You do not have admin access');
+        }
+      } catch (err) {
+        console.error('Error checking admin status:', err);
+        setIsAdmin(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+  }, [user]);
+
+  // Load documents when admin confirmed or filters change
+  useEffect(() => {
+    if (!isAdmin) return;
+    setLoading(true);
+    loadDocuments().finally(() => setLoading(false));
+  }, [filterCategory, filterLanguage, filterActive, isAdmin, loadDocuments]);
+
+  // Auto-refresh every 30 seconds
+  useEffect(() => {
+    if (!isAdmin) return;
+    intervalRef.current = setInterval(() => { loadDocuments(); }, 30000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [isAdmin, loadDocuments]);
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await loadDocuments();
+    setRefreshing(false);
+  };
 
   const handleOpenModal = (doc?: PalmiraKnowledgeBaseDocument) => {
     if (doc) {
@@ -289,14 +293,30 @@ export default function PalmiraKnowledgeBaseAdmin() {
                   ? 'Urus dokumen pangkalan pengetahuan untuk Palmira'
                   : 'Manage knowledge base documents for Palmira'}
               </p>
+              {lastUpdated && (
+                <p className="text-xs text-gray-400 mt-1">
+                  {language === 'ms' ? 'Dikemas kini' : 'Updated'}: {lastUpdated.toLocaleTimeString()}
+                </p>
+              )}
             </div>
-            <button
-              onClick={() => handleOpenModal()}
-              className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
-            >
-              <Plus className="w-5 h-5" />
-              {language === 'ms' ? 'Tambah Dokumen' : 'Add Document'}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleManualRefresh}
+                disabled={refreshing}
+                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-xl font-medium transition-colors disabled:opacity-50"
+                title={language === 'ms' ? 'Muat semula' : 'Refresh'}
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
+                {language === 'ms' ? 'Muat Semula' : 'Refresh'}
+              </button>
+              <button
+                onClick={() => handleOpenModal()}
+                className="bg-green-800 hover:bg-green-900 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2 transition-colors"
+              >
+                <Plus className="w-5 h-5" />
+                {language === 'ms' ? 'Tambah Dokumen' : 'Add Document'}
+              </button>
+            </div>
           </div>
         </div>
 
