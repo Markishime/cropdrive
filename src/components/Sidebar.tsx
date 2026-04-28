@@ -82,21 +82,6 @@ export const Sidebar: React.FC = () => {
   const { user } = useAuth();
   const pathname = usePathname();
 
-  useEffect(() => {
-    setMounted(true);
-    const lang = getCurrentLanguage();
-    setCurrentLang(lang);
-    
-    // Load collapsed state from localStorage
-    const savedCollapsed = localStorage.getItem('sidebar-collapsed');
-    setIsCollapsed(savedCollapsed === 'true');
-    
-    // Check admin status
-    if (user) {
-      checkAdminStatus();
-    }
-  }, [user]);
-
   const checkAdminStatus = async () => {
     const { auth } = await import('@/lib/firebase');
     if (!auth.currentUser) return;
@@ -121,6 +106,21 @@ export const Sidebar: React.FC = () => {
       setIsAdmin(false);
     }
   };
+
+  useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLang(lang);
+
+    // Load collapsed state from localStorage
+    const savedCollapsed = localStorage.getItem('sidebar-collapsed');
+    setIsCollapsed(savedCollapsed === 'true');
+
+    // Check admin status
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const { language } = useTranslation(currentLang);
 
@@ -216,7 +216,7 @@ export const Sidebar: React.FC = () => {
     return item.showAlways;
   });
 
-  const SidebarContent = () => (
+  const renderSidebarContent = () => (
     <div className="h-full flex flex-col min-h-screen lg:min-h-0">
             {/* Logo & Collapse Button */}
             <div className="p-4 sm:p-6 border-b border-green-700/50">
@@ -356,7 +356,7 @@ export const Sidebar: React.FC = () => {
           transition={{ duration: 0.3, ease: 'easeInOut' }}
           className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 border-r border-green-700 shadow-2xl h-screen"
         >
-          <SidebarContent />
+          {renderSidebarContent()}
         </motion.div>
       </aside>
 
@@ -381,7 +381,7 @@ export const Sidebar: React.FC = () => {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-gradient-to-br from-green-900 via-green-800 to-green-900 shadow-2xl z-50 lg:hidden overflow-y-auto"
             >
-              <SidebarContent />
+              {renderSidebarContent()}
             </motion.aside>
           </>
         )}

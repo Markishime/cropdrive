@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage, LANGUAGE_CHANGE_EVENT, type Language } from '@/i18n';
+import { getCurrentLanguage, LANGUAGE_CHANGE_EVENT, type Language } from '@/i18n';
 import PalmiraOnboarding from '@/components/PalmiraOnboarding';
 import PalmiraDashboard from '@/components/PalmiraDashboard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -21,61 +21,11 @@ export default function PalmiraPage() {
   const [membershipActive, setMembershipActive] = useState(false);
   const [loadingMembership, setLoadingMembership] = useState(true);
   const [isContractExpired, setIsContractExpired] = useState(false);
-  const [contractEndDate, setContractEndDate] = useState<Date | null>(null);
   const isMountedRef = useRef(false);
-
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    setMounted(true);
-    const lang = getCurrentLanguage();
-    setCurrentLang(lang);
-  }, []);
-
-  // Listen for language changes from the site switcher
-  useEffect(() => {
-    const handleLanguageChange = () => {
-      const lang = getCurrentLanguage();
-      setCurrentLang(lang);
-    };
-    window.addEventListener('storage', handleLanguageChange);
-    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    return () => {
-      window.removeEventListener('storage', handleLanguageChange);
-      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
-    };
-  }, []);
-
-  // Redirect unauthenticated users (avoid side-effects during render)
-  useEffect(() => {
-    if (!mounted) return;
-    if (!authLoading && !user) {
-      router.replace('/login');
-    }
-  }, [mounted, authLoading, user, router]);
-
-  // Check membership
-  useEffect(() => {
-    if (!authLoading && user) {
-      checkMembership();
-    }
-  }, [user, authLoading]);
-
-  // Check onboarding status
-  useEffect(() => {
-    if (!authLoading && user && membershipActive) {
-      checkOnboarding();
-    }
-  }, [user, authLoading, membershipActive]);
 
   const checkMembership = async () => {
     if (!user) return;
-    
+
     if (isMountedRef.current) setLoadingMembership(true);
     try {
       // Use server-side membership check (Admin SDK) to avoid client-side
@@ -93,15 +43,12 @@ export default function PalmiraPage() {
       // Check if user is within their 1-year contract period
       const withinContract = !!result?.success && !!result?.data?.isWithinContract;
       const contractExpired = !!result?.success && !!result?.data?.isContractExpired;
-      
+
       if (isMountedRef.current) {
         setMembershipActive(withinContract);
         setIsContractExpired(contractExpired);
-        if (result?.data?.contractEndDate) {
-          setContractEndDate(new Date(result.data.contractEndDate));
-        }
       }
-      
+
       // Only show "Subscription Expired" if contract has ended (after 1 year)
       if (contractExpired) {
         toast.error(
@@ -152,6 +99,55 @@ export default function PalmiraPage() {
   const handleOnboardingComplete = () => {
     setOnboardingCompleted(true);
   };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
+    const lang = getCurrentLanguage();
+    setCurrentLang(lang);
+  }, []);
+
+  // Listen for language changes from the site switcher
+  useEffect(() => {
+    const handleLanguageChange = () => {
+      const lang = getCurrentLanguage();
+      setCurrentLang(lang);
+    };
+    window.addEventListener('storage', handleLanguageChange);
+    window.addEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    return () => {
+      window.removeEventListener('storage', handleLanguageChange);
+      window.removeEventListener(LANGUAGE_CHANGE_EVENT, handleLanguageChange);
+    };
+  }, []);
+
+  // Redirect unauthenticated users (avoid side-effects during render)
+  useEffect(() => {
+    if (!mounted) return;
+    if (!authLoading && !user) {
+      router.replace('/login');
+    }
+  }, [mounted, authLoading, user, router]);
+
+  // Check membership
+  useEffect(() => {
+    if (!authLoading && user) {
+      checkMembership();
+    }
+  }, [user, authLoading]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Check onboarding status
+  useEffect(() => {
+    if (!authLoading && user && membershipActive) {
+      checkOnboarding();
+    }
+  }, [user, authLoading, membershipActive]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Loading state
   if (!mounted || authLoading || loadingMembership || loadingOnboarding) {

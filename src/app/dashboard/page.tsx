@@ -2,15 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { useTranslation, type Language } from '@/i18n';
 import Button from '@/components/ui/Button';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import toast from 'react-hot-toast';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWandSparkles, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { faWandSparkles } from '@fortawesome/free-solid-svg-icons';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 
@@ -126,7 +124,7 @@ export default function DashboardPage() {
     return () => {
       window.removeEventListener('analysisReportSaved', handleReportSaved);
     };
-  }, [mounted, refreshUser, user?.uid]);
+  }, [mounted, refreshUser, user?.uid]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Real-time listener to count reports and sync uploadsUsed
   useEffect(() => {
@@ -234,8 +232,6 @@ export default function DashboardPage() {
     isUploadLimitExceeded,
     userPlan: user.plan
   });
-  const daysActive = Math.floor((Date.now() - new Date(user.registrationDate).getTime()) / (1000 * 60 * 60 * 24));
-
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
