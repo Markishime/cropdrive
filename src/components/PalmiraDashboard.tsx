@@ -268,28 +268,15 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
         return;
       }
 
-      const token = await currentUser.getIdToken();
-      const response = await fetch('/api/membership', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        // User can access Palmira if within contract period
-        setCanAccessAI(result.data.canAccessPalmira);
-        // User can perform new analysis if within contract AND has uploads remaining
-        setCanPerformAnalysis(result.data.canPerformAnalysis);
-        setHasReachedUploadLimit(result.data.hasReachedUploadLimit);
-        setUploadsUsedThisMonth(result.data.uploadsUsedThisMonth || 0);
-        setUploadLimit(result.data.uploadLimit || 2);
-      } else {
-        setCanAccessAI(false);
-        setCanPerformAnalysis(false);
-      }
+      // All features are free - grant access to all logged-in users
+      setCanAccessAI(true);
+      setCanPerformAnalysis(true);
+      setHasReachedUploadLimit(false);
     } catch (error) {
       console.error('Error checking AI access:', error);
-      setCanAccessAI(false);
-      setCanPerformAnalysis(false);
+      // Default to allowing access since all features are free
+      setCanAccessAI(true);
+      setCanPerformAnalysis(true);
     }
   };
 

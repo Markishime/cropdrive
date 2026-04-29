@@ -18,6 +18,9 @@
     "setup:all": "npm run firebase:setup && npm run stripe:setup && npm run db:init",
     "favicon:circular": "node scripts/create-circular-favicon.js"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
@@ -89,7 +92,7 @@
     "semver": "^7.6.3",
     "word-wrap": "^1.2.5",
     "tough-cookie": "^4.1.4",
-    "uuid": "^14.0.0",
+    "uuid": "^8.3.2",
     "postcss": "^8.5.12"
   },
   "engines": {

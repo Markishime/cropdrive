@@ -236,12 +236,8 @@ export function isWithinContractPeriod(membership: Membership | null): boolean {
  * Check if user has reached their upload limit for the current month.
  */
 export function hasReachedUploadLimit(membership: Membership | null): boolean {
-  if (!membership) return true;
-  // -1 means unlimited
-  if (membership.uploadLimit === -1) return false;
-  const used = membership.uploadsUsedThisMonth || 0;
-  const limit = membership.uploadLimit || 2;
-  return used >= limit;
+  // All features are free - no upload limit
+  return false;
 }
 
 /**
@@ -254,10 +250,8 @@ export function hasReachedUploadLimit(membership: Membership | null): boolean {
  * For users with no plan at all, they cannot access Palmira.
  */
 export function canAccessPalmira(membership: Membership | null): boolean {
-  if (!membership) return false;
-
-  // Check if within 1-year contract period
-  return isWithinContractPeriod(membership);
+  // All features are free
+  return true;
 }
 
 /**
@@ -265,14 +259,7 @@ export function canAccessPalmira(membership: Membership | null): boolean {
  * Requires being within contract AND not having reached upload limit.
  */
 export function canPerformAnalysis(membership: Membership | null): boolean {
-  if (!membership) return false;
-  
-  // Must be within contract period
-  if (!isWithinContractPeriod(membership)) return false;
-  
-  // Must not have reached upload limit
-  if (hasReachedUploadLimit(membership)) return false;
-  
+  // All features are free
   return true;
 }
 
