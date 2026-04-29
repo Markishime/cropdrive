@@ -79,7 +79,7 @@ export default function AdminOperationsPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [data, setData] = useState<OperationsData>({ uploadedFiles: [], internalReports: [], chatLogs: [] });
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'chats' | 'uploads' | 'reports'>('chats');
+  const [activeTab, setActiveTab] = useState<'chats' | 'uploads'>('chats');
   const [expandedChatId, setExpandedChatId] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>({});
   const [loadingMessages, setLoadingMessages] = useState<string | null>(null);
@@ -317,7 +317,6 @@ export default function AdminOperationsPage() {
                   {([
                     { key: 'chats', label: 'Palmira Conversations', icon: faComments, count: selectedUser.chats.length, color: 'blue' },
                     { key: 'uploads', label: 'Uploaded Files', icon: faFile, count: selectedUser.uploads.length, color: 'yellow' },
-                    { key: 'reports', label: 'Analysis Reports', icon: faChartBar, count: selectedUser.reports.length, color: 'purple' },
                   ] as const).map((tab) => (
                     <button
                       key={tab.key}
@@ -480,42 +479,6 @@ export default function AdminOperationsPage() {
                   )}
 
                   {/* Analysis Reports Tab */}
-                  {activeTab === 'reports' && (
-                    <div className="space-y-3">
-                      {selectedUser.reports.length === 0 ? (
-                        <div className="text-center py-10 text-gray-400">
-                          <FontAwesomeIcon icon={faChartBar} className="w-10 h-10 mb-3 opacity-30" />
-                          <p>No analysis reports yet</p>
-                        </div>
-                      ) : (
-                        selectedUser.reports.map((report) => (
-                          <div key={report.id} className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                            <div className="w-10 h-10 rounded-lg bg-purple-100 flex items-center justify-center flex-shrink-0">
-                              <FontAwesomeIcon icon={faChartBar} className="w-5 h-5 text-purple-600" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-gray-900 text-sm truncate">{report.title || 'Untitled Report'}</p>
-                              <p className="text-xs text-gray-500 mt-0.5 capitalize">{report.type || 'Analysis'}</p>
-                              <p className="text-xs text-gray-400 mt-0.5">
-                                {report.createdAt ? new Date(report.createdAt).toLocaleString() : 'Date unknown'}
-                              </p>
-                            </div>
-                            {report.fileUrl && (
-                              <a
-                                href={report.fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center gap-1.5 text-xs bg-purple-600 text-white px-3 py-1.5 rounded-lg hover:bg-purple-700 transition flex-shrink-0"
-                              >
-                                <FontAwesomeIcon icon={faEye} className="w-3 h-3" />
-                                View
-                              </a>
-                            )}
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
