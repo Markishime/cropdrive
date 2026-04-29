@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-function getApp(): admin.app.App {
+function initializeApp(): admin.app.App {
   if (admin.apps.length > 0) {
     return admin.apps[0]!;
   }
@@ -23,24 +23,12 @@ function getApp(): admin.app.App {
   });
 }
 
-export const adminAuth = new Proxy({} as admin.auth.Auth, {
-  get(_t, prop) {
-    return (getApp().auth() as any)[prop];
-  },
-});
+// Eagerly initialize so getAuth()/getFirestore() from firebase-admin modular API work
+const app = initializeApp();
 
-export const adminDb = new Proxy({} as admin.firestore.Firestore, {
-  get(_t, prop) {
-    return (getApp().firestore() as any)[prop];
-  },
-});
-
+export const adminAuth = app.auth();
+export const adminDb = app.firestore();
 export const adminFirestore = adminDb;
-
-export const adminStorage = new Proxy({} as admin.storage.Storage, {
-  get(_t, prop) {
-    return (getApp().storage() as any)[prop];
-  },
-});
+export const adminStorage = app.storage();
 
 export default admin;
