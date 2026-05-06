@@ -54,8 +54,10 @@ const DEFAULT_BLOG_IMAGE = `${BLOG_IMAGES_BASE}/cropdrive-intro.jpg`;
 
 function getBlogImageSrc(path: string | undefined): string {
   if (!path || !path.trim()) return DEFAULT_BLOG_IMAGE;
-  const p = path.trim();
-  if (p.startsWith('http://') || p.startsWith('https://')) return p;
+  let p = path.trim();
+  // Upgrade http to https so Next.js image domain config only needs https
+  if (p.startsWith('http://')) p = 'https://' + p.slice(7);
+  if (p.startsWith('https://')) return p;
   return p.startsWith('/') ? p : `${BLOG_IMAGES_BASE}/${p.replace(/^\//, '')}`;
 }
 
@@ -699,8 +701,17 @@ export default function BlogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-12">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="glass-card rounded-2xl overflow-hidden">
+                <div className="animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 h-48" style={{ animation: 'skeleton-shimmer 1.5s ease-in-out infinite', backgroundSize: '200% 100%' }} />
+                <div className="p-6 space-y-3">
+                  <div className="animate-pulse bg-gray-200 h-5 w-3/4 rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-full rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-2/3 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
         
@@ -818,7 +829,7 @@ export default function BlogPage() {
                     className={`${colSpan} group cursor-pointer`}
                     onClick={() => handlePostClick(post)}
                   >
-                    <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 h-full transform hover:scale-[1.02]">
+                    <div className="relative overflow-hidden rounded-3xl bg-white/75 backdrop-blur-sm border border-green-100 shadow-xl hover:shadow-2xl hover:border-green-300 transition-all duration-500 h-full transform hover:scale-[1.02]">
                       {/* Image - visible with lighter overlay so AI/post image shows */}
                       <div className={`relative ${imageHeight} overflow-hidden`}>
                         <Image
@@ -927,7 +938,7 @@ export default function BlogPage() {
                     className="group cursor-pointer"
                     onClick={() => handlePostClick(post)}
                   >
-                    <div className={`relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                    <div className={`relative overflow-hidden rounded-2xl bg-white/75 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 border border-green-100 hover:border-green-300 ${
                       isCropDrive ? 'border-l-4 border-l-green-500' : 
                       isAGS ? 'border-l-4 border-l-blue-500' : 
                       'border-l-4 border-l-purple-500'
@@ -1062,7 +1073,7 @@ export default function BlogPage() {
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder={currentLanguage === 'id' ? 'Alamat email Anda' : language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
-                  className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
+                  className="flex-1 px-5 py-3.5 rounded-xl bg-white text-gray-900 placeholder-gray-500 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
                   disabled={newsletterStatus === 'loading'}
                   required
                 />

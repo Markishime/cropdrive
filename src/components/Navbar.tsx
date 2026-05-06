@@ -161,11 +161,7 @@ export const Navbar: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl shadow-2xl ${
-              scrolled
-                ? 'glass-light border border-white/60'
-                : 'glass border border-white/12'
-            } ${mobile ? 'md:hidden' : ''}`}
+            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl shadow-2xl bg-white border border-gray-200 ${mobile ? 'md:hidden' : ''}`}
             role="menu"
           >
             <div className="p-2">
@@ -178,21 +174,17 @@ export const Navbar: React.FC = () => {
                     onClick={() => handleLanguageSelect(option.value)}
                     className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-all duration-200 ${
                       active
-                        ? scrolled
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-yellow-400/20 text-yellow-300'
-                        : scrolled
-                        ? 'text-gray-700 hover:bg-green-50/80'
-                        : 'text-white hover:bg-white/10'
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-gray-700 hover:bg-green-50/80'
                     }`}
                     role="menuitem"
                   >
                     <div>
                       <div className="text-sm font-bold">{option.label}</div>
-                      <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>{option.code}</div>
+                      <div className="text-xs text-gray-500">{option.code}</div>
                     </div>
                     {active && (
-                      <span className={`text-xs font-bold uppercase tracking-[0.2em] ${scrolled ? 'text-green-600' : 'text-yellow-300'}`}>
+                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-600">
                         {translateLabel('Active', 'Aktif', 'Aktif')}
                       </span>
                     )}

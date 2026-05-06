@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
-import { safeGetLocalStorage, isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
+import { isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 
 export default function HowItWorksPage() {
   const [mounted, setMounted] = useState(false);
@@ -380,7 +380,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Steps Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gradient-to-b from-white via-green-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {steps.map((step, index) => (
             <motion.div
@@ -396,13 +396,14 @@ export default function HowItWorksPage() {
               <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
                 {/* Image */}
                 <div className="w-full md:w-1/2">
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                    <Image
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl border border-green-100">
+                    <ImageWithSkeleton
                       src={step.image}
                       alt={step.title}
                       width={800}
                       height={600}
                       className="w-full h-96 object-cover"
+                      containerClassName="w-full h-96"
                     />
                   </div>
                 </div>

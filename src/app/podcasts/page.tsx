@@ -1,15 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPodcast,
   faPlay,
-  faSpinner,
   faLock,
   faXmark,
   faHeadphones,
@@ -48,7 +46,6 @@ function getResolvedVideoId(ep: PodcastEpisode): string | null {
 }
 
 export default function PodcastsPage() {
-  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
   const [episodes, setEpisodes] = useState<PodcastEpisode[]>([]);
@@ -59,10 +56,6 @@ export default function PodcastsPage() {
   useEffect(() => {
     setMounted(true);
     setLanguage(getCurrentLanguage());
-  }, []);
-
-  useEffect(() => {
-    loadEpisodes();
   }, []);
 
   const loadEpisodes = async () => {
@@ -84,6 +77,10 @@ export default function PodcastsPage() {
     }
   };
 
+  useEffect(() => {
+    loadEpisodes();
+  }, []);
+
   const closeModal = () => setSelectedEpisode(null);
 
   if (!mounted) {
@@ -98,7 +95,7 @@ export default function PodcastsPage() {
   const localize = (en: string, ms: string) => (language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-green-50/20 to-white">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-20 sm:py-28 overflow-hidden">
         {/* Background pattern */}
@@ -147,9 +144,17 @@ export default function PodcastsPage() {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Loading */}
         {loading && (
-          <div className="flex flex-col items-center justify-center py-24">
-            <FontAwesomeIcon icon={faSpinner} className="w-10 h-10 text-green-600 animate-spin mb-4" />
-            <p className="text-gray-500 font-body">{t('Loading episodes...', 'Memuatkan episod...')}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-12">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="glass-card rounded-2xl overflow-hidden">
+                <div className="animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 h-48" style={{ animation: 'skeleton-shimmer 1.5s ease-in-out infinite', backgroundSize: '200% 100%' }} />
+                <div className="p-6 space-y-3">
+                  <div className="animate-pulse bg-gray-200 h-5 w-3/4 rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-full rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-2/3 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -204,7 +209,7 @@ export default function PodcastsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
-                className="group cursor-pointer overflow-hidden rounded-3xl bg-white shadow-xl border border-gray-100 hover:shadow-2xl hover:border-green-200 transition-all duration-300"
+                className="group cursor-pointer overflow-hidden rounded-3xl glass-card hover:shadow-2xl hover:border-green-200 transition-all duration-300"
                 onClick={() => setSelectedEpisode(episodes[0])}
               >
                 <div className="flex flex-col lg:flex-row">
@@ -296,7 +301,7 @@ export default function PodcastsPage() {
                         initial={{ opacity: 0, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.35, delay: 0.2 + index * 0.05 }}
-                        className="group flex cursor-pointer overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-lg hover:border-green-200 transition-all duration-300"
+                        className="group flex cursor-pointer overflow-hidden rounded-2xl bg-white/75 backdrop-blur-sm border border-green-100 shadow-sm hover:shadow-lg hover:border-green-300 transition-all duration-300"
                         onClick={() => setSelectedEpisode(ep)}
                       >
                         {/* Thumbnail */}

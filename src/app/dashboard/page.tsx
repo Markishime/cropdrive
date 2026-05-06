@@ -234,7 +234,7 @@ export default function DashboardPage() {
   });
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-slate-950">
+      <div className="min-h-screen bg-gradient-to-b from-white via-green-50/30 to-white">
         {/* Hero Header — glassmorphic */}
         <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
           {/* Deep background */}
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="glass rounded-2xl p-6 border border-white/15 shadow-2xl"
+                className="bg-white/90 backdrop-blur-sm rounded-2xl p-6 border border-white/60 shadow-xl"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center space-x-4">
@@ -304,22 +304,22 @@ export default function DashboardPage() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-xs text-white/70 font-semibold uppercase">
+                      <p className="text-xs text-gray-500 font-semibold uppercase">
                         {language === 'id' ? 'Akses Akun' : language === 'ms' ? 'Akses Akaun' : 'Account Access'}
                       </p>
-                      <p className="text-2xl font-black text-white">
+                      <p className="text-2xl font-black text-gray-900">
                         {language === 'id' ? 'Semua Fitur AI Gratis' : language === 'ms' ? 'Semua Ciri AI Percuma' : 'All AI Features Are Free'}
                       </p>
                     </div>
                   </div>
                   <div className="text-left md:text-right">
-                    <p className="text-sm text-white/80 font-semibold">
+                    <p className="text-sm text-gray-600 font-semibold">
                       {language === 'id' ? 'Batas unggah laporan:' : language === 'ms' ? 'Had muat naik laporan:' : 'Report upload limit:'}
                     </p>
-                    <p className="text-3xl font-black text-yellow-400">
+                    <p className="text-3xl font-black text-green-700">
                       2
                     </p>
-                    <p className="text-xs text-white/70">
+                    <p className="text-xs text-gray-500">
                       {language === 'id' ? 'setiap pengguna' : language === 'ms' ? 'setiap pengguna' : 'per user'}
                     </p>
                   </div>
@@ -336,7 +336,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="glass-green rounded-3xl shadow-2xl overflow-hidden"
+              className="bg-white rounded-3xl shadow-xl border border-green-200 overflow-hidden"
             >
               <div className="bg-gradient-to-r from-green-600 via-green-700 to-green-800 p-8 text-white">
                 <div className="flex items-start justify-between flex-wrap gap-4">
@@ -367,40 +367,40 @@ export default function DashboardPage() {
               </div>
 
               <div className="p-8">
-                <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
-                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   {language === 'id' ? 'Akses & Batas Laporan Anda' : language === 'ms' ? 'Akses & Had Laporan Anda' : 'Your Access & Report Limit'}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3 p-4 rounded-xl glass-green">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500 glow-green">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-gray-900">
                         {language === 'id' ? 'Akses Penuh AI & Palmira' : language === 'ms' ? 'Akses Penuh AI & Palmira' : 'Full AI & Palmira Access'}
                       </p>
-                      <p className="text-sm text-green-300 font-medium mt-1">
+                      <p className="text-sm text-gray-600 font-medium mt-1">
                         {language === 'id' ? 'Gratis untuk semua pengguna terdaftar' : language === 'ms' ? 'Percuma untuk semua pengguna berdaftar' : 'Free for all registered users'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 p-4 rounded-xl glass-green">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border border-green-200">
                     <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500 glow-green">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-white">
+                      <p className="font-semibold text-gray-900">
                         {language === 'id' ? 'Batas Unggah Laporan' : language === 'ms' ? 'Had Muat Naik Laporan' : 'Report Upload Limit'}
                       </p>
-                      <p className="text-sm text-green-300 font-medium mt-1">
+                      <p className="text-sm text-gray-600 font-medium mt-1">
                         {language === 'id' ? 'Maksimum 2 laporan per pengguna' : language === 'ms' ? 'Maksimum 2 laporan bagi setiap pengguna' : 'Maximum of 2 reports per user'}
                       </p>
                     </div>
@@ -428,11 +428,11 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               whileHover={{ scale: 1.01 }}
-              className="glass-ai rounded-2xl p-8 border border-indigo-400/25 shadow-xl text-white"
+              className="bg-white rounded-2xl p-8 border border-indigo-200 shadow-xl text-gray-900"
             >
                 <div className="flex items-start space-x-4 mb-6">
-                  <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
-                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-16 h-16 bg-indigo-100 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                    <svg className="w-8 h-8 text-indigo-600" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
                     </svg>
                   </div>
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                       {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}
                       <span className="text-yellow-400">⚡</span>
                     </h3>
-                    <p className="text-white/90 text-sm">
+                    <p className="text-gray-600 text-sm">
                       {language === 'id'
                         ? 'Unggah laporan laboratorium (Gambar/PDF/Excel - SPLAB, farm_test_data) dan dapatkan analisis AI dalam 5-8 menit.'
                         : language === 'ms'
@@ -453,7 +453,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Upload Progress */}
-                <div className="mb-6 bg-white/10 backdrop-blur-sm rounded-xl p-4">
+                <div className="mb-6 bg-gray-50 rounded-xl p-4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="text-sm font-semibold">
                       {language === 'id' ? 'Penggunaan Unggahan' : language === 'ms' ? 'Penggunaan Muat Naik' : 'Upload Usage'}
@@ -463,7 +463,7 @@ export default function DashboardPage() {
                     </span>
                   </div>
                   {uploadsLimit !== -1 && (
-                    <div className="w-full bg-white/20 rounded-full h-3 overflow-hidden">
+                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                       <div 
                         className={`h-full rounded-full transition-all duration-500 ${
                           uploadPercentage >= 80 
@@ -485,7 +485,7 @@ export default function DashboardPage() {
                 </Button>
               ) : (
                 <div>
-                  <p className="text-yellow-300 text-sm mb-4 font-semibold bg-yellow-500/20 p-3 rounded-lg">
+                  <p className="text-amber-700 text-sm mb-4 font-semibold bg-amber-50 border border-amber-200 p-3 rounded-lg">
                     {language === 'id'
                       ? '⚠️ Batas 2 unggahan laporan telah tercapai untuk akun ini.'
                       : language === 'ms'

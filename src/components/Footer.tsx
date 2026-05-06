@@ -70,7 +70,7 @@ export const Footer: React.FC = () => {
   );
 
   return (
-    <footer className="bg-gradient-to-br from-slate-950 via-green-950 to-slate-950 text-white border-t border-white/8">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}

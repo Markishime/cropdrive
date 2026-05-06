@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 
 export default function AboutUsPage() {
   const [mounted, setMounted] = useState(false);
@@ -80,12 +80,13 @@ export default function AboutUsPage() {
             <div className="max-w-3xl mx-auto">
               <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-2xl p-4 sm:p-6 shadow-lg border border-green-100">
                 <div className="relative rounded-xl overflow-hidden">
-                  <Image
+                  <ImageWithSkeleton
                     src="/images/About-Us.png"
                     alt="About CropDrive"
                     width={800}
                     height={600}
                     className="w-full h-auto object-cover rounded-lg"
+                    containerClassName="w-full"
                   />
                 </div>
               </div>
@@ -162,7 +163,7 @@ export default function AboutUsPage() {
       </section>
 
       {/* Values Section */}
-      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gray-50">
+      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-green-50/50 via-white to-green-50/30">
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -200,15 +201,16 @@ export default function AboutUsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 text-center"
+                className="glass-card p-8 rounded-2xl hover:shadow-xl transition-all duration-300 text-center"
               >
                 <div className="w-24 h-24 mx-auto mb-6 relative">
-                  <Image
+                  <ImageWithSkeleton
                     src={value.img}
                     alt={value.title}
                     width={96}
                     height={96}
                     className="object-contain"
+                    containerClassName="w-24 h-24"
                   />
                 </div>
                 <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-4 font-heading">

@@ -471,7 +471,7 @@ video::-webkit-media-controls-panel {
   --duration-slow: 500ms;
 }
 
-/* ---------- Dark mode tokens ---------- */
+/* ---------- Dark mode tokens (disabled - light theme only) ---------- */
 .dark, [data-theme="dark"] {
   --glass-bg: rgba(15, 23, 42, 0.65);
   --glass-bg-light: rgba(15, 23, 42, 0.85);
@@ -483,18 +483,6 @@ video::-webkit-media-controls-panel {
   --neu-shadow-raise: 6px 6px 14px #0f0f1a, -6px -6px 14px #252545;
   --neu-shadow-inset: inset 4px 4px 10px #0f0f1a, inset -4px -4px 10px #252545;
   --neu-border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --glass-bg: rgba(15, 23, 42, 0.65);
-    --glass-bg-light: rgba(15, 23, 42, 0.85);
-    --glass-border: rgba(255, 255, 255, 0.08);
-    --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255,255,255,0.05) inset;
-    --neu-bg: #1a1a2e;
-    --neu-shadow-raise: 6px 6px 14px #0f0f1a, -6px -6px 14px #252545;
-    --neu-shadow-inset: inset 4px 4px 10px #0f0f1a, inset -4px -4px 10px #252545;
-  }
 }
 
 /* ---------- Glassmorphism Utilities ---------- */
@@ -572,11 +560,11 @@ video::-webkit-media-controls-panel {
 
   /* Glass navigation bar */
   .glass-nav {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 1px solid transparent;
+    box-shadow: none;
   }
 
   .glass-nav-scrolled {
@@ -807,7 +795,14 @@ video::-webkit-media-controls-panel {
 
   /* Stat counter card */
   .stat-card {
-    @apply glass-light glass-shimmer;
+    background: var(--glass-bg-light);
+    backdrop-filter: var(--glass-blur-sm);
+    -webkit-backdrop-filter: var(--glass-blur-sm);
+    border: 1px solid var(--glass-border-strong);
+    border-radius: var(--bento-radius);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.10), 0 1px 0 rgba(255,255,255,0.50) inset;
+    position: relative;
+    overflow: hidden;
     padding: 1.5rem;
     text-align: center;
     transition: transform var(--duration-base) var(--ease-spring),
@@ -816,6 +811,101 @@ video::-webkit-media-controls-panel {
 
   .stat-card:hover {
     transform: translateY(-4px) scale(1.02);
+  }
+
+  /* Glass card for light backgrounds - premium frosted effect */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.60);
+    border-radius: var(--bento-radius);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.08),
+                0 2px 8px rgba(15, 23, 42, 0.04),
+                inset 0 1px 0 rgba(255, 255, 255, 0.80);
+    transition: all var(--duration-base) var(--ease-smooth);
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 20px 60px rgba(15, 23, 42, 0.12),
+                0 4px 12px rgba(15, 23, 42, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.90);
+    transform: translateY(-3px);
+    border-color: rgba(34, 197, 94, 0.30);
+  }
+
+  /* Premium feature card with subtle green glow */
+  .premium-card {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(34, 197, 94, 0.12);
+    border-radius: var(--bento-radius);
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06),
+                0 1px 4px rgba(15, 23, 42, 0.03),
+                inset 0 1px 0 rgba(255, 255, 255, 0.70);
+    transition: all 350ms var(--ease-smooth);
+  }
+
+  .premium-card:hover {
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 24px 64px rgba(34, 197, 94, 0.10),
+                0 8px 24px rgba(15, 23, 42, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    transform: translateY(-4px);
+    border-color: rgba(34, 197, 94, 0.25);
+  }
+
+  /* AI-glow accent for technology cards */
+  .ai-glow-card {
+    background: rgba(255, 255, 255, 0.80);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(99, 102, 241, 0.10);
+    border-radius: var(--bento-radius);
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.06),
+                0 0 0 1px rgba(99, 102, 241, 0.05);
+    transition: all 350ms var(--ease-smooth);
+  }
+
+  .ai-glow-card:hover {
+    border-color: rgba(99, 102, 241, 0.25);
+    box-shadow: 0 20px 60px rgba(99, 102, 241, 0.12),
+                0 0 40px rgba(99, 102, 241, 0.06),
+                0 0 0 1px rgba(99, 102, 241, 0.15);
+    transform: translateY(-4px);
+  }
+
+  /* Premium section divider with gradient line */
+  .section-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.3), rgba(250, 204, 21, 0.3), rgba(34, 197, 94, 0.3), transparent);
+  }
+
+  /* Neumorphic card for light backgrounds */
+  .neu-card {
+    background: #f8faf9;
+    border-radius: var(--bento-radius);
+    box-shadow: 8px 8px 20px rgba(163, 177, 168, 0.35),
+                -8px -8px 20px rgba(255, 255, 255, 0.90);
+    border: 1px solid rgba(255, 255, 255, 0.60);
+    transition: all var(--duration-base) var(--ease-smooth);
+  }
+
+  .neu-card:hover {
+    box-shadow: 12px 12px 24px rgba(163, 177, 168, 0.40),
+                -12px -12px 24px rgba(255, 255, 255, 0.95);
+    transform: translateY(-2px);
+  }
+
+  /* Neu-inset (pressed) state */
+  .neu-card-inset {
+    background: #f0f4f2;
+    border-radius: var(--bento-radius);
+    box-shadow: inset 4px 4px 12px rgba(163, 177, 168, 0.30),
+                inset -4px -4px 12px rgba(255, 255, 255, 0.80);
+    border: 1px solid rgba(0, 0, 0, 0.03);
   }
 
   /* Premium button V2 */
