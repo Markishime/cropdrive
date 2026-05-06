@@ -12,6 +12,11 @@ const nextConfig = {
         hostname: 'cdn.coverr.co',
         pathname: '**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.squarespace-cdn.com',
+        pathname: '**',
+      },
     ],
   },
   // CRITICAL: Prevent trailing slash redirects that cause 307 errors for Stripe webhooks
