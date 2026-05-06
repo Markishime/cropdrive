@@ -161,10 +161,10 @@ export const Navbar: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
+            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl shadow-2xl ${
               scrolled
-                ? 'border-green-200 bg-white/95'
-                : 'border-yellow-400/30 bg-gray-900/95'
+                ? 'glass-light border border-white/60'
+                : 'glass border border-white/12'
             } ${mobile ? 'md:hidden' : ''}`}
             role="menu"
           >
@@ -209,8 +209,8 @@ export const Navbar: React.FC = () => {
   const navbarClasses = `
     fixed top-0 left-0 right-0 z-[100] transition-all duration-500
     ${scrolled
-      ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-      : 'bg-transparent'
+      ? 'glass-nav-scrolled'
+      : 'glass-nav'
     }
   `;
 
@@ -299,10 +299,10 @@ export const Navbar: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className={`absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border-2 ${
+                      className={`absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-2xl overflow-hidden ${
                         scrolled 
-                          ? 'bg-white/95 border-green-200' 
-                          : 'bg-gray-900/95 border-yellow-400/30'
+                          ? 'glass-light border border-white/60' 
+                          : 'glass border border-white/12'
                       }`}
                     >
                       {getStartedLinks.map((item, index) => (
@@ -338,10 +338,10 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center">
                 {/* Dashboard Button */}
                 <Link href="/dashboard">
-                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap cursor-pointer ${
+                  <button className={`px-5 py-2.5 font-bold rounded-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                     scrolled
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                      ? 'btn-v2-primary'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 border border-yellow-300/40'
                   }`}>
                     {translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}
                   </button>
@@ -359,10 +359,10 @@ export const Navbar: React.FC = () => {
                   </button>
                 </Link>
                 <Link href="/register">
-                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap ${
+                  <button className={`px-5 py-2.5 font-bold rounded-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                     scrolled
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                      ? 'btn-v2-primary'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 border border-yellow-300/40'
                   }`}>
                     {translateLabel('Register', 'Daftar', 'Daftar')}
                   </button>

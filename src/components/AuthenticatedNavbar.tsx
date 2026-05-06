@@ -357,7 +357,7 @@ export const AuthenticatedNavbar: React.FC = () => {
 
   // Dashboard navbar style (existing)
   return (
-    <nav className="sticky top-0 z-40 bg-gradient-to-br from-green-900 via-green-800 to-green-900 backdrop-blur-lg border-b border-green-700/50">
+    <nav className="sticky top-0 z-40 glass-sidebar border-b border-white/10 shadow-lg backdrop-blur-2xl">
       <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left Side - Mobile Menu Spacer */}

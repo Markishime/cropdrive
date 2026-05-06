@@ -234,16 +234,16 @@ export default function DashboardPage() {
   });
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50">
-        {/* Hero Header */}
-        <section className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-12 sm:py-16 lg:py-20 relative overflow-hidden">
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0" style={{
-              backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-              backgroundSize: '40px 40px'
-            }}></div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-green-950 to-slate-950">
+        {/* Hero Header — glassmorphic */}
+        <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
+          {/* Deep background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-green-900 via-green-800 to-green-900" />
+          {/* Dot grid */}
+          <div className="absolute inset-0 opacity-10 premium-mesh" />
+          {/* AI glow orb */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-green-500/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-yellow-400/15 blur-3xl pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <motion.div
@@ -294,7 +294,7 @@ export default function DashboardPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.5 }}
-                className="bg-gradient-to-br from-white/15 to-white/5 backdrop-blur-md rounded-2xl p-6 border-2 border-white/20 shadow-2xl"
+                className="glass rounded-2xl p-6 border border-white/15 shadow-2xl"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="flex items-center space-x-4">
@@ -336,7 +336,7 @@ export default function DashboardPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl border-2 border-green-200 overflow-hidden"
+              className="glass-green rounded-3xl shadow-2xl overflow-hidden"
             >
               <div className="bg-gradient-to-r from-green-600 via-green-700 to-green-800 p-8 text-white">
                 <div className="flex items-start justify-between flex-wrap gap-4">
@@ -367,40 +367,40 @@ export default function DashboardPage() {
               </div>
 
               <div className="p-8">
-                <h3 className="text-2xl font-black text-gray-900 mb-6 flex items-center gap-2">
-                  <svg className="w-6 h-6 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <h3 className="text-2xl font-black text-white mb-6 flex items-center gap-2">
+                  <svg className="w-6 h-6 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
                   {language === 'id' ? 'Akses & Batas Laporan Anda' : language === 'ms' ? 'Akses & Had Laporan Anda' : 'Your Access & Report Limit'}
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border-2 border-green-200">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-600">
+                  <div className="flex items-start gap-3 p-4 rounded-xl glass-green">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500 glow-green">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-white">
                         {language === 'id' ? 'Akses Penuh AI & Palmira' : language === 'ms' ? 'Akses Penuh AI & Palmira' : 'Full AI & Palmira Access'}
                       </p>
-                      <p className="text-sm text-green-700 font-medium mt-1">
+                      <p className="text-sm text-green-300 font-medium mt-1">
                         {language === 'id' ? 'Gratis untuk semua pengguna terdaftar' : language === 'ms' ? 'Percuma untuk semua pengguna berdaftar' : 'Free for all registered users'}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-green-50 border-2 border-green-200">
-                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-600">
+                  <div className="flex items-start gap-3 p-4 rounded-xl glass-green">
+                    <div className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-green-500 glow-green">
                       <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="font-semibold text-gray-900">
+                      <p className="font-semibold text-white">
                         {language === 'id' ? 'Batas Unggah Laporan' : language === 'ms' ? 'Had Muat Naik Laporan' : 'Report Upload Limit'}
                       </p>
-                      <p className="text-sm text-green-700 font-medium mt-1">
+                      <p className="text-sm text-green-300 font-medium mt-1">
                         {language === 'id' ? 'Maksimum 2 laporan per pengguna' : language === 'ms' ? 'Maksimum 2 laporan bagi setiap pengguna' : 'Maximum of 2 reports per user'}
                       </p>
                     </div>
@@ -428,7 +428,7 @@ export default function DashboardPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
               whileHover={{ scale: 1.01 }}
-              className="bg-gradient-to-br from-green-600 to-green-700 rounded-2xl p-8 border border-green-500 shadow-xl text-white"
+              className="glass-ai rounded-2xl p-8 border border-indigo-400/25 shadow-xl text-white"
             >
                 <div className="flex items-start space-x-4 mb-6">
                   <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">

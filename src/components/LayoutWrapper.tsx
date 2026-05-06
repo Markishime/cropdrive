@@ -29,10 +29,13 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-950 via-green-950 to-slate-900">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 border-4 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-600 font-medium">Loading...</p>
+          <div className="relative w-14 h-14">
+            <div className="absolute inset-0 rounded-full border-2 border-green-500/30 animate-ping" />
+            <div className="w-14 h-14 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+          <p className="text-white/70 font-medium text-scrim">Loading...</p>
         </div>
       </div>
     );
@@ -66,7 +69,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
     
     if (isDashboardPage) {
       return (
-        <div key={language} className="flex h-screen overflow-hidden bg-gray-50">
+        <div key={language} className="flex h-screen overflow-hidden bg-gradient-to-br from-slate-950 via-green-950 to-slate-900">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden w-0 min-w-0">
             <AuthenticatedNavbar />

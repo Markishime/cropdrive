@@ -50,8 +50,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
         whileTap={{ scale: 0.98 }}
               className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-2 sm:space-x-3'} px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl transition-all duration-200 group cursor-pointer ${
                 isActive
-                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg font-bold'
-                  : 'text-white/80 hover:bg-white/10 hover:text-white'
+                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-[0_4px_16px_rgba(250,204,21,0.45)] font-bold'
+                  : 'text-white/75 hover:bg-white/12 hover:text-white hover:shadow-[inset_0_0_0_1px_rgba(255,255,255,0.10)]'
               }`}
         title={isCollapsed ? (language === 'ms' ? labelMs : label) : undefined}
       >
@@ -349,12 +349,12 @@ export const Sidebar: React.FC = () => {
         )}
       </button>
 
-      {/* Desktop Sidebar - Solid Green Background */}
+      {/* Desktop Sidebar - Glassmorphic V2 */}
       <aside className="hidden lg:flex lg:flex-shrink-0">
         <motion.div
           animate={{ width: isCollapsed ? 80 : 288 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="bg-gradient-to-br from-green-900 via-green-800 to-green-900 border-r border-green-700 shadow-2xl h-screen"
+          className="glass-sidebar h-screen overflow-hidden"
         >
           {renderSidebarContent()}
         </motion.div>
@@ -379,7 +379,7 @@ export const Sidebar: React.FC = () => {
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 bg-gradient-to-br from-green-900 via-green-800 to-green-900 shadow-2xl z-50 lg:hidden overflow-y-auto"
+              className="fixed top-0 left-0 bottom-0 w-72 sm:w-80 glass-sidebar shadow-2xl z-50 lg:hidden overflow-y-auto"
             >
               {renderSidebarContent()}
             </motion.aside>

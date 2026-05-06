@@ -261,7 +261,7 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+                  className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-primary rounded-xl font-black text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
                   style={{ pointerEvents: 'auto' }}
                 >
                   {copy('🚀 Get Started Now', '🚀 Mulakan Sekarang')}
@@ -275,7 +275,7 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+                  className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-glass rounded-xl font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
                   style={{ pointerEvents: 'auto' }}
                 >
                   {copy('▶️ Watch Demo', '▶️ Tonton Demo')}
@@ -378,8 +378,10 @@ export default function HomePage() {
       </section>
 
       {/* Who We Serve Section - Two Client Types */}
-      <section className="py-10 xs:py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+      <section className="py-10 xs:py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-slate-950 via-green-950 to-slate-950 relative overflow-hidden">
+        {/* Ambient glow */}
+        <div className="absolute inset-0 opacity-30" style={{background:'radial-gradient(ellipse at top, rgba(21,128,61,0.3), transparent 60%), radial-gradient(ellipse at bottom, rgba(15,23,42,0.8), transparent 80%)'}} />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -387,10 +389,10 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-8 xs:mb-10 sm:mb-12 lg:mb-16"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-2 xs:mb-3 sm:mb-4 font-heading tracking-tight px-2">
+            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-white mb-2 xs:mb-3 sm:mb-4 font-heading tracking-tight px-2">
               {copy('Who Do We Serve?', 'Siapa Yang Kami Khidmat?')}
             </h2>
-            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-3 xs:px-4">
+            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-white/70 max-w-3xl mx-auto px-3 xs:px-4">
               {copy('Tailored solutions for every type of customer', 'Penyelesaian disesuaikan untuk setiap jenis pelanggan')}
             </p>
           </motion.div>
@@ -402,7 +404,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="glass-gold rounded-2xl sm:rounded-3xl overflow-hidden glass-shimmer"
             >
               {/* Farmers Image - Large */}
               <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
@@ -465,7 +467,7 @@ export default function HomePage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300"
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 btn-v2-primary text-white rounded-xl font-black text-base sm:text-lg uppercase tracking-wider"
                   >
                       {copy('🛒 Join Us Now', '🛒 Sertai Sekarang')}
                   </motion.button>
@@ -479,7 +481,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="glass-green rounded-2xl sm:rounded-3xl overflow-hidden glass-shimmer"
             >
               {/* Organizations Image - Large */}
               <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
@@ -495,7 +497,7 @@ export default function HomePage() {
               </div>
 
               <div className="p-6 sm:p-8 lg:p-10">
-                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-green-900 mb-4 sm:mb-6 text-center">
+                <h3 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white mb-4 sm:mb-6 text-center">
                   {copy('Organizations', 'Organisasi')}
                 </h3>
 
@@ -538,7 +540,7 @@ export default function HomePage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 btn-v2-primary rounded-xl font-black text-base sm:text-lg uppercase tracking-wider"
                   >
                       {copy('📅 Book A Demo', '📅 Tempah Demo')}
                   </motion.button>
@@ -550,13 +552,10 @@ export default function HomePage() {
       </section>
 
       {/* Image Carousel Section - 5 Images */}
-      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-br from-green-900 via-green-800 to-green-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
+      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-br from-slate-950 via-green-950 to-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-15 premium-mesh"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -671,7 +670,9 @@ export default function HomePage() {
       </section>
 
       {/* CropDrive Introduction Section */}
-      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
+      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-slate-950 via-slate-900 to-green-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 premium-mesh" />
+        <div className="absolute top-0 right-1/3 w-80 h-80 bg-green-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -680,13 +681,13 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-10 xs:mb-12 sm:mb-16"
           >
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-6">
               CropDrive™ Oil Palm AI Advisor
             </h2>
-            <p className="text-2xl md:text-3xl font-semibold text-green-700 mb-4">
+            <p className="text-2xl md:text-3xl font-semibold text-green-400 mb-4">
               {copy('Smart Farming Intelligence for Oil Palm Plantations', 'Smart Farming Intelligence untuk Ladang Kelapa Sawit')}
             </p>
-            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-4 xs:mb-5 sm:mb-6 leading-relaxed px-3 xs:px-4">
+            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-white/70 max-w-4xl mx-auto mb-4 xs:mb-5 sm:mb-6 leading-relaxed px-3 xs:px-4">
               {copy('Your personal farming expert that analyzes soil and leaf test reports using artificial intelligence. It reads your lab results, compares them to industry standards, and provides detailed recommendations to improve your plantation\'s health and productivity.', 'Pakar pertanian peribadi anda yang menganalisis laporan ujian tanah dan daun menggunakan kecerdasan buatan. Ia membaca keputusan makmal anda, membandingkannya dengan piawaian industri, dan memberikan cadangan terperinci untuk meningkatkan kesihatan dan produktiviti ladang anda.')}
             </p>
             <div className="flex flex-col md:flex-row items-center justify-center gap-2 xs:gap-3 text-sm xs:text-base sm:text-lg text-green-600 font-semibold bg-green-50 border-2 border-green-200 rounded-xl p-4 xs:p-5 sm:p-6 max-w-2xl mx-auto">
@@ -850,7 +851,8 @@ export default function HomePage() {
       </section>
 
       {/* How We Help Section */}
-      <section className="py-20 bg-gradient-to-br from-green-50 to-white">
+      <section className="py-20 bg-gradient-to-br from-slate-950 via-green-950 to-slate-900 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-15 premium-mesh" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -899,7 +901,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-white p-6 rounded-2xl shadow-lg border-2 border-green-200 hover:border-green-500 transition-all"
+              className="flex flex-col items-center text-center glass-green p-6 rounded-2xl glass-shimmer"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -976,7 +978,7 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-md p-6 rounded-2xl text-center border-2 border-white/20 hover:border-yellow-400 transition-all"
+                className="glass p-6 rounded-2xl text-center border border-white/15 hover:border-yellow-400/40 transition-all glass-shimmer"
               >
                 <div className="w-16 h-16 mx-auto mb-4 relative">
                   <Image
@@ -1044,7 +1046,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-gradient-to-br from-green-50 to-white p-6 rounded-2xl shadow-lg border-2 border-green-200 hover:border-green-500 transition-all"
+                  className="flex flex-col items-center text-center glass-green p-6 rounded-2xl glass-shimmer"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -1634,7 +1636,9 @@ export default function HomePage() {
       </section>
 
       {/* Trust & Guarantee Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 via-yellow-50 to-white">
+      <section className="py-24 bg-gradient-to-br from-slate-950 via-slate-900 to-green-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-20 premium-mesh" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-yellow-400/8 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1835,7 +1839,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border-2 border-gray-700 hover:border-yellow-400 transition-all"
+                className="glass p-8 rounded-2xl border border-gray-600/30 hover:border-yellow-400/40 transition-all glass-shimmer"
               >
                 <div className="text-6xl mb-4">{tech.icon}</div>
                 <h3 className="text-2xl font-bold mb-4 text-yellow-400">{tech.title}</h3>
@@ -1888,7 +1892,8 @@ export default function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
+      <section className="py-24 bg-gradient-to-br from-slate-950 to-green-950 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-15 premium-mesh" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
