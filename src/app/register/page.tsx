@@ -308,7 +308,7 @@ export default function RegisterPage() {
                     alt="CropDrive Logo"
                     width={40}
                     height={40}
-                    className="object-cover w-full h-full rounded-full"
+                    className="object-contain w-full h-full"
                     priority
                   />
                 </motion.div>

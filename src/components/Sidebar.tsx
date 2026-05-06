@@ -223,26 +223,26 @@ export const Sidebar: React.FC = () => {
         <div className="flex items-center justify-between">
           {isCollapsed ? (
             <Link href="/dashboard" className="flex items-center justify-center mx-auto mb-2" onClick={() => setIsOpen(false)}>
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white overflow-hidden shadow-lg hover:shadow-xl transition-all">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white overflow-hidden shadow-lg hover:shadow-xl transition-all flex items-center justify-center">
                 <Image
                   src="/images/Cropdrive Logo.png"
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
             </Link>
           ) : (
             <Link href="/dashboard" className="flex items-center space-x-2 sm:space-x-3 group flex-1 min-w-0" onClick={() => setIsOpen(false)}>
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white overflow-hidden shadow-lg group-hover:shadow-xl transition-all flex-shrink-0">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white overflow-hidden shadow-lg group-hover:shadow-xl transition-all flex-shrink-0 flex items-center justify-center">
                 <Image
                   src="/images/Cropdrive Logo.png"
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>

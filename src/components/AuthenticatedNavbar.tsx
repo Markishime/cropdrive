@@ -225,7 +225,7 @@ export const AuthenticatedNavbar: React.FC = () => {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group mr-4 sm:mr-8 lg:mr-12 flex-shrink-0">
-              <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 ${
+              <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 flex items-center justify-center ${
                 scrolled ? 'bg-white shadow-md' : 'bg-white/90 shadow-lg'
               }`}>
                 <Image
@@ -233,7 +233,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
