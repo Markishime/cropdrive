@@ -212,73 +212,102 @@ export default function GetStartedFarmersPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-28 sm:py-32 overflow-hidden pt-28 sm:pt-32">
+        {/* Ambient glow and pattern */}
+        <div className="absolute inset-0 opacity-15">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
             backgroundSize: '40px 40px'
           }}></div>
         </div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-green-400/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Kami Membantu Anda Memutuskan' : 'We help you decide'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'Apa yang Tanaman Anda Perlukan' : 'what your crops really need'}</span>
+            <span className="inline-block text-yellow-400 text-xs sm:text-sm font-bold tracking-widest uppercase px-4 sm:px-6 py-2 border-2 border-yellow-400/50 rounded-full backdrop-blur-md bg-white/10 shadow-lg mb-4 sm:mb-6">
+              {language === 'ms' ? 'Untuk Petani Individu' : 'For Individual Farmers'}
+            </span>
+            <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-[1.1] font-heading">
+              {language === 'ms' ? 'Kami Membantu Anda\nMemutuskan' : 'We help you\ndecide'}<br />
+              <span className="text-yellow-400">{language === 'ms' ? 'Apa yang Tanaman\nAnda Perlukan' : 'what your crops\nreally need'}</span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 xs:px-4">
               {language === 'ms'
                 ? 'Muat naik keputusan makmal tanah dan daun anda dan terima cadangan yang direka untuk anda bagi mengurangkan perbelanjaan dan meningkatkan produktiviti'
                 : 'Upload your soil and leaf lab results and receive recommendations designed for you to reduce your expenses and boost your productivity'
               }
             </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-block"
+            >
+              <Link href="/pricing">
+                <button className="px-6 xs:px-8 sm:px-12 py-2.5 xs:py-3 sm:py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:shadow-2xl hover:shadow-yellow-400/40 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide text-xs xs:text-sm sm:text-base">
+                  {language === 'ms' ? 'Lihat Pelan Harga' : 'View Pricing Plans'}
+                </button>
+              </Link>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white via-green-50/30 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
+            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-2 sm:mb-4 font-heading">
               {language === 'ms' ? 'Cara Ia' : 'How it'} <span className="text-green-700">{language === 'ms' ? 'Berfungsi' : 'works'}</span>
             </h2>
+            <p className="text-base xs:text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-2 xs:px-4">
+              {language === 'ms' ? '7 langkah mudah untuk mencapai hasil yang lebih baik' : '7 simple steps to better results'}
+            </p>
           </motion.div>
 
-          <div className="space-y-12">
+          <div className="space-y-4 sm:space-y-6">
             {steps.map((step, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -50 : 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.6 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-lg"
+                whileHover={{ scale: 1.02, y: -5 }}
+                className="premium-card p-6 sm:p-8 hover:shadow-lg transition-all"
               >
-                <div className="flex items-start gap-6">
+                <div className="flex items-start gap-4 sm:gap-6">
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-green-700 text-yellow-400 rounded-full flex items-center justify-center text-3xl font-black shadow-xl">
+                    <motion.div 
+                      initial={{ scale: 0, rotate: -180 }}
+                      whileInView={{ scale: 1, rotate: 0 }}
+                      transition={{ duration: 0.8, delay: index * 0.1 }}
+                      viewport={{ once: true }}
+                      className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-green-600 to-green-700 text-yellow-400 rounded-xl flex items-center justify-center text-2xl sm:text-3xl font-black shadow-lg"
+                    >
                       {step.number}
-                    </div>
+                    </motion.div>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-3 font-heading">
+                    <h3 className="text-lg xs:text-xl sm:text-2xl font-black text-gray-900 mb-2 font-heading">
                       {step.title}
-                </h3>
-                    <p className="text-lg text-gray-700 leading-relaxed">
+                    </h3>
+                    <p className="text-sm xs:text-base sm:text-lg text-gray-700 leading-relaxed">
                       {step.desc}
-                </p>
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -288,62 +317,71 @@ export default function GetStartedFarmersPage() {
       </section>
 
       {/* Membership Plans Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-green-50/50 via-white to-white relative overflow-hidden">
+        <div className="absolute top-0 right-1/3 w-96 h-96 bg-green-400/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
-              {language === 'ms' ? 'Pelan Keahlian dan' : 'Membership Plans and'} <span className="text-green-700">{language === 'ms' ? 'Harga' : 'Pricing'}</span>
+            <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black text-gray-900 mb-2 sm:mb-4 font-heading">
+              {language === 'ms' ? 'Pelan Keahlian dan Harga' : 'Membership Plans and Pricing'}
             </h2>
-            <p className="text-xl text-gray-600 mt-4">
+            <p className="text-base xs:text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-2 xs:px-4">
               {language === 'ms' 
                 ? 'Pilih pelan yang sesuai dengan saiz ladang anda'
                 : 'Choose the plan that fits your farm size'
               }
-                </p>
-              </motion.div>
+            </p>
+          </motion.div>
           
           <div className="text-center">
-            <Link href="/pricing">
-              <button className="px-10 py-5 bg-gradient-to-r from-green-600 to-green-700 text-white font-black rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide">
-                {language === 'ms' ? 'Lihat Pelan Harga' : 'View Pricing Plans'}
-              </button>
-            </Link>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Link href="/pricing">
+                <button className="px-6 xs:px-8 sm:px-12 py-3 sm:py-4 btn-v2-primary text-white rounded-full hover:shadow-2xl hover:shadow-green-500/40 transition-all duration-300 shadow-lg transform hover:scale-105 uppercase tracking-wide text-xs xs:text-sm sm:text-base font-black">
+                  {language === 'ms' ? 'Lihat Pelan Harga' : 'View Pricing Plans'}
+                </button>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </section>
 
       {/* Form Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white via-green-50/20 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12"
+            className="premium-panel-strong rounded-3xl p-6 sm:p-8 md:p-12"
           >
             <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 font-heading">
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl font-black text-gray-900 mb-4 font-heading">
                 {language === 'ms' ? 'Pembantu AI CropDrive™' : 'CropDrive™ AI Assistant'}
-            </h2>
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-                <p className="text-gray-700 leading-relaxed">
-              {language === 'ms'
+              </h2>
+              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded-lg">
+                <p className="text-gray-700 text-sm xs:text-base sm:text-lg leading-relaxed">
+                  {language === 'ms'
                     ? 'Ahli agronomi AI kami sedang diintegrasikan ke dalam sistem dan akan segera menjana cadangan segera untuk anda. Buat masa ini, anda boleh memuat naik butiran ladang anda dan fail analisis makmal tanah dan daun anda di sini. Pasukan kami akan memproses data anda secara manual dan menyediakan laporan terperinci untuk anda sehingga Pembantu CropDrive™ dilancarkan.'
                     : 'Our AI agronomist is being integrated into the system and will soon generate instant recommendations for you. In the meantime, you can upload your farm details and your soil and leaf laboratory analysis files here. Our team will process your data manually and prepare a detailed report for you until the CropDrive™ Assistant goes live.'
-              }
-            </p>
+                  }
+                </p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label htmlFor="farmer-firstName" className="block text-sm font-bold text-gray-700 mb-2">
                     {language === 'ms' ? 'Nama Pertama' : 'First Name'} <span className="text-red-500">*</span>
@@ -355,7 +393,7 @@ export default function GetStartedFarmersPage() {
                     required
                     value={formData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all bg-gray-50 focus:bg-white"
                   />
                 </div>
                 <div>
@@ -369,7 +407,7 @@ export default function GetStartedFarmersPage() {
                     required
                     value={formData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all bg-gray-50 focus:bg-white"
                   />
                 </div>
               </div>
@@ -385,11 +423,11 @@ export default function GetStartedFarmersPage() {
                   required
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-green-600 focus:ring-2 focus:ring-green-200 transition-all bg-gray-50 focus:bg-white"
                 />
               </div>
 
-              <div className="flex items-center">
+              <div className="flex items-center p-4 bg-green-50 rounded-lg border border-green-200">
                 <input
                   type="checkbox"
                   name="newsletter"
@@ -398,7 +436,7 @@ export default function GetStartedFarmersPage() {
                   onChange={handleInputChange}
                   className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
                 />
-                <label htmlFor="newsletter" className="ml-2 text-sm text-gray-700">
+                <label htmlFor="newsletter" className="ml-3 text-sm text-gray-700 font-medium">
                   {language === 'ms' ? 'Daftar untuk berita dan kemas kini' : 'Sign up for news and updates'}
                 </label>
               </div>

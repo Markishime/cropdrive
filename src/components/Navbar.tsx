@@ -283,7 +283,7 @@ export const Navbar: React.FC = () => {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                 </button>
 
-                {/* Dropdown Menu - Modern Glass Effect */}
+                {/* Dropdown Menu - Clean White */}
                 <AnimatePresence>
                   {showGetStartedDropdown && (
                     <motion.div
@@ -291,24 +291,16 @@ export const Navbar: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className={`absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-2xl overflow-hidden ${
-                        scrolled 
-                          ? 'glass-light border border-white/60' 
-                          : 'glass border border-white/12'
-                      }`}
+                      className="absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-xl overflow-hidden bg-white border border-gray-100"
                     >
                       {getStartedLinks.map((item, index) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 ${
-                            scrolled 
-                              ? 'text-gray-700 hover:bg-green-50/80 hover:text-green-700' 
-                              : 'text-white hover:bg-yellow-400/20 hover:text-yellow-300'
-                          } ${index > 0 ? 'border-t' : ''} ${scrolled ? 'border-gray-200' : 'border-gray-700'}`}
+                          className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 text-gray-700 hover:bg-green-50 hover:text-green-700 ${index > 0 ? 'border-t border-gray-100' : ''}`}
                         >
-                          <div className="font-bold text-base mb-1">{language === 'en' ? item.label : item.labelMs}</div>
-                          <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <div className="font-bold text-base mb-1 text-gray-900">{language === 'en' ? item.label : item.labelMs}</div>
+                          <div className="text-xs text-gray-500">
                             {item.label === 'For Farmers' 
                               ? translateLabel('Individual palm oil farmers & smallholders', 'Untuk petani kelapa sawit individu', 'Untuk petani kelapa sawit individu')
                               : translateLabel('Large plantations & organizations', 'Untuk ladang dan organisasi besar', 'Untuk perkebunan dan organisasi besar')
