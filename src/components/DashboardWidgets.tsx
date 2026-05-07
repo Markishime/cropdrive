@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faShieldHalved, faLock, faCertificate, faLeaf,
-  faFileAlt, faComments, faClockRotateLeft, faBolt
+  faBolt, faChartBar, faVial, faSeedling
 } from '@fortawesome/free-solid-svg-icons';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 interface DashboardWidgetsProps {
   language: string;
@@ -15,66 +17,193 @@ interface DashboardWidgetsProps {
   onNavigate: (path: string) => void;
 }
 
-export const QuickActionsWidget: React.FC<DashboardWidgetsProps> = ({ language, uploadsUsed, uploadsLimit, onNavigate }) => {
+interface AnalysisReport {
+  id: string;
+  type: string;
+  date: string;
+  title: string;
+  recommendations?: number;
+  analysisData?: any;
+}
+
+export const DataVisualizationWidget: React.FC<DashboardWidgetsProps & { userId?: string }> = ({ language, uploadsUsed, uploadsLimit, onNavigate, userId }) => {
   const copy = (en: string, ms: string, id: string) =>
     language === 'id' ? id : language === 'ms' ? ms : en;
 
-  const actions = [
-    {
-      icon: faFileAlt,
-      label: copy('View Reports', 'Lihat Laporan', 'Lihat Laporan'),
-      description: copy(`${uploadsUsed} completed`, `${uploadsUsed} selesai`, `${uploadsUsed} selesai`),
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'bg-blue-50 border-blue-200',
-      path: '/reports',
-    },
-    {
-      icon: faComments,
-      label: copy('Chat with Palmira', 'Bersembang dengan Palmira', 'Obrolan dengan Palmira'),
-      description: copy('AI Agronomist', 'Ahli Agronomi AI', 'Ahli Agronomi AI'),
-      color: 'from-purple-500 to-purple-600',
-      bgColor: 'bg-purple-50 border-purple-200',
-      path: '/palmira',
-    },
-    {
-      icon: faClockRotateLeft,
-      label: copy('Analysis History', 'Sejarah Analisis', 'Riwayat Analisis'),
-      description: copy('Past results', 'Keputusan lepas', 'Hasil sebelumnya'),
-      color: 'from-amber-500 to-orange-500',
-      bgColor: 'bg-amber-50 border-amber-200',
-      path: '/reports',
-    },
-    {
-      icon: faBolt,
-      label: copy('New Analysis', 'Analisis Baru', 'Analisis Baru'),
-      description: copy(`${Math.max(0, uploadsLimit - uploadsUsed)} remaining`, `${Math.max(0, uploadsLimit - uploadsUsed)} baki`, `${Math.max(0, uploadsLimit - uploadsUsed)} tersisa`),
-      color: 'from-green-500 to-emerald-600',
-      bgColor: 'bg-green-50 border-green-200',
-      path: '/assistant',
-    },
-  ];
+  const [reports, setReports] = useState<AnalysisReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) { setLoading(false); return; }
+    const fetchReports = async () => {
+      try {
+        const reportsRef = collection(db, 'analysis_results');
+        const q1 = query(reportsRef, where('userId', '==', userId), where('status', '==', 'completed'));
+        const q2 = query(reportsRef, where('user_id', '==', userId), where('status', '==', 'completed'));
+        const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+        const map = new Map<string, AnalysisReport>();
+        [...snap1.docs, ...snap2.docs].forEach(d => {
+          if (!map.has(d.id)) {
+            const data = d.data();
+            const types = data.report_types || [];
+            map.set(d.id, {
+              id: d.id,
+              type: types.includes('leaf') ? 'leaf' : types.includes('soil') ? 'soil' : (data.type || 'soil'),
+              date: data.createdAt?.toDate?.()?.toISOString() || data.timestamp || data.created_at || '',
+              title: data.title || data.report_title || 'Analysis Report',
+              recommendations: data.recommendations?.length || data.recommendation_count || 0,
+              analysisData: data.analysis_data || data.analysisData || null,
+            });
+          }
+        });
+        setReports(Array.from(map.values()));
+      } catch (e) {
+        console.warn('DataViz: Error loading reports', e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, [userId]);
+
+  const soilCount = reports.filter(r => r.type === 'soil').length;
+  const leafCount = reports.filter(r => r.type === 'leaf').length;
+  const totalRecommendations = reports.reduce((acc, r) => acc + (r.recommendations || 0), 0);
+  const remaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
+
+  // Mini bar chart data for report activity
+  const barData = (() => {
+    const months: Record<string, number> = {};
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const key = d.toLocaleDateString('en-US', { month: 'short' });
+      months[key] = 0;
+    }
+    reports.forEach(r => {
+      if (r.date) {
+        const d = new Date(r.date);
+        const key = d.toLocaleDateString('en-US', { month: 'short' });
+        if (key in months) months[key]++;
+      }
+    });
+    return Object.entries(months).map(([month, count]) => ({ month, count }));
+  })();
+  const maxBar = Math.max(...barData.map(d => d.count), 1);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {actions.map((action, i) => (
-        <motion.button
-          key={action.path + i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          whileHover={{ scale: 1.03, y: -2 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={() => onNavigate(action.path)}
-          className={`p-4 rounded-2xl border ${action.bgColor} text-left transition-all hover:shadow-lg`}
-        >
-          <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center mb-3 shadow-md`}>
-            <FontAwesomeIcon icon={action.icon} className="w-5 h-5 text-white" />
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.1 }}
+      className="bg-white rounded-3xl border border-gray-200 shadow-xl overflow-hidden"
+    >
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-700 to-emerald-800 px-6 py-5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <FontAwesomeIcon icon={faChartBar} className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-white">
+                {copy('Analysis Overview', 'Gambaran Analisis', 'Ikhtisar Analisis')}
+              </h3>
+              <p className="text-sm text-white/70">
+                {copy('Your farm data at a glance', 'Data ladang anda sekilas pandang', 'Data kebun Anda sekilas')}
+              </p>
+            </div>
           </div>
-          <p className="font-bold text-gray-900 text-sm">{action.label}</p>
-          <p className="text-xs text-gray-500 mt-1">{action.description}</p>
-        </motion.button>
-      ))}
-    </div>
+          <button
+            onClick={() => onNavigate('/reports')}
+            className="text-sm font-semibold text-white/90 hover:text-white bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition-all"
+          >
+            {copy('View All →', 'Lihat Semua →', 'Lihat Semua →')}
+          </button>
+        </div>
+      </div>
+
+      <div className="p-6">
+        {loading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="w-8 h-8 border-3 border-green-600 border-t-transparent rounded-full animate-spin" />
+          </div>
+        ) : (
+          <>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 border border-green-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <FontAwesomeIcon icon={faChartBar} className="w-4 h-4 text-green-600" />
+                  <span className="text-xs font-bold text-green-700 uppercase">{copy('Total', 'Jumlah', 'Total')}</span>
+                </div>
+                <p className="text-3xl font-black text-gray-900">{uploadsUsed}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {remaining === Infinity
+                    ? copy('Unlimited', 'Tanpa had', 'Tak terbatas')
+                    : copy(`of ${uploadsLimit} used`, `daripada ${uploadsLimit}`, `dari ${uploadsLimit} digunakan`)
+                  }
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <FontAwesomeIcon icon={faVial} className="w-4 h-4 text-amber-600" />
+                  <span className="text-xs font-bold text-amber-700 uppercase">{copy('Soil', 'Tanah', 'Tanah')}</span>
+                </div>
+                <p className="text-3xl font-black text-gray-900">{soilCount}</p>
+                <p className="text-xs text-gray-500 mt-1">{copy('analyses', 'analisis', 'analisis')}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-4 border border-emerald-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <FontAwesomeIcon icon={faSeedling} className="w-4 h-4 text-emerald-600" />
+                  <span className="text-xs font-bold text-emerald-700 uppercase">{copy('Leaf', 'Daun', 'Daun')}</span>
+                </div>
+                <p className="text-3xl font-black text-gray-900">{leafCount}</p>
+                <p className="text-xs text-gray-500 mt-1">{copy('analyses', 'analisis', 'analisis')}</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-100">
+                <div className="flex items-center gap-2 mb-2">
+                  <FontAwesomeIcon icon={faBolt} className="w-4 h-4 text-blue-600" />
+                  <span className="text-xs font-bold text-blue-700 uppercase">{copy('Tips', 'Cadangan', 'Saran')}</span>
+                </div>
+                <p className="text-3xl font-black text-gray-900">{totalRecommendations}</p>
+                <p className="text-xs text-gray-500 mt-1">{copy('recommendations', 'cadangan', 'rekomendasi')}</p>
+              </div>
+            </div>
+
+            {/* Activity Chart */}
+            <div className="bg-gray-50 rounded-2xl p-5 border border-gray-100">
+              <h4 className="text-sm font-bold text-gray-700 mb-4">
+                {copy('Analysis Activity (Last 6 Months)', 'Aktiviti Analisis (6 Bulan Terakhir)', 'Aktivitas Analisis (6 Bulan Terakhir)')}
+              </h4>
+              <div className="flex items-end gap-3 h-28">
+                {barData.map((bar, i) => (
+                  <div key={bar.month} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-xs font-bold text-gray-600">{bar.count > 0 ? bar.count : ''}</span>
+                    <motion.div
+                      initial={{ height: 0 }}
+                      animate={{ height: bar.count > 0 ? `${(bar.count / maxBar) * 100}%` : '4px' }}
+                      transition={{ delay: 0.3 + i * 0.08, type: 'spring', stiffness: 200 }}
+                      className={`w-full rounded-lg ${bar.count > 0 ? 'bg-gradient-to-t from-green-500 to-emerald-400 shadow-sm' : 'bg-gray-200'}`}
+                      style={{ minHeight: '4px' }}
+                    />
+                    <span className="text-[10px] font-semibold text-gray-500 mt-1">{bar.month}</span>
+                  </div>
+                ))}
+              </div>
+              {reports.length === 0 && (
+                <p className="text-center text-sm text-gray-400 mt-3">
+                  {copy('No analyses yet. Start your first one!', 'Belum ada analisis. Mulakan yang pertama!', 'Belum ada analisis. Mulai yang pertama!')}
+                </p>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    </motion.div>
   );
 };
 
@@ -123,55 +252,6 @@ export const TrustSignalsWidget: React.FC<{ language: string }> = ({ language })
           </div>
         ))}
       </div>
-    </motion.div>
-  );
-};
-
-export const UploadProgressWidget: React.FC<DashboardWidgetsProps> = ({ language, uploadsUsed, uploadsLimit }) => {
-  const copy = (en: string, ms: string, id: string) =>
-    language === 'id' ? id : language === 'ms' ? ms : en;
-
-  const percentage = uploadsLimit === -1 ? 0 : (uploadsUsed / uploadsLimit) * 100;
-  const remaining = uploadsLimit === -1 ? Infinity : Math.max(0, uploadsLimit - uploadsUsed);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.2 }}
-      className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-bold text-gray-900">
-          {copy('Upload Progress', 'Kemajuan Muat Naik', 'Progres Unggahan')}
-        </h3>
-        <span className="text-2xl font-black text-green-700">
-          {uploadsUsed}/{uploadsLimit === -1 ? '∞' : uploadsLimit}
-        </span>
-      </div>
-      
-      {/* Visual progress */}
-      <div className="flex gap-2 mb-3">
-        {Array.from({ length: uploadsLimit === -1 ? 2 : uploadsLimit }).map((_, i) => (
-          <div
-            key={i}
-            className={`h-3 flex-1 rounded-full transition-all ${
-              i < uploadsUsed
-                ? 'bg-gradient-to-r from-green-400 to-green-600 shadow-sm'
-                : 'bg-gray-100 border border-gray-200'
-            }`}
-          />
-        ))}
-      </div>
-      
-      <p className="text-sm text-gray-600">
-        {remaining === 0
-          ? copy('Upload limit reached', 'Had muat naik dicapai', 'Batas unggahan tercapai')
-          : remaining === Infinity
-          ? copy('Unlimited uploads available', 'Muat naik tanpa had tersedia', 'Unggahan tak terbatas tersedia')
-          : copy(`${remaining} upload${remaining > 1 ? 's' : ''} remaining`, `${remaining} muat naik baki`, `${remaining} unggahan tersisa`)
-        }
-      </p>
     </motion.div>
   );
 };

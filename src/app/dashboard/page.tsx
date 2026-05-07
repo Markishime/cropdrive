@@ -12,7 +12,7 @@ import { faWandSparkles } from '@fortawesome/free-solid-svg-icons';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
 import OnboardingTutorial from '@/components/OnboardingTutorial';
-import { QuickActionsWidget, TrustSignalsWidget, UploadProgressWidget } from '@/components/DashboardWidgets';
+import { TrustSignalsWidget } from '@/components/DashboardWidgets';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -515,33 +515,6 @@ export default function DashboardPage() {
                 </div>
               )}
             </motion.div>
-          </div>
-        </section>
-
-        {/* Quick Actions */}
-        <section className="py-6">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="text-xl font-black text-gray-900 mb-4">
-              {language === 'id' ? 'Aksi Cepat' : language === 'ms' ? 'Tindakan Pantas' : 'Quick Actions'}
-            </h2>
-            <QuickActionsWidget
-              language={language}
-              uploadsUsed={uploadsUsed}
-              uploadsLimit={uploadsLimit}
-              onNavigate={(path) => router.push(path)}
-            />
-          </div>
-        </section>
-
-        {/* Upload Progress Visual */}
-        <section className="py-4">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <UploadProgressWidget
-              language={language}
-              uploadsUsed={uploadsUsed}
-              uploadsLimit={uploadsLimit}
-              onNavigate={(path) => router.push(path)}
-            />
           </div>
         </section>
 

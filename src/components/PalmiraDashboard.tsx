@@ -146,6 +146,7 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
+  const voiceInputBaseRef = useRef<string>('');
 
   // Voice input using Web Speech API
   const toggleVoiceInput = () => {
@@ -166,11 +167,23 @@ export default function PalmiraDashboard({ language }: PalmiraDashboardProps) {
     recognition.interimResults = true;
     recognition.lang = language === 'id' ? 'id-ID' : language === 'ms' ? 'ms-MY' : 'en-US';
 
+    // Save the current input as the base before voice starts
+    voiceInputBaseRef.current = input;
+
     recognition.onresult = (event: any) => {
-      const transcript = Array.from(event.results)
-        .map((result: any) => result[0].transcript)
-        .join('');
-      setInput(prev => prev + transcript);
+      let finalTranscript = '';
+      let interimTranscript = '';
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalTranscript += result[0].transcript;
+        } else {
+          interimTranscript += result[0].transcript;
+        }
+      }
+      // Replace input with base + current recognition result (avoids duplication)
+      const transcript = finalTranscript || interimTranscript;
+      setInput(voiceInputBaseRef.current + (voiceInputBaseRef.current && transcript ? ' ' : '') + transcript);
     };
 
     recognition.onend = () => {
