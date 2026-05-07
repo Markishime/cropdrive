@@ -155,11 +155,11 @@ export default function ContactUsPage() {
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
             onSubmit={handleSubmit}
-            className="glass-card rounded-2xl p-6 sm:p-8 space-y-6"
+            className="premium-panel-strong rounded-3xl p-6 sm:p-8 md:p-10 space-y-6"
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="name" className="block text-sm font-bold text-gray-700 mb-2">
                   {copy('Full Name', 'Nama Penuh')} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -168,14 +168,14 @@ export default function ContactUsPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-600 focus:ring-2 focus:ring-green-200 focus:bg-white transition-all text-base"
                   placeholder={copy('Enter your name', 'Masukkan nama anda')}
                   required
                   disabled={isSubmitting}
                 />
               </div>
               <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="email" className="block text-sm font-bold text-gray-700 mb-2">
                   {copy('Email', 'E-mel')} <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -184,7 +184,7 @@ export default function ContactUsPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-600 focus:ring-2 focus:ring-green-200 focus:bg-white transition-all text-base"
                   placeholder="you@example.com"
                   required
                   disabled={isSubmitting}
@@ -194,7 +194,7 @@ export default function ContactUsPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="organization" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="organization" className="block text-sm font-bold text-gray-700 mb-2">
                   {copy('Organization (optional)', 'Organisasi (pilihan)')}
                 </label>
                 <input
@@ -203,13 +203,13 @@ export default function ContactUsPage() {
                   name="organization"
                   value={formData.organization}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-600 focus:ring-2 focus:ring-green-200 focus:bg-white transition-all text-base"
                   placeholder={copy('Company or farm name', 'Nama syarikat atau ladang')}
                   disabled={isSubmitting}
                 />
               </div>
               <div>
-                <label htmlFor="role" className="block text-sm font-semibold text-gray-700 mb-2">
+                <label htmlFor="role" className="block text-sm font-bold text-gray-700 mb-2">
                   {copy('Your Role', 'Peranan Anda')}
                 </label>
                 <input
@@ -218,7 +218,7 @@ export default function ContactUsPage() {
                   name="role"
                   value={formData.role}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-600 focus:ring-2 focus:ring-green-200 focus:bg-white transition-all text-base"
                   placeholder={copy('e.g. Farmer, NGO, Lab', 'Contoh: Petani, NGO, Makmal')}
                   disabled={isSubmitting}
                 />
@@ -226,7 +226,7 @@ export default function ContactUsPage() {
             </div>
 
             <div>
-              <label htmlFor="message" className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="message" className="block text-sm font-bold text-gray-700 mb-2">
                 {copy('Your Message', 'Mesej Anda')} <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -234,7 +234,7 @@ export default function ContactUsPage() {
                 name="message"
                 value={formData.message}
                 onChange={handleInputChange}
-                className="w-full rounded-xl border border-gray-300 px-4 py-3 text-base min-h-[140px] resize-y focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 focus:border-green-600 focus:ring-2 focus:ring-green-200 focus:bg-white transition-all text-base min-h-[140px] resize-y"
                 placeholder={copy('How can we help you?', 'Bagaimana kami boleh membantu anda?')}
                 required
                 disabled={isSubmitting}
@@ -248,7 +248,7 @@ export default function ContactUsPage() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold text-base sm:text-lg shadow-lg transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[160px]"
+                className="inline-flex items-center justify-center px-8 sm:px-10 py-3.5 sm:py-4 rounded-xl btn-v2-primary font-black uppercase text-sm sm:text-base tracking-wider shadow-lg transition-all duration-200 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none min-w-[180px]"
               >
                 {isSubmitting ? (
                   <>

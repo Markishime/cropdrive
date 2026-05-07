@@ -681,10 +681,10 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-10 xs:mb-12 sm:mb-16"
           >
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              CropDrive™ Oil Palm AI Advisor
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 font-heading tracking-tight">
+              CropDrive™ Oil Palm <span className="text-green-700">AI Advisor</span>
             </h2>
-            <p className="text-2xl md:text-3xl font-semibold text-green-600 mb-4">
+            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-green-600 mb-4">
               {copy('Smart Farming Intelligence for Oil Palm Plantations', 'Smart Farming Intelligence untuk Ladang Kelapa Sawit')}
             </p>
             <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-4 xs:mb-5 sm:mb-6 leading-relaxed px-3 xs:px-4">
@@ -717,7 +717,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="mt-16"
           >
-            <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-8 text-center font-heading tracking-tight">
               {copy('Who Is It For?', 'Untuk Siapa?')}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -782,8 +782,9 @@ export default function HomePage() {
       </section>
 
       {/* The Challenge Section */}
-      <section className="py-12 xs:py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-b from-white via-red-50/20 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -791,12 +792,23 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="max-w-6xl mx-auto"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 xs:mb-6 sm:mb-8 text-center px-2">
-              <span className="text-red-600">{copy('The Challenge', 'Cabaran')}</span>
-            </h2>
-            <p className="text-sm xs:text-base sm:text-lg text-gray-700 mb-10 text-center px-3 xs:px-4 max-w-3xl mx-auto">
-              {copy('Soil and leaf test results are difficult to interpret without expert support. This often leads to wasted fertilizer, higher costs, missed yield potential, and long-term soil degradation.', 'Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada pembaziran baja, kos yang lebih tinggi, hasil yang terlepas, dan degradasi tanah jangka panjang.')}
-            </p>
+            <div className="text-center mb-10 sm:mb-14">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="inline-block text-red-600 text-xs font-bold tracking-widest uppercase mb-4 bg-red-50 px-4 py-1.5 rounded-full border border-red-200"
+              >
+                {copy('Industry Problem', 'Masalah Industri')}
+              </motion.span>
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 xs:mb-6 px-2 font-heading tracking-tight">
+                <span className="text-red-600">{copy('The Challenge', 'Cabaran')}</span>
+              </h2>
+              <p className="text-sm xs:text-base sm:text-lg text-gray-700 px-3 xs:px-4 max-w-3xl mx-auto leading-relaxed">
+                {copy('Soil and leaf test results are difficult to interpret without expert support. This often leads to wasted fertilizer, higher costs, missed yield potential, and long-term soil degradation.', 'Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada pembaziran baja, kos yang lebih tinggi, hasil yang terlepas, dan degradasi tanah jangka panjang.')}
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { 
@@ -831,7 +843,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-red-50/70 backdrop-blur-sm p-6 rounded-2xl border border-red-200 hover:border-red-400 hover:shadow-lg transition-all shadow-sm"
+                  className="flex flex-col items-center text-center bg-white p-6 rounded-2xl border border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-100/50 transition-all shadow-sm"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -853,7 +865,8 @@ export default function HomePage() {
       {/* How We Help Section */}
       <section className="py-20 bg-gradient-to-b from-green-50 via-white to-green-50/30 relative overflow-hidden">
         <div className="absolute inset-0 opacity-8 premium-mesh" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute top-0 left-1/4 w-80 h-80 bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -861,12 +874,23 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="max-w-6xl mx-auto"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 text-center">
-              <span className="text-green-700">{copy('How We Help', 'Bagaimana Kami Membantu')}</span>
-            </h2>
-            <p className="text-2xl font-semibold text-green-700 mb-12 text-center">
-              {copy('CropDrive™ AI Agronomist interprets test data, provides field-specific recommendations, designs soil health improvement strategies, and links every step to clear economic and return-on-investment values.', 'Agronomis AI CropDrive™ mentafsir data ujian, menyediakan cadangan khusus ladang, mereka bentuk strategi peningkatan kesihatan tanah, dan mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas.')}
-            </p>
+            <div className="text-center mb-12">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="inline-block text-green-700 text-xs font-bold tracking-widest uppercase mb-4 bg-green-50 px-4 py-1.5 rounded-full border border-green-200"
+              >
+                {copy('Our Solution', 'Penyelesaian Kami')}
+              </motion.span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading tracking-tight">
+                <span className="text-green-700">{copy('How We Help', 'Bagaimana Kami Membantu')}</span>
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                {copy('CropDrive™ AI Agronomist interprets test data, provides field-specific recommendations, designs soil health improvement strategies, and links every step to clear economic and return-on-investment values.', 'Agronomis AI CropDrive™ mentafsir data ujian, menyediakan cadangan khusus ladang, mereka bentuk strategi peningkatan kesihatan tanah, dan mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas.')}
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { 
