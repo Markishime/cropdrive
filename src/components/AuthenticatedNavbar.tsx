@@ -214,8 +214,8 @@ export const AuthenticatedNavbar: React.FC = () => {
     const navbarClasses = `
       fixed top-0 left-0 right-0 z-[100] transition-all duration-500
       ${scrolled
-        ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-        : 'bg-transparent'
+        ? 'glass-nav-scrolled'
+        : 'glass-nav'
       }
     `;
 
