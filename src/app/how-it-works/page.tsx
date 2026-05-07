@@ -371,7 +371,7 @@ export default function HowItWorksPage() {
             >
               <Link href="/assistant">
                 <button className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 uppercase tracking-wide">
-                  {language === 'ms' ? '🚀 Cuba Sekarang' : '🚀 Try Now'}
+                  {copy('🚀 Try Now', '🚀 Cuba Sekarang')}
                 </button>
               </Link>
             </motion.div>
@@ -422,7 +422,7 @@ export default function HowItWorksPage() {
                   {index === steps.length - 1 && (
                     <Link href="/register">
                       <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                        {language === 'ms' ? 'Mulakan Sekarang' : 'Get Started Now'}
+                        {copy('Get Started Now', 'Mulakan Sekarang')}
                       </button>
                     </Link>
                   )}
@@ -445,23 +445,20 @@ export default function HowItWorksPage() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl md:text-5xl font-black text-white mb-6 font-heading">
-              {language === 'ms' ? 'Sedia untuk Transformasi?' : 'Ready to Transform?'}
+              {copy('Ready to Transform?', 'Sedia untuk Transformasi?')}
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              {language === 'ms'
-                ? 'Sertai ribuan petani yang sudah menggunakan AI untuk hasil yang lebih baik'
-                : 'Join thousands of farmers already using AI for better yields'
-              }
+              {copy('Join thousands of farmers already using AI for better yields', 'Sertai ribuan petani yang sudah menggunakan AI untuk hasil yang lebih baik')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
                 <button className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 uppercase tracking-wide">
-                  {language === 'ms' ? 'Daftar Sekarang' : 'Register Now'}
+                  {copy('Register Now', 'Daftar Sekarang')}
                 </button>
               </Link>
               <Link href="/pricing">
                 <button className="px-10 py-5 border-2 border-white text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300 uppercase tracking-wide">
-                  {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+                  {copy('View Pricing', 'Lihat Harga')}
                 </button>
               </Link>
             </div>

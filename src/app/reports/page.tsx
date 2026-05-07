@@ -691,14 +691,27 @@ export default function ReportsPage() {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
                       {/* Report Info */}
                       <div className="flex items-start gap-4 flex-1">
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center flex-shrink-0">
-                          <FontAwesomeIcon icon={faFileAlt} className="w-6 h-6 sm:w-7 sm:h-7 text-green-700" />
+                        <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${report.type === 'leaf' ? 'from-emerald-100 to-emerald-200' : 'from-amber-100 to-amber-200'} flex items-center justify-center flex-shrink-0`}>
+                          <FontAwesomeIcon icon={faFileAlt} className={`w-6 h-6 sm:w-7 sm:h-7 ${report.type === 'leaf' ? 'text-emerald-700' : 'text-amber-700'}`} />
                         </div>
 
                         <div className="flex-1 min-w-0">
-                          <h3 className="text-xl sm:text-2xl font-black text-gray-900 mb-2">
-                            {report.title}
-                          </h3>
+                          <div className="flex items-center gap-3 mb-2 flex-wrap">
+                            <h3 className="text-xl sm:text-2xl font-black text-gray-900">
+                              {report.title}
+                            </h3>
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${report.type === 'leaf' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                              {report.type === 'leaf' 
+                                ? (language === 'id' ? '🌿 Daun' : language === 'ms' ? '🌿 Daun' : '🌿 Leaf')
+                                : (language === 'id' ? '🌱 Tanah' : language === 'ms' ? '🌱 Tanah' : '🌱 Soil')
+                              }
+                            </span>
+                            {report.recommendations > 0 && (
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                                {report.recommendations} {language === 'id' ? 'rekomendasi' : language === 'ms' ? 'cadangan' : 'recommendations'}
+                              </span>
+                            )}
+                          </div>
                           
                           {report.summary && (
                             <p className="text-base text-gray-600 mb-4 line-clamp-2">{report.summary}</p>
@@ -712,6 +725,10 @@ export default function ReportsPage() {
                                 month: 'long',
                                 day: 'numeric'
                               })}
+                            </span>
+                            <span className="flex items-center gap-1.5 text-green-600 font-semibold">
+                              <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.172 7.707 8.879a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                              {language === 'id' ? 'AI Terverifikasi' : language === 'ms' ? 'AI Disahkan' : 'AI Verified'}
                             </span>
                           </div>
                         </div>

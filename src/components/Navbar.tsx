@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Button from './ui/Button';
 import toast from 'react-hot-toast';
 import { useLanguage } from './LanguageProvider';
@@ -36,8 +37,8 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const language = mounted ? currentLang : 'en';
-  const translateLabel = (english: string, malay: string, indonesian = malay) => (
-    language === 'en' ? english : language === 'id' ? indonesian : malay
+  const translateLabel = (english: string, malay: string, indonesian?: string) => (
+    language === 'en' ? english : language === 'id' ? (indonesian || toIndonesianText(malay)) : malay
   );
 
   const languageOptions: Array<{ value: Language; code: string; label: string }> = [
@@ -254,7 +255,7 @@ export const Navbar: React.FC = () => {
                     : 'text-white'
                 }`}
               >
-                {language === 'en' ? link.label : link.labelMs}
+                {translateLabel(link.label, link.labelMs)}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
@@ -299,7 +300,7 @@ export const Navbar: React.FC = () => {
                           href={item.href}
                           className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 text-gray-700 hover:bg-green-50 hover:text-green-700 ${index > 0 ? 'border-t border-gray-100' : ''}`}
                         >
-                          <div className="font-bold text-base mb-1 text-gray-900">{language === 'en' ? item.label : item.labelMs}</div>
+                          <div className="font-bold text-base mb-1 text-gray-900">{translateLabel(item.label, item.labelMs)}</div>
                           <div className="text-xs text-gray-500">
                             {item.label === 'For Farmers' 
                               ? translateLabel('Individual palm oil farmers & smallholders', 'Untuk petani kelapa sawit individu', 'Untuk petani kelapa sawit individu')
@@ -439,7 +440,7 @@ export const Navbar: React.FC = () => {
                     className="block text-white hover:text-yellow-400 font-semibold text-base py-3 px-3 rounded-lg hover:bg-white/10 transition-all duration-200"
                     onClick={() => setIsOpen(false)}
                   >
-                    {language === 'en' ? link.label : link.labelMs}
+                    {translateLabel(link.label, link.labelMs)}
                   </Link>
                 ))}
 
@@ -456,7 +457,7 @@ export const Navbar: React.FC = () => {
                         className="block text-white hover:text-yellow-400 font-medium text-sm transition-colors duration-200 py-2.5 px-3 rounded-lg hover:bg-white/10"
                         onClick={() => setIsOpen(false)}
                       >
-                        {language === 'en' ? link.label : link.labelMs}
+                        {translateLabel(link.label, link.labelMs)}
                       </Link>
                     ))}
                   </div>

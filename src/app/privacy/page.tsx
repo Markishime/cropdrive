@@ -109,213 +109,135 @@ export default function PrivacyPage() {
                   <div className="prose prose-lg max-w-none">
                     <div className="space-y-6 text-gray-700">
                       <p className="text-sm text-gray-500 mb-6">
-                        Last updated: 30 December 2025
+                        {copy('Last updated: 30 December 2025', 'Kemaskini terakhir: 30 Disember 2025')}
                       </p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Data controller</h2>
-                      <p>
-                        AGS – Agriculture Global Solutions OÜ
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('1. Data controller', '1. Pengawal data')}</h2>
+                      <p>{copy('AGS – Agriculture Global Solutions OÜ', 'AGS – Agriculture Global Solutions OÜ')}</p>
                       <ul className="list-disc pl-6 space-y-2">
-                        <li><strong>Registered address:</strong> Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
-                        <li><strong>Email:</strong> contact@agriglobalsolutions.com</li>
-                        <li><strong>Phone:</strong> +49 15163105462</li>
+                        <li><strong>{copy('Registered address:', 'Alamat berdaftar:')}</strong> Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
+                        <li><strong>{copy('Email:', 'E-mel:')}</strong> contact@agriglobalsolutions.com</li>
+                        <li><strong>{copy('Phone:', 'Telefon:')}</strong> +49 15163105462</li>
                       </ul>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Scope</h2>
-                      <p>
-                        This policy covers personal data processing on www.cropdrive.ai and related app pages.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('2. Scope', '2. Skop')}</h2>
+                      <p>{copy('This policy covers personal data processing on www.cropdrive.ai and related app pages.', 'Dasar ini meliputi pemprosesan data peribadi di www.cropdrive.ai dan halaman aplikasi berkaitan.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. Legal framework followed</h2>
-                      <p>
-                        This website follows EU data protection rules.
-                      </p>
-                      <p>
-                        GDPR applies to personal data processing.
-                      </p>
-                      <p>
-                        EU ePrivacy rules apply to device storage and similar technologies, see the separate <Link href="/cookies" className="text-green-600 hover:text-green-700 font-semibold underline">Cookie Policy</Link>.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('3. Legal framework followed', '3. Rangka kerja undang-undang yang diikuti')}</h2>
+                      <p>{copy('This website follows EU data protection rules.', 'Laman web ini mengikuti peraturan perlindungan data EU.')}</p>
+                      <p>{copy('GDPR applies to personal data processing.', 'GDPR terpakai untuk pemprosesan data peribadi.')}</p>
+                      <p>{copy('EU ePrivacy rules apply to device storage and similar technologies, see the separate ', 'Peraturan ePrivacy EU terpakai untuk storan peranti dan teknologi serupa, lihat ')}<Link href="/cookies" className="text-green-600 hover:text-green-700 font-semibold underline">{copy('Cookie Policy', 'Dasar Kuki')}</Link>{copy('.', '.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. Personal data collected</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('4. Personal data collected', '4. Data peribadi yang dikumpul')}</h2>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">A. Account and login data</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('A. Account and login data', 'A. Data akaun dan log masuk')}</h3>
                       <ul className="list-disc pl-6 space-y-2">
-                        <li>Email address.</li>
-                        <li>Authentication status and security tokens handled through Firebase Authentication.</li>
+                        <li>{copy('Email address.', 'Alamat e-mel.')}</li>
+                        <li>{copy('Authentication status and security tokens handled through Firebase Authentication.', 'Status pengesahan dan token keselamatan yang dikendalikan melalui Firebase Authentication.')}</li>
                       </ul>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">B. Service usage data</h3>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('B. Service usage data', 'B. Data penggunaan perkhidmatan')}</h3>
                       <ul className="list-disc pl-6 space-y-2">
-                        <li>Basic device and browser data.</li>
-                        <li>Page views and feature usage data collected through Vercel Web Analytics.</li>
+                        <li>{copy('Basic device and browser data.', 'Data peranti dan pelayar asas.')}</li>
+                        <li>{copy('Page views and feature usage data collected through Vercel Web Analytics.', 'Paparan halaman dan data penggunaan ciri yang dikumpul melalui Vercel Web Analytics.')}</li>
                       </ul>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">C. Customer support and contact data</h3>
-                      <p>
-                        Name, email, phone number, message content, when you contact AGS through forms, email, or messaging.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('C. Customer support and contact data', 'C. Data sokongan pelanggan dan hubungan')}</h3>
+                      <p>{copy('Name, email, phone number, message content, when you contact AGS through forms, email, or messaging.', 'Nama, e-mel, nombor telefon, kandungan mesej, apabila anda menghubungi AGS melalui borang, e-mel atau pemesejan.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">D. Payment flow data</h3>
-                      <p>
-                        Subscription purchase is handled on Stripe hosted checkout pages on stripe.com.
-                      </p>
-                      <p>
-                        Payment data is processed by Stripe on Stripe pages.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('D. Payment flow data', 'D. Data aliran pembayaran')}</h3>
+                      <p>{copy('Subscription purchase is handled on Stripe hosted checkout pages on stripe.com.', 'Pembelian langganan dikendalikan di halaman checkout yang dihoskan oleh Stripe di stripe.com.')}</p>
+                      <p>{copy('Payment data is processed by Stripe on Stripe pages.', 'Data pembayaran diproses oleh Stripe di halaman Stripe.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Purposes and legal basis</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('5. Purposes and legal basis', '5. Tujuan dan asas undang-undang')}</h2>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">A. Providing the service</h3>
-                      <p>
-                        <strong>Purpose:</strong> create accounts, sign in, deliver app functions, provide requested outputs.
-                      </p>
-                      <p>
-                        <strong>Legal basis:</strong> performance of a contract or steps before a contract under GDPR Article 6(1)(b).
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('A. Providing the service', 'A. Menyediakan perkhidmatan')}</h3>
+                      <p><strong>{copy('Purpose:', 'Tujuan:')}</strong> {copy('create accounts, sign in, deliver app functions, provide requested outputs.', 'mencipta akaun, log masuk, menyampaikan fungsi aplikasi, menyediakan output yang diminta.')}</p>
+                      <p><strong>{copy('Legal basis:', 'Asas undang-undang:')}</strong> {copy('performance of a contract or steps before a contract under GDPR Article 6(1)(b).', 'pelaksanaan kontrak atau langkah sebelum kontrak di bawah Perkara 6(1)(b) GDPR.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">B. Security and fraud prevention</h3>
-                      <p>
-                        <strong>Purpose:</strong> protect accounts, prevent abuse, keep the service stable.
-                      </p>
-                      <p>
-                        <strong>Legal basis:</strong> legitimate interests under GDPR Article 6(1)(f).
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('B. Security and fraud prevention', 'B. Keselamatan dan pencegahan penipuan')}</h3>
+                      <p><strong>{copy('Purpose:', 'Tujuan:')}</strong> {copy('protect accounts, prevent abuse, keep the service stable.', 'melindungi akaun, mencegah penyalahgunaan, mengekalkan kestabilan perkhidmatan.')}</p>
+                      <p><strong>{copy('Legal basis:', 'Asas undang-undang:')}</strong> {copy('legitimate interests under GDPR Article 6(1)(f).', 'kepentingan sah di bawah Perkara 6(1)(f) GDPR.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">C. Product improvement and basic analytics</h3>
-                      <p>
-                        <strong>Purpose:</strong> understand aggregated usage patterns, improve pages and features.
-                      </p>
-                      <p>
-                        <strong>Legal basis:</strong> legitimate interests under GDPR Article 6(1)(f), limited to privacy focused analytics described in this policy.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('C. Product improvement and basic analytics', 'C. Penambahbaikan produk dan analitik asas')}</h3>
+                      <p><strong>{copy('Purpose:', 'Tujuan:')}</strong> {copy('understand aggregated usage patterns, improve pages and features.', 'memahami corak penggunaan agregat, meningkatkan halaman dan ciri.')}</p>
+                      <p><strong>{copy('Legal basis:', 'Asas undang-undang:')}</strong> {copy('legitimate interests under GDPR Article 6(1)(f), limited to privacy focused analytics described in this policy.', 'kepentingan sah di bawah Perkara 6(1)(f) GDPR, terhad kepada analitik berfokus privasi yang diterangkan dalam dasar ini.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">D. Payments and billing administration</h3>
-                      <p>
-                        <strong>Purpose:</strong> enable subscriptions, handle payment confirmation, manage billing records required for business operations.
-                      </p>
-                      <p>
-                        <strong>Legal basis:</strong> performance of a contract under GDPR Article 6(1)(b), plus legal obligation under GDPR Article 6(1)(c) where bookkeeping or tax rules require recordkeeping.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('D. Payments and billing administration', 'D. Pentadbiran pembayaran dan pengebilan')}</h3>
+                      <p><strong>{copy('Purpose:', 'Tujuan:')}</strong> {copy('enable subscriptions, handle payment confirmation, manage billing records required for business operations.', 'membolehkan langganan, mengendalikan pengesahan pembayaran, mengurus rekod pengebilan yang diperlukan untuk operasi perniagaan.')}</p>
+                      <p><strong>{copy('Legal basis:', 'Asas undang-undang:')}</strong> {copy('performance of a contract under GDPR Article 6(1)(b), plus legal obligation under GDPR Article 6(1)(c) where bookkeeping or tax rules require recordkeeping.', 'pelaksanaan kontrak di bawah Perkara 6(1)(b) GDPR, ditambah kewajipan undang-undang di bawah Perkara 6(1)(c) GDPR apabila peraturan perakaunan atau cukai memerlukan penyimpanan rekod.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">E. Marketing communications</h3>
-                      <p>
-                        <strong>Purpose:</strong> send marketing messages only when you opt in.
-                      </p>
-                      <p>
-                        <strong>Legal basis:</strong> consent under GDPR Article 6(1)(a), with withdrawal available at any time.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('E. Marketing communications', 'E. Komunikasi pemasaran')}</h3>
+                      <p><strong>{copy('Purpose:', 'Tujuan:')}</strong> {copy('send marketing messages only when you opt in.', 'menghantar mesej pemasaran hanya apabila anda memilih untuk menyertai.')}</p>
+                      <p><strong>{copy('Legal basis:', 'Asas undang-undang:')}</strong> {copy('consent under GDPR Article 6(1)(a), with withdrawal available at any time.', 'persetujuan di bawah Perkara 6(1)(a) GDPR, dengan penarikan tersedia pada bila-bila masa.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Sharing and service providers</h2>
-                      <p>
-                        AGS shares personal data with service providers only for the purposes listed above.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('6. Sharing and service providers', '6. Perkongsian dan penyedia perkhidmatan')}</h2>
+                      <p>{copy('AGS shares personal data with service providers only for the purposes listed above.', 'AGS berkongsi data peribadi dengan penyedia perkhidmatan hanya untuk tujuan yang disenaraikan di atas.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">A. Hosting and analytics</h3>
-                      <p>
-                        Vercel, for hosting and Vercel Web Analytics.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('A. Hosting and analytics', 'A. Pengehosan dan analitik')}</h3>
+                      <p>{copy('Vercel, for hosting and Vercel Web Analytics.', 'Vercel, untuk pengehosan dan Vercel Web Analytics.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">B. Authentication</h3>
-                      <p>
-                        Google Firebase, for sign in and account authentication.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('B. Authentication', 'B. Pengesahan')}</h3>
+                      <p>{copy('Google Firebase, for sign in and account authentication.', 'Google Firebase, untuk log masuk dan pengesahan akaun.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">C. Payments</h3>
-                      <p>
-                        Stripe, for hosted checkout and payment processing on stripe.com.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('C. Payments', 'C. Pembayaran')}</h3>
+                      <p>{copy('Stripe, for hosted checkout and payment processing on stripe.com.', 'Stripe, untuk checkout yang dihoskan dan pemprosesan pembayaran di stripe.com.')}</p>
 
-                      <p className="mt-4">
-                        Each provider processes data under contractual terms for data protection and security.
-                      </p>
+                      <p className="mt-4">{copy('Each provider processes data under contractual terms for data protection and security.', 'Setiap penyedia memproses data di bawah terma kontrak untuk perlindungan data dan keselamatan.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. International data transfers</h2>
-                      <p>
-                        Some service providers process data outside the EEA.
-                      </p>
-                      <p>
-                        AGS uses EU transfer safeguards where required, including EU Standard Contractual Clauses under Commission Implementing Decision (EU) 2021/914.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('7. International data transfers', '7. Pemindahan data antarabangsa')}</h2>
+                      <p>{copy('Some service providers process data outside the EEA.', 'Sesetengah penyedia perkhidmatan memproses data di luar EEA.')}</p>
+                      <p>{copy('AGS uses EU transfer safeguards where required, including EU Standard Contractual Clauses under Commission Implementing Decision (EU) 2021/914.', 'AGS menggunakan perlindungan pemindahan EU apabila diperlukan, termasuk Klausa Kontrak Standard EU di bawah Keputusan Pelaksanaan Suruhanjaya (EU) 2021/914.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Retention</h2>
-                      <p>
-                        AGS keeps personal data only for as long as needed for the purposes in section 5.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('8. Retention', '8. Penyimpanan')}</h2>
+                      <p>{copy('AGS keeps personal data only for as long as needed for the purposes in section 5.', 'AGS menyimpan data peribadi hanya selama yang diperlukan untuk tujuan dalam bahagian 5.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Operational data</h3>
-                      <p>
-                        Account data is stored while an account remains active. Deletion follows a verified request or account removal flow.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Operational data', 'Data operasi')}</h3>
+                      <p>{copy('Account data is stored while an account remains active. Deletion follows a verified request or account removal flow.', 'Data akaun disimpan selagi akaun kekal aktif. Pemadaman mengikut permintaan yang disahkan atau aliran pembuangan akaun.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Support communications</h3>
-                      <p>
-                        Support messages are stored for case handling and business records, then deleted or anonymised based on internal retention rules.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Support communications', 'Komunikasi sokongan')}</h3>
+                      <p>{copy('Support messages are stored for case handling and business records, then deleted or anonymised based on internal retention rules.', 'Mesej sokongan disimpan untuk pengendalian kes dan rekod perniagaan, kemudian dipadam atau dianonimkan berdasarkan peraturan penyimpanan dalaman.')}</p>
 
-                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Billing records</h3>
-                      <p>
-                        Billing and invoice related records are stored for statutory retention periods where required by law.
-                      </p>
+                      <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Billing records', 'Rekod pengebilan')}</h3>
+                      <p>{copy('Billing and invoice related records are stored for statutory retention periods where required by law.', 'Rekod berkaitan pengebilan dan invois disimpan untuk tempoh penyimpanan berkanun apabila dikehendaki oleh undang-undang.')}</p>
 
                       <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Stripe</h3>
-                      <p>
-                        Payment card data is handled by Stripe on Stripe pages, under Stripe retention rules.
-                      </p>
+                      <p>{copy('Payment card data is handled by Stripe on Stripe pages, under Stripe retention rules.', 'Data kad pembayaran dikendalikan oleh Stripe di halaman Stripe, di bawah peraturan penyimpanan Stripe.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Your rights under GDPR</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('9. Your rights under GDPR', '9. Hak anda di bawah GDPR')}</h2>
                       <ul className="list-disc pl-6 space-y-2">
-                        <li>Access.</li>
-                        <li>Rectification.</li>
-                        <li>Erasure.</li>
-                        <li>Restriction.</li>
-                        <li>Data portability.</li>
-                        <li>Objection to processing based on legitimate interests.</li>
-                        <li>Withdrawal of consent, where processing is based on consent.</li>
+                        <li>{copy('Access.', 'Akses.')}</li>
+                        <li>{copy('Rectification.', 'Pembetulan.')}</li>
+                        <li>{copy('Erasure.', 'Pemadaman.')}</li>
+                        <li>{copy('Restriction.', 'Sekatan.')}</li>
+                        <li>{copy('Data portability.', 'Kebolehpindahan data.')}</li>
+                        <li>{copy('Objection to processing based on legitimate interests.', 'Bantahan terhadap pemprosesan berdasarkan kepentingan sah.')}</li>
+                        <li>{copy('Withdrawal of consent, where processing is based on consent.', 'Penarikan persetujuan, apabila pemprosesan berdasarkan persetujuan.')}</li>
                       </ul>
-                      <p className="mt-4">
-                        Rights are exercised by emailing contact@agriglobalsolutions.com.
-                      </p>
-                      <p>
-                        AGS verifies identity before releasing or deleting account data.
-                      </p>
+                      <p className="mt-4">{copy('Rights are exercised by emailing contact@agriglobalsolutions.com.', 'Hak dilaksanakan dengan menghantar e-mel ke contact@agriglobalsolutions.com.')}</p>
+                      <p>{copy('AGS verifies identity before releasing or deleting account data.', 'AGS mengesahkan identiti sebelum melepaskan atau memadam data akaun.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">10. Complaints</h2>
-                      <p>
-                        A complaint can be filed with a supervisory authority in the EU.
-                      </p>
-                      <p>
-                        A complaint can be filed in the EU Member State of habitual residence, place of work, or place of the alleged infringement, under GDPR Article 77.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('10. Complaints', '10. Aduan')}</h2>
+                      <p>{copy('A complaint can be filed with a supervisory authority in the EU.', 'Aduan boleh difailkan kepada pihak berkuasa penyeliaan di EU.')}</p>
+                      <p>{copy('A complaint can be filed in the EU Member State of habitual residence, place of work, or place of the alleged infringement, under GDPR Article 77.', 'Aduan boleh difailkan di Negara Ahli EU tempat kediaman biasa, tempat kerja atau tempat pelanggaran yang didakwa, di bawah Perkara 77 GDPR.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">11. Automated decision making</h2>
-                      <p>
-                        CropDrive generates agronomic outputs for decision support.
-                      </p>
-                      <p>
-                        No solely automated decision with legal or similarly significant effect is used for access, pricing, or eligibility.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('11. Automated decision making', '11. Pembuatan keputusan automatik')}</h2>
+                      <p>{copy('CropDrive generates agronomic outputs for decision support.', 'CropDrive menjana output agronomi untuk sokongan keputusan.')}</p>
+                      <p>{copy('No solely automated decision with legal or similarly significant effect is used for access, pricing, or eligibility.', 'Tiada keputusan automatik semata-mata dengan kesan undang-undang atau kesan yang sama pentingnya digunakan untuk akses, harga atau kelayakan.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">12. Security</h2>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('12. Security', '12. Keselamatan')}</h2>
                       <ul className="list-disc pl-6 space-y-2">
-                        <li>Transport encryption is used for website traffic.</li>
-                        <li>Access to internal systems is restricted to authorised personnel.</li>
-                        <li>Service providers apply security controls for hosting, authentication, and payments.</li>
+                        <li>{copy('Transport encryption is used for website traffic.', 'Penyulitan pengangkutan digunakan untuk trafik laman web.')}</li>
+                        <li>{copy('Access to internal systems is restricted to authorised personnel.', 'Akses kepada sistem dalaman terhad kepada kakitangan yang diberi kuasa.')}</li>
+                        <li>{copy('Service providers apply security controls for hosting, authentication, and payments.', 'Penyedia perkhidmatan menggunakan kawalan keselamatan untuk pengehosan, pengesahan dan pembayaran.')}</li>
                       </ul>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">13. Children</h2>
-                      <p>
-                        The service is intended for adults.
-                      </p>
-                      <p>
-                        AGS does not knowingly collect personal data from children under 16.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('13. Children', '13. Kanak-kanak')}</h2>
+                      <p>{copy('The service is intended for adults.', 'Perkhidmatan ini ditujukan untuk orang dewasa.')}</p>
+                      <p>{copy('AGS does not knowingly collect personal data from children under 16.', 'AGS tidak sengaja mengumpul data peribadi daripada kanak-kanak di bawah 16 tahun.')}</p>
 
-                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">14. Changes</h2>
-                      <p>
-                        Updates are posted on this page with a revised "Last updated" date.
-                      </p>
+                      <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('14. Changes', '14. Perubahan')}</h2>
+                      <p>{copy('Updates are posted on this page with a revised "Last updated" date.', 'Kemaskini disiarkan di halaman ini dengan tarikh "Kemaskini terakhir" yang disemak.')}</p>
                     </div>
                   </div>
                 </CardContent>

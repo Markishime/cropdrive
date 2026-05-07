@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function TermsAndConditionsPage() {
@@ -28,6 +29,7 @@ export default function TermsAndConditionsPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-palm-50 via-white to-gold-50">
@@ -80,13 +82,10 @@ export default function TermsAndConditionsPage() {
               </svg>
             </div>
             <h1 className="text-5xl md:text-7xl font-black mb-6 font-heading">
-              {language === 'ms' ? 'Terma dan Syarat' : 'Terms and Conditions'}
+              {copy('Terms and Conditions', 'Terma dan Syarat')}
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms' 
-                ? 'Syarat dan peraturan perniagaan untuk perkhidmatan B2B'
-                : 'Business terms and conditions for B2B services'
-              }
+              {copy('Business terms and conditions for B2B services', 'Syarat dan peraturan perniagaan untuk perkhidmatan B2B')}
             </p>
           </motion.div>
         </div>
@@ -117,97 +116,97 @@ export default function TermsAndConditionsPage() {
                           </svg>
                         </div>
                         <h2 className="text-3xl md:text-4xl font-heading font-black text-gray-900">
-                          Terms and Conditions
+                          {copy('Terms and Conditions', 'Terma dan Syarat')}
                         </h2>
                       </div>
 
                       <div className="space-y-6 text-gray-700">
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">1. General Information</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('1. General Information', '1. Maklumat Am')}</h3>
                           <div className="bg-green-50 p-6 rounded-xl mb-4 border-2 border-green-200">
                             <ul className="list-none space-y-2">
-                              <li><span className="font-semibold">Company name:</span> AGS – Agriculture Global Solutions OÜ</li>
-                              <li><span className="font-semibold">Address:</span> Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
-                              <li><span className="font-semibold">Operational Headquarters:</span> Herford, Germany</li>
-                              <li><span className="font-semibold">Contact:</span> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
+                              <li><span className="font-semibold">{copy('Company name:', 'Nama syarikat:')} </span> AGS – Agriculture Global Solutions OÜ</li>
+                              <li><span className="font-semibold">{copy('Address:', 'Alamat:')} </span> Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
+                              <li><span className="font-semibold">{copy('Operational Headquarters:', 'Ibu pejabat operasi:')} </span> Herford, Germany</li>
+                              <li><span className="font-semibold">{copy('Contact:', 'Hubungi:')} </span> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
                             </ul>
                           </div>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">2. B2B Services Only</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('2. B2B Services Only', '2. Perkhidmatan B2B Sahaja')}</h3>
                           <p>
-                            CropDrive is a service operated by AGS – Agriculture Global Solutions OÜ and is intended exclusively for business customers, organizations, and institutions. Contracts with consumers as defined by §13 BGB are explicitly excluded.
+                            {copy('CropDrive is a service operated by AGS – Agriculture Global Solutions OÜ and is intended exclusively for business customers, organizations, and institutions. Contracts with consumers as defined by §13 BGB are explicitly excluded.', 'CropDrive ialah perkhidmatan yang dikendalikan oleh AGS – Agriculture Global Solutions OÜ dan ditujukan secara eksklusif untuk pelanggan perniagaan, organisasi dan institusi. Kontrak dengan pengguna seperti yang ditakrifkan oleh §13 BGB dikecualikan secara eksplisit.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">3. Scope of Services</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('3. Scope of Services', '3. Skop Perkhidmatan')}</h3>
                           <p>
-                            We provide specialized agricultural consultancy and digital advisory services. All service details, deliverables, and obligations are determined in individual agreements with each client.
+                            {copy('We provide specialized agricultural consultancy and digital advisory services. All service details, deliverables, and obligations are determined in individual agreements with each client.', 'Kami menyediakan perkhidmatan perundingan pertanian khusus dan perkhidmatan nasihat digital. Semua butiran perkhidmatan, hasil kerja dan kewajipan ditentukan dalam perjanjian individu dengan setiap pelanggan.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">4. Payment Terms</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('4. Payment Terms', '4. Syarat Pembayaran')}</h3>
                           <p>
-                            Payment terms, including due dates, advance payments, and installment options, are specified in individual contracts. Payment methods are also agreed case-by-case.
+                            {copy('Payment terms, including due dates, advance payments, and installment options, are specified in individual contracts. Payment methods are also agreed case-by-case.', 'Syarat pembayaran, termasuk tarikh akhir, bayaran pendahuluan dan pilihan ansuran, dinyatakan dalam kontrak individu. Kaedah pembayaran juga dipersetujui secara kes demi kes.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">5. Delivery of Services</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('5. Delivery of Services', '5. Penyampaian Perkhidmatan')}</h3>
                           <p>
-                            Delivery timelines and methods are defined per contract. AGS commits to fulfilling services in accordance with the agreed terms.
+                            {copy('Delivery timelines and methods are defined per contract. AGS commits to fulfilling services in accordance with the agreed terms.', 'Garis masa dan kaedah penyampaian ditakrifkan mengikut kontrak. AGS komited untuk memenuhi perkhidmatan mengikut terma yang dipersetujui.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">6. Cancellation and Termination</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('6. Cancellation and Termination', '6. Pembatalan dan Penamatan')}</h3>
                           <p>
-                            Cancellation conditions and early termination penalties (if any) are outlined in individual contracts.
+                            {copy('Cancellation conditions and early termination penalties (if any) are outlined in individual contracts.', 'Syarat pembatalan dan penalti penamatan awal (jika ada) digariskan dalam kontrak individu.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">7. Liability</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('7. Liability', '7. Liabiliti')}</h3>
                           <p>
-                            Unless otherwise agreed, AGS's liability is limited to gross negligence and willful misconduct. Liability for indirect or consequential damages is excluded to the extent legally permissible.
+                            {copy('Unless otherwise agreed, AGS\'s liability is limited to gross negligence and willful misconduct. Liability for indirect or consequential damages is excluded to the extent legally permissible.', 'Melainkan dipersetujui sebaliknya, liabiliti AGS terhad kepada kecuaian besar dan salah laku yang disengajakan. Liabiliti untuk kerosakan tidak langsung atau akibat dikecualikan setakat yang dibenarkan oleh undang-undang.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">8. Confidentiality</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('8. Confidentiality', '8. Kerahsiaan')}</h3>
                           <p>
-                            All parties are obligated to maintain confidentiality. Separate non-disclosure agreements may be signed when required.
+                            {copy('All parties are obligated to maintain confidentiality. Separate non-disclosure agreements may be signed when required.', 'Semua pihak berkewajipan untuk mengekalkan kerahsiaan. Perjanjian tidak mendedahkan berasingan boleh ditandatangani apabila diperlukan.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">9. Intellectual Property</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('9. Intellectual Property', '9. Harta Intelek')}</h3>
                           <p>
-                            All rights related to reports, data, content, or tools produced during the service are governed by individual contracts.
+                            {copy('All rights related to reports, data, content, or tools produced during the service are governed by individual contracts.', 'Semua hak berkaitan laporan, data, kandungan atau alat yang dihasilkan semasa perkhidmatan dikawal oleh kontrak individu.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">10. Dispute Resolution</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('10. Dispute Resolution', '10. Penyelesaian Pertikaian')}</h3>
                           <p>
-                            Unless otherwise agreed, all contracts are subject to German law. Jurisdiction is Herford, Germany. Dispute resolution through mediation or arbitration may be agreed upon in writing.
+                            {copy('Unless otherwise agreed, all contracts are subject to German law. Jurisdiction is Herford, Germany. Dispute resolution through mediation or arbitration may be agreed upon in writing.', 'Melainkan dipersetujui sebaliknya, semua kontrak tertakluk kepada undang-undang Jerman. Bidang kuasa ialah Herford, Jerman. Penyelesaian pertikaian melalui pengantaraan atau timbang tara boleh dipersetujui secara bertulis.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">11. Amendments</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('11. Amendments', '11. Pindaan')}</h3>
                           <p>
-                            We reserve the right to amend these Terms and Conditions at any time. The latest version is available on the website and applies to future contracts.
+                            {copy('We reserve the right to amend these Terms and Conditions at any time. The latest version is available on the website and applies to future contracts.', 'Kami berhak untuk meminda Terma dan Syarat ini pada bila-bila masa. Versi terkini boleh didapati di laman web dan terpakai untuk kontrak masa hadapan.')}
                           </p>
                         </div>
 
                         <div>
-                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">12. Data Protection</h3>
+                          <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('12. Data Protection', '12. Perlindungan Data')}</h3>
                           <p>
-                            We process personal data in compliance with the GDPR and the German Federal Data Protection Act (BDSG). Please refer to our <Link href="/privacy" className="text-green-700 hover:text-green-800 underline font-semibold">Privacy Policy</Link> for details.
+                            {copy('We process personal data in compliance with the GDPR and the German Federal Data Protection Act (BDSG). Please refer to our ', 'Kami memproses data peribadi dengan mematuhi GDPR dan Akta Perlindungan Data Persekutuan Jerman (BDSG). Sila rujuk ')}<Link href="/privacy" className="text-green-700 hover:text-green-800 underline font-semibold">{copy('Privacy Policy', 'Dasar Privasi')}</Link>{copy(' for details.', ' untuk maklumat lanjut.')}
                           </p>
                         </div>
                       </div>
@@ -334,7 +333,7 @@ export default function TermsAndConditionsPage() {
                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
-                  {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+                  {copy('Back to Home', 'Kembali ke Laman Utama')}
                 </button>
               </Link>
             </motion.div>

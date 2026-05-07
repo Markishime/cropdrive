@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function RightOfWithdrawalPage() {
@@ -28,6 +29,7 @@ export default function RightOfWithdrawalPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-palm-50 via-white to-gold-50">
@@ -80,13 +82,10 @@ export default function RightOfWithdrawalPage() {
               </svg>
             </div>
             <h1 className="text-5xl md:text-7xl font-black mb-6 font-heading">
-              {language === 'ms' ? 'Hak Penarikan Balik' : 'Right of Withdrawal'}
+              {copy('Right of Withdrawal', 'Hak Penarikan Balik')}
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms' 
-                ? 'Maklumat mengenai hak anda untuk menarik balik kontrak'
-                : 'Information about your right to withdraw from the contract'
-              }
+              {copy('Information about your right to withdraw from the contract', 'Maklumat mengenai hak anda untuk menarik balik kontrak')}
             </p>
           </motion.div>
         </div>
@@ -117,25 +116,25 @@ export default function RightOfWithdrawalPage() {
                           </svg>
                         </div>
                         <h2 className="text-3xl md:text-4xl font-heading font-black text-gray-900">
-                          Right of Withdrawal
+                          {copy('Right of Withdrawal', 'Hak Penarikan Balik')}
                         </h2>
                       </div>
 
                       <div className="space-y-6 text-gray-700">
                         <div className="bg-blue-50 p-6 rounded-xl mb-6 border-2 border-blue-200">
                           <p className="font-semibold text-gray-900 mb-0">
-                            This notice applies to Consumers within the European Union and the European Economic Area who purchase the CropDrive OP Advisor digital service through www.cropdrive.ai.
+                            {copy('This notice applies to Consumers within the European Union and the European Economic Area who purchase the CropDrive OP Advisor digital service through www.cropdrive.ai.', 'Notis ini terpakai kepada Pengguna dalam Kesatuan Eropah dan Kawasan Ekonomi Eropah yang membeli perkhidmatan digital CropDrive OP Advisor melalui www.cropdrive.ai.')}
                           </p>
                         </div>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Right of withdrawal</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Right of withdrawal', 'Hak penarikan balik')}</h3>
                         <p>
-                          You have the right to withdraw from this contract within fourteen days without giving any reason. The withdrawal period expires fourteen days after the day the contract is concluded.
+                          {copy('You have the right to withdraw from this contract within fourteen days without giving any reason. The withdrawal period expires fourteen days after the day the contract is concluded.', 'Anda berhak untuk menarik balik daripada kontrak ini dalam tempoh empat belas hari tanpa memberikan sebarang sebab. Tempoh penarikan balik tamat empat belas hari selepas hari kontrak disimpulkan.')}
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">How to exercise the right of withdrawal</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('How to exercise the right of withdrawal', 'Cara melaksanakan hak penarikan balik')}</h3>
                         <p>
-                          To exercise the right of withdrawal, you must inform us of your decision to withdraw from this contract by an unequivocal statement sent by email or by post.
+                          {copy('To exercise the right of withdrawal, you must inform us of your decision to withdraw from this contract by an unequivocal statement sent by email or by post.', 'Untuk melaksanakan hak penarikan balik, anda mesti memaklumkan keputusan anda untuk menarik balik daripada kontrak ini melalui kenyataan yang jelas dihantar melalui e-mel atau pos.')}
                         </p>
                         <div className="bg-yellow-50 p-6 rounded-xl mb-6 border-2 border-yellow-200">
                           <div className="space-y-2 text-gray-700">
@@ -148,27 +147,27 @@ export default function RightOfWithdrawalPage() {
                           </div>
                         </div>
                         <p>
-                          To meet the withdrawal deadline, it is sufficient that you send your withdrawal statement before the withdrawal period expires.
+                          {copy('To meet the withdrawal deadline, it is sufficient that you send your withdrawal statement before the withdrawal period expires.', 'Untuk memenuhi tarikh akhir penarikan balik, memadai anda menghantar kenyataan penarikan balik anda sebelum tempoh penarikan balik tamat.')}
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Effects of withdrawal</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Effects of withdrawal', 'Kesan penarikan balik')}</h3>
                         <p>
-                          If you withdraw from this contract, we reimburse all payments received from you without undue delay and in any event no later than fourteen days from the day we receive your withdrawal statement. Reimbursement is made using the same payment method used for the original transaction, unless an alternative method is expressly agreed, and no fees are charged for the reimbursement.
+                          {copy('If you withdraw from this contract, we reimburse all payments received from you without undue delay and in any event no later than fourteen days from the day we receive your withdrawal statement. Reimbursement is made using the same payment method used for the original transaction, unless an alternative method is expressly agreed, and no fees are charged for the reimbursement.', 'Jika anda menarik balik daripada kontrak ini, kami akan membayar balik semua bayaran yang diterima daripada anda tanpa kelewatan yang tidak wajar dan dalam apa jua keadaan tidak lewat daripada empat belas hari dari hari kami menerima kenyataan penarikan balik anda. Pembayaran balik dibuat menggunakan kaedah pembayaran yang sama yang digunakan untuk transaksi asal, melainkan kaedah alternatif dipersetujui secara nyata, dan tiada bayaran dikenakan untuk pembayaran balik.')}
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Start of service during the withdrawal period and proportionate payment</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Start of service during the withdrawal period and proportionate payment', 'Permulaan perkhidmatan semasa tempoh penarikan balik dan pembayaran berkadar')}</h3>
                         <p>
-                          The CropDrive OP Advisor service is a digital service supplied online and access is normally activated immediately after purchase. Where you request that performance of the digital service begins during the withdrawal period and you later withdraw, you owe a proportionate amount for the service supplied up to the time you informed us of the withdrawal, compared to the full contract term.
+                          {copy('The CropDrive OP Advisor service is a digital service supplied online and access is normally activated immediately after purchase. Where you request that performance of the digital service begins during the withdrawal period and you later withdraw, you owe a proportionate amount for the service supplied up to the time you informed us of the withdrawal, compared to the full contract term.', 'Perkhidmatan CropDrive OP Advisor ialah perkhidmatan digital yang dibekalkan dalam talian dan akses biasanya diaktifkan serta-merta selepas pembelian. Apabila anda meminta pelaksanaan perkhidmatan digital bermula semasa tempoh penarikan balik dan anda kemudian menarik balik, anda berhutang jumlah berkadar untuk perkhidmatan yang dibekalkan sehingga masa anda memaklumkan penarikan balik, berbanding dengan tempoh kontrak penuh.')}
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Loss of the right of withdrawal for digital content supplied immediately</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Loss of the right of withdrawal for digital content supplied immediately', 'Kehilangan hak penarikan balik untuk kandungan digital yang dibekalkan serta-merta')}</h3>
                         <p>
-                          Where the contract includes digital content not supplied on a tangible medium and you request immediate supply, you acknowledge that the right of withdrawal is lost once the supply of that digital content begins.
+                          {copy('Where the contract includes digital content not supplied on a tangible medium and you request immediate supply, you acknowledge that the right of withdrawal is lost once the supply of that digital content begins.', 'Apabila kontrak termasuk kandungan digital yang tidak dibekalkan pada medium ketara dan anda meminta bekalan segera, anda mengakui bahawa hak penarikan balik hilang sebaik sahaja bekalan kandungan digital tersebut bermula.')}
                         </p>
 
-                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">Model withdrawal form</h3>
+                        <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">{copy('Model withdrawal form', 'Borang penarikan balik model')}</h3>
                         <p className="mb-4">
-                          Complete and send this form only if you wish to withdraw from the contract.
+                          {copy('Complete and send this form only if you wish to withdraw from the contract.', 'Lengkapkan dan hantar borang ini hanya jika anda ingin menarik balik daripada kontrak.')}
                         </p>
                         <div className="bg-gray-50 p-6 rounded-xl mb-6 border-2 border-gray-200 font-mono text-sm">
                           <p className="mb-4">To: AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia, Email: contact@agriglobalsolutions.com</p>
@@ -248,7 +247,7 @@ export default function RightOfWithdrawalPage() {
                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
-                  {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+                  {copy('Back to Home', 'Kembali ke Laman Utama')}
                 </button>
               </Link>
             </motion.div>

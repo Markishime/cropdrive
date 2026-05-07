@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import { sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import toast from 'react-hot-toast';
@@ -39,12 +40,13 @@ export default function ForgotPasswordPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!email) {
-      toast.error(language === 'ms' ? 'Sila masukkan email anda' : 'Please enter your email');
+      toast.error(copy('Please enter your email', 'Sila masukkan email anda'));
       return;
     }
 
@@ -53,18 +55,16 @@ export default function ForgotPasswordPage() {
       await sendPasswordResetEmail(auth, email);
       setEmailSent(true);
       toast.success(
-        language === 'ms' 
-          ? 'Pautan set semula kata laluan telah dihantar ke email anda'
-          : 'Password reset link sent to your email'
+        copy('Password reset link sent to your email', 'Pautan set semula kata laluan telah dihantar ke email anda')
       );
     } catch (error: any) {
       console.error('Password reset error:', error);
       if (error.code === 'auth/user-not-found') {
-        toast.error(language === 'ms' ? 'Email tidak dijumpai' : 'Email not found');
+        toast.error(copy('Email not found', 'Email tidak dijumpai'));
       } else if (error.code === 'auth/invalid-email') {
-        toast.error(language === 'ms' ? 'Email tidak sah' : 'Invalid email');
+        toast.error(copy('Invalid email', 'Email tidak sah'));
       } else {
-        toast.error(language === 'ms' ? 'Ralat berlaku. Sila cuba lagi.' : 'An error occurred. Please try again.');
+        toast.error(copy('An error occurred. Please try again.', 'Ralat berlaku. Sila cuba lagi.'));
       }
     } finally {
       setLoading(false);
@@ -143,7 +143,7 @@ export default function ForgotPasswordPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.2 }}
               >
-                {language === 'ms' ? 'Set Semula Kata Laluan' : 'Reset Password'}
+                {copy('Reset Password', 'Set Semula Kata Laluan')}
               </motion.h2>
               <motion.p 
                 className="text-green-100 text-lg"
@@ -151,10 +151,7 @@ export default function ForgotPasswordPage() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {language === 'ms'
-                  ? 'Masukkan email anda untuk menerima pautan set semula'
-                  : 'Enter your email to receive a reset link'
-                }
+                {copy('Enter your email to receive a reset link', 'Masukkan email anda untuk menerima pautan set semula')}
               </motion.p>
             </div>
           </motion.div>
@@ -180,26 +177,20 @@ export default function ForgotPasswordPage() {
 
                 <div>
                   <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {language === 'ms' ? 'Email Dihantar!' : 'Email Sent!'}
+                    {copy('Email Sent!', 'Email Dihantar!')}
                   </h3>
                   <p className="text-gray-600">
-                    {language === 'ms'
-                      ? 'Kami telah menghantar pautan set semula kata laluan ke'
-                      : 'We have sent a password reset link to'
-                    }
+                    {copy('We have sent a password reset link to', 'Kami telah menghantar pautan set semula kata laluan ke')}
                   </p>
                   <p className="text-green-700 font-bold mt-2">{email}</p>
                   <p className="text-gray-600 mt-4 text-sm">
-                    {language === 'ms'
-                      ? 'Sila semak peti masuk anda dan klik pada pautan untuk set semula kata laluan anda.'
-                      : 'Please check your inbox and click on the link to reset your password.'
-                    }
+                    {copy('Please check your inbox and click on the link to reset your password.', 'Sila semak peti masuk anda dan klik pada pautan untuk set semula kata laluan anda.')}
                   </p>
                 </div>
 
                 <div className="space-y-3">
                   <Link href="/login" className="block w-full bg-gradient-to-r from-green-600 to-green-700 text-white font-black py-4 rounded-xl hover:from-green-700 hover:to-green-800 transition-all shadow-lg hover:shadow-xl uppercase tracking-wide text-center">
-                    {language === 'ms' ? 'Kembali ke Log Masuk' : 'Back to Sign In'}
+                    {copy('Back to Sign In', 'Kembali ke Log Masuk')}
                   </Link>
                   
                   <button
@@ -209,7 +200,7 @@ export default function ForgotPasswordPage() {
                     }}
                     className="block w-full text-gray-600 hover:text-gray-800 font-semibold transition-colors"
                   >
-                    {language === 'ms' ? 'Cuba email lain' : 'Try another email'}
+                    {copy('Try another email', 'Cuba email lain')}
                   </button>
                 </div>
               </div>
@@ -217,11 +208,11 @@ export default function ForgotPasswordPage() {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
-                    {language === 'ms' ? 'Alamat Email' : 'Email Address'} <span className="text-red-500">*</span>
+                    {copy('Email Address', 'Alamat Email')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
-                    placeholder={language === 'ms' ? 'nama@email.com' : 'name@email.com'}
+                    placeholder={copy('name@email.com', 'nama@email.com')}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -243,10 +234,10 @@ export default function ForgotPasswordPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                       </svg>
-                      {language === 'ms' ? 'Menghantar...' : 'Sending...'}
+                      {copy('Sending...', 'Menghantar...')}
                     </span>
                   ) : (
-                    language === 'ms' ? 'Hantar Pautan Set Semula' : 'Send Reset Link'
+                    copy('Send Reset Link', 'Hantar Pautan Set Semula')
                   )}
                 </motion.button>
               </form>
@@ -255,12 +246,12 @@ export default function ForgotPasswordPage() {
             {!emailSent && (
               <div className="mt-6 text-center">
                 <p className="text-sm text-gray-600">
-                  {language === 'ms' ? 'Ingat kata laluan anda?' : 'Remember your password?'}{' '}
+                  {copy('Remember your password?', 'Ingat kata laluan anda?')}{' '}
                   <Link
                     href="/login"
                     className="text-green-700 hover:text-green-800 font-bold transition-colors"
                   >
-                    {language === 'ms' ? 'Log masuk di sini' : 'Sign in here'}
+                    {copy('Sign in here', 'Log masuk di sini')}
                   </Link>
                 </p>
               </div>
@@ -278,7 +269,7 @@ export default function ForgotPasswordPage() {
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>
-              {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+              {copy('Back to Home', 'Kembali ke Laman Utama')}
             </Link>
           </motion.div>
         </div>

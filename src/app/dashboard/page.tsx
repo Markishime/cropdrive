@@ -11,11 +11,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faWandSparkles } from '@fortawesome/free-solid-svg-icons';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase';
+import OnboardingTutorial from '@/components/OnboardingTutorial';
+import { QuickActionsWidget, TrustSignalsWidget, UploadProgressWidget } from '@/components/DashboardWidgets';
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState<Language>('en');
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { user, loading: authLoading, refreshUser } = useAuth();
   const router = useRouter();
@@ -24,6 +27,11 @@ export default function DashboardPage() {
     setMounted(true);
     const lang = (localStorage.getItem('cropdrive-language') || 'en') as Language;
     setCurrentLang(lang);
+    // Show onboarding if user hasn't completed it
+    const onboardingDone = localStorage.getItem('cropdrive-onboarding-complete');
+    if (!onboardingDone) {
+      setShowOnboarding(true);
+    }
   }, []);
 
   // Silently refresh user data when returning from purchase
@@ -234,6 +242,12 @@ export default function DashboardPage() {
   });
   return (
     <ProtectedRoute>
+      {showOnboarding && (
+        <OnboardingTutorial
+          language={language}
+          onComplete={() => setShowOnboarding(false)}
+        />
+      )}
       <div className="min-h-screen bg-gradient-to-b from-white via-green-50/30 to-white">
         {/* Hero Header — glassmorphic */}
         <section className="relative py-12 sm:py-16 lg:py-20 overflow-hidden">
@@ -501,6 +515,40 @@ export default function DashboardPage() {
                 </div>
               )}
             </motion.div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-xl font-black text-gray-900 mb-4">
+              {language === 'id' ? 'Aksi Cepat' : language === 'ms' ? 'Tindakan Pantas' : 'Quick Actions'}
+            </h2>
+            <QuickActionsWidget
+              language={language}
+              uploadsUsed={uploadsUsed}
+              uploadsLimit={uploadsLimit}
+              onNavigate={(path) => router.push(path)}
+            />
+          </div>
+        </section>
+
+        {/* Upload Progress Visual */}
+        <section className="py-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <UploadProgressWidget
+              language={language}
+              uploadsUsed={uploadsUsed}
+              uploadsLimit={uploadsLimit}
+              onNavigate={(path) => router.push(path)}
+            />
+          </div>
+        </section>
+
+        {/* Trust & Security Signals */}
+        <section className="py-6 pb-12">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <TrustSignalsWidget language={language} />
           </div>
         </section>
 

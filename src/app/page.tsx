@@ -1920,8 +1920,8 @@ export default function HomePage() {
 
       {/* FAQ Section */}
       <section className="py-24 bg-gradient-to-b from-green-50/50 via-white to-white relative overflow-hidden">
-        <div className="absolute inset-0 opacity-8 premium-mesh" />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 opacity-8 premium-mesh pointer-events-none" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
