@@ -267,20 +267,22 @@ export default function HomePage() {
                   {copy('🚀 Get Started Now', '🚀 Mulakan Sekarang')}
                 </motion.button>
               </Link>
-              <Link 
-                href="/how-it-works" 
-                className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-glass rounded-xl font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
+              {language !== 'id' && (
+                <Link 
+                  href="/how-it-works" 
+                  className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
                   style={{ pointerEvents: 'auto' }}
                 >
-                  {copy('▶️ Watch Demo', '▶️ Tonton Demo')}
-                </motion.button>
-              </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-glass rounded-xl font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    {copy('▶️ Watch Demo', '▶️ Tonton Demo')}
+                  </motion.button>
+                </Link>
+              )}
             </motion.div>
           </div>
         </div>
