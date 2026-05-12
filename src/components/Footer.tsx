@@ -26,6 +26,7 @@ const footerSections: FooterSection[] = [
     titleMs: 'Syarikat',
     links: [
       { href: '/about', label: 'About Us', labelMs: 'Tentang Kami' },
+      { href: '/reviews', label: 'Reviews', labelMs: 'Ulasan' },
       { href: '/blog', label: 'Blog', labelMs: 'Blog' },
     ],
   },
@@ -70,14 +71,14 @@ export const Footer: React.FC = () => {
   );
 
   return (
-    <footer className="bg-secondary-900 text-white">
+    <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
           {/* Company Info */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <motion.div
-                className="w-12 h-12 bg-white rounded-full overflow-hidden shadow-lg"
+                className="w-12 h-12 bg-white rounded-full overflow-hidden shadow-lg flex items-center justify-center"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -86,7 +87,7 @@ export const Footer: React.FC = () => {
                   alt="CropDrive Logo"
                   width={48}
                   height={48}
-                  className="object-cover"
+                  className="object-contain"
                 />
               </motion.div>
               <span className="font-bold text-xl">

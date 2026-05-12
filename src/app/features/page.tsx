@@ -5,19 +5,13 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
-import { useAuth } from '@/lib/auth';
-import Button from '@/components/ui/Button';
-import Card, { CardContent } from '@/components/ui/Card';
+
 
 export default function FeaturesPage() {
   const [mounted, setMounted] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<Language>('en');
   const { language, t } = useTranslation(currentLanguage);
   const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
-  const { user } = useAuth();
-  
-  const currentPlan = user?.plan || 'start';
-
   useEffect(() => {
     setMounted(true);
     const lang = getCurrentLanguage();
@@ -188,39 +182,16 @@ export default function FeaturesPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Logged-in User Banner */}
-      {user && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-green-600 to-green-700 text-white py-4 px-4 sm:px-6 lg:px-8"
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <p className="text-sm font-medium">
-                {copy(`✓ Your Current Plan: ${currentPlan.toUpperCase()} • All features below are available to you!`, `✓ Pelan Semasa Anda: ${currentPlan.toUpperCase()} • Semua ciri di bawah tersedia untuk anda!`)}
-              </p>
-            </div>
-            {currentPlan === 'start' && (
-              <Link href="/pricing">
-                <Button className="bg-yellow-400 text-green-900 hover:bg-yellow-300 font-bold px-6 py-2 text-sm">
-                  {copy('Upgrade Now', 'Naik Taraf Sekarang')}
-                </Button>
-              </Link>
-            )}
-          </div>
-        </motion.div>
-      )}
-      
-      {/* Hero Section with Green Gradient */}
-      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-24 sm:py-32 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
             backgroundSize: '40px 40px'
           }}></div>
         </div>
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-yellow-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -233,30 +204,38 @@ export default function FeaturesPage() {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="inline-block text-yellow-400 text-sm font-bold tracking-widest uppercase mb-6"
+              className="inline-block text-yellow-400 text-xs sm:text-sm font-bold tracking-widest uppercase mb-6 bg-white/10 px-5 py-2 rounded-full border border-yellow-400/30 backdrop-blur-sm"
             >
               {copy('11 Core Features', '11 Ciri Utama')}
             </motion.span>
 
-            <h1 className="text-5xl md:text-7xl font-bold text-white mb-8 leading-tight">
+            <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white mb-6 sm:mb-8 leading-tight font-heading">
               {language === 'ms' ? 'CropDrive™ Oil Palm AI Advisor' : 'CropDrive™ Oil Palm AI Advisor'}<br />
               <span className="text-yellow-400">{copy('FEATURES', 'CIRI-CIRI')}</span>
             </h1>
 
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed">
               {copy('Latest technology for accurate, comprehensive, and easy-to-use palm oil farm analysis', 'Teknologi terkini untuk analisis ladang kelapa sawit yang tepat, menyeluruh, dan mudah digunakan')}
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
-                <button className="px-8 py-4 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-sm tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-                  {copy('Sign Up Now', 'Daftar Sekarang')}
-                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 sm:px-10 py-4 btn-v2-primary rounded-xl font-black uppercase text-sm sm:text-base tracking-wider"
+                >
+                  {copy('🚀 Sign Up Now', '🚀 Daftar Sekarang')}
+                </motion.button>
               </Link>
               <Link href="/get-started/farmers">
-                <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-medium uppercase text-sm tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-200 hover:bg-white/10">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-8 sm:px-10 py-4 border-2 border-white/30 text-white rounded-xl font-bold uppercase text-sm sm:text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 transition-all duration-300 hover:bg-white/10 backdrop-blur-sm"
+                >
                   {copy('Learn More', 'Ketahui Lebih Lanjut')}
-                </button>
+                </motion.button>
               </Link>
             </div>
           </motion.div>
@@ -264,57 +243,65 @@ export default function FeaturesPage() {
       </section>
 
       {/* Features Grid Section - All 11 Core Features */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white via-green-50/30 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-green-400/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="text-center mb-12 sm:mb-16"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading tracking-tight">
+              {copy('All', 'Semua')} <span className="text-green-700">11 {copy('Features', 'Ciri')}</span>
+            </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {copy('Everything you need for precision palm oil farming', 'Semua yang anda perlukan untuk pertanian kelapa sawit presisi')}
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: (index % 2) * 0.1 }}
+                transition={{ duration: 0.6, delay: (index % 2) * 0.1 }}
                 viewport={{ once: true }}
+                whileHover={{ y: -4 }}
+                className="premium-card h-full p-6 sm:p-8 border-l-4 border-l-yellow-400"
               >
-                <Card className="h-full hover:shadow-2xl hover:scale-105 transition-all duration-300 bg-white border-l-4 border-yellow-400">
-                  <CardContent className="p-8">
-                    <div className="flex items-start mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-green-700 to-green-900 rounded-full flex items-center justify-center text-yellow-400 text-2xl font-black mr-4 flex-shrink-0">
-                        {feature.number}
-                      </div>
-                      <div className="text-5xl">{feature.icon}</div>
-                    </div>
-
-                    <h3 className="text-2xl font-bold text-gray-900 mb-4 uppercase tracking-wide">
+                <div className="flex items-start gap-4 mb-5">
+                  <div className="w-14 h-14 bg-gradient-to-br from-green-700 to-green-900 rounded-2xl flex items-center justify-center text-yellow-400 text-xl font-black flex-shrink-0 shadow-lg">
+                    {feature.number}
+                  </div>
+                  <div>
+                    <div className="text-3xl mb-1">{feature.icon}</div>
+                    <h3 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight">
                       {feature.title}
                     </h3>
+                  </div>
+                </div>
 
-                    <p className="text-gray-700 mb-6 leading-relaxed text-base">
-                      {feature.description}
-                    </p>
+                <p className="text-gray-600 mb-6 leading-relaxed text-sm sm:text-base">
+                  {feature.description}
+                </p>
 
-                    <div className="space-y-3 pt-4 border-t border-gray-200">
-                      <p className="text-sm font-bold text-green-700 uppercase tracking-wide mb-2">
-                        {copy('Benefits:', 'Manfaat:')}
-                      </p>
-                      {feature.benefits.map((benefit, benefitIndex) => (
-                        <div key={benefitIndex} className="flex items-center">
-                          <svg
-                            className="w-5 h-5 text-yellow-500 mr-3 flex-shrink-0"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                          <span className="text-gray-800 font-medium text-sm">{benefit}</span>
-                        </div>
-                      ))}
+                <div className="space-y-2.5 pt-4 border-t border-green-100">
+                  <p className="text-xs font-bold text-green-700 uppercase tracking-wider mb-2">
+                    {copy('Benefits:', 'Manfaat:')}
+                  </p>
+                  {feature.benefits.map((benefit, benefitIndex) => (
+                    <div key={benefitIndex} className="flex items-center">
+                      <svg className="w-4 h-4 text-green-500 mr-2.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                      <span className="text-gray-700 font-medium text-sm">{benefit}</span>
                     </div>
-                  </CardContent>
-                </Card>
+                  ))}
+                </div>
               </motion.div>
             ))}
           </div>
@@ -322,28 +309,33 @@ export default function FeaturesPage() {
       </section>
 
       {/* Technical Capabilities Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-green-50/20 via-white to-green-50/20 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-6 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 uppercase">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading tracking-tight">
               {copy('Technical', 'Keupayaan')} <span className="text-green-700">{copy('Capabilities', 'Teknikal')}</span>
             </h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              {copy('Supports multiple formats and comprehensive nutrient analysis', 'Menyokong pelbagai format dan analisis nutrien menyeluruh')}
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {/* Supported Formats */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-blue-50 to-white p-8 rounded-xl shadow-lg border-2 border-blue-200"
+              whileHover={{ y: -4 }}
+              className="premium-card p-8"
             >
               <div className="text-5xl mb-4 text-center">📁</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
@@ -375,7 +367,8 @@ export default function FeaturesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-green-50 to-white p-8 rounded-xl shadow-lg border-2 border-green-200"
+              whileHover={{ y: -4 }}
+              className="premium-card p-8"
             >
               <div className="text-5xl mb-4 text-center">🧪</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
@@ -419,7 +412,8 @@ export default function FeaturesPage() {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-yellow-50 to-white p-8 rounded-xl shadow-lg border-2 border-yellow-200"
+              whileHover={{ y: -4 }}
+              className="premium-card p-8"
             >
               <div className="text-5xl mb-4 text-center">🍃</div>
               <h3 className="text-xl font-bold text-gray-900 mb-4 text-center uppercase">
@@ -451,27 +445,28 @@ export default function FeaturesPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-green-50/30 via-white to-green-50/20 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-6 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="text-center mb-16">
-              <span className="inline-block text-yellow-500 text-sm font-bold tracking-widest uppercase mb-4">
+            <div className="text-center mb-12 sm:mb-16">
+              <span className="inline-block text-green-700 text-xs font-bold tracking-widest uppercase mb-4 bg-green-50 px-4 py-1.5 rounded-full border border-green-200">
                 {copy('Simple & Fast', 'Mudah & Pantas')}
               </span>
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 uppercase">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading tracking-tight">
                 {copy('User', 'Perjalanan')} <span className="text-green-700">{copy('Journey', 'Pengguna')}</span>
               </h2>
-              <p className="text-xl text-gray-700 max-w-3xl mx-auto">
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto">
                 {copy('Simple 5-step process from upload to action', 'Proses mudah 5 langkah dari muat naik ke tindakan')}
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-6">
               {[
                 {
                   step: '1',
@@ -522,18 +517,18 @@ export default function FeaturesPage() {
                   viewport={{ once: true }}
                   className="text-center"
                 >
-                  <div className="relative bg-gradient-to-br from-green-50 to-white p-6 rounded-xl border-2 border-green-200 hover:border-yellow-400 transition-all duration-300 hover:shadow-xl">
-                    <div className="text-5xl mb-4">{step.icon}</div>
+                  <div className="relative premium-card p-6 hover:border-green-300 transition-all duration-300">
+                    <div className="text-4xl sm:text-5xl mb-4">{step.icon}</div>
                     
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-700 to-green-900 text-yellow-400 rounded-full flex items-center justify-center text-2xl font-black mx-auto mb-4 shadow-lg">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-green-700 to-green-900 text-yellow-400 rounded-2xl flex items-center justify-center text-xl sm:text-2xl font-black mx-auto mb-4 shadow-lg">
                       {step.step}
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 mb-3 uppercase tracking-wide">
+                    <h3 className="text-base sm:text-lg font-black text-gray-900 mb-3 tracking-tight">
                       {step.title}
                     </h3>
 
-                    <p className="text-gray-700 text-sm leading-relaxed">
+                    <p className="text-gray-600 text-xs sm:text-sm leading-relaxed">
                       {step.description}
                     </p>
                   </div>
@@ -545,15 +540,17 @@ export default function FeaturesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 overflow-hidden">
+      <section className="relative py-20 sm:py-24 bg-gradient-to-br from-green-900 via-green-800 to-green-900 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
             backgroundSize: '40px 40px'
           }}></div>
         </div>
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-yellow-400/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-16 -left-16 w-64 h-64 rounded-full bg-green-400/10 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -561,22 +558,30 @@ export default function FeaturesPage() {
             viewport={{ once: true }}
             className="text-center"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 uppercase">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 font-heading">
               {copy('Ready to', 'Sedia untuk')} <span className="text-yellow-400">{copy('Start?', 'Memulakan?')}</span>
             </h2>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 mb-10 sm:mb-12 max-w-3xl mx-auto leading-relaxed">
               {copy('Don\'t guess - know exactly what your plantation needs!', 'Jangan teka - tahu apa yang ladang anda perlukan dengan ketepatan!')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center">
               <Link href="/register">
-                <button className="px-10 py-5 bg-yellow-400 text-green-900 rounded-xl font-bold uppercase text-base tracking-wider hover:bg-yellow-300 transition-all duration-200 shadow-xl hover:shadow-2xl transform hover:scale-105">
-                  {copy('Join Now', 'Sertai Sekarang')}
-                </button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-10 py-5 btn-v2-primary rounded-xl font-black uppercase text-base tracking-wider"
+                >
+                  {copy('🚀 Join Now', '🚀 Sertai Sekarang')}
+                </motion.button>
               </Link>
               <Link href="/pricing">
-                <button className="px-10 py-5 border-2 border-white text-white rounded-xl font-medium uppercase text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 hover:bg-white/10 transition-all duration-200">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-10 py-5 border-2 border-white text-white rounded-xl font-bold uppercase text-base tracking-wider hover:border-yellow-400 hover:text-yellow-400 hover:bg-white/10 transition-all duration-300"
+                >
                   {copy('View Plans', 'Lihat Pelan Harga')}
-                </button>
+                </motion.button>
               </Link>
             </div>
           </motion.div>

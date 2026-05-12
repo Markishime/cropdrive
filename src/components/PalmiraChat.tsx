@@ -545,8 +545,8 @@ export default function PalmiraChat({
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-3 ${
                     message.role === 'user'
-                      ? 'bg-green-600 text-white'
-                      : 'bg-gray-100 text-gray-900'
+                      ? 'glass-bubble-user text-white'
+                      : 'glass-bubble-ai text-white'
                   }`}
                 >
                   <div className="whitespace-pre-wrap break-words">
@@ -580,7 +580,11 @@ export default function PalmiraChat({
                   />
                 </div>
                 <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                  <FontAwesomeIcon icon={faSpinner} className="w-5 h-5 animate-spin text-gray-600" spin />
+                  <div className="flex gap-1">
+                    <div className="ai-thinking-dot"></div>
+                    <div className="ai-thinking-dot"></div>
+                    <div className="ai-thinking-dot"></div>
+                  </div>
                 </div>
               </div>
             )}

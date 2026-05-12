@@ -261,26 +261,28 @@ export default function HomePage() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 rounded-full font-black text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+                  className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-primary rounded-xl font-black text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
                   style={{ pointerEvents: 'auto' }}
                 >
                   {copy('🚀 Get Started Now', '🚀 Mulakan Sekarang')}
                 </motion.button>
               </Link>
-              <Link 
-                href="/how-it-works" 
-                className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
-                style={{ pointerEvents: 'auto' }}
-              >
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="w-full sm:w-auto px-6 sm:px-8 md:px-10 lg:px-12 py-3 sm:py-3.5 md:py-4 lg:py-4.5 bg-white/10 backdrop-blur-md text-white border-2 border-white/30 rounded-full font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider shadow-2xl hover:bg-white/20 transition-all duration-300 touch-manipulation cursor-pointer relative z-50 pointer-events-auto flex items-center justify-center whitespace-nowrap"
+              {language !== 'id' && (
+                <Link 
+                  href="/how-it-works" 
+                  className="w-full sm:w-auto relative z-50 pointer-events-auto inline-block"
                   style={{ pointerEvents: 'auto' }}
                 >
-                  {copy('▶️ Watch Demo', '▶️ Tonton Demo')}
-                </motion.button>
-              </Link>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full sm:w-auto px-8 sm:px-10 lg:px-12 py-3.5 sm:py-4 btn-v2-glass rounded-xl font-bold text-sm sm:text-base md:text-lg uppercase tracking-wider touch-manipulation cursor-pointer flex items-center justify-center whitespace-nowrap"
+                    style={{ pointerEvents: 'auto' }}
+                  >
+                    {copy('▶️ Watch Demo', '▶️ Tonton Demo')}
+                  </motion.button>
+                </Link>
+              )}
             </motion.div>
           </div>
         </div>
@@ -378,8 +380,10 @@ export default function HomePage() {
       </section>
 
       {/* Who We Serve Section - Two Client Types */}
-      <section className="py-10 xs:py-12 sm:py-16 lg:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+      <section className="py-10 xs:py-12 sm:py-16 lg:py-20 bg-gradient-to-b from-white via-green-50/50 to-white relative overflow-hidden">
+        {/* Ambient glow */}
+        <div className="absolute inset-0 opacity-30" style={{background:'radial-gradient(ellipse at top, rgba(21,128,61,0.08), transparent 60%), radial-gradient(ellipse at bottom, rgba(34,197,94,0.05), transparent 80%)'}} />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -402,7 +406,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-yellow-300 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-2 border-yellow-200 hover:border-yellow-400 transition-all"
             >
               {/* Farmers Image - Large */}
               <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
@@ -465,7 +469,7 @@ export default function HomePage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-green-900 text-yellow-400 rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:bg-green-800 transition-all duration-300"
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 btn-v2-primary text-white rounded-xl font-black text-base sm:text-lg uppercase tracking-wider"
                   >
                       {copy('🛒 Join Us Now', '🛒 Sertai Sekarang')}
                   </motion.button>
@@ -479,7 +483,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
-              className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl sm:rounded-3xl overflow-hidden border-2 sm:border-4 border-green-600 shadow-xl hover:shadow-2xl transition-all duration-300"
+              className="bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl border-2 border-green-200 hover:border-green-400 transition-all"
             >
               {/* Organizations Image - Large */}
               <div className="relative w-full h-64 sm:h-80 lg:h-96 overflow-hidden bg-gray-200">
@@ -538,7 +542,7 @@ export default function HomePage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-black text-base sm:text-lg uppercase tracking-wider shadow-xl hover:from-green-700 hover:to-green-800 transition-all duration-300"
+                    className="w-full px-6 sm:px-8 py-3 sm:py-4 btn-v2-primary rounded-xl font-black text-base sm:text-lg uppercase tracking-wider"
                   >
                       {copy('📅 Book A Demo', '📅 Tempah Demo')}
                   </motion.button>
@@ -550,13 +554,10 @@ export default function HomePage() {
       </section>
 
       {/* Image Carousel Section - 5 Images */}
-      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-br from-green-900 via-green-800 to-green-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute inset-0" style={{
-            backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-            backgroundSize: '40px 40px'
-          }}></div>
-        </div>
+      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-b from-green-50 via-white to-green-50/30 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10 premium-mesh"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-500/8 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-yellow-400/5 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
@@ -566,10 +567,10 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-10 xs:mb-12 sm:mb-16"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-white mb-3 xs:mb-4 font-heading tracking-tight px-2">
+            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-3 xs:mb-4 font-heading tracking-tight px-2">
               {copy('Why Choose CropDrive?', 'Mengapa Memilih CropDrive?')}
             </h2>
-            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-white/90 max-w-3xl mx-auto px-3 xs:px-4">
+            <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-3 xs:px-4">
               {copy('Cutting-edge AI technology for smarter palm oil farming', 'Teknologi AI terkini untuk pertanian kelapa sawit yang lebih pintar')}
             </p>
           </motion.div>
@@ -615,7 +616,7 @@ export default function HomePage() {
                 transition={{ duration: 0.7, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05, y: -10 }}
-                className="group relative bg-white rounded-3xl overflow-hidden shadow-2xl hover:shadow-yellow-400/60 transition-all duration-500"
+                className="group relative bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl hover:shadow-green-500/10 transition-all duration-500 border border-green-100 hover:border-green-300"
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
@@ -661,9 +662,9 @@ export default function HomePage() {
               { number: '20-30%', label: copy('Less Waste', 'Kurang Pembaziran') },
               { number: 'RM 5-10K', label: copy('Savings/Year', 'Jimat/Tahun') },
             ].map((stat, index) => (
-              <div key={index} className="text-center bg-white/10 backdrop-blur-sm rounded-xl p-4 xs:p-5 sm:p-6 border-2 border-yellow-400/30 hover:border-yellow-400 transition-all duration-300">
-                <p className="text-2xl xs:text-3xl sm:text-4xl font-black text-yellow-400 mb-1 xs:mb-2">{stat.number}</p>
-                <p className="text-white/90 text-xs xs:text-sm font-semibold uppercase tracking-wide leading-tight">{stat.label}</p>
+              <div key={index} className="text-center bg-green-50 backdrop-blur-sm rounded-xl p-4 xs:p-5 sm:p-6 border-2 border-green-200 hover:border-green-500 transition-all duration-300">
+                <p className="text-2xl xs:text-3xl sm:text-4xl font-black text-green-700 mb-1 xs:mb-2">{stat.number}</p>
+                <p className="text-gray-700 text-xs xs:text-sm font-semibold uppercase tracking-wide leading-tight">{stat.label}</p>
               </div>
             ))}
           </motion.div>
@@ -671,7 +672,9 @@ export default function HomePage() {
       </section>
 
       {/* CropDrive Introduction Section */}
-      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-br from-gray-50 to-white">
+      <section className="py-12 xs:py-16 sm:py-20 lg:py-24 bg-gradient-to-b from-white via-green-50/30 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="absolute top-0 right-1/3 w-80 h-80 bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -680,10 +683,10 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-10 xs:mb-12 sm:mb-16"
           >
-            <h2 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
-              CropDrive™ Oil Palm AI Advisor
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 font-heading tracking-tight">
+              CropDrive™ Oil Palm <span className="text-green-700">AI Advisor</span>
             </h2>
-            <p className="text-2xl md:text-3xl font-semibold text-green-700 mb-4">
+            <p className="text-lg sm:text-xl md:text-2xl font-semibold text-green-600 mb-4">
               {copy('Smart Farming Intelligence for Oil Palm Plantations', 'Smart Farming Intelligence untuk Ladang Kelapa Sawit')}
             </p>
             <p className="text-sm xs:text-base sm:text-lg md:text-xl text-gray-600 max-w-4xl mx-auto mb-4 xs:mb-5 sm:mb-6 leading-relaxed px-3 xs:px-4">
@@ -716,7 +719,7 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="mt-16"
           >
-            <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900 mb-8 text-center font-heading tracking-tight">
               {copy('Who Is It For?', 'Untuk Siapa?')}
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
@@ -761,7 +764,7 @@ export default function HomePage() {
                   transition={{ duration: 0.5, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ scale: 1.05 }}
-                  className="bg-white p-4 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 text-center"
+                  className="premium-card p-4 text-center"
                 >
                   <div className="w-16 h-16 mx-auto mb-3 relative">
                     <Image
@@ -781,8 +784,9 @@ export default function HomePage() {
       </section>
 
       {/* The Challenge Section */}
-      <section className="py-12 xs:py-16 sm:py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
+      <section className="py-12 xs:py-16 sm:py-20 bg-gradient-to-b from-white via-red-50/20 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-5 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -790,12 +794,23 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="max-w-6xl mx-auto"
           >
-            <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 xs:mb-6 sm:mb-8 text-center px-2">
-              <span className="text-red-600">{copy('The Challenge', 'Cabaran')}</span>
-            </h2>
-            <p className="text-sm xs:text-base sm:text-lg text-gray-700 mb-10 text-center px-3 xs:px-4 max-w-3xl mx-auto">
-              {copy('Soil and leaf test results are difficult to interpret without expert support. This often leads to wasted fertilizer, higher costs, missed yield potential, and long-term soil degradation.', 'Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada pembaziran baja, kos yang lebih tinggi, hasil yang terlepas, dan degradasi tanah jangka panjang.')}
-            </p>
+            <div className="text-center mb-10 sm:mb-14">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="inline-block text-red-600 text-xs font-bold tracking-widest uppercase mb-4 bg-red-50 px-4 py-1.5 rounded-full border border-red-200"
+              >
+                {copy('Industry Problem', 'Masalah Industri')}
+              </motion.span>
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 xs:mb-6 px-2 font-heading tracking-tight">
+                <span className="text-red-600">{copy('The Challenge', 'Cabaran')}</span>
+              </h2>
+              <p className="text-sm xs:text-base sm:text-lg text-gray-700 px-3 xs:px-4 max-w-3xl mx-auto leading-relaxed">
+                {copy('Soil and leaf test results are difficult to interpret without expert support. This often leads to wasted fertilizer, higher costs, missed yield potential, and long-term soil degradation.', 'Keputusan ujian tanah dan daun sukar untuk ditafsir tanpa sokongan pakar. Ini sering membawa kepada pembaziran baja, kos yang lebih tinggi, hasil yang terlepas, dan degradasi tanah jangka panjang.')}
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { 
@@ -830,7 +845,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-red-50 p-6 rounded-2xl border-2 border-red-200 hover:border-red-400 transition-all"
+                  className="flex flex-col items-center text-center bg-white p-6 rounded-2xl border border-red-100 hover:border-red-300 hover:shadow-lg hover:shadow-red-100/50 transition-all shadow-sm"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -850,8 +865,10 @@ export default function HomePage() {
       </section>
 
       {/* How We Help Section */}
-      <section className="py-20 bg-gradient-to-br from-green-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-gradient-to-b from-green-50 via-white to-green-50/30 relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="absolute top-0 left-1/4 w-80 h-80 bg-green-500/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -859,12 +876,23 @@ export default function HomePage() {
             viewport={{ once: true }}
             className="max-w-6xl mx-auto"
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-8 text-center">
-              <span className="text-green-700">{copy('How We Help', 'Bagaimana Kami Membantu')}</span>
-            </h2>
-            <p className="text-2xl font-semibold text-green-700 mb-12 text-center">
-              {copy('CropDrive™ AI Agronomist interprets test data, provides field-specific recommendations, designs soil health improvement strategies, and links every step to clear economic and return-on-investment values.', 'Agronomis AI CropDrive™ mentafsir data ujian, menyediakan cadangan khusus ladang, mereka bentuk strategi peningkatan kesihatan tanah, dan mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas.')}
-            </p>
+            <div className="text-center mb-12">
+              <motion.span
+                initial={{ opacity: 0, y: -10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                viewport={{ once: true }}
+                className="inline-block text-green-700 text-xs font-bold tracking-widest uppercase mb-4 bg-green-50 px-4 py-1.5 rounded-full border border-green-200"
+              >
+                {copy('Our Solution', 'Penyelesaian Kami')}
+              </motion.span>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading tracking-tight">
+                <span className="text-green-700">{copy('How We Help', 'Bagaimana Kami Membantu')}</span>
+              </h2>
+              <p className="text-base sm:text-lg text-gray-600 max-w-4xl mx-auto leading-relaxed">
+                {copy('CropDrive™ AI Agronomist interprets test data, provides field-specific recommendations, designs soil health improvement strategies, and links every step to clear economic and return-on-investment values.', 'Agronomis AI CropDrive™ mentafsir data ujian, menyediakan cadangan khusus ladang, mereka bentuk strategi peningkatan kesihatan tanah, dan mengaitkan setiap langkah dengan nilai ekonomi dan pulangan pelaburan yang jelas.')}
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[
                 { 
@@ -899,7 +927,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-white p-6 rounded-2xl shadow-lg border-2 border-green-200 hover:border-green-500 transition-all"
+              className="premium-card flex flex-col items-center text-center p-6"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -910,7 +938,7 @@ export default function HomePage() {
                       className="object-contain"
                     />
                   </div>
-                  <p className="text-base font-semibold text-gray-900">{item.text}</p>
+                  <p className="text-base font-semibold text-gray-800">{item.text}</p>
                 </motion.div>
               ))}
             </div>
@@ -919,8 +947,11 @@ export default function HomePage() {
       </section>
 
       {/* Results That Matter Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-gradient-to-br from-green-800 via-green-900 to-green-800 text-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_2px_2px,white_1px,transparent_0)] bg-[length:40px_40px]" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -931,7 +962,7 @@ export default function HomePage() {
             <h2 className="text-4xl md:text-5xl font-bold mb-8">
               <span className="text-yellow-400">{copy('Results That Matter', 'Hasil Yang Penting')}</span>
             </h2>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-12">
+            <p className="text-xl text-green-100 max-w-3xl mx-auto mb-12">
               {copy('Farmers and organizations receive actionable input plans that reduce costs, protect soil, and increase yields. Better resource use strengthens economic returns, improves long-term sustainability, and creates more resilient farming systems.', 'Petani dan organisasi menerima pelan input yang boleh dilaksanakan yang mengurangkan kos, melindungi tanah, dan meningkatkan hasil. Penggunaan sumber yang lebih baik memperkuat pulangan ekonomi, meningkatkan kemampanan jangka panjang, dan mewujudkan sistem pertanian yang lebih berdaya tahan.')}
             </p>
           </motion.div>
@@ -976,19 +1007,19 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.05 }}
-                className="bg-white/10 backdrop-blur-md p-6 rounded-2xl text-center border-2 border-white/20 hover:border-yellow-400 transition-all"
+                className="bg-white/10 backdrop-blur-md p-6 rounded-2xl text-center border border-white/20 hover:border-yellow-400/50 hover:bg-white/15 transition-all duration-300"
               >
-                <div className="w-16 h-16 mx-auto mb-4 relative">
+                <div className="w-16 h-16 mx-auto mb-4 relative bg-white rounded-xl p-2 shadow-lg">
                   <Image
                     src={stat.icon}
                     alt={stat.text}
                     width={64}
                     height={64}
-                    className="object-contain"
+                    className="object-contain w-full h-full"
                   />
                 </div>
                 <div className="text-3xl font-black text-yellow-400 mb-3">{stat.number}</div>
-                <p className="text-sm text-blue-100 leading-tight">{stat.text}</p>
+                <p className="text-sm text-green-100 leading-tight">{stat.text}</p>
               </motion.div>
             ))}
           </div>
@@ -1044,7 +1075,7 @@ export default function HomePage() {
                   transition={{ duration: 0.6, delay: index * 0.1 }}
                   viewport={{ once: true }}
                   whileHover={{ y: -5 }}
-                  className="flex flex-col items-center text-center bg-gradient-to-br from-green-50 to-white p-6 rounded-2xl shadow-lg border-2 border-green-200 hover:border-green-500 transition-all"
+                  className="premium-card flex flex-col items-center text-center p-6"
                 >
                   <div className="w-20 h-20 mb-4 relative">
                     <Image
@@ -1056,7 +1087,7 @@ export default function HomePage() {
                     />
                   </div>
                   <h3 className="text-lg font-bold text-gray-900 mb-2">{benefit.title}</h3>
-                  <p className="text-sm text-gray-700">{benefit.desc}</p>
+                  <p className="text-sm text-gray-600">{benefit.desc}</p>
                 </motion.div>
               ))}
             </div>
@@ -1233,8 +1264,8 @@ export default function HomePage() {
                 {/* Image Side */}
                 <div className="flex-1 relative">
                   <motion.div
-                    whileHover={{ scale: 1.05 }}
-                    className="relative rounded-3xl overflow-hidden shadow-2xl"
+                    whileHover={{ scale: 1.03 }}
+                    className="relative rounded-3xl overflow-hidden shadow-xl border border-green-100"
                   >
                     <Image
                       src={step.image}
@@ -1282,7 +1313,7 @@ export default function HomePage() {
       </section>
 
       {/* What We Offer Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <section className="py-20 bg-gradient-to-b from-green-50/40 via-white to-green-50/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1292,7 +1323,7 @@ export default function HomePage() {
             className="text-center mb-16"
           >
             <h2 className="text-5xl md:text-6xl font-black text-gray-900 mb-6">
-              <span className="text-blue-700">{copy('What We Offer', 'Apa Yang Kami Tawarkan')}</span>
+              <span className="text-green-700">{copy('What We Offer', 'Apa Yang Kami Tawarkan')}</span>
             </h2>
             <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
               {copy('We interpret lab results, provide clear fertilization strategies, and deliver long-term investment plans with soil health restoration tailored to each customer.', 'Kami mentafsir keputusan makmal, menyediakan strategi pemupukan yang jelas, dan menyampaikan pelan pelaburan jangka panjang dengan pemulihan kesihatan tanah yang disesuaikan untuk setiap pelanggan.')}
@@ -1339,9 +1370,9 @@ export default function HomePage() {
                 transition={{ duration: 0.6, delay: index * 0.1 }}
                 viewport={{ once: true }}
                 whileHover={{ scale: 1.03, y: -5 }}
-                className="bg-white rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-blue-100 hover:border-blue-400"
+                className="bg-white/85 backdrop-blur-sm rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-green-100 hover:border-green-400"
               >
-                <div className="relative h-56 bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center p-8">
+                <div className="relative h-56 bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-8">
                   <div className="w-32 h-32 relative">
                     <Image
                       src={segment.img}
@@ -1353,7 +1384,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <h3 className="text-2xl font-black text-blue-900 mb-4 text-center">
+                  <h3 className="text-2xl font-black text-green-900 mb-4 text-center">
                     {segment.title}
                   </h3>
                   <p className="text-gray-700 leading-relaxed text-center">
@@ -1634,7 +1665,9 @@ export default function HomePage() {
       </section>
 
       {/* Trust & Guarantee Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 via-yellow-50 to-white">
+      <section className="py-24 bg-gradient-to-b from-white via-green-50/30 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-400/5 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1835,7 +1868,7 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border-2 border-gray-700 hover:border-yellow-400 transition-all"
+                className="glass p-8 rounded-2xl border border-gray-600/30 hover:border-yellow-400/40 transition-all glass-shimmer"
               >
                 <div className="text-6xl mb-4">{tech.icon}</div>
                 <h3 className="text-2xl font-bold mb-4 text-yellow-400">{tech.title}</h3>
@@ -1888,8 +1921,9 @@ export default function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-gradient-to-b from-green-50/50 via-white to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh pointer-events-none" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}

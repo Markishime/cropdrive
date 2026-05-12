@@ -1,10 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    // ESLint errors (ordering, static-components) do not affect runtime correctness.
-    // Run `npm run lint` separately to review warnings.
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {
@@ -15,6 +10,26 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.coverr.co',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.squarespace-cdn.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'static1.squarespace.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'static1.squarespace.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.squarespace.com',
         pathname: '**',
       },
     ],

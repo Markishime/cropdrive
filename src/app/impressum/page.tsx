@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Card, { CardContent } from '@/components/ui/Card';
 
 export default function ImpressumPage() {
@@ -28,6 +29,7 @@ export default function ImpressumPage() {
   }, []);
 
   const { language } = useTranslation(mounted ? currentLanguage : 'en');
+  const copy = (en: string, ms: string) => language === 'id' ? toIndonesianText(ms) : language === 'ms' ? ms : en;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-palm-50 via-white to-gold-50">
@@ -83,10 +85,7 @@ export default function ImpressumPage() {
               Impressum
             </h1>
             <p className="text-xl md:text-2xl text-green-100 max-w-3xl mx-auto leading-relaxed">
-              {language === 'ms' 
-                ? 'Maklumat syarikat dan tanggungjawab undang-undang'
-                : 'Company information and legal responsibility'
-              }
+              {copy('Company information and legal responsibility', 'Maklumat syarikat dan tanggungjawab undang-undang')}
             </p>
           </motion.div>
         </div>
@@ -185,7 +184,7 @@ export default function ImpressumPage() {
                   <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                   </svg>
-                  {language === 'ms' ? 'Kembali ke Laman Utama' : 'Back to Home'}
+                  {copy('Back to Home', 'Kembali ke Laman Utama')}
                 </button>
               </Link>
             </motion.div>

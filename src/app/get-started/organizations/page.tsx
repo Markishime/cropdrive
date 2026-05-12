@@ -125,49 +125,66 @@ export default function GetStartedOrganizationsPage() {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
+      <section className="relative bg-gradient-to-br from-green-900 via-green-800 to-green-900 py-28 sm:py-32 overflow-hidden pt-28 sm:pt-32">
+        {/* Ambient glow and pattern */}
+        <div className="absolute inset-0 opacity-15">
           <div className="absolute inset-0" style={{
             backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
             backgroundSize: '40px 40px'
           }}></div>
         </div>
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 w-72 h-72 bg-green-400/5 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             className="text-center"
           >
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-8 leading-tight font-heading">
-              {language === 'ms' ? 'Kami Membantu Organisasi Anda' : 'We help your organization'}<br />
-              <span className="text-yellow-400">{language === 'ms' ? 'Berjaya dalam Industri Kelapa Sawit' : 'succeed in the palm oil industry'}</span>
+            <span className="inline-block text-yellow-400 text-xs sm:text-sm font-bold tracking-widest uppercase px-4 sm:px-6 py-2 border-2 border-yellow-400/50 rounded-full backdrop-blur-md bg-white/10 shadow-lg mb-4 sm:mb-6">
+              {language === 'ms' ? 'Untuk Organisasi' : 'For Organizations'}
+            </span>
+            <h1 className="text-4xl xs:text-5xl sm:text-6xl md:text-7xl font-black text-white mb-4 sm:mb-6 leading-[1.1] font-heading">
+              {language === 'ms' ? 'Kami Membantu Organisasi\nAnda Berjaya' : 'We help your\norganization succeed'}<br />
+              <span className="text-yellow-400">{language === 'ms' ? 'dalam Industri Kelapa Sawit' : 'in the palm oil industry'}</span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/90 mb-12 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-base xs:text-lg sm:text-xl md:text-2xl text-white/90 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed px-2 xs:px-4">
               {language === 'ms'
                 ? 'Gunakan teknologi AI untuk mengoptimumkan pengurusan ladang kelapa sawit anda, meningkatkan produktiviti, dan mengurangkan kos operasi'
                 : 'Use AI technology to optimize your oil palm plantation management, increase productivity, and reduce operational costs'
               }
             </p>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="inline-block"
+            >
+              <button className="px-6 xs:px-8 sm:px-12 py-2.5 xs:py-3 sm:py-4 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:shadow-2xl hover:shadow-yellow-400/40 transition-all duration-300 shadow-xl transform hover:scale-105 uppercase tracking-wide text-xs xs:text-sm sm:text-base">
+                {language === 'ms' ? '📅 Hantarkan Borang' : '📅 Submit Form'}
+              </button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
 
       {/* Working with our partners Section */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white via-green-50/30 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-12 sm:mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-4 font-heading">
+            <h2 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl font-black text-gray-900 mb-4 sm:mb-6 font-heading">
               {language === 'ms' ? 'Bekerja dengan' : 'Working with'} <span className="text-green-700">{language === 'ms' ? 'Rakan Kongsi Kami' : 'our partners'}</span>
             </h2>
-            <p className="text-xl text-gray-600 mt-4 max-w-3xl mx-auto">
+            <p className="text-base xs:text-lg sm:text-xl text-gray-600 max-w-3xl mx-auto px-2 xs:px-4">
               {language === 'ms'
                 ? 'Kami menyesuaikan persediaan untuk rakan kongsi komersial dan bukan komersial untuk memenuhi matlamat operasi dan keperluan pelaporan'
                 : 'We tailor setups for commercial and non-commercial partners to meet operational goals and reporting needs'
@@ -175,13 +192,14 @@ export default function GetStartedOrganizationsPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-white p-8 rounded-2xl shadow-lg"
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="premium-card p-6 sm:p-8 hover:shadow-lg transition-all"
             >
               <div className="mb-6">
                 <Image 
@@ -189,22 +207,37 @@ export default function GetStartedOrganizationsPage() {
                   alt={language === 'ms' ? 'Organisasi komersial' : 'Commercial organizations'} 
                   width={600} 
                   height={400} 
-                  className="rounded-lg object-cover w-full h-64"
+                  className="rounded-xl object-cover w-full h-56 sm:h-64"
                 />
               </div>
-              <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 font-heading">
+              <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-gray-900 mb-4 font-heading">
                 {language === 'ms' ? 'Untuk Organisasi Komersial' : 'For Commercial Organizations'}
               </h3>
-              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+              <p className="text-sm xs:text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
                 {language === 'ms'
                   ? 'Ladang, perniagaan pertanian, pembekal baja, dan makmal. Kami membantu anda:'
                   : 'Plantations, agribusinesses, fertilizer suppliers, and laboratories. We help you:'
                 }
               </p>
-              <ul className="list-disc list-inside text-gray-700 space-y-2 text-lg">
-                <li>{language === 'ms' ? 'Menambah nilai kepada produk dan perkhidmatan sedia ada anda' : 'Add value to your existing products and services'}</li>
-                <li>{language === 'ms' ? 'Memperkukuhkan sokongan teknikal anda kepada petani' : 'Strengthen your technical support to farmers'}</li>
-                <li>{language === 'ms' ? 'Menghubungkan cadangan berasaskan sains kepada penggunaan produk anda' : 'Link science based recommendations to your product use'}</li>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Menambah nilai kepada produk dan perkhidmatan sedia ada anda' : 'Add value to your existing products and services'}</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Memperkukuhkan sokongan teknikal anda kepada petani' : 'Strengthen your technical support to farmers'}</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Menghubungkan cadangan berasaskan sains kepada penggunaan produk anda' : 'Link science based recommendations to your product use'}</span>
+                </li>
               </ul>
             </motion.div>
 
@@ -213,7 +246,8 @@ export default function GetStartedOrganizationsPage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
               viewport={{ once: true }}
-              className="bg-white p-8 rounded-2xl shadow-lg"
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="premium-card p-6 sm:p-8 hover:shadow-lg transition-all"
             >
               <div className="mb-6">
                 <Image 
@@ -221,22 +255,37 @@ export default function GetStartedOrganizationsPage() {
                   alt={language === 'ms' ? 'Organisasi bukan komersial' : 'Non-commercial organizations'} 
                   width={600} 
                   height={400} 
-                  className="rounded-lg object-cover w-full h-64"
+                  className="rounded-xl object-cover w-full h-56 sm:h-64"
                 />
               </div>
-              <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-4 font-heading">
+              <h3 className="text-xl xs:text-2xl sm:text-3xl font-black text-gray-900 mb-4 font-heading">
                 {language === 'ms' ? 'Untuk Organisasi Bukan Komersial' : 'For Non-Commercial Organizations'}
               </h3>
-              <p className="text-lg text-gray-700 mb-4 leading-relaxed">
+              <p className="text-sm xs:text-base sm:text-lg text-gray-700 mb-4 leading-relaxed">
                 {language === 'ms'
                   ? 'Agensi kerajaan, NGO, program pembangunan, dan organisasi antarabangsa. Kami membantu anda:'
                   : 'Government agencies, NGOs, development programs, and international organizations. We help you:'
                 }
               </p>
-              <ul className="list-disc list-inside text-gray-700 space-y-2 text-lg">
-                <li>{language === 'ms' ? 'Mencapai lebih ramai petani dengan nasihat agronomi yang konsisten' : 'Reach more farmers with consistent agronomy advice'}</li>
-                <li>{language === 'ms' ? 'Menggunakan data makmal untuk menyokong kerja sambungan anda' : 'Use lab data to support your extension work'}</li>
-                <li>{language === 'ms' ? 'Melaporkan hasil kepada penderma dan program kebangsaan' : 'Report results to donors and national programs'}</li>
+              <ul className="space-y-2 sm:space-y-3">
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Mencapai lebih ramai petani dengan nasihat agronomi yang konsisten' : 'Reach more farmers with consistent agronomy advice'}</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Menggunakan data makmal untuk menyokong kerja sambungan anda' : 'Use lab data to support your extension work'}</span>
+                </li>
+                <li className="flex items-start gap-2 sm:gap-3">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-green-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="text-gray-700 text-sm xs:text-base sm:text-lg">{language === 'ms' ? 'Melaporkan hasil kepada penderma dan program kebangsaan' : 'Report results to donors and national programs'}</span>
+                </li>
               </ul>
             </motion.div>
           </div>
@@ -244,21 +293,22 @@ export default function GetStartedOrganizationsPage() {
       </section>
 
       {/* Form Section */}
-      <section className="py-24 bg-gradient-to-br from-green-50 to-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 sm:py-24 bg-gradient-to-b from-white via-blue-50/20 to-white relative overflow-hidden">
+        <div className="absolute inset-0 opacity-8 premium-mesh" />
+        <div className="max-w-4xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-white rounded-3xl shadow-2xl p-8 md:p-12"
+            className="premium-panel-strong rounded-3xl p-6 sm:p-8 md:p-12"
           >
             <div className="text-center mb-8">
-              <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4 font-heading">
+              <h2 className="text-2xl xs:text-3xl sm:text-4xl font-black text-gray-900 mb-4 font-heading">
                 {language === 'ms' ? 'Hubungi Kami untuk Kerjasama' : 'Contact Us for Partnership'}
               </h2>
-              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-                <p className="text-gray-700 leading-relaxed">
+              <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-lg">
+                <p className="text-gray-700 text-sm xs:text-base sm:text-lg leading-relaxed">
                   {language === 'ms'
                     ? 'Isi borang di bawah untuk memulakan perbincangan tentang bagaimana CropDrive™ boleh membantu organisasi anda mencapai matlamat pengurusan ladang kelapa sawit yang lebih baik.'
                     : 'Fill out the form below to start a discussion about how CropDrive™ can help your organization achieve better oil palm plantation management goals.'
@@ -267,8 +317,8 @@ export default function GetStartedOrganizationsPage() {
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <label htmlFor="org-firstName" className="block text-sm font-bold text-gray-700 mb-2">
                     {language === 'ms' ? 'Nama Pertama' : 'First Name'} <span className="text-red-500">*</span>

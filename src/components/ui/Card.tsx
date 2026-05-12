@@ -1,13 +1,29 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
+type CardVariant = 'default' | 'glass' | 'glass-ai' | 'glass-green' | 'glass-gold' | 'glass-light' | 'neu' | 'bento';
+
 interface CardProps {
   children: React.ReactNode;
   className?: string;
   hover?: boolean;
   onClick?: () => void;
   padding?: 'none' | 'sm' | 'md' | 'lg';
+  variant?: CardVariant;
+  shimmer?: boolean;
+  delay?: number;
 }
+
+const variantBase: Record<CardVariant, string> = {
+  default:     'bg-white/80 backdrop-blur-sm rounded-2xl shadow-card border border-white/20',
+  glass:       'glass',
+  'glass-ai':  'glass-ai',
+  'glass-green':'glass-green',
+  'glass-gold':'glass-gold',
+  'glass-light':'glass-light',
+  neu:         'neu',
+  bento:       'glass-light rounded-[1.5rem]',
+};
 
 export const Card: React.FC<CardProps> = ({
   children,
@@ -15,6 +31,9 @@ export const Card: React.FC<CardProps> = ({
   hover = false,
   onClick,
   padding = 'md',
+  variant = 'default',
+  shimmer = false,
+  delay = 0,
 }) => {
   const paddingClasses = {
     none: '',
@@ -23,43 +42,45 @@ export const Card: React.FC<CardProps> = ({
     lg: 'p-8',
   };
 
-  const cardClasses = `
-    bg-white/80 backdrop-blur-sm rounded-2xl shadow-card border border-white/20 transition-all duration-300
-    ${hover ? 'hover:shadow-card-hover hover:transform hover:scale-105 hover:shadow-glow' : ''}
-    ${onClick ? 'cursor-pointer' : ''}
-    ${paddingClasses[padding]}
-    ${className}
-  `;
+  const hoverClasses = hover
+    ? variant === 'neu'
+      ? 'cursor-pointer hover:shadow-[8px_8px_18px_#bec3cc,-8px_-8px_18px_#ffffff]'
+      : 'cursor-pointer hover:shadow-card-hover'
+    : '';
 
-  if (onClick) {
-    return (
-      <motion.div
-        className={cardClasses}
-        onClick={onClick}
-        whileHover={hover ? { scale: 1.05 } : {}}
-        whileTap={{ scale: 0.95 }}
-        transition={{ duration: 0.2 }}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        {children}
-      </motion.div>
-    );
-  }
+  const cardClasses = [
+    variantBase[variant],
+    'transition-all duration-300',
+    hoverClasses,
+    onClick ? 'cursor-pointer' : '',
+    shimmer ? 'glass-shimmer' : '',
+    paddingClasses[padding],
+    className,
+  ].filter(Boolean).join(' ');
+
+  const motionProps = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: {
+      duration: 0.4,
+      delay,
+      type: 'spring' as const,
+      stiffness: 100,
+      damping: 20,
+    },
+    ...(onClick && hover ? {
+      whileHover: { y: -4, scale: 1.02 },
+      whileTap: { scale: 0.98, y: 0 },
+    } : {}),
+  };
 
   return (
-    <motion.div
-      className={cardClasses}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-    >
+    <motion.div className={cardClasses} onClick={onClick} {...motionProps}>
       {children}
     </motion.div>
   );
 };
 
-// Card sub-components
 export const CardHeader: React.FC<{ children: React.ReactNode; className?: string }> = ({
   children,
   className = '',
@@ -100,7 +121,7 @@ export const CardFooter: React.FC<{ children: React.ReactNode; className?: strin
   children,
   className = '',
 }) => (
-  <div className={`mt-6 pt-4 border-t border-gray-200 ${className}`}>
+  <div className={`mt-6 pt-4 border-t border-white/20 ${className}`}>
     {children}
   </div>
 );

@@ -15,7 +15,7 @@ import { faEye, faEyeSlash, faCheckCircle, faTimesCircle } from '@fortawesome/fr
 // Hide navbar for this page
 export const dynamic = 'force-dynamic';
 
-const TERMS_SECTIONS = [
+const TERMS_SECTIONS_EN = [
   {
     title: '1. Acceptance of these Terms',
     body: 'By registering for, accessing, or using CropDrive.ai, you agree to these Terms and Conditions. If you do not agree, do not use the service.',
@@ -109,6 +109,202 @@ const TERMS_SECTIONS = [
     body: 'If you have questions, need support, want to report a bug, want to request additional uploads, or want to raise a data-related concern, you may contact CropDrive.ai through the contact details provided on the platform.',
   },
 ];
+
+const TERMS_SECTIONS_MS = [
+  {
+    title: '1. Penerimaan Terma Ini',
+    body: 'Dengan mendaftar, mengakses, atau menggunakan CropDrive.ai, anda bersetuju dengan Terma dan Syarat ini. Jika anda tidak bersetuju, jangan gunakan perkhidmatan ini.',
+  },
+  {
+    title: '2. Mengenai Perkhidmatan',
+    body: 'CropDrive.ai ialah perkhidmatan sokongan agronomi digital yang membolehkan pengguna berdaftar memuat naik keputusan ujian tanah dan keputusan ujian daun untuk analisis. Perkhidmatan ini kini hanya tersedia untuk pengguna yang berada di Malaysia dan Indonesia.',
+  },
+  {
+    title: '3. Kelayakan',
+    body: 'Anda boleh menggunakan CropDrive.ai hanya jika anda layak dari segi undang-undang untuk bersetuju dengan Terma ini dan jika anda berada di Malaysia atau Indonesia. Dengan menggunakan perkhidmatan ini, anda mengesahkan bahawa keputusan ujian yang dimuat naik berkaitan dengan ladang, bidang, atau operasi yang anda diberi kuasa untuk menghantar data.',
+  },
+  {
+    title: '4. Perkhidmatan Percuma',
+    body: 'CropDrive.ai kini ditawarkan secara percuma kepada petani. Kami berhak untuk mengubah, mengehadkan, menggantung, atau menghentikan perkhidmatan ini, secara keseluruhan atau sebahagian, pada bila-bila masa.',
+  },
+  {
+    title: '5. Maklumat Pendaftaran Yang Diperlukan',
+    body: 'Untuk menggunakan CropDrive.ai, anda mesti menyediakan nombor WhatsApp yang sah, alamat emel yang sah, dan lokasi anda. Anda bersetuju bahawa maklumat ini adalah tepat dan dikemas kini secara munasabah.\n\nMaklumat hubungan ini akan digunakan hanya untuk komunikasi berkaitan perkhidmatan yang penting, termasuk perubahan penting, kemas kini, perkembangan, notis keselamatan, isu teknikal, dan komunikasi sokongan. Ia juga akan digunakan jika kami perlu menghubungi anda berkaitan masalah dengan akaun atau fail yang dimuat naik.\n\nKami tidak akan menggunakan butiran hubungan anda untuk panggilan telefon yang tidak diingini. Kami tidak akan menjual butiran hubungan anda kepada pihak ketiga. Kami tidak akan berkongsi butiran hubungan anda untuk pemasaran pihak ketiga.',
+  },
+  {
+    title: '6. Had Muat Naik',
+    body: 'Setiap ahli berdaftar boleh memuat naik keputusan ujian untuk analisis hanya dua kali setiap tahun kalendar. Ini bermakna maksimum dua acara muat naik setahun bagi setiap ahli, sama ada muat naik mengandungi keputusan ujian tanah, keputusan ujian daun, atau kedua-duanya.\n\nJika anda memerlukan muat naik tambahan, anda boleh menghubungi kami dan meminta akses tambahan. Sebarang akses tambahan tersebut adalah mengikut budi bicara kami.',
+  },
+  {
+    title: '7. Laporan Yang Dimuat Naik dan Data Yang Anda Sediakan',
+    body: 'Dengan memuat naik laporan ujian tanah, laporan ujian daun, atau fail berkaitan, anda mengesahkan bahawa anda mempunyai hak untuk memuat naiknya dan membenarkan CropDrive.ai memprosesnya untuk analisis.\n\nAnda juga memahami bahawa fail yang dimuat naik mungkin mengandungi maklumat ladang atau butiran lain. CropDrive.ai akan menggunakan kandungan agronomi laporan ini untuk menyediakan analisis dan untuk menambah baik perkhidmatan.',
+  },
+  {
+    title: '8. Maklumat Peribadi dalam Laporan Yang Dimuat Naik',
+    body: 'CropDrive.ai direka untuk menggunakan data agronomi seperti nilai ujian tanah dan daun. CropDrive.ai tidak bertujuan menggunakan nama peribadi, butiran hubungan, atau pengecam peribadi lain yang mungkin terdapat dalam laporan yang dimuat naik untuk pemasaran, jualan, atau pemprofilan yang tidak berkaitan.\n\nJika butiran peribadi terdapat dalam laporan yang dimuat naik, butiran tersebut tidak akan dimasukkan dalam set data agregat yang digunakan untuk penambahbaikan perkhidmatan, penanda aras, analitik, atau pembangunan produk.\n\nKami tidak sengaja menggunakan nama peribadi, nombor telefon, alamat emel, alamat, atau pengecam serupa yang terdapat dalam laporan yang dimuat naik untuk sebarang tujuan selain apa yang diperlukan secara teknikal untuk mengendalikan, mengamankan, menyokong, atau menyelesaikan masalah perkhidmatan.',
+  },
+  {
+    title: '9. Data Agregat dan Tanpa Nama',
+    body: 'Dengan menggunakan CropDrive.ai, anda bersetuju bahawa kami boleh mengakses, menggunakan, menyimpan, menganalisis, dan menggabungkan data agronomi daripada keputusan ujian tanah dan daun yang dimuat naik dalam bentuk agregat dan tanpa nama.\n\nIni termasuk, sebagai contoh, nilai nutrien, pH, ciri tanah, nilai nutrien daun, trend serantau, corak berkaitan tanaman, dan data analitik bukan peribadi yang serupa.\n\nData agregat dan tanpa nama ini boleh digunakan oleh CropDrive.ai untuk menambah baik platform, menambah baik cadangan, membangunkan ciri baharu, menjalankan penanda aras, menjana statistik, melatih dan menambah baik model, dan memahami corak agronomi dengan lebih baik.\n\nData agregat tidak akan termasuk butiran hubungan peribadi anda.',
+  },
+  {
+    title: '10. Butiran Hubungan dan Data Lokasi',
+    body: 'Nombor WhatsApp, alamat emel, dan lokasi anda diperlukan untuk operasi akaun dan komunikasi perkhidmatan. Lokasi anda juga boleh digunakan untuk menyokong kelayakan negara, tafsiran agronomi serantau, kawalan kualiti perkhidmatan, dan pembangunan platform.\n\nKami tidak akan menjual maklumat ini. Kami tidak akan mendedahkannya kepada pihak ketiga yang tidak berkaitan untuk tujuan pemasaran.\n\nDi mana perlu secara ketat untuk mengendalikan, mengehoskan, menyelenggara, mengamankan, atau menyokong perkhidmatan, akses terhad boleh diberikan kepada penyedia perkhidmatan teknikal yang bertindak bagi pihak kami dan di bawah obligasi kerahsiaan dan perlindungan data. Kami juga boleh mendedahkan maklumat apabila dikehendaki oleh undang-undang.',
+  },
+  {
+    title: '11. Tiada Pemasaran Pihak Ketiga',
+    body: 'CropDrive.ai tidak akan berkongsi nombor WhatsApp, alamat emel, atau maklumat laporan yang dimuat naik yang boleh dikenal pasti dengan pihak ketiga untuk pengiklanan, permintaan, penjualan semula, penjanaan petunjuk, atau penggunaan komersial yang tidak berkaitan.',
+  },
+  {
+    title: '12. Sokongan dan Hubungan Pengguna',
+    body: 'Anda boleh menghubungi kami pada bila-bila masa untuk melaporkan pepijat, masalah teknikal, ralat, dan isu kebolehgunaan, atau untuk meminta bantuan dengan perkhidmatan.\n\nKami boleh menghubungi anda melalui WhatsApp atau emel untuk sokongan, kemas kini penting, notis keselamatan, perubahan produk, isu penggunaan, atau perkembangan perkhidmatan.',
+  },
+  {
+    title: '13. Tiada Jaminan Keputusan',
+    body: 'CropDrive.ai menyediakan output maklumat dan sokongan keputusan sahaja. Keputusan analisis, tafsiran, dan cadangan bergantung pada kualiti, kelengkapan, kebolehbacaan, dan ketepatan fail dan data yang anda muat naik.\n\nKami tidak menjamin bahawa sebarang cadangan akan meningkatkan hasil, meningkatkan keuntungan, mencegah penyakit, membetulkan masalah pemakanan, atau menghasilkan sebarang keputusan agronomi atau komersial yang tertentu.\n\nPerkhidmatan ini tidak menggantikan pemeriksaan lapangan, kawalan kualiti makmal, pertimbangan profesional tempatan, atau tanggungjawab anda sendiri untuk keputusan ladang.',
+  },
+  {
+    title: '14. Ketersediaan Perkhidmatan',
+    body: 'Kami berhasrat untuk memastikan CropDrive.ai tersedia dan berfungsi dengan baik, tetapi kami tidak menjamin perkhidmatan tanpa gangguan, ketersediaan berterusan, atau operasi tanpa ralat.\n\nPlatform ini boleh dikemas kini, diubah, diganggu, ditangguhkan, atau tidak tersedia buat sementara waktu pada bila-bila masa.',
+  },
+  {
+    title: '15. Ketepatan Input Pengguna',
+    body: 'Anda bertanggungjawab untuk memastikan bahawa fail dan maklumat yang anda muat naik adalah tepat, sah, dan relevan. Anda tidak boleh memuat naik bahan yang palsu, mengelirukan, dimanipulasi, berbahaya, haram, atau tidak dibenarkan.',
+  },
+  {
+    title: '16. Penggunaan Yang Betul',
+    body: 'Anda bersetuju untuk tidak menyalahgunakan perkhidmatan. Ini termasuk percubaan untuk mengganggu platform, memintas had, memuat naik fail berniat jahat, mengikis sistem, menggunakan akaun orang lain tanpa kebenaran, atau menggunakan perkhidmatan dengan cara yang menyalahi undang-undang atau menyalahgunakan.',
+  },
+  {
+    title: '17. Harta Intelek',
+    body: 'CropDrive.ai, termasuk perisian, aliran kerja, reka bentuk, kaedah analisis, output bertulis, struktur data, dan kandungan berkaitan, kekal sebagai hak milik CropDrive.ai atau pemberi lesennya, kecuali bahan yang anda muat naik secara sah.\n\nAnda mengekalkan hak anda dalam fail yang anda muat naik. Anda memberikan CropDrive.ai hak untuk memproses, menyimpan, menganalisis, dan menggunakan fail tersebut dan kandungan agronominya seperti yang diterangkan dalam Terma ini.',
+  },
+  {
+    title: '18. Penggantungan atau Penamatan',
+    body: 'Kami boleh menggantung, menyekat, atau menamatkan akses kepada CropDrive.ai jika kami percaya Terma ini telah dilanggar, jika perkhidmatan disalahgunakan, jika maklumat akaun adalah palsu, jika muat naik tidak dibenarkan, atau jika penggantungan diperlukan atas sebab undang-undang, keselamatan, operasi, atau teknikal.',
+  },
+  {
+    title: '19. Pengekalan dan Pemadaman Data',
+    body: 'Kami boleh menyimpan fail yang dimuat naik, data agronomi, rekod akaun, log, dan komunikasi perkhidmatan selama yang diperlukan secara munasabah untuk mengendalikan perkhidmatan, mengekalkan keselamatan, menyelesaikan pertikaian, menambah baik platform, memenuhi obligasi undang-undang, dan memelihara set data analitik agregat.\n\nAnda boleh meminta penutupan akaun atau pemadaman data hubungan peribadi anda, tertakluk kepada had undang-undang, teknikal, audit, sandaran, dan operasi.\n\nData agregat atau tanpa nama yang tidak lagi mengenal pasti anda boleh terus disimpan dan digunakan.',
+  },
+  {
+    title: '20. Perubahan kepada Terma Ini',
+    body: 'Kami boleh mengemas kini Terma ini dari semasa ke semasa. Jika kami membuat perubahan material, kami boleh memberitahu anda melalui platform, WhatsApp, atau emel. Penggunaan berterusan CropDrive.ai selepas kemas kini bermakna anda menerima Terma yang dikemas kini.',
+  },
+  {
+    title: '21. Had Liabiliti',
+    body: 'Setakat yang dibenarkan sepenuhnya oleh undang-undang, CropDrive.ai dan pengendalinya tidak bertanggungjawab atas kerugian tidak langsung, sampingan, khas, berbangkit, atau perniagaan yang timbul daripada penggunaan perkhidmatan, termasuk kehilangan keuntungan, kehilangan hasil, kehilangan data, kehilangan peluang, atau keputusan yang dibuat berdasarkan output platform.\n\nPenggunaan perkhidmatan ini adalah atas risiko anda sendiri.',
+  },
+  {
+    title: '22. Bahasa Pentadbiran',
+    body: 'Jika Terma ini diterjemahkan ke dalam bahasa lain, versi Bahasa Inggeris mengawal sekiranya berlaku ketidakselarasan, melainkan undang-undang tempatan menghendaki sebaliknya.',
+  },
+  {
+    title: '23. Hubungi Kami',
+    body: 'Jika anda mempunyai soalan, memerlukan sokongan, ingin melaporkan pepijat, ingin meminta muat naik tambahan, atau ingin membangkitkan kebimbangan berkaitan data, anda boleh menghubungi CropDrive.ai melalui butiran hubungan yang disediakan di platform.',
+  },
+];
+
+const TERMS_SECTIONS_ID = [
+  {
+    title: '1. Penerimaan Ketentuan Ini',
+    body: 'Dengan mendaftar, mengakses, atau menggunakan CropDrive.ai, Anda menyetujui Syarat dan Ketentuan ini. Jika Anda tidak setuju, jangan gunakan layanan ini.',
+  },
+  {
+    title: '2. Tentang Layanan',
+    body: 'CropDrive.ai adalah layanan dukungan agronomi digital yang memungkinkan pengguna terdaftar mengunggah hasil uji tanah dan hasil uji daun untuk analisis. Layanan ini saat ini hanya tersedia untuk pengguna yang berlokasi di Malaysia dan Indonesia.',
+  },
+  {
+    title: '3. Kelayakan',
+    body: 'Anda dapat menggunakan CropDrive.ai hanya jika Anda secara hukum mampu menyetujui Ketentuan ini dan jika Anda berlokasi di Malaysia atau Indonesia. Dengan menggunakan layanan ini, Anda mengonfirmasi bahwa hasil uji yang diunggah berkaitan dengan perkebunan, lahan, atau operasi yang Anda berwenang untuk mengirimkan data.',
+  },
+  {
+    title: '4. Layanan Gratis',
+    body: 'CropDrive.ai saat ini ditawarkan secara gratis kepada petani. Kami berhak untuk mengubah, membatasi, menangguhkan, atau menghentikan layanan ini, secara keseluruhan atau sebagian, kapan saja.',
+  },
+  {
+    title: '5. Informasi Pendaftaran Yang Diperlukan',
+    body: 'Untuk menggunakan CropDrive.ai, Anda harus menyediakan nomor WhatsApp yang valid, alamat email yang valid, dan lokasi Anda. Anda setuju bahwa informasi ini akurat dan diperbarui secara wajar.\n\nInformasi kontak ini akan digunakan hanya untuk komunikasi terkait layanan yang penting, termasuk perubahan penting, pembaruan, perkembangan, pemberitahuan keamanan, masalah teknis, dan komunikasi dukungan. Ini juga akan digunakan jika kami perlu menghubungi Anda terkait masalah dengan akun atau file yang diunggah.\n\nKami tidak akan menggunakan detail kontak Anda untuk panggilan telepon yang tidak diinginkan. Kami tidak akan menjual detail kontak Anda kepada pihak ketiga. Kami tidak akan membagikan detail kontak Anda untuk pemasaran pihak ketiga.',
+  },
+  {
+    title: '6. Batas Unggahan',
+    body: 'Setiap anggota terdaftar dapat mengunggah hasil uji untuk analisis hanya dua kali per tahun kalender. Ini berarti maksimum dua acara unggahan per tahun per anggota, baik unggahan berisi hasil uji tanah, hasil uji daun, atau keduanya.\n\nJika Anda memerlukan unggahan tambahan, Anda dapat menghubungi kami dan meminta akses tambahan. Akses tambahan tersebut sesuai kebijaksanaan kami.',
+  },
+  {
+    title: '7. Laporan Yang Diunggah dan Data Yang Anda Berikan',
+    body: 'Dengan mengunggah laporan uji tanah, laporan uji daun, atau file terkait, Anda mengonfirmasi bahwa Anda memiliki hak untuk mengunggahnya dan mengizinkan CropDrive.ai memprosesnya untuk analisis.\n\nAnda juga memahami bahwa file yang diunggah mungkin berisi informasi perkebunan atau detail lainnya. CropDrive.ai akan menggunakan konten agronomi laporan ini untuk menyediakan analisis dan untuk meningkatkan layanan.',
+  },
+  {
+    title: '8. Informasi Pribadi dalam Laporan Yang Diunggah',
+    body: 'CropDrive.ai dirancang untuk menggunakan data agronomi seperti nilai uji tanah dan daun. CropDrive.ai tidak dimaksudkan untuk menggunakan nama pribadi, detail kontak, atau pengidentifikasi pribadi lain yang mungkin muncul dalam laporan yang diunggah untuk pemasaran, penjualan, atau profiling yang tidak terkait.\n\nJika detail pribadi muncul dalam laporan yang diunggah, detail tersebut tidak akan dimasukkan dalam kumpulan data agregat yang digunakan untuk peningkatan layanan, benchmarking, analitik, atau pengembangan produk.\n\nKami tidak dengan sengaja menggunakan nama pribadi, nomor telepon, alamat email, alamat, atau pengidentifikasi serupa yang muncul dalam laporan yang diunggah untuk tujuan apa pun selain yang diperlukan secara teknis untuk mengoperasikan, mengamankan, mendukung, atau memecahkan masalah layanan.',
+  },
+  {
+    title: '9. Data Agregat dan Anonim',
+    body: 'Dengan menggunakan CropDrive.ai, Anda setuju bahwa kami dapat mengakses, menggunakan, menyimpan, menganalisis, dan menggabungkan data agronomi dari hasil uji tanah dan daun yang diunggah dalam bentuk agregat dan anonim.\n\nIni termasuk, misalnya, nilai nutrisi, pH, karakteristik tanah, nilai nutrisi daun, tren regional, pola terkait tanaman, dan data analitis non-pribadi serupa.\n\nData agregat dan anonim ini dapat digunakan oleh CropDrive.ai untuk meningkatkan platform, meningkatkan rekomendasi, mengembangkan fitur baru, melakukan benchmarking, menghasilkan statistik, melatih dan meningkatkan model, dan lebih memahami pola agronomi.\n\nData agregat tidak akan mencakup detail kontak pribadi Anda.',
+  },
+  {
+    title: '10. Detail Kontak dan Data Lokasi',
+    body: 'Nomor WhatsApp, alamat email, dan lokasi Anda diperlukan untuk operasi akun dan komunikasi layanan. Lokasi Anda juga dapat digunakan untuk mendukung kelayakan negara, interpretasi agronomi regional, kontrol kualitas layanan, dan pengembangan platform.\n\nKami tidak akan menjual informasi ini. Kami tidak akan mengungkapkannya kepada pihak ketiga yang tidak terkait untuk tujuan pemasaran.\n\nJika benar-benar diperlukan untuk mengoperasikan, menghosting, memelihara, mengamankan, atau mendukung layanan, akses terbatas dapat diberikan kepada penyedia layanan teknis yang bertindak atas nama kami dan di bawah kewajiban kerahasiaan dan perlindungan data. Kami juga dapat mengungkapkan informasi bila diwajibkan oleh hukum.',
+  },
+  {
+    title: '11. Tidak Ada Pemasaran Pihak Ketiga',
+    body: 'CropDrive.ai tidak akan membagikan nomor WhatsApp, alamat email, atau informasi laporan yang diunggah yang dapat diidentifikasi kepada pihak ketiga untuk periklanan, permintaan, penjualan kembali, penjanaan prospek, atau penggunaan komersial yang tidak terkait.',
+  },
+  {
+    title: '12. Dukungan dan Kontak Pengguna',
+    body: 'Anda dapat menghubungi kami kapan saja untuk melaporkan bug, masalah teknis, kesalahan, dan masalah kegunaan, atau untuk meminta bantuan dengan layanan.\n\nKami dapat menghubungi Anda melalui WhatsApp atau email untuk dukungan, pembaruan penting, pemberitahuan keamanan, perubahan produk, masalah penggunaan, atau perkembangan layanan.',
+  },
+  {
+    title: '13. Tidak Ada Jaminan Hasil',
+    body: 'CropDrive.ai menyediakan output informasi dan dukungan keputusan saja. Hasil analisis, interpretasi, dan rekomendasi bergantung pada kualitas, kelengkapan, keterbacaan, dan keakuratan file dan data yang Anda unggah.\n\nKami tidak menjamin bahwa rekomendasi apa pun akan meningkatkan hasil panen, meningkatkan profitabilitas, mencegah penyakit, memperbaiki masalah nutrisi, atau menghasilkan hasil agronomi atau komersial tertentu.\n\nLayanan ini tidak menggantikan inspeksi lapangan, kontrol kualitas laboratorium, penilaian profesional lokal, atau tanggung jawab Anda sendiri atas keputusan perkebunan.',
+  },
+  {
+    title: '14. Ketersediaan Layanan',
+    body: 'Kami bertujuan untuk menjaga CropDrive.ai tersedia dan berfungsi dengan baik, tetapi kami tidak menjamin layanan tanpa gangguan, ketersediaan berkelanjutan, atau operasi bebas kesalahan.\n\nPlatform dapat diperbarui, diubah, diganggu, ditunda, atau tidak tersedia sementara kapan saja.',
+  },
+  {
+    title: '15. Keakuratan Input Pengguna',
+    body: 'Anda bertanggung jawab untuk memastikan bahwa file dan informasi yang Anda unggah akurat, sah, dan relevan. Anda tidak boleh mengunggah materi yang palsu, menyesatkan, dimanipulasi, berbahaya, ilegal, atau tidak sah.',
+  },
+  {
+    title: '16. Penggunaan Yang Benar',
+    body: 'Anda setuju untuk tidak menyalahgunakan layanan. Ini termasuk upaya untuk mengganggu platform, melewati batas, mengunggah file berbahaya, mengikis sistem, menggunakan akun orang lain tanpa izin, atau menggunakan layanan dengan cara yang melanggar hukum atau menyalahgunakan.',
+  },
+  {
+    title: '17. Kekayaan Intelektual',
+    body: 'CropDrive.ai, termasuk perangkat lunaknya, alur kerja, desain, metode analisis, output tertulis, struktur data, dan konten terkait, tetap menjadi milik CropDrive.ai atau pemberi lisensinya, kecuali materi yang Anda unggah secara sah.\n\nAnda mempertahankan hak Anda atas file yang Anda unggah. Anda memberikan CropDrive.ai hak untuk memproses, menyimpan, menganalisis, dan menggunakan file tersebut dan konten agronominya seperti yang dijelaskan dalam Ketentuan ini.',
+  },
+  {
+    title: '18. Penangguhan atau Penghentian',
+    body: 'Kami dapat menangguhkan, membatasi, atau menghentikan akses ke CropDrive.ai jika kami percaya Ketentuan ini telah dilanggar, jika layanan disalahgunakan, jika informasi akun palsu, jika unggahan tidak sah, atau jika penangguhan diperlukan karena alasan hukum, keamanan, operasional, atau teknis.',
+  },
+  {
+    title: '19. Penyimpanan dan Penghapusan Data',
+    body: 'Kami dapat menyimpan file yang diunggah, data agronomi, catatan akun, log, dan komunikasi layanan selama yang diperlukan secara wajar untuk mengoperasikan layanan, menjaga keamanan, menyelesaikan sengketa, meningkatkan platform, memenuhi kewajiban hukum, dan memelihara kumpulan data analitis agregat.\n\nAnda dapat meminta penutupan akun atau penghapusan data kontak pribadi Anda, tunduk pada batasan hukum, teknis, audit, cadangan, dan operasional.\n\nData agregat atau anonim yang tidak lagi mengidentifikasi Anda dapat terus disimpan dan digunakan.',
+  },
+  {
+    title: '20. Perubahan Ketentuan Ini',
+    body: 'Kami dapat memperbarui Ketentuan ini dari waktu ke waktu. Jika kami membuat perubahan material, kami dapat memberi tahu Anda melalui platform, WhatsApp, atau email. Penggunaan berkelanjutan CropDrive.ai setelah pembaruan berarti Anda menerima Ketentuan yang diperbarui.',
+  },
+  {
+    title: '21. Batasan Tanggung Jawab',
+    body: 'Sejauh diizinkan sepenuhnya oleh hukum, CropDrive.ai dan operatornya tidak bertanggung jawab atas kerugian tidak langsung, insidental, khusus, konsekuensial, atau bisnis yang timbul dari penggunaan layanan, termasuk kehilangan keuntungan, kehilangan hasil panen, kehilangan data, kehilangan peluang, atau keputusan yang dibuat berdasarkan output platform.\n\nPenggunaan layanan ini atas risiko Anda sendiri.',
+  },
+  {
+    title: '22. Bahasa Yang Mengatur',
+    body: 'Jika Ketentuan ini diterjemahkan ke dalam bahasa lain, versi Bahasa Inggris mengatur jika terjadi ketidaksesuaian, kecuali hukum lokal menghendaki sebaliknya.',
+  },
+  {
+    title: '23. Hubungi Kami',
+    body: 'Jika Anda memiliki pertanyaan, memerlukan dukungan, ingin melaporkan bug, ingin meminta unggahan tambahan, atau ingin mengajukan masalah terkait data, Anda dapat menghubungi CropDrive.ai melalui detail kontak yang disediakan di platform.',
+  },
+];
+
+function getTermsSections(language: string) {
+  if (language === 'id') return TERMS_SECTIONS_ID;
+  if (language === 'ms') return TERMS_SECTIONS_MS;
+  return TERMS_SECTIONS_EN;
+}
 
 export default function RegisterPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -308,7 +504,7 @@ export default function RegisterPage() {
                     alt="CropDrive Logo"
                     width={40}
                     height={40}
-                    className="object-cover w-full h-full rounded-full"
+                    className="object-contain w-full h-full"
                     priority
                   />
                 </motion.div>
@@ -386,7 +582,7 @@ export default function RegisterPage() {
                   onScroll={handleTermsScroll}
                   className="overflow-y-auto flex-1 px-5 xs:px-6 sm:px-8 py-4"
                 >
-                  {TERMS_SECTIONS.map((section, idx) => (
+                  {getTermsSections(language).map((section, idx) => (
                     <div key={idx} className="mb-5">
                       <h4 className="text-sm font-black text-gray-900 mb-1">{section.title}</h4>
                       {section.body.split('\n\n').map((para, pIdx) => (

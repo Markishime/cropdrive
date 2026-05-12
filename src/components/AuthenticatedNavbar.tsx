@@ -214,8 +214,8 @@ export const AuthenticatedNavbar: React.FC = () => {
     const navbarClasses = `
       fixed top-0 left-0 right-0 z-[100] transition-all duration-500
       ${scrolled
-        ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-        : 'bg-transparent'
+        ? 'glass-nav-scrolled'
+        : 'glass-nav'
       }
     `;
 
@@ -225,7 +225,7 @@ export const AuthenticatedNavbar: React.FC = () => {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group mr-4 sm:mr-8 lg:mr-12 flex-shrink-0">
-              <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 ${
+              <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 flex items-center justify-center ${
                 scrolled ? 'bg-white shadow-md' : 'bg-white/90 shadow-lg'
               }`}>
                 <Image
@@ -233,7 +233,7 @@ export const AuthenticatedNavbar: React.FC = () => {
                   alt="CropDrive Logo"
                   width={40}
                   height={40}
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
@@ -357,7 +357,7 @@ export const AuthenticatedNavbar: React.FC = () => {
 
   // Dashboard navbar style (existing)
   return (
-    <nav className="sticky top-0 z-40 bg-gradient-to-br from-green-900 via-green-800 to-green-900 backdrop-blur-lg border-b border-green-700/50">
+    <nav className="sticky top-0 z-40 glass-sidebar border-b border-white/10 shadow-lg backdrop-blur-2xl">
       <div className="max-w-7xl mx-auto px-3 xs:px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14 sm:h-16">
           {/* Left Side - Mobile Menu Spacer */}

@@ -7,6 +7,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/lib/auth';
 import { type Language } from '@/i18n';
+import { toIndonesianText } from '@/i18n/id';
 import Button from './ui/Button';
 import toast from 'react-hot-toast';
 import { useLanguage } from './LanguageProvider';
@@ -36,8 +37,8 @@ export const Navbar: React.FC = () => {
   }, []);
 
   const language = mounted ? currentLang : 'en';
-  const translateLabel = (english: string, malay: string, indonesian = malay) => (
-    language === 'en' ? english : language === 'id' ? indonesian : malay
+  const translateLabel = (english: string, malay: string, indonesian?: string) => (
+    language === 'en' ? english : language === 'id' ? (indonesian || toIndonesianText(malay)) : malay
   );
 
   const languageOptions: Array<{ value: Language; code: string; label: string }> = [
@@ -161,11 +162,7 @@ export const Navbar: React.FC = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.18 }}
-            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl border shadow-2xl backdrop-blur-xl ${
-              scrolled
-                ? 'border-green-200 bg-white/95'
-                : 'border-yellow-400/30 bg-gray-900/95'
-            } ${mobile ? 'md:hidden' : ''}`}
+            className={`absolute right-0 top-full z-[120] mt-3 w-56 overflow-hidden rounded-2xl shadow-2xl bg-white border border-gray-200 ${mobile ? 'md:hidden' : ''}`}
             role="menu"
           >
             <div className="p-2">
@@ -178,21 +175,17 @@ export const Navbar: React.FC = () => {
                     onClick={() => handleLanguageSelect(option.value)}
                     className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-left transition-all duration-200 ${
                       active
-                        ? scrolled
-                          ? 'bg-green-50 text-green-700'
-                          : 'bg-yellow-400/20 text-yellow-300'
-                        : scrolled
-                        ? 'text-gray-700 hover:bg-green-50/80'
-                        : 'text-white hover:bg-white/10'
+                        ? 'bg-green-50 text-green-700'
+                        : 'text-gray-700 hover:bg-green-50/80'
                     }`}
                     role="menuitem"
                   >
                     <div>
                       <div className="text-sm font-bold">{option.label}</div>
-                      <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>{option.code}</div>
+                      <div className="text-xs text-gray-500">{option.code}</div>
                     </div>
                     {active && (
-                      <span className={`text-xs font-bold uppercase tracking-[0.2em] ${scrolled ? 'text-green-600' : 'text-yellow-300'}`}>
+                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-green-600">
                         {translateLabel('Active', 'Aktif', 'Aktif')}
                       </span>
                     )}
@@ -209,8 +202,8 @@ export const Navbar: React.FC = () => {
   const navbarClasses = `
     fixed top-0 left-0 right-0 z-[100] transition-all duration-500
     ${scrolled
-      ? 'bg-white/95 backdrop-blur-lg shadow-lg'
-      : 'bg-transparent'
+      ? 'glass-nav-scrolled'
+      : 'glass-nav'
     }
   `;
 
@@ -222,7 +215,7 @@ export const Navbar: React.FC = () => {
           {/* Logo - CropDrive OP Advisor™ */}
           <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group mr-4 sm:mr-8 lg:mr-12 flex-shrink-0">
             {/* CropDrive Logo */}
-            <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 ${
+            <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden transition-all duration-500 flex-shrink-0 flex items-center justify-center ${
               scrolled ? 'bg-white shadow-md' : 'bg-white/90 shadow-lg'
             }`}>
               <Image
@@ -230,7 +223,7 @@ export const Navbar: React.FC = () => {
                 alt="CropDrive Logo"
                 width={40}
                 height={40}
-                className="object-cover"
+                className="object-contain"
                 priority
               />
             </div>
@@ -262,7 +255,7 @@ export const Navbar: React.FC = () => {
                     : 'text-white'
                 }`}
               >
-                {language === 'en' ? link.label : link.labelMs}
+                {translateLabel(link.label, link.labelMs)}
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
               </Link>
             ))}
@@ -291,7 +284,7 @@ export const Navbar: React.FC = () => {
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-yellow-400 group-hover:w-full transition-all duration-300"></span>
                 </button>
 
-                {/* Dropdown Menu - Modern Glass Effect */}
+                {/* Dropdown Menu - Clean White */}
                 <AnimatePresence>
                   {showGetStartedDropdown && (
                     <motion.div
@@ -299,24 +292,16 @@ export const Navbar: React.FC = () => {
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: -10, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className={`absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-2xl overflow-hidden backdrop-blur-xl border-2 ${
-                        scrolled 
-                          ? 'bg-white/95 border-green-200' 
-                          : 'bg-gray-900/95 border-yellow-400/30'
-                      }`}
+                      className="absolute top-full right-0 mt-3 w-72 rounded-2xl shadow-xl overflow-hidden bg-white border border-gray-100"
                     >
                       {getStartedLinks.map((item, index) => (
                         <Link
                           key={item.href}
                           href={item.href}
-                          className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 ${
-                            scrolled 
-                              ? 'text-gray-700 hover:bg-green-50/80 hover:text-green-700' 
-                              : 'text-white hover:bg-yellow-400/20 hover:text-yellow-300'
-                          } ${index > 0 ? 'border-t' : ''} ${scrolled ? 'border-gray-200' : 'border-gray-700'}`}
+                          className={`block px-6 py-4 text-sm transition-all duration-300 hover:pl-8 text-gray-700 hover:bg-green-50 hover:text-green-700 ${index > 0 ? 'border-t border-gray-100' : ''}`}
                         >
-                          <div className="font-bold text-base mb-1">{language === 'en' ? item.label : item.labelMs}</div>
-                          <div className={`text-xs ${scrolled ? 'text-gray-500' : 'text-gray-400'}`}>
+                          <div className="font-bold text-base mb-1 text-gray-900">{translateLabel(item.label, item.labelMs)}</div>
+                          <div className="text-xs text-gray-500">
                             {item.label === 'For Farmers' 
                               ? translateLabel('Individual palm oil farmers & smallholders', 'Untuk petani kelapa sawit individu', 'Untuk petani kelapa sawit individu')
                               : translateLabel('Large plantations & organizations', 'Untuk ladang dan organisasi besar', 'Untuk perkebunan dan organisasi besar')
@@ -338,10 +323,10 @@ export const Navbar: React.FC = () => {
               <div className="flex items-center">
                 {/* Dashboard Button */}
                 <Link href="/dashboard">
-                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap cursor-pointer ${
+                  <button className={`px-5 py-2.5 font-bold rounded-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap cursor-pointer transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                     scrolled
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                      ? 'btn-v2-primary'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 border border-yellow-300/40'
                   }`}>
                     {translateLabel('Dashboard', 'Papan Pemuka', 'Dashboard')}
                   </button>
@@ -359,10 +344,10 @@ export const Navbar: React.FC = () => {
                   </button>
                 </Link>
                 <Link href="/register">
-                  <button className={`px-4 sm:px-6 py-2 sm:py-3 font-bold rounded-full transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap ${
+                  <button className={`px-5 py-2.5 font-bold rounded-xl uppercase tracking-wide text-xs sm:text-sm whitespace-nowrap transition-all duration-200 hover:-translate-y-0.5 active:scale-95 ${
                     scrolled
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800'
-                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 hover:from-yellow-300 hover:to-yellow-400'
+                      ? 'btn-v2-primary'
+                      : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 shadow-lg hover:shadow-xl hover:from-yellow-300 hover:to-yellow-400 border border-yellow-300/40'
                   }`}>
                     {translateLabel('Register', 'Daftar', 'Daftar')}
                   </button>
@@ -455,7 +440,7 @@ export const Navbar: React.FC = () => {
                     className="block text-white hover:text-yellow-400 font-semibold text-base py-3 px-3 rounded-lg hover:bg-white/10 transition-all duration-200"
                     onClick={() => setIsOpen(false)}
                   >
-                    {language === 'en' ? link.label : link.labelMs}
+                    {translateLabel(link.label, link.labelMs)}
                   </Link>
                 ))}
 
@@ -472,7 +457,7 @@ export const Navbar: React.FC = () => {
                         className="block text-white hover:text-yellow-400 font-medium text-sm transition-colors duration-200 py-2.5 px-3 rounded-lg hover:bg-white/10"
                         onClick={() => setIsOpen(false)}
                       >
-                        {language === 'en' ? link.label : link.labelMs}
+                        {translateLabel(link.label, link.labelMs)}
                       </Link>
                     ))}
                   </div>

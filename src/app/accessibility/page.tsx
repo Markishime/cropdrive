@@ -108,55 +108,55 @@ export default function AccessibilityPage() {
                 </div>
                 <div>
                   <h2 className="text-3xl md:text-4xl font-heading font-black text-gray-900">
-                    English
+                    {copy('English', 'Bahasa Melayu')}
                   </h2>
-                  <p className="text-gray-600">Accessibility Statement</p>
+                  <p className="text-gray-600">{copy('Accessibility Statement', 'Kenyataan Kebolehcapaian')}</p>
                 </div>
               </div>
 
               <div className="prose prose-lg max-w-none">
                 <p className="text-gray-700 leading-relaxed mb-8">
-                  CropDrive OP Advisor, available at www.cropdrive.ai, is committed to providing an accessible digital experience for all users, including people with disabilities. We work to improve usability and accessibility on an ongoing basis and aim to align our design and development with the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA.
+                  {copy('CropDrive OP Advisor, available at www.cropdrive.ai, is committed to providing an accessible digital experience for all users, including people with disabilities. We work to improve usability and accessibility on an ongoing basis and aim to align our design and development with the Web Content Accessibility Guidelines (WCAG) 2.1 at Level AA.', 'CropDrive OP Advisor, tersedia di www.cropdrive.ai, komited untuk menyediakan pengalaman digital yang boleh diakses untuk semua pengguna, termasuk orang kurang upaya. Kami berusaha untuk meningkatkan kebolehgunaan dan kebolehcapaian secara berterusan dan bertujuan untuk menyelaraskan reka bentuk dan pembangunan kami dengan Garis Panduan Kebolehcapaian Kandungan Web (WCAG) 2.1 pada Tahap AA.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Measures to support accessibility</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Measures to support accessibility', 'Langkah untuk menyokong kebolehcapaian')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  We design and develop core user journeys with accessibility in mind, including navigation, forms, and subscription purchase flows. We review new pages and features for accessibility issues and address problems identified through internal testing and user feedback.
+                  {copy('We design and develop core user journeys with accessibility in mind, including navigation, forms, and subscription purchase flows. We review new pages and features for accessibility issues and address problems identified through internal testing and user feedback.', 'Kami mereka bentuk dan membangunkan perjalanan pengguna teras dengan mengambil kira kebolehcapaian, termasuk navigasi, borang dan aliran pembelian langganan. Kami menyemak halaman dan ciri baharu untuk isu kebolehcapaian dan menangani masalah yang dikenal pasti melalui ujian dalaman dan maklum balas pengguna.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Feedback and contact</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Feedback and contact', 'Maklum balas dan hubungi')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  If you encounter an accessibility barrier on www.cropdrive.ai, or if you need content in an alternative format, please contact us:
+                  {copy('If you encounter an accessibility barrier on www.cropdrive.ai, or if you need content in an alternative format, please contact us:', 'Jika anda menemui halangan kebolehcapaian di www.cropdrive.ai, atau jika anda memerlukan kandungan dalam format alternatif, sila hubungi kami:')}
                 </p>
                 <div className="bg-green-50 p-6 rounded-xl mb-6 border-2 border-green-200">
                   <ul className="list-none space-y-2 text-gray-700">
-                    <li><strong>Email:</strong> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
-                    <li><strong>Phone:</strong> <a href="tel:+4915163105462" className="text-green-700 hover:text-green-800">+49 15163105462</a></li>
-                    <li><strong>Postal address:</strong> AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
+                    <li><strong>{copy('Email:', 'E-mel:')}</strong> <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline">contact@agriglobalsolutions.com</a></li>
+                    <li><strong>{copy('Phone:', 'Telefon:')}</strong> <a href="tel:+4915163105462" className="text-green-700 hover:text-green-800">+49 15163105462</a></li>
+                    <li><strong>{copy('Postal address:', 'Alamat pos:')}</strong> AGS – Agriculture Global Solutions OÜ, Sakala tn 7-2, Kesklinna linnaosa, 10141 Tallinn, Harju maakond, Estonia</li>
                   </ul>
                 </div>
                 <p className="text-gray-700 leading-relaxed mb-8">
-                  We aim to respond to accessibility feedback within 14 days.
+                  {copy('We aim to respond to accessibility feedback within 14 days.', 'Kami bertujuan untuk memberi respons kepada maklum balas kebolehcapaian dalam tempoh 14 hari.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Compatibility</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Compatibility', 'Keserasian')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  www.cropdrive.ai is designed to work with current major browsers, including Chrome, Firefox, Safari, and Edge, and with common assistive technologies, including screen readers.
+                  {copy('www.cropdrive.ai is designed to work with current major browsers, including Chrome, Firefox, Safari, and Edge, and with common assistive technologies, including screen readers.', 'www.cropdrive.ai direka bentuk untuk berfungsi dengan pelayar utama semasa, termasuk Chrome, Firefox, Safari dan Edge, serta dengan teknologi bantuan biasa, termasuk pembaca skrin.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Technical specifications</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Technical specifications', 'Spesifikasi teknikal')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  The website relies on modern web technologies, including Next.js, TypeScript, and Tailwind CSS.
+                  {copy('The website relies on modern web technologies, including Next.js, TypeScript, and Tailwind CSS.', 'Laman web ini bergantung pada teknologi web moden, termasuk Next.js, TypeScript dan Tailwind CSS.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Limitations and alternatives</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Limitations and alternatives', 'Had dan alternatif')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-4">
-                  Some third-party pages and components, including Stripe-hosted checkout pages, are controlled by third parties and may not fully meet accessibility standards in all cases. If you experience a barrier during checkout, contact us and we will help you complete the purchase through an alternative route. Some downloadable documents, if provided on the website, may not always be fully accessible. On request, we will provide an accessible alternative format.
+                  {copy('Some third-party pages and components, including Stripe-hosted checkout pages, are controlled by third parties and may not fully meet accessibility standards in all cases. If you experience a barrier during checkout, contact us and we will help you complete the purchase through an alternative route. Some downloadable documents, if provided on the website, may not always be fully accessible. On request, we will provide an accessible alternative format.', 'Beberapa halaman dan komponen pihak ketiga, termasuk halaman checkout yang dihoskan oleh Stripe, dikawal oleh pihak ketiga dan mungkin tidak sepenuhnya memenuhi standard kebolehcapaian dalam semua kes. Jika anda mengalami halangan semasa checkout, hubungi kami dan kami akan membantu anda melengkapkan pembelian melalui laluan alternatif. Beberapa dokumen yang boleh dimuat turun, jika disediakan di laman web, mungkin tidak selalu boleh diakses sepenuhnya. Atas permintaan, kami akan menyediakan format alternatif yang boleh diakses.')}
                 </p>
 
-                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">Need help</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">{copy('Need help', 'Perlukan bantuan')}</h2>
                 <p className="text-gray-700 leading-relaxed mb-8">
-                  If you need assistance using the service or accessing content, contact us at{' '}
+                  {copy('If you need assistance using the service or accessing content, contact us at', 'Jika anda memerlukan bantuan menggunakan perkhidmatan atau mengakses kandungan, hubungi kami di')}{' '}
                   <a href="mailto:contact@agriglobalsolutions.com" className="text-green-700 hover:text-green-800 underline font-semibold">contact@agriglobalsolutions.com</a>.
                 </p>
               </div>

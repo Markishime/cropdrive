@@ -60,55 +60,6 @@ function slugFromUrl(url: string): string {
     .toLowerCase();
 }
 
-async function fetchAgsWordPressPosts(): Promise<any[]> {
-  const response = await fetch(`${AGS_BASE_URL}/wp-json/wp/v2/posts?_embed&per_page=12`, {
-    headers: {
-      'User-Agent': 'CropDrive-BlogSync/1.0 (+https://cropdrive.ai)',
-      Accept: 'application/json,text/plain,*/*',
-    },
-    next: { revalidate: 3600 },
-  });
-
-  if (!response.ok) {
-    throw new Error(`AGS WordPress API returned HTTP ${response.status}`);
-  }
-
-  const posts = await response.json();
-  if (!Array.isArray(posts)) return [];
-
-  return posts.map((post: any, index: number) => {
-    const content = stripHtml(post?.content?.rendered || '');
-    const excerpt = stripHtml(post?.excerpt?.rendered || '') || buildExcerpt(content);
-    const categories = (post?._embedded?.['wp:term'] || []).flat().map((term: any) => term?.name).filter(Boolean);
-    const author = post?._embedded?.author?.[0]?.name || 'AGS';
-    const image = post?._embedded?.['wp:featuredmedia']?.[0]?.source_url || '/images/blog/ags-empowering.jpg';
-    const sourceUrl = normalizeAgsUrl(post?.link || `${AGS_UPDATES_URL}/${post?.slug || ''}`) || AGS_BASE_URL;
-
-    return {
-      id: `ags-${post?.slug || index}`,
-      title: stripHtml(post?.title?.rendered || 'AGS Update'),
-      titleMs: stripHtml(post?.title?.rendered || 'AGS Update'),
-      excerpt,
-      excerptMs: excerpt,
-      content,
-      contentMs: content,
-      author,
-      authorMs: author,
-      date: post?.date || new Date().toISOString(),
-      readTime: estimateReadTime(content),
-      readTimeMs: estimateReadTime(content),
-      category: categories[0] || 'AGS',
-      categoryMs: categories[0] || 'AGS',
-      tags: categories.length > 0 ? categories : ['AGS'],
-      tagsMs: categories.length > 0 ? categories : ['AGS'],
-      image,
-      featured: index < 2,
-      published: true,
-      sourceUrl,
-    };
-  });
-}
-
 function extractAgsListingLinks(html: string): string[] {
   const hrefRegex = /href=["']([^"']+)["']/gi;
   const links = new Set<string>();
@@ -200,13 +151,7 @@ async function fetchAgsHtmlPosts(): Promise<any[]> {
 }
 
 async function fetchAgsPosts(): Promise<any[]> {
-  try {
-    const wpPosts = await fetchAgsWordPressPosts();
-    if (wpPosts.length > 0) return wpPosts;
-  } catch (error) {
-    console.warn('AGS WordPress fetch failed:', error);
-  }
-
+  // AGS runs on Squarespace (not WordPress) — skip the wp-json endpoint entirely
   try {
     const htmlPosts = await fetchAgsHtmlPosts();
     if (htmlPosts.length > 0) return htmlPosts;
@@ -263,7 +208,7 @@ export async function POST(req: NextRequest) {
       const { verifyAdmin } = await import('@/lib/admin');
       try {
         await verifyAdmin(token);
-      } catch (error) {
+      } catch {
         return NextResponse.json(
           { error: 'Unauthorized: Admin access required' },
           { status: 403 }

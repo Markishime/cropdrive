@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -54,21 +54,138 @@ const DEFAULT_BLOG_IMAGE = `${BLOG_IMAGES_BASE}/cropdrive-intro.jpg`;
 
 function getBlogImageSrc(path: string | undefined): string {
   if (!path || !path.trim()) return DEFAULT_BLOG_IMAGE;
-  const p = path.trim();
+  let p = path.trim();
+  // Upgrade http to https so Next.js image domain config only needs https
+  if (p.startsWith('http://')) p = 'https://' + p.slice(7);
+  if (p.startsWith('https://')) return p;
   return p.startsWith('/') ? p : `${BLOG_IMAGES_BASE}/${p.replace(/^\//, '')}`;
 }
 
-// Static blog posts (fallback if API fails)
+// Static blog posts â€” real AGS content with Squarespace CDN images (fallback if API fails)
 const staticBlogPosts: BlogPost[] = [
-  // Featured CropDrive Posts
+  // â”€â”€ Featured Posts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  {
+    id: 'ags-fusarium-wilt',
+    title: 'Is South Asia Prepared? The Rising Biosecurity Threat of Fusarium Wilt in Oil Palm',
+    titleMs: 'Adakah Asia Selatan Bersedia? Ancaman Biosekuriti Fusarium Wilt yang Meningkat dalam Kelapa Sawit',
+    excerpt: 'Fusarium wiltâ€”caused by Fusarium oxysporum f. sp. elaeidisâ€”is the most destructive disease of oil palm. Indonesia and Malaysia, accounting for over 85% of global palm oil production, face catastrophic risk as this silent soil-borne pathogen edges closer to South Asia.',
+    excerptMs: 'Fusarium wiltâ€”disebabkan oleh Fusarium oxysporum f. sp. elaeidisâ€”adalah penyakit paling merosakkan kelapa sawit. Indonesia dan Malaysia, menyumbang lebih 85% pengeluaran minyak sawit global, menghadapi risiko besar apabila patogen terbawa tanah yang senyap ini menghampiri Asia Selatan.',
+    content: `Oil palm is one of the world's most valuable crops, producing over 77 million tonnes of palm oil annually and supporting millions of livelihoods across Southeast Asia. But this global industry faces a serious and growing biosecurity threat from Fusarium wilt, caused by the soil-borne fungal pathogen Fusarium oxysporum f. sp. elaeidis (Foe). Though currently restricted to parts of Africa and South America, experts warn that its potential arrival in South Asia could devastate the heart of global palm oil production.
+
+Fusarium wilt attacks the plant's vascular system, blocking water and nutrient transport. Fronds yellow and wilt, growth weakens, and infected trees often die prematurely. Critically, early symptoms can be absent for yearsâ€”allowing silent spread across entire plantations before an outbreak becomes visible. The pathogen survives in soil using thick-walled chlamydospores that remain dormant for decades, making elimination virtually impossible once established.
+
+South Asia's vulnerability is compounded by several factors: most plantations use African-derived germplasm that is highly susceptible to Foe; biosecurity protocols for international seed and pollen exchange are weak; and contaminated soil, farm tools, water runoff, and even footwear can spread the pathogen across long distances. In Africa, yield losses from Foe range from 6â€“16%, with some localized outbreaks causing up to 50% loss. A 10% reduction in Indonesia's 45 million tonne output would represent billions in economic damage.
+
+Key preventive actions include: investing in resistant variety breeding programs tailored to South Asian conditions, implementing rigorous nursery certification and pathogen testing, deploying rapid molecular diagnostics (PCR and LAMP) for early detection, harmonizing quarantine and disinfection protocols across Indonesia, Malaysia, and PNG, and training farmers in early symptom recognition. The time to act is nowâ€”before the pathogen reaches South Asian shores.`,
+    contentMs: `Kelapa sawit adalah salah satu tanaman paling berharga di dunia, menghasilkan lebih 77 juta tan minyak sawit setiap tahun. Industri global ini menghadapi ancaman biosekuriti yang serius dari Fusarium wilt, disebabkan oleh patogen kulat terbawa tanah Fusarium oxysporum f. sp. elaeidis (Foe). Walaupun kini terhad kepada bahagian Afrika dan Amerika Selatan, pakar memberi amaran bahawa ketibaan potensialnya di Asia Selatan boleh memusnahkan pengeluaran minyak sawit global.
+
+Fusarium wilt menyerang sistem vaskular tumbuhan, menyekat pengangkutan air dan nutrien. Pelepah menguning dan layu, pertumbuhan melemah, dan pokok yang dijangkiti sering mati awal. Secara kritikal, gejala awal boleh tiada selama bertahun-tahun, membenarkan penyebaran senyap merentasi ladang sebelum wabak menjadi kelihatan.
+
+Kerentanan Asia Selatan diburukkan oleh beberapa faktor: kebanyakan ladang menggunakan plasma nutfah keturunan Afrika yang sangat terdedah kepada Foe; protokol biosekuriti untuk pertukaran benih dan debunga antarabangsa adalah lemah. Di Afrika, kehilangan hasil dari Foe berkisar antara 6â€“16%, dengan beberapa wabak menyebabkan kehilangan sehingga 50%.
+
+Tindakan pencegahan utama yang disyorkan oleh pakar AGS termasuk: melabur dalam program pembiakan varieti tahan, melaksanakan pensijilan tapan semaian yang ketat, menggunakan diagnostik molekul yang pantas untuk pengesanan awal, menyelaraskan protokol kuarantin merentasi Indonesia, Malaysia dan PNG, dan melatih petani dalam pengecaman gejala awal.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-04-15',
+    readTime: '8 min read',
+    readTimeMs: '8 minit bacaan',
+    category: 'Palm Oil',
+    categoryMs: 'Kelapa Sawit',
+    tags: ['Palm Oil', 'Biosecurity', 'Fusarium Wilt', 'Disease Management', 'Malaysia'],
+    tagsMs: ['Kelapa Sawit', 'Biosekuriti', 'Fusarium Wilt', 'Pengurusan Penyakit', 'Malaysia'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/8b34f64f-dfe0-4f44-8be9-ebf08d9feb1d/Agriculture%2BConsultancy%2BPlant%2Bbreeding%2Bcrop%2Bscience%2Bgenetics%2Bplant%2Bpathology%2Bagronomy%2Bremote%2Bsensing%2Bprecision%2Bagriculture+%281%29.jpeg?format=1000w',
+    featured: true,
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/is-south-asia-prepared-the-rising-biosecurity-threat-of-fusarium-wilt-in-oil-palm',
+  },
+  {
+    id: 'ags-ai-yield-predictions',
+    title: 'Enhancing Palm Oil Agronomy: AI-Driven Yield Predictions with Machine Learning',
+    titleMs: 'Meningkatkan Agronomi Kelapa Sawit: Ramalan Hasil Dipacu AI dengan Pembelajaran Mesin',
+    excerpt: 'A landmark 11-year study across 49 plots in Malaysia found the Extra Trees Regressor achieves an RÂ² of 0.65 in palm oil yield predictionâ€”a substantial leap over traditional methods. Machine learning and deep learning are now essential tools for sustainable plantation management.',
+    excerptMs: 'Kajian perintis selama 11 tahun merentasi 49 plot di Malaysia mendapati Extra Trees Regressor mencapai RÂ² 0.65 dalam ramalan hasil kelapa sawitâ€”lonjakan ketara berbanding kaedah tradisional. Pembelajaran mesin dan pembelajaran mendalam kini merupakan alat penting untuk pengurusan ladang yang lestari.',
+    content: `The palm oil industry stands at a critical juncture where advanced technologies can significantly impact its sustainability and productivity. Accurate yield prediction is essential not only for effective resource management but also for optimizing the entire palm oil supply chain. With growing demand and increasing pressure to adopt sustainable practices, machine learning and deep learning are offering promising solutions.
+
+Machine learning in agriculture involves algorithms that analyze large datasets to identify patterns and make predictions. In the context of palm oil, these datasets include soil composition, climatic conditions, palm tree age, and farming techniques. By training models on this data, researchers develop predictive tools that estimate future yields based on current and historical informationâ€”allowing plantation managers to optimize fertilizer use, water application, and labor allocation.
+
+Deep learning takes this further by utilizing neural networks that capture complex non-linear relationships between yield-influencing factors. For example, deep learning models can simultaneously consider the interplay between soil nutrients, weather patterns, and plant biology, providing nuanced predictions that single-variable models cannot achieve. This is particularly valuable in palm oil farming where multiple variables interact in unpredictable ways.
+
+A landmark study conducted over 11 years across 49 plots in Malaysia applied 17 different models. The Extra Trees Regressor achieved the highest accuracy with an RÂ² of 0.65â€”explaining 65% of yield variation, a substantial improvement over traditional methods. These findings indicate that by leveraging AI, plantation managers can improve planning, optimize resource allocation, reduce waste, and support the shift toward sustainable palm oil production.`,
+    contentMs: `Industri kelapa sawit berada di persimpangan kritikal di mana teknologi canggih boleh memberi kesan yang ketara kepada kemampanan dan produktivitinya. Ramalan hasil yang tepat adalah penting bukan sahaja untuk pengurusan sumber yang berkesan tetapi juga untuk mengoptimumkan seluruh rantai bekalan minyak sawit.
+
+Pembelajaran mesin dalam pertanian melibatkan algoritma yang menganalisis set data besar untuk mengenal pasti corak dan membuat ramalan. Dalam konteks kelapa sawit, set data ini termasuk komposisi tanah, keadaan iklim, usia pokok kelapa sawit, dan teknik pertanian.
+
+Pembelajaran mendalam mengambil langkah selanjutnya dengan menggunakan rangkaian neural yang menangkap hubungan tidak linear yang kompleks antara faktor-faktor yang mempengaruhi hasil kelapa sawit.
+
+Kajian penting selama 11 tahun merentasi 49 plot di Malaysia menggunakan 17 model yang berbeza. Extra Trees Regressor muncul sebagai yang paling berkesan, mencapai RÂ² 0.65â€”peningkatan ketara berbanding kaedah tradisional dalam meramal hasil kelapa sawit.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-03-20',
+    readTime: '7 min read',
+    readTimeMs: '7 minit bacaan',
+    category: 'Palm Oil',
+    categoryMs: 'Kelapa Sawit',
+    tags: ['Palm Oil', 'AI', 'Machine Learning', 'Yield Prediction', 'Agronomy'],
+    tagsMs: ['Kelapa Sawit', 'AI', 'Pembelajaran Mesin', 'Ramalan Hasil', 'Agronomi'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/dfc39bc1-663c-4279-b80c-9189962f4abb/Oil+palm+plantation+aerial+photo+drone.png?format=1000w',
+    featured: true,
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/enhancing-palm-oil-agronomy-ai-driven-yield-predictions-with-machine-learning',
+  },
+  {
+    id: 'ags-precision-agriculture-ai',
+    title: 'Precision Agriculture: The AI-Powered Path to Sustainable Farming',
+    titleMs: 'Pertanian Presisi: Laluan Berkuasa AI menuju Pertanian Lestari',
+    excerpt: 'AI is transforming how farms operateâ€”from precision crop monitoring via satellites, drones, and ground sensors, to smarter resource management and full automation of farm tasks. AGS experts show how these technologies integrate into sustainable, profitable operations.',
+    excerptMs: 'AI sedang mengubah cara ladang beroperasiâ€”dari pemantauan tanaman presisi melalui satelit, dron, dan penderia tanah, kepada pengurusan sumber yang lebih bijak dan automasi penuh tugas ladang. Pakar AGS menunjukkan cara mengintegrasikan teknologi ini ke dalam operasi yang lestari dan menguntungkan.',
+    content: `In today's agricultural landscape, the need to produce more food with fewer resources has never been greater. Integrating Artificial Intelligence into farming practices offers a clear path forward, making operations more efficient and sustainable. A recent study published in the World Journal of Advanced Research and Reviews sheds light on AI's crucial role in modern farming across crop monitoring, resource management, and automation.
+
+AI has significantly improved crop monitoring. High-resolution satellite imagery gives farmers a broad view of their fields, identifying patterns invisible from the ground. Drones capture detailed aerial images that AI analyzes to detect subtle changes in plant healthâ€”enabling early intervention. Ground sensors monitor soil moisture, temperature, and nutrient levels, with AI predicting optimal times for watering, fertilizing, and harvesting. These tools reduce waste and minimize environmental impactâ€”key pillars of sustainable farming.
+
+AI also transforms resource management. Smart irrigation systems use sensor data and weather forecasts to determine exactly how much water crops need, conserving water while ensuring proper hydration. AI-driven customized fertilization plans maximize nutrient efficiency and reduce runoff. Pest and disease prediction models analyze historical data and current conditions for early, targeted actionâ€”reducing reliance on broad-spectrum pesticides.
+
+At AGS, our mission is to help farmers navigate AI integration complexity. We provide expert data management services that turn complex datasets into actionable insights, optimized resource-use solutions, and advanced automation support. By partnering with AGS, farmers turn AI's potential into real, measurable improvementsâ€”balancing productivity with environmental stewardship for long-term sustainability.`,
+    contentMs: `Dalam landskap pertanian hari ini, keperluan untuk menghasilkan lebih banyak makanan dengan sumber yang lebih sedikit tidak pernah lebih besar. Mengintegrasikan Kecerdasan Buatan ke dalam amalan pertanian menawarkan laluan ke hadapan yang jelas, menjadikan operasi lebih cekap dan lestari.
+
+AI telah meningkatkan pemantauan tanaman secara ketara melalui imej satelit, dron, dan penderia tanah yang menyediakan maklumat terperinci masa nyata. Sistem pengairan pintar menggunakan data penderia dan ramalan cuaca untuk menentukan tepat berapa banyak air yang diperlukan tanaman.
+
+Automasi mewakili hadapan lain: traktor dan pemanen autonomi menanam dan menuai dengan ketepatan, mengurangkan kos buruh dan meningkatkan kecekapan. Robot berteknologi AI membezakan antara tanaman dan rumpai, membuang tumbuhan yang tidak diingini tanpa herbisid.
+
+Di AGS, misi kami adalah membantu petani mengemudi kerumitan integrasi AI, menyediakan pengurusan data pakar dan sokongan automasi canggihâ€”mengubah potensi AI menjadi penambahbaikan nyata untuk pertanian lestari.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-02-28',
+    readTime: '6 min read',
+    readTimeMs: '6 minit bacaan',
+    category: 'Innovation',
+    categoryMs: 'Inovasi',
+    tags: ['Precision Agriculture', 'AI', 'Sustainability', 'Drones', 'Smart Farming'],
+    tagsMs: ['Pertanian Presisi', 'AI', 'Kelestarian', 'Dron', 'Pertanian Pintar'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/67d165dc-2949-4719-85d7-f0bfee8600e6/1%2BAGS%2BAI%2BField%2BPrecision%2BAgriculture+%281%29.jpg?format=1000w',
+    featured: true,
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/precision-agriculture-the-ai-powered-path-to-sustainable-farming',
+  },
   {
     id: 'cropdrive-introduction',
     title: 'Introducing CropDrive: Revolutionizing Palm Oil Farming with AI-Powered Intelligence',
     titleMs: 'Memperkenalkan CropDrive: Merevolusikan Pertanian Kelapa Sawit dengan Kecerdasan Berkuasa AI',
-    excerpt: 'Discover CropDrive, the cutting-edge AI platform transforming palm oil operations through intelligent analysis, predictive insights, and actionable recommendations for sustainable farming.',
-    excerptMs: 'Temui CropDrive, platform AI canggih yang mengubah operasi kelapa sawit melalui analisis pintar, pandangan ramalan, dan cadangan yang boleh dilaksanakan untuk pertanian lestari.',
-    content: 'CropDrive represents a paradigm shift in agricultural technology, specifically designed for the palm oil industry. Our platform leverages advanced artificial intelligence and machine learning algorithms to analyze crop health, predict potential issues, and provide actionable insights that help farmers maximize yields while maintaining sustainability standards. With CropDrive, farmers can upload images of their crops, receive instant AI-powered analysis, and access comprehensive reports that guide decision-making processes. The platform integrates seamlessly with existing farm management systems, making it accessible to both small-scale farmers and large plantation operations.',
-    contentMs: 'CropDrive mewakili perubahan paradigma dalam teknologi pertanian, direka khusus untuk industri kelapa sawit. Platform kami memanfaatkan kecerdasan buatan dan algoritma pembelajaran mesin untuk menganalisis kesihatan tanaman, meramalkan masalah berpotensi, dan memberikan pandangan yang boleh dilaksanakan untuk membantu petani memaksimumkan hasil sambil mengekalkan standard kelestarian. Dengan CropDrive, petani boleh memuat naik imej tanaman mereka, menerima analisis berkuasa AI segera, dan mengakses laporan komprehensif yang membimbing proses membuat keputusan. Platform ini bersepadu dengan sistem pengurusan ladang sedia ada, menjadikannya boleh diakses oleh petani berskala kecil dan operasi ladang besar.',
+    excerpt: 'CropDrive is the cutting-edge AI platform transforming palm oil operations through intelligent crop analysis, predictive yield insights, and actionable recommendationsâ€”partnered with AGS to deliver both technological precision and expert consultancy.',
+    excerptMs: 'CropDrive adalah platform AI canggih yang mengubah operasi kelapa sawit melalui analisis tanaman pintar, pandangan hasil ramalan, dan cadangan yang boleh dilaksanakanâ€”bermitra dengan AGS untuk memberikan ketepatan teknologi dan perundingan pakar.',
+    content: `CropDrive represents a paradigm shift in agricultural technology, specifically designed for the palm oil industry. Our platform leverages advanced artificial intelligence and machine learning algorithms trained on thousands of palm oil crop images to analyze plant health, predict potential issues, and provide actionable insights that help farmers maximize yields while maintaining sustainability standards.
+
+With CropDrive, farmers upload images of their crops and receive instant AI-powered analysis. Our deep learning neural networks detect subtle patterns invisible to the human eyeâ€”enabling early detection of diseases such as Ganoderma Basal Stem Rot, nutrient deficiencies, and environmental stress indicators before they become critical problems. AI models are continuously improved, ensuring recommendations become more accurate over time.
+
+CropDrive offers three subscription tiers designed for every farm size. The Start plan provides essential AI reports and standard support. The Smart plan adds 24-hour priority response, referral bonuses, and enhanced analysis. The Precision plan delivers unlimited support, multi-plot comparative analysis, AGS partner consultancy discounts, and advanced reporting for large-scale operations. All plans include Palmiraâ€”our specialized AI assistant for palm oil farming questions available 24/7.
+
+CropDrive works in strategic partnership with AGSâ€”Agriculture Global Solutionsâ€”combining AI precision with decades of agricultural consultancy expertise. When AI analysis identifies complex issues, AGS consultants provide deeper interpretation, local context, and customized action plans. Together, CropDrive and AGS empower Malaysian farmers to compete globally while building sustainable, profitable operations.`,
+    contentMs: `CropDrive mewakili perubahan paradigma dalam teknologi pertanian, direka khusus untuk industri kelapa sawit. Platform kami memanfaatkan kecerdasan buatan dan algoritma pembelajaran mesin canggih yang dilatih pada ribuan imej tanaman kelapa sawit.
+
+Dengan CropDrive, petani memuat naik imej tanaman mereka dan menerima analisis berkuasa AI segera. Rangkaian neural pembelajaran mendalam kami mengesan corak halus yang tidak kelihatan kepada mata manusiaâ€”membolehkan pengesanan awal penyakit sebelum ia menjadi masalah kritikal.
+
+CropDrive menawarkan tiga peringkat langganan: pelan Start untuk asas, pelan Smart dengan masa respons 24 jam, dan pelan Precision untuk operasi berskala besar dengan sokongan tanpa had.
+
+CropDrive bekerjasama secara strategik dengan AGSâ€”Agriculture Global Solutionsâ€”menggabungkan ketepatan AI dengan kepakaran perundingan pertanian selama beberapa dekad untuk memperkasakan petani Malaysia.`,
     author: 'CropDrive Team',
     authorMs: 'Pasukan CropDrive',
     date: '2025-02-01',
@@ -79,154 +196,161 @@ const staticBlogPosts: BlogPost[] = [
     tags: ['CropDrive', 'AI', 'Palm Oil', 'Innovation', 'Technology'],
     tagsMs: ['CropDrive', 'AI', 'Kelapa Sawit', 'Inovasi', 'Teknologi'],
     image: '/images/blog/cropdrive-intro.jpg',
-    featured: true
+    featured: true,
+    published: true,
+  },
+  // â”€â”€ Regular Posts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  {
+    id: 'ags-smallholder-precision-ag',
+    title: 'Improving Smallholder Oil Palm Practices with Precision Agriculture',
+    titleMs: 'Meningkatkan Amalan Kelapa Sawit Pekebun Kecil dengan Pertanian Presisi',
+    excerpt: 'A study in Kampar, Malaysia demonstrated how UAV mapping combined with multi-criteria analysis helps smallholders address soil erosion, water quality, and biodiversity lossâ€”with 43% of plantations scoring high sustainability and clear, targeted improvement roadmaps.',
+    excerptMs: 'Kajian di Kampar, Malaysia menunjukkan bagaimana pemetaan UAV digabungkan dengan analisis pelbagai kriteria membantu pekebun kecil mengatasi hakisan tanah, kualiti air, dan kehilangan biodiversitiâ€”dengan 43% ladang mendapat skor kelestarian tinggi.',
+    content: `Sustainability challenges in smallholder oil palm plantations have become a focal point for environmental and agricultural experts. These farms, often constrained by limited resources, face soil erosion, poor water quality, and biodiversity loss. A study conducted in Kampar, Malaysia, explored how UAVs combined with multi-criteria analysis (MCA) could help smallholders address these problems through precision agriculture.
+
+Using UAVs equipped with high-resolution RGB and near-infrared sensors, researchers mapped slopes and waterways across 25 hectares of plantations. Digital elevation models revealed steep slopes lacking protective vegetation, making them vulnerable to erosion. Many waterways lacked riparian buffersâ€”vegetated zones that stabilize soil and filter runoffâ€”resulting in degraded water quality and sedimentation.
+
+Researchers applied MCA to evaluate six sustainability indicators: erosion risk, riparian buffers, water clarity, channel modification, vegetation connectivity, and land cover quality. Results showed approximately 43% of the plantation scored high sustainability, 46% medium, and 9% lowâ€”providing a clear, actionable map of where interventions were most urgently needed.
+
+Practical recommendations included replanting riparian zones with native trees, enhancing ground cover on steep slopes using palm fronds as mulch, establishing vegetation corridors to promote biodiversity, and stabilizing unpaved farm roads with stones and vegetation. This UAV-and-data-driven approach supports RSPO certification by helping farmers meet required environmental standards through targeted, resource-efficient actionsâ€”proving that precision agriculture can make sustainable farming accessible even for smallholders.`,
+    contentMs: `Cabaran kelestarian dalam ladang kelapa sawit pekebun kecil telah menjadi tumpuan utama bagi pakar alam sekitar dan pertanian. Ladang-ladang ini, sering terbatas oleh sumber terhad, menghadapi isu seperti hakisan tanah, kualiti air yang buruk, dan kehilangan biodiversiti.
+
+Menggunakan UAV yang dilengkapi dengan penderia RGB resolusi tinggi, penyelidik memetakan cerun dan saluran air merentasi 25 hektar ladang di Kampar, Malaysia. Model ketinggian digital mendedahkan kawasan dengan cerun curam yang terdedah kepada hakisan.
+
+Penyelidik menggunakan analisis pelbagai kriteria untuk menilai enam penunjuk kelestarian. Hasilnya menunjukkan kira-kira 43% ladang mendapat skor kelestarian tinggi, 46% sederhana, dan 9% rendah.
+
+Cadangan praktikal termasuk menanam semula zon riparian dengan pokok-pokok asli, meningkatkan litup tanah di cerun curam menggunakan pelepah sawit sebagai mulsa, mewujudkan koridor tumbuh-tumbuhan, dan menstabilkan jalan ladang tidak berturap.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-03-10',
+    readTime: '7 min read',
+    readTimeMs: '7 minit bacaan',
+    category: 'Sustainability',
+    categoryMs: 'Kelestarian',
+    tags: ['Smallholder', 'Precision Agriculture', 'UAV', 'Sustainability', 'RSPO', 'Malaysia'],
+    tagsMs: ['Pekebun Kecil', 'Pertanian Presisi', 'UAV', 'Kelestarian', 'RSPO', 'Malaysia'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/18025865-4d41-446f-8fc9-ded8c9475d60/Indonesia+small+holder+oil+palm+farmers+2.jpg?format=1000w',
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/improving-smallholder-oil-palm-practices-with-precision-agriculture',
+  },
+  {
+    id: 'ags-bsr-disease-management',
+    title: 'Boost Your Oil Palm Plantation\'s Productivity with Advanced Disease Management',
+    titleMs: 'Tingkatkan Produktiviti Ladang Kelapa Sawit Anda dengan Pengurusan Penyakit Lanjutan',
+    excerpt: 'Ganoderma Basal Stem Rot (BSR) silently destroys oil palms before visible symptoms appear. UAV-based aerial monitoring enables early detection of this devastating diseaseâ€”identifying subtle leaf color shifts and canopy structure changes that save trees and yields before it is too late.',
+    excerptMs: 'Busuk Pangkal Batang Ganoderma (BSR) merosakkan kelapa sawit secara senyap sebelum gejala kelihatan. Pemantauan udara berasaskan UAV membolehkan pengesanan awal penyakit merbahaya iniâ€”mengenal pasti perubahan warna daun dan struktur kanopi yang menyelamatkan pokok dan hasil.',
+    content: `Ganoderma Basal Stem Rot (BSR) is one of the most severe challenges facing oil palm plantations today. This disease, caused by the fungal pathogen Ganoderma boninense, can lead to significant yield losses and the death of palm trees if not addressed early. As plantations continue to expand globally, effective disease management becomes increasingly critical.
+
+Ganoderma boninense primarily attacks the base of oil palm trees. The disease starts subtly with yellowing leaves and wilting that can go unnoticed for months. As infection progresses, the fungus decays the trunk, eventually leading to structural collapse and death. Transmission occurs through soil and plant residues, with spores spreading from infected to healthy trees. By the time visible symptoms like canopy dieback appear, the tree is often beyond savingâ€”making early detection essential.
+
+UAV technology transforms disease management. Drones equipped with advanced multispectral imaging capture detailed aerial images that AI analyzes to detect subtle changes in leaf color, canopy structure, and other early BSR indicators. This method dramatically increases detection accuracy while reducing the time and labor of traditional manual inspections.
+
+AGS's UAV-based monitoring services focus on three pillars: early detection through aerial imaging, targeted intervention that applies treatments precisely where needed to minimize cost and waste, and sustainability practices that reduce reliance on chemical treatments while promoting healthy plantation growth. Protecting trees from BSR means more consistent yields, lower management costs, and long-term viability for your operations.`,
+    contentMs: `Busuk Pangkal Batang Ganoderma (BSR) adalah salah satu cabaran paling teruk yang dihadapi oleh ladang kelapa sawit hari ini. Penyakit ini, yang disebabkan oleh patogen kulat Ganoderma boninense, boleh menyebabkan kehilangan hasil yang ketara dan kematian pokok kelapa sawit jika tidak ditangani awal.
+
+Ganoderma boninense terutamanya menyerang pangkal pokok kelapa sawit. Penyakit bermula secara halus dengan daun-daun yang menguning dan layu yang mudah tidak disedari. Menjelang masa gejala kelihatan seperti kematian kanopi, pokok sering sudah tidak boleh diselamatkan.
+
+Teknologi UAV mengubah pengurusan penyakit. Dron yang dilengkapi dengan pengimejan multispektral canggih menangkap imej udara terperinci yang AI analisis untuk mengesan perubahan halus dalam warna daun dan penunjuk awal BSR.
+
+Perkhidmatan pemantauan berasaskan UAV AGS memberi tumpuan kepada tiga teras: pengesanan awal, campur tangan yang disasarkan, dan amalan kelestarian yang mengurangkan pergantungan pada rawatan kimia sambil menggalakkan pertumbuhan ladang yang sihat.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-01-15',
+    readTime: '6 min read',
+    readTimeMs: '6 minit bacaan',
+    category: 'Agriculture',
+    categoryMs: 'Pertanian',
+    tags: ['Ganoderma', 'BSR', 'Disease Management', 'UAV', 'Palm Oil', 'Drones'],
+    tagsMs: ['Ganoderma', 'BSR', 'Pengurusan Penyakit', 'UAV', 'Kelapa Sawit', 'Dron'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/899ac40c-52b4-4374-a9a3-dfda3990beec/drone%2Babove%2Boil%2Bpalm%2Bplantation%2B2+%281%29.png?format=1000w',
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/boost-your-oil-palm-plantations-productivity-with-advanced-disease-management',
+  },
+  {
+    id: 'ags-ai-supply-chains',
+    title: 'AI-Powered Supply Chains for Sustainable Agriculture',
+    titleMs: 'Rantai Bekalan Berkuasa AI untuk Pertanian Lestari',
+    excerpt: 'AI is revolutionizing agricultural supply chains through smarter demand forecasting using ARIMA and LSTM models, real-time resource monitoring, and waste reduction. Farms aligned with market demand conserve resources and measurably reduce their environmental footprint.',
+    excerptMs: 'AI sedang merevolusikan rantai bekalan pertanian melalui ramalan permintaan yang lebih pintar menggunakan model ARIMA dan LSTM, pemantauan sumber masa nyata, dan pengurangan pembaziran. Ladang yang selaras dengan permintaan pasaran menjimatkan sumber dan mengurangkan jejak alam sekitar.',
+    content: `Artificial Intelligence is making a significant impact on agricultural supply chains by optimizing everything from crop production to market delivery. Through improved demand forecasting and resource management, AI is helping farmers and agribusinesses tackle challenges like reducing waste and increasing efficiencyâ€”while building more sustainable food systems.
+
+One of the most transformative applications is demand forecasting. AI uses complex models such as ARIMA (Auto-Regressive Integrated Moving Average) and LSTM (Long Short-Term Memory) that analyze past sales and transaction data to predict future market demand. By applying these models, farmers avoid overproduction that leads to wasted resources and unsold goods. AI also monitors variables like weather patterns, soil health, and consumer behavior, enabling informed decisions about planting, harvesting, and distribution timelines.
+
+Sustainability gains from AI are equally notable. AI-driven tools enable more efficient use of water and fertilizersâ€”monitoring soil moisture and nutrient levels in real time and applying inputs only when and where necessary. This precision farming minimizes environmental impact by conserving resources and reducing soil degradation risk. It aligns production with demand, reducing food waste for perishable goods and ensuring that agricultural inputs create maximum value.
+
+Despite clear benefits, challenges remain. Reliable, high-quality data is essential for AI to function effectively, and smaller farms may need support to build data collection infrastructure. Technical expertise requires training. However, as AI technology becomes more user-friendly and accessible, barriers are falling rapidly. For palm oil farmers, AI-powered supply chains represent a powerful path to aligning productivity with environmental responsibility.`,
+    contentMs: `Kecerdasan Buatan memberi kesan yang ketara kepada rantai bekalan pertanian dengan mengoptimumkan segalanya dari pengeluaran tanaman hingga penghantaran pasaran. Melalui ramalan permintaan yang lebih baik dan pengurusan sumber, AI membantu petani mengatasi cabaran seperti mengurangkan pembaziran dan meningkatkan kecekapan.
+
+Salah satu aplikasi yang paling transformatif adalah ramalan permintaan. AI menggunakan model kompleks seperti ARIMA dan LSTM yang menganalisis data jualan dan transaksi masa lalu untuk meramalkan permintaan masa hadapan, membantu petani mengelak pengeluaran berlebihan.
+
+Perolehan kelestarian dari AI sama-sama ketara. Alat yang dipacu AI membolehkan penggunaan air dan baja yang lebih cekapâ€”memantau kelembapan tanah dan tahap nutrien dalam masa nyata dan menggunakan input hanya apabila perlu.
+
+Walaupun terdapat manfaat yang jelas, cabaran kekal mengenai kualiti data dan kepakaran teknikal. Namun, apabila teknologi AI menjadi lebih mesra pengguna dan boleh diakses, halangan ini semakin berkurang.`,
+    author: 'Alexander Loladze, AGS',
+    authorMs: 'Alexander Loladze, AGS',
+    date: '2025-01-05',
+    readTime: '6 min read',
+    readTimeMs: '6 minit bacaan',
+    category: 'Sustainability',
+    categoryMs: 'Kelestarian',
+    tags: ['AI', 'Supply Chain', 'Sustainable Agriculture', 'Demand Forecasting', 'Food Production'],
+    tagsMs: ['AI', 'Rantai Bekalan', 'Pertanian Lestari', 'Ramalan Permintaan', 'Pengeluaran Makanan'],
+    image: 'https://images.squarespace-cdn.com/content/v1/664f726caa96fb6042fac225/4fb0db07-34b0-494c-b37c-9f6b1e35600a/Agricultural+supply+chains+use+AI+for+sustaibale+agriculture.jpg?format=1000w',
+    published: true,
+    sourceUrl: 'https://www.agriglobalsolutions.com/updates-insights/ai-powered-supply-chains-for-sustainable-agriculture',
   },
   {
     id: 'cropdrive-features',
     title: 'CropDrive Features: Everything You Need to Know About Our AI Platform',
     titleMs: 'Ciri-Ciri CropDrive: Semua yang Perlu Anda Ketahui Tentang Platform AI Kami',
-    excerpt: 'Explore the comprehensive features of CropDrive, from AI-powered crop analysis to detailed reporting, subscription plans, and expert support services.',
-    excerptMs: 'Terokai ciri-ciri komprehensif CropDrive, dari analisis tanaman berkuasa AI hingga pelaporan terperinci, pelan langganan, dan perkhidmatan sokongan pakar.',
-    content: 'CropDrive offers three distinct subscription tiers designed to meet the needs of different farming operations. The Start plan provides essential AI reports and standard support, perfect for small-scale farmers getting started with technology. The Smart plan includes enhanced features like 24-hour response times and referral bonuses, ideal for growing operations. The Precision plan offers unlimited support, comparative analysis, and partner discounts for large-scale plantations. All plans include our core AI analysis capabilities, which can detect diseases, assess crop health, predict yields, and provide recommendations for optimal farming practices. Our platform also features Palmira, an AI assistant that answers questions about palm oil farming, and comprehensive reporting tools that generate detailed insights from uploaded crop images.',
-    contentMs: 'CropDrive menawarkan tiga peringkat langganan yang berbeza direka untuk memenuhi keperluan operasi pertanian yang berbeza. Pelan Start menyediakan laporan AI penting dan sokongan standard, sempurna untuk petani berskala kecil yang baru bermula dengan teknologi. Pelan Smart termasuk ciri-ciri tambahan seperti masa respons 24 jam dan bonus rujukan, sesuai untuk operasi yang berkembang. Pelan Precision menawarkan sokongan tanpa had, analisis perbandingan, dan diskaun rakan kongsi untuk ladang berskala besar. Semua pelan termasuk keupayaan analisis AI teras kami, yang dapat mengesan penyakit, menilai kesihatan tanaman, meramalkan hasil, dan memberikan cadangan untuk amalan pertanian yang optimum. Platform kami juga menampilkan Palmira, pembantu AI yang menjawab soalan tentang pertanian kelapa sawit, dan alat pelaporan komprehensif yang menghasilkan pandangan terperinci dari imej tanaman yang dimuat naik.',
+    excerpt: 'Explore CropDrive\'s deep learning crop analysis, three-tier subscription plans, the Palmira AI assistant, and seamless AGS consultancy integrationâ€”all purpose-built to maximize palm oil yields while achieving sustainability certification standards.',
+    excerptMs: 'Terokai analisis tanaman pembelajaran mendalam CropDrive, pelan langganan tiga peringkat, pembantu AI Palmira, dan integrasi perundingan AGS yang lancarâ€”semuanya dibina khas untuk memaksimumkan hasil kelapa sawit sambil mencapai standard pensijilan kelestarian.',
+    content: `CropDrive offers a comprehensive suite of AI-powered tools specifically designed for the palm oil industry. Our core platform uses deep learning computer visionâ€”trained on thousands of annotated palm oil imagesâ€”to analyze uploaded crop photos, detecting diseases, assessing plant health, predicting yields, and recommending optimal farming practices within minutes.
+
+The platform offers three distinct subscription tiers. The Start plan provides essential AI analysis reports and standard support, perfect for small-scale farmers entering precision agriculture. The Smart plan adds 24-hour priority response, enhanced analysis features, and referral bonuses for growing operations. The Precision plan delivers unlimited support, multi-plot comparative analysis, AGS partner consultancy discounts, and advanced reporting dashboards for large-scale plantations and agricultural organizations.
+
+Palmira, CropDrive's integrated AI assistant, is available 24/7 to answer questions about crop management, disease identification, pest control, soil health, fertilization strategies, harvest timing, and sustainable practices. Trained on extensive palm oil agricultural knowledge, Palmira provides accurate, actionable guidanceâ€”and explains AI analysis results in plain language for farmers at any technical level.
+
+All CropDrive plans integrate with AGS's expert consultancy network. When AI analysis identifies complex issues requiring human expertise, AGS consultants provide deeper interpretation, local context, and customized action plans. This combination of AI precision and human wisdom creates a complete support systemâ€”helping Malaysian palm oil farmers optimize operations, reduce costs, and achieve RSPO and other certification standards.`,
+    contentMs: `CropDrive menawarkan suite alat berkuasa AI yang komprehensif yang direka khusus untuk industri kelapa sawit. Platform teras kami menggunakan penglihatan komputer pembelajaran mendalamâ€”dilatih pada ribuan imej kelapa sawit yang dianotasiâ€”untuk menganalisis imej tanaman yang dimuat naik dalam masa beberapa minit.
+
+Platform ini menawarkan tiga peringkat langganan yang berbeza. Pelan Start untuk petani berskala kecil. Pelan Smart menambah respons keutamaan 24 jam untuk operasi yang berkembang. Pelan Precision memberikan sokongan tanpa had dan diskaun perundingan rakan kongsi AGS untuk ladang berskala besar.
+
+Palmira, pembantu AI bersepadu CropDrive, tersedia 24/7 untuk menjawab soalan tentang pengurusan tanaman, pengenalan penyakit, kawalan perosak, kesihatan tanah, dan amalan lestari.
+
+Semua pelan CropDrive bersepadu dengan rangkaian perundingan pakar AGS, menggabungkan ketepatan AI dengan kebijaksanaan manusia untuk mencipta sistem sokongan yang lengkap bagi petani kelapa sawit Malaysia.`,
     author: 'CropDrive Product Team',
     authorMs: 'Pasukan Produk CropDrive',
     date: '2025-01-28',
-    readTime: '12 min read',
-    readTimeMs: '12 minit bacaan',
-    category: 'Technology',
-    categoryMs: 'Teknologi',
-    tags: ['CropDrive', 'Features', 'AI Platform', 'Subscription', 'Technology'],
-    tagsMs: ['CropDrive', 'Ciri-Ciri', 'Platform AI', 'Langganan', 'Teknologi'],
-    image: '/images/blog/cropdrive-features.jpg',
-    featured: true
-  },
-  {
-    id: 'ags-partnership',
-    title: 'CropDrive Partners with Agriculture Global Solutions (AGS): A Strategic Alliance for Agricultural Excellence',
-    titleMs: 'CropDrive Bekerjasama dengan Agriculture Global Solutions (AGS): Perikatan Strategik untuk Kecemerlangan Pertanian',
-    excerpt: 'Learn about the strategic partnership between CropDrive and AGS, combining cutting-edge AI technology with expert agricultural consultancy to deliver comprehensive farming solutions.',
-    excerptMs: 'Pelajari tentang perkongsian strategik antara CropDrive dan AGS, menggabungkan teknologi AI canggih dengan perundingan pertanian pakar untuk menyampaikan penyelesaian pertanian komprehensif.',
-    content: 'The partnership between CropDrive and Agriculture Global Solutions (AGS) represents a powerful synergy between technology and expertise. While CropDrive provides the AI-powered platform for crop analysis and insights, AGS brings decades of agricultural consultancy experience, offering tailored strategies for farm optimization, sustainable farming practices, and technology integration. This collaboration enables farmers to not only receive AI-generated insights but also benefit from expert interpretation and actionable recommendations from AGS consultants. Together, CropDrive and AGS empower farmers with both the tools and knowledge needed to thrive in today\'s challenging agricultural landscape, ensuring that technological innovation is complemented by proven agricultural wisdom.',
-    contentMs: 'Perkongsian antara CropDrive dan Agriculture Global Solutions (AGS) mewakili sinergi yang kuat antara teknologi dan kepakaran. Walaupun CropDrive menyediakan platform berkuasa AI untuk analisis dan pandangan tanaman, AGS membawa pengalaman perundingan pertanian selama beberapa dekad, menawarkan strategi yang disesuaikan untuk pengoptimuman ladang, amalan pertanian lestari, dan integrasi teknologi. Kerjasama ini membolehkan petani bukan sahaja menerima pandangan yang dihasilkan AI tetapi juga mendapat manfaat daripada tafsiran pakar dan cadangan yang boleh dilaksanakan daripada perunding AGS. Bersama-sama, CropDrive dan AGS memberdayakan petani dengan kedua-dua alat dan pengetahuan yang diperlukan untuk berkembang maju dalam landskap pertanian yang mencabar hari ini, memastikan inovasi teknologi dilengkapi dengan kebijaksanaan pertanian yang terbukti.',
-    author: 'CropDrive & AGS Partnership Team',
-    authorMs: 'Pasukan Perkongsian CropDrive & AGS',
-    date: '2025-01-25',
-    readTime: '9 min read',
-    readTimeMs: '9 minit bacaan',
-    category: 'Innovation',
-    categoryMs: 'Inovasi',
-    tags: ['CropDrive', 'AGS', 'Partnership', 'Agriculture', 'Consultancy'],
-    tagsMs: ['CropDrive', 'AGS', 'Perkongsian', 'Pertanian', 'Perundingan'],
-    image: '/images/blog/ags-partnership.jpg',
-    featured: true
-  },
-  // AGS Posts
-  {
-    id: 'ags-introduction',
-    title: 'Agriculture Global Solutions (AGS): Empowering Agriculture with Expert Consultancy',
-    titleMs: 'Agriculture Global Solutions (AGS): Memberdayakan Pertanian dengan Perundingan Pakar',
-    excerpt: 'Discover how AGS transforms the agricultural industry with innovative consultancy services, tailored strategies, and sustainable farming practices that boost productivity and sustainability.',
-    excerptMs: 'Temui bagaimana AGS mengubah industri pertanian dengan perkhidmatan perundingan inovatif, strategi yang disesuaikan, dan amalan pertanian lestari yang meningkatkan produktiviti dan kelestarian.',
-    content: 'Agriculture Global Solutions (AGS) stands at the forefront of agricultural consultancy, dedicated to transforming farming operations through expert insights and innovative strategies. With a focus on empowering farmers with the tools and knowledge needed to thrive in today\'s challenging agricultural landscape, AGS provides comprehensive consultancy services that address the specific needs of modern farming. Our services include tailored strategies to maximize farm efficiency and output, implementation of sustainable farming practices for long-term success, and seamless integration of the latest agricultural technologies to streamline operations and improve yields. At AGS, we believe in providing not just advice, but actionable solutions that lead to tangible results, whether you\'re looking to optimize crop production, reduce environmental impact, or adopt new technologies.',
-    contentMs: 'Agriculture Global Solutions (AGS) berada di barisan hadapan perundingan pertanian, komited untuk mengubah operasi pertanian melalui pandangan pakar dan strategi inovatif. Dengan fokus pada memberdayakan petani dengan alat dan pengetahuan yang diperlukan untuk berkembang maju dalam landskap pertanian yang mencabar hari ini, AGS menyediakan perkhidmatan perundingan komprehensif yang menangani keperluan khusus pertanian moden. Perkhidmatan kami termasuk strategi yang disesuaikan untuk memaksimumkan kecekapan dan output ladang, pelaksanaan amalan pertanian lestari untuk kejayaan jangka panjang, dan integrasi tanpa masalah teknologi pertanian terkini untuk memudahkan operasi dan meningkatkan hasil. Di AGS, kami percaya dalam menyediakan bukan sahaja nasihat, tetapi penyelesaian yang boleh dilaksanakan yang membawa kepada hasil yang ketara, sama ada anda ingin mengoptimumkan pengeluaran tanaman, mengurangkan kesan alam sekitar, atau menggunakan teknologi baru.',
-    author: 'AGS Consultancy Team',
-    authorMs: 'Pasukan Perundingan AGS',
-    date: '2025-01-20',
-    readTime: '11 min read',
-    readTimeMs: '11 minit bacaan',
-    category: 'Agriculture',
-    categoryMs: 'Pertanian',
-    tags: ['AGS', 'Consultancy', 'Agriculture', 'Sustainability', 'Expertise'],
-    tagsMs: ['AGS', 'Perundingan', 'Pertanian', 'Kelestarian', 'Kepakaran'],
-    image: '/images/blog/ags-empowering.jpg',
-    featured: true
-  },
-  {
-    id: 'ags-services',
-    title: 'Comprehensive Agricultural Consultancy Services by AGS: Tailored Solutions for Modern Farming',
-    titleMs: 'Perkhidmatan Perundingan Pertanian Komprehensif oleh AGS: Penyelesaian Disesuaikan untuk Pertanian Moden',
-    excerpt: 'Explore AGS\'s comprehensive consultancy services including agricultural strategy development, sustainable farming implementation, and advanced technology integration.',
-    excerptMs: 'Terokai perkhidmatan perundingan komprehensif AGS termasuk pembangunan strategi pertanian, pelaksanaan pertanian lestari, dan integrasi teknologi maju.',
-    content: 'AGS offers three core consultancy services designed to address every aspect of modern agricultural operations. Our Agricultural Consultancy service provides tailored strategies to maximize your farm\'s efficiency and output, analyzing your specific conditions and developing customized solutions. Our Sustainable Farming Practices service focuses on implementing eco-friendly methods for long-term success, helping farmers balance productivity with environmental responsibility. Our Technology Integration service leverages the latest agricultural technologies to streamline operations and improve yields, ensuring that farmers can effectively adopt and utilize cutting-edge tools like CropDrive. Each service is delivered by experienced agricultural consultants who understand the unique challenges of modern farming and provide actionable, results-driven recommendations.',
-    contentMs: 'AGS menawarkan tiga perkhidmatan perundingan teras yang direka untuk menangani setiap aspek operasi pertanian moden. Perkhidmatan Perundingan Pertanian kami menyediakan strategi yang disesuaikan untuk memaksimumkan kecekapan dan output ladang anda, menganalisis keadaan khusus anda dan membangunkan penyelesaian yang disesuaikan. Perkhidmatan Amalan Pertanian Lestari kami memberi tumpuan kepada pelaksanaan kaedah mesra alam untuk kejayaan jangka panjang, membantu petani menyeimbangkan produktiviti dengan tanggungjawab alam sekitar. Perkhidmatan Integrasi Teknologi kami memanfaatkan teknologi pertanian terkini untuk memudahkan operasi dan meningkatkan hasil, memastikan petani dapat mengguna pakai dan menggunakan alat canggih seperti CropDrive dengan berkesan. Setiap perkhidmatan disampaikan oleh perunding pertanian yang berpengalaman yang memahami cabaran unik pertanian moden dan memberikan cadangan yang boleh dilaksanakan dan berorientasikan hasil.',
-    author: 'AGS Services Team',
-    authorMs: 'Pasukan Perkhidmatan AGS',
-    date: '2025-01-18',
-    readTime: '10 min read',
-    readTimeMs: '10 minit bacaan',
-    category: 'Agriculture',
-    categoryMs: 'Pertanian',
-    tags: ['AGS', 'Services', 'Consultancy', 'Farming', 'Sustainability'],
-    tagsMs: ['AGS', 'Perkhidmatan', 'Perundingan', 'Pertanian', 'Kelestarian'],
-    image: '/images/blog/ags-services.jpg'
-  },
-  {
-    id: 'ags-sustainable-farming',
-    title: 'Sustainable Farming Practices: How AGS Helps Farmers Achieve Long-Term Success',
-    titleMs: 'Amalan Pertanian Lestari: Bagaimana AGS Membantu Petani Mencapai Kejayaan Jangka Panjang',
-    excerpt: 'Learn about AGS\'s approach to sustainable farming, implementing eco-friendly methods that ensure long-term productivity while protecting the environment.',
-    excerptMs: 'Pelajari tentang pendekatan AGS terhadap pertanian lestari, melaksanakan kaedah mesra alam yang memastikan produktiviti jangka panjang sambil melindungi alam sekitar.',
-    content: 'Sustainability is at the heart of AGS\'s consultancy approach. We help farmers implement eco-friendly methods that ensure long-term success while protecting the environment. Our sustainable farming practices include soil health management, water conservation strategies, integrated pest management, and biodiversity preservation. AGS consultants work closely with farmers to develop customized sustainability plans that align with certification standards while maintaining or improving productivity. We understand that sustainable farming is not just about environmental responsibility—it\'s about ensuring the long-term viability of farming operations. Through our consultancy services, farmers learn to balance productivity with environmental stewardship, creating farming systems that are both profitable and sustainable for generations to come.',
-    contentMs: 'Kelestarian adalah teras pendekatan perundingan AGS. Kami membantu petani melaksanakan kaedah mesra alam yang memastikan kejayaan jangka panjang sambil melindungi alam sekitar. Amalan pertanian lestari kami termasuk pengurusan kesihatan tanah, strategi pemuliharaan air, pengurusan perosak bersepadu, dan pemeliharaan biodiversiti. Perunding AGS bekerjasama rapat dengan petani untuk membangunkan pelan kelestarian yang disesuaikan yang selaras dengan standard pensijilan sambil mengekalkan atau meningkatkan produktiviti. Kami memahami bahawa pertanian lestari bukan hanya tentang tanggungjawab alam sekitar—ia tentang memastikan daya maju jangka panjang operasi pertanian. Melalui perkhidmatan perundingan kami, petani belajar menyeimbangkan produktiviti dengan penjagaan alam sekitar, mencipta sistem pertanian yang menguntungkan dan lestari untuk generasi akan datang.',
-    author: 'AGS Sustainability Team',
-    authorMs: 'Pasukan Kelestarian AGS',
-    date: '2025-01-15',
     readTime: '8 min read',
     readTimeMs: '8 minit bacaan',
-    category: 'Sustainability',
-    categoryMs: 'Kelestarian',
-    tags: ['AGS', 'Sustainability', 'Farming', 'Environment', 'Best Practices'],
-    tagsMs: ['AGS', 'Kelestarian', 'Pertanian', 'Alam Sekitar', 'Amalan Terbaik'],
-    image: '/images/blog/ags-sustainable.jpg'
-  },
-  // More CropDrive Posts
-  {
-    id: 'cropdrive-ai-technology',
-    title: 'The Science Behind CropDrive: How AI Transforms Crop Analysis',
-    titleMs: 'Sains Di Sebalik CropDrive: Bagaimana AI Mengubah Analisis Tanaman',
-    excerpt: 'Dive deep into the AI technology powering CropDrive, understanding how machine learning algorithms analyze crop images and provide actionable insights.',
-    excerptMs: 'Menyelami teknologi AI yang menggerakkan CropDrive, memahami bagaimana algoritma pembelajaran mesin menganalisis imej tanaman dan memberikan pandangan yang boleh dilaksanakan.',
-    content: 'CropDrive\'s AI technology represents the cutting edge of agricultural intelligence. Our platform utilizes advanced computer vision algorithms trained on millions of crop images to identify diseases, assess plant health, predict yields, and recommend optimal farming practices. The system employs deep learning neural networks that can detect subtle patterns invisible to the human eye, enabling early detection of issues before they become critical problems. Our AI models are continuously trained on new data, ensuring that recommendations become more accurate over time. The technology integrates multiple data sources including weather patterns, soil conditions, and historical yield data to provide comprehensive insights. This multi-layered approach ensures that farmers receive not just isolated observations, but holistic recommendations that consider the entire farming ecosystem.',
-    contentMs: 'Teknologi AI CropDrive mewakili kelebihan kecerdasan pertanian. Platform kami menggunakan algoritma penglihatan komputer canggih yang dilatih pada berjuta-juta imej tanaman untuk mengenal pasti penyakit, menilai kesihatan tumbuhan, meramalkan hasil, dan mengesyorkan amalan pertanian yang optimum. Sistem ini menggunakan rangkaian neural pembelajaran mendalam yang dapat mengesan corak halus yang tidak kelihatan kepada mata manusia, membolehkan pengesanan awal masalah sebelum mereka menjadi masalah kritikal. Model AI kami sentiasa dilatih pada data baru, memastikan cadangan menjadi lebih tepat dari masa ke masa. Teknologi ini mengintegrasikan pelbagai sumber data termasuk corak cuaca, keadaan tanah, dan data hasil sejarah untuk memberikan pandangan komprehensif. Pendekatan berbilang lapisan ini memastikan petani menerima bukan sahaja pemerhatian terpencil, tetapi cadangan holistik yang mempertimbangkan keseluruhan ekosistem pertanian.',
-    author: 'CropDrive AI Research Team',
-    authorMs: 'Pasukan Penyelidikan AI CropDrive',
-    date: '2025-01-12',
-    readTime: '13 min read',
-    readTimeMs: '13 minit bacaan',
     category: 'Technology',
     categoryMs: 'Teknologi',
-    tags: ['CropDrive', 'AI', 'Machine Learning', 'Technology', 'Innovation'],
-    tagsMs: ['CropDrive', 'AI', 'Pembelajaran Mesin', 'Teknologi', 'Inovasi'],
-    image: '/images/blog/cropdrive-ai-tech.jpg'
-  },
-  {
-    id: 'cropdrive-success-stories',
-    title: 'Success Stories: How CropDrive is Transforming Palm Oil Farms Across Malaysia',
-    titleMs: 'Kisah Kejayaan: Bagaimana CropDrive Mengubah Ladang Kelapa Sawit di Seluruh Malaysia',
-    excerpt: 'Read inspiring stories from Malaysian palm oil farmers who have successfully implemented CropDrive to improve yields, reduce costs, and enhance sustainability.',
-    excerptMs: 'Baca kisah inspirasi dari petani kelapa sawit Malaysia yang telah berjaya melaksanakan CropDrive untuk meningkatkan hasil, mengurangkan kos, dan meningkatkan kelestarian.',
-    content: 'Across Malaysia, palm oil farmers are experiencing remarkable transformations with CropDrive. Small-scale farmers report 20-30% yield improvements after implementing AI-driven recommendations. Large plantations have reduced pesticide usage by up to 40% through early disease detection, while maintaining or improving crop health. One plantation in Sabah credits CropDrive with identifying a soil nutrient deficiency that was limiting yields, leading to a targeted fertilization program that increased production by 35%. Another farmer in Johor used CropDrive\'s predictive insights to optimize harvest timing, resulting in higher quality palm oil and better market prices. These success stories demonstrate how accessible AI technology can level the playing field, giving farmers of all sizes the tools they need to compete effectively in the global market while maintaining sustainable practices.',
-    contentMs: 'Di seluruh Malaysia, petani kelapa sawit mengalami transformasi yang luar biasa dengan CropDrive. Petani berskala kecil melaporkan peningkatan hasil 20-30% selepas melaksanakan cadangan yang didorong AI. Ladang besar telah mengurangkan penggunaan racun perosak sehingga 40% melalui pengesanan penyakit awal, sambil mengekalkan atau meningkatkan kesihatan tanaman. Satu ladang di Sabah mengaitkan CropDrive dengan mengenal pasti kekurangan nutrien tanah yang menghadkan hasil, membawa kepada program persenyawaan yang disasarkan yang meningkatkan pengeluaran sebanyak 35%. Petani lain di Johor menggunakan pandangan ramalan CropDrive untuk mengoptimumkan masa penuaian, menghasilkan minyak sawit berkualiti lebih tinggi dan harga pasaran yang lebih baik. Kisah kejayaan ini menunjukkan bagaimana teknologi AI yang boleh diakses dapat meratakan padang permainan, memberikan petani semua saiz alat yang mereka perlukan untuk bersaing dengan berkesan dalam pasaran global sambil mengekalkan amalan lestari.',
-    author: 'CropDrive Community Team',
-    authorMs: 'Pasukan Komuniti CropDrive',
-    date: '2025-01-10',
-    readTime: '9 min read',
-    readTimeMs: '9 minit bacaan',
-    category: 'Farming',
-    categoryMs: 'Pertanian',
-    tags: ['CropDrive', 'Success Stories', 'Malaysia', 'Farming', 'Case Studies'],
-    tagsMs: ['CropDrive', 'Kisah Kejayaan', 'Malaysia', 'Pertanian', 'Kajian Kes'],
-    image: '/images/blog/cropdrive-success.jpg'
+    tags: ['CropDrive', 'Features', 'AI Platform', 'Subscription', 'Palmira'],
+    tagsMs: ['CropDrive', 'Ciri-Ciri', 'Platform AI', 'Langganan', 'Palmira'],
+    image: '/images/blog/cropdrive-features.jpg',
+    published: true,
   },
   {
     id: 'cropdrive-palmira-assistant',
     title: 'Meet Palmira: Your AI Assistant for Palm Oil Farming Questions',
     titleMs: 'Temu Palmira: Pembantu AI Anda untuk Soalan Pertanian Kelapa Sawit',
-    excerpt: 'Discover Palmira, CropDrive\'s intelligent AI assistant that answers your palm oil farming questions 24/7, providing expert knowledge at your fingertips.',
-    excerptMs: 'Temui Palmira, pembantu AI pintar CropDrive yang menjawab soalan pertanian kelapa sawit anda 24/7, menyediakan pengetahuan pakar di hujung jari anda.',
-    content: 'Palmira is CropDrive\'s revolutionary AI assistant designed specifically for palm oil farming. Available 24/7, Palmira can answer questions about crop management, disease identification, pest control, soil health, fertilization strategies, harvest timing, and sustainable farming practices. Powered by advanced natural language processing and trained on extensive agricultural knowledge, Palmira provides accurate, actionable answers that help farmers make informed decisions. Whether you\'re dealing with a specific problem or seeking general farming advice, Palmira is always ready to help. The assistant integrates seamlessly with CropDrive\'s analysis platform, allowing you to ask follow-up questions about your crop images and receive detailed explanations of AI-generated insights. Palmira represents the future of agricultural support—instant, accurate, and always available.',
-    contentMs: 'Palmira adalah pembantu AI revolusioner CropDrive yang direka khusus untuk pertanian kelapa sawit. Tersedia 24/7, Palmira boleh menjawab soalan tentang pengurusan tanaman, pengenalan penyakit, kawalan perosak, kesihatan tanah, strategi persenyawaan, masa penuaian, dan amalan pertanian lestari. Dikuasakan oleh pemprosesan bahasa semula jadi canggih dan dilatih pada pengetahuan pertanian yang luas, Palmira menyediakan jawapan yang tepat dan boleh dilaksanakan yang membantu petani membuat keputusan yang termaklumat. Sama ada anda menghadapi masalah khusus atau mencari nasihat pertanian umum, Palmira sentiasa bersedia untuk membantu. Pembantu ini bersepadu dengan platform analisis CropDrive, membolehkan anda bertanya soalan susulan tentang imej tanaman anda dan menerima penjelasan terperinci tentang pandangan yang dihasilkan AI. Palmira mewakili masa depan sokongan pertanian—segera, tepat, dan sentiasa tersedia.',
+    excerpt: 'Palmira is CropDrive\'s 24/7 AI assistant trained on comprehensive palm oil agricultural knowledge. From early Ganoderma detection to harvest optimization, Palmira answers farming questions instantlyâ€”and explains AI crop analysis results in clear, actionable language.',
+    excerptMs: 'Palmira adalah pembantu AI 24/7 CropDrive yang dilatih pada pengetahuan pertanian kelapa sawit yang komprehensif. Dari pengesanan awal Ganoderma hingga pengoptimuman penuaian, Palmira menjawab soalan pertanian dengan segera.',
+    content: `Palmira is CropDrive's revolutionary AI assistant, purpose-built for palm oil farming. Available 24 hours a day, 7 days a week, Palmira answers questions about crop management, disease identification, pest control, soil health, fertilization strategies, harvest timing, and sustainable farming practicesâ€”instantly and accurately, without waiting for office hours or expert availability.
+
+Powered by advanced natural language processing and trained on extensive palm oil agricultural knowledge, Palmira provides responses that farmers can act on immediately. Whether dealing with a specific problem identified in a CropDrive analysisâ€”such as early-stage Ganoderma BSR symptoms or a suspected nutrient deficiencyâ€”or seeking general farming guidance, Palmira combines deep expert knowledge with the convenience of instant availability.
+
+What makes Palmira unique is its deep integration with CropDrive's AI analysis platform. After uploading a crop image and receiving an analysis report, farmers can ask Palmira follow-up questions: "Why is my palm showing these frond symptoms?" "What treatment should I apply for early-stage Ganoderma?" "How can I optimize my fertilization schedule based on these soil readings?" Palmira explains the AI-generated insights in plain language and suggests specific, actionable next steps tailored to your farm conditions.
+
+Palmira is available to all CropDrive subscribers and bridges the gap between AI technology and practical farming application. For complex situations requiring deeper analysis, Palmira can connect farmers directly with AGS consultants. Together, Palmira and AGS represent a complete knowledge ecosystemâ€”from instant AI guidance to expert human consultationâ€”ensuring Malaysian palm oil farmers always have the support they need, whenever they need it.`,
+    contentMs: `Palmira adalah pembantu AI revolusioner CropDrive, dibina khas untuk pertanian kelapa sawit. Tersedia 24 jam sehari, 7 hari seminggu, Palmira menjawab soalan tentang pengurusan tanaman, pengenalan penyakit, kawalan perosak, kesihatan tanah, strategi persenyawaan, masa penuaian, dan amalan pertanian lestari.
+
+Dikuasakan oleh pemprosesan bahasa semula jadi canggih dan dilatih pada pengetahuan pertanian kelapa sawit yang luas, Palmira memberikan respons yang boleh segera dilaksanakan oleh petani. Sama ada menghadapi masalah khusus yang dikenal pasti dalam analisis CropDrive atau mencari bimbingan pertanian umum, Palmira menggabungkan kedalaman pengetahuan pakar dengan kemudahan ketersediaan segera.
+
+Apa yang menjadikan Palmira unik adalah integrasinya yang mendalam dengan platform analisis CropDrive. Selepas memuat naik imej tanaman dan menerima laporan analisis AI, petani boleh bertanya soalan susulan kepada Palmira tentang gejala, rawatan, dan langkah seterusnya.
+
+Palmira tersedia kepada semua pelanggan CropDrive dan berfungsi sebagai jambatan antara teknologi AI dan aplikasi pertanian praktikal, dengan sokongan perunding AGS untuk situasi yang kompleks.`,
     author: 'CropDrive Product Team',
     authorMs: 'Pasukan Produk CropDrive',
     date: '2025-01-08',
@@ -234,96 +358,51 @@ const staticBlogPosts: BlogPost[] = [
     readTimeMs: '7 minit bacaan',
     category: 'Technology',
     categoryMs: 'Teknologi',
-    tags: ['CropDrive', 'Palmira', 'AI Assistant', 'Technology', 'Support'],
-    tagsMs: ['CropDrive', 'Palmira', 'Pembantu AI', 'Teknologi', 'Sokongan'],
-    image: '/images/blog/palmira-assistant.jpg'
+    tags: ['CropDrive', 'Palmira', 'AI Assistant', 'Palm Oil', 'Support'],
+    tagsMs: ['CropDrive', 'Palmira', 'Pembantu AI', 'Kelapa Sawit', 'Sokongan'],
+    image: '/images/blog/palmira-assistant.jpg',
+    published: true,
   },
-  // More AGS Posts
   {
-    id: 'ags-technology-integration',
-    title: 'Technology Integration in Agriculture: AGS\'s Approach to Modernizing Farms',
-    titleMs: 'Integrasi Teknologi dalam Pertanian: Pendekatan AGS untuk Memodenkan Ladang',
-    excerpt: 'Learn how AGS helps farmers integrate cutting-edge agricultural technologies, from AI platforms to IoT sensors, streamlining operations and improving yields.',
-    excerptMs: 'Pelajari bagaimana AGS membantu petani mengintegrasikan teknologi pertanian canggih, dari platform AI hingga sensor IoT, memudahkan operasi dan meningkatkan hasil.',
-    content: 'Technology integration is one of AGS\'s core consultancy services, helping farmers adopt and effectively utilize modern agricultural technologies. Our consultants work with farmers to assess their current operations, identify opportunities for technology adoption, and develop implementation strategies. We specialize in integrating AI platforms like CropDrive, IoT sensor networks for real-time monitoring, automated irrigation systems, and data analytics tools. AGS ensures that technology adoption is not just about buying new tools, but about creating integrated systems that work together seamlessly. We provide training, support, and ongoing consultation to ensure that farmers can maximize the value of their technology investments. Our approach focuses on practical, results-driven integration that improves efficiency, reduces costs, and enhances productivity.',
-    contentMs: 'Integrasi teknologi adalah salah satu perkhidmatan perundingan teras AGS, membantu petani mengguna pakai dan menggunakan teknologi pertanian moden dengan berkesan. Perunding kami bekerjasama dengan petani untuk menilai operasi semasa mereka, mengenal pasti peluang untuk penggunaan teknologi, dan membangunkan strategi pelaksanaan. Kami pakar dalam mengintegrasikan platform AI seperti CropDrive, rangkaian sensor IoT untuk pemantauan masa nyata, sistem pengairan automatik, dan alat analitik data. AGS memastikan bahawa penggunaan teknologi bukan hanya tentang membeli alat baru, tetapi tentang mencipta sistem bersepadu yang bekerjasama dengan lancar. Kami menyediakan latihan, sokongan, dan perundingan berterusan untuk memastikan petani dapat memaksimumkan nilai pelaburan teknologi mereka. Pendekatan kami memberi tumpuan kepada integrasi praktikal dan berorientasikan hasil yang meningkatkan kecekapan, mengurangkan kos, dan meningkatkan produktiviti.',
-    author: 'AGS Technology Team',
-    authorMs: 'Pasukan Teknologi AGS',
-    date: '2025-01-05',
-    readTime: '10 min read',
-    readTimeMs: '10 minit bacaan',
+    id: 'ags-partnership',
+    title: 'CropDrive Ã— AGS: Expert AI Technology Meets Agricultural Consultancy',
+    titleMs: 'CropDrive Ã— AGS: Teknologi AI Pakar Bertemu Perundingan Pertanian',
+    excerpt: 'The strategic partnership between CropDrive and Agriculture Global Solutions combines cutting-edge AI crop analysis with decades of agricultural consultancy expertiseâ€”giving Malaysian farmers unparalleled access to both technological precision and human insight.',
+    excerptMs: 'Perkongsian strategik antara CropDrive dan Agriculture Global Solutions menggabungkan analisis tanaman AI canggih dengan kepakaran perundingan pertanian selama beberapa dekadâ€”memberikan petani Malaysia akses yang tidak tertandingi kepada teknologi dan pandangan pakar.',
+    content: `The partnership between CropDrive and Agriculture Global Solutions (AGS) represents one of the most powerful alliances in modern agricultural technology. CropDrive contributes AI-driven crop analysis, real-time health monitoring, yield prediction, and the Palmira AI assistant. AGS brings deep agricultural consultancy expertise, field-tested sustainable farming strategies, and specialized knowledge in palm oil agronomy, disease management, and precision agriculture accumulated over years of working with farmers across Southeast Asia.
+
+This partnership means that when CropDrive's AI detects a potential issueâ€”whether early-stage Ganoderma BSR, a soil nutrient deficiency, or suboptimal harvest timingâ€”AGS consultants are available to validate the findings, provide local context specific to Malaysian conditions, and develop customized action plans. AI insight and human expertise work in tandem, creating recommendations that are both data-driven and practically actionable on the ground.
+
+For farmers, this integrated model unlocks capabilities neither party could deliver alone. CropDrive provides speed, scale, and objectivityâ€”analyzing crop images and identifying patterns across large datasets with consistent, evidence-based recommendations. AGS provides judgment, relationship-building, and the contextual understanding that turns data into real farm improvements. Together they form a complete solution from diagnosis to implementation.
+
+The AGS-CropDrive partnership is particularly valuable for RSPO certification support. As demand grows for certified sustainable palm oil, farmers need both the documentation that AI analysis provides and expert guidance to implement best practices. Together, CropDrive and AGS help farmers meet certification requirements while improving productivityâ€”demonstrating that sustainability and profitability are not mutually exclusive goals.`,
+    contentMs: `Perkongsian antara CropDrive dan Agriculture Global Solutions (AGS) mewakili salah satu perikatan paling berkuasa dalam teknologi pertanian moden. CropDrive menyumbang analisis tanaman dipacu AI, pemantauan kesihatan masa nyata, ramalan hasil, dan pembantu AI Palmira. AGS membawa kepakaran perundingan pertanian yang mendalam dan pengetahuan khusus dalam agronomi kelapa sawit.
+
+Perkongsian ini bermaksud apabila AI CropDrive mengesan masalah berpotensiâ€”sama ada peringkat awal Busuk Pangkal Batang Ganoderma, kekurangan nutrien tanah, atau masa penuaian yang kurang optimumâ€”perunding AGS tersedia untuk mengesahkan penemuan dan membangunkan pelan tindakan yang disesuaikan.
+
+Bagi petani, model bersepadu ini membuka keupayaan yang tidak boleh disampaikan oleh mana-mana pihak secara bersendirian. CropDrive menyediakan kelajuan, skala, dan objektif AI manakala AGS menyediakan pertimbangan dan pemahaman konteks yang mengubah data menjadi penambahbaikan ladang yang nyata.
+
+Perkongsian AGS-CropDrive amat berkuasa untuk sokongan pensijilan RSPO, membantu petani memenuhi keperluan pensijilan sambil meningkatkan produktivitiâ€”membuktikan bahawa kelestarian dan keuntungan boleh dicapai bersama.`,
+    author: 'CropDrive & AGS Partnership Team',
+    authorMs: 'Pasukan Perkongsian CropDrive & AGS',
+    date: '2025-01-25',
+    readTime: '9 min read',
+    readTimeMs: '9 minit bacaan',
     category: 'Innovation',
     categoryMs: 'Inovasi',
-    tags: ['AGS', 'Technology', 'Integration', 'Innovation', 'Farming'],
-    tagsMs: ['AGS', 'Teknologi', 'Integrasi', 'Inovasi', 'Pertanian'],
-    image: '/images/blog/ags-technology.jpg'
+    tags: ['CropDrive', 'AGS', 'Partnership', 'AI', 'Consultancy', 'RSPO'],
+    tagsMs: ['CropDrive', 'AGS', 'Perkongsian', 'AI', 'Perundingan', 'RSPO'],
+    image: '/images/blog/ags-partnership.jpg',
+    published: true,
   },
-  {
-    id: 'ags-farm-optimization',
-    title: 'Farm Optimization Strategies: How AGS Maximizes Efficiency and Output',
-    titleMs: 'Strategi Pengoptimuman Ladang: Bagaimana AGS Memaksimumkan Kecekapan dan Output',
-    excerpt: 'Discover AGS\'s tailored strategies for farm optimization, helping farmers maximize efficiency, increase output, and improve profitability through data-driven approaches.',
-    excerptMs: 'Temui strategi yang disesuaikan AGS untuk pengoptimuman ladang, membantu petani memaksimumkan kecekapan, meningkatkan output, dan meningkatkan keuntungan melalui pendekatan berasaskan data.',
-    content: 'Farm optimization is at the core of AGS\'s agricultural consultancy services. We develop tailored strategies that maximize your farm\'s efficiency and output by analyzing every aspect of your operation. Our consultants conduct comprehensive assessments of soil health, crop varieties, planting patterns, irrigation systems, pest management, and harvest processes. Using data-driven approaches, we identify bottlenecks, inefficiencies, and opportunities for improvement. AGS then develops customized optimization plans that address your specific challenges while respecting your budget and operational constraints. Our strategies often result in 20-40% improvements in efficiency and output, with many farmers reporting significant cost reductions and increased profitability. We work closely with farmers throughout the implementation process, providing ongoing support and adjusting strategies as needed.',
-    contentMs: 'Pengoptimuman ladang adalah teras perkhidmatan perundingan pertanian AGS. Kami membangunkan strategi yang disesuaikan yang memaksimumkan kecekapan dan output ladang anda dengan menganalisis setiap aspek operasi anda. Perunding kami menjalankan penilaian komprehensif kesihatan tanah, varieti tanaman, corak penanaman, sistem pengairan, pengurusan perosak, dan proses penuaian. Menggunakan pendekatan berasaskan data, kami mengenal pasti kesesakan, ketidakcekapan, dan peluang untuk penambahbaikan. AGS kemudian membangunkan pelan pengoptimuman yang disesuaikan yang menangani cabaran khusus anda sambil menghormati belanjawan dan kekangan operasi anda. Strategi kami sering menghasilkan peningkatan 20-40% dalam kecekapan dan output, dengan ramai petani melaporkan pengurangan kos yang ketara dan peningkatan keuntungan. Kami bekerjasama rapat dengan petani sepanjang proses pelaksanaan, menyediakan sokongan berterusan dan melaraskan strategi mengikut keperluan.',
-    author: 'AGS Optimization Team',
-    authorMs: 'Pasukan Pengoptimuman AGS',
-    date: '2025-01-03',
-    readTime: '11 min read',
-    readTimeMs: '11 minit bacaan',
-    category: 'Agriculture',
-    categoryMs: 'Pertanian',
-    tags: ['AGS', 'Optimization', 'Efficiency', 'Farming', 'Productivity'],
-    tagsMs: ['AGS', 'Pengoptimuman', 'Kecekapan', 'Pertanian', 'Produktiviti'],
-    image: '/images/blog/ags-optimization.jpg'
-  },
-  // Combined CropDrive & AGS Posts
-  {
-    id: 'cropdrive-ags-integration',
-    title: 'The Perfect Combination: Integrating CropDrive AI with AGS Consultancy Services',
-    titleMs: 'Gabungan Sempurna: Mengintegrasikan AI CropDrive dengan Perkhidmatan Perundingan AGS',
-    excerpt: 'Explore how combining CropDrive\'s AI technology with AGS\'s expert consultancy creates a powerful solution for modern palm oil farming.',
-    excerptMs: 'Terokai bagaimana menggabungkan teknologi AI CropDrive dengan perundingan pakar AGS mencipta penyelesaian yang berkuasa untuk pertanian kelapa sawit moden.',
-    content: 'The integration of CropDrive\'s AI platform with AGS\'s consultancy services creates a comprehensive solution that combines cutting-edge technology with expert agricultural knowledge. When farmers use CropDrive for AI-powered crop analysis, they can then consult with AGS experts who interpret the results, provide context, and develop actionable strategies. This combination ensures that farmers not only receive accurate AI insights but also benefit from human expertise that understands local conditions, market dynamics, and long-term sustainability goals. AGS consultants use CropDrive data to inform their recommendations, creating a data-driven consultancy approach that delivers measurable results. This integrated solution is particularly powerful for farmers seeking to optimize operations while maintaining sustainability standards, as it combines the speed and accuracy of AI with the wisdom and experience of agricultural experts.',
-    contentMs: 'Integrasi platform AI CropDrive dengan perkhidmatan perundingan AGS mencipta penyelesaian komprehensif yang menggabungkan teknologi canggih dengan pengetahuan pertanian pakar. Apabila petani menggunakan CropDrive untuk analisis tanaman berkuasa AI, mereka kemudian boleh berunding dengan pakar AGS yang mentafsirkan hasil, menyediakan konteks, dan membangunkan strategi yang boleh dilaksanakan. Gabungan ini memastikan petani bukan sahaja menerima pandangan AI yang tepat tetapi juga mendapat manfaat daripada kepakaran manusia yang memahami keadaan tempatan, dinamik pasaran, dan matlamat kelestarian jangka panjang. Perunding AGS menggunakan data CropDrive untuk memaklumkan cadangan mereka, mencipta pendekatan perundingan berasaskan data yang memberikan hasil yang boleh diukur. Penyelesaian bersepadu ini amat berkuasa untuk petani yang ingin mengoptimumkan operasi sambil mengekalkan standard kelestarian, kerana ia menggabungkan kelajuan dan ketepatan AI dengan kebijaksanaan dan pengalaman pakar pertanian.',
-    author: 'CropDrive & AGS Integration Team',
-    authorMs: 'Pasukan Integrasi CropDrive & AGS',
-    date: '2025-01-01',
-    readTime: '10 min read',
-    readTimeMs: '10 minit bacaan',
-    category: 'Innovation',
-    categoryMs: 'Inovasi',
-    tags: ['CropDrive', 'AGS', 'Integration', 'AI', 'Consultancy'],
-    tagsMs: ['CropDrive', 'AGS', 'Integrasi', 'AI', 'Perundingan'],
-    image: '/images/blog/integration.jpg'
-  },
-  {
-    id: 'future-agriculture',
-    title: 'The Future of Agriculture: How CropDrive and AGS are Shaping Tomorrow\'s Farming',
-    titleMs: 'Masa Depan Pertanian: Bagaimana CropDrive dan AGS Membentuk Pertanian Masa Depan',
-    excerpt: 'Look ahead to the future of agriculture, exploring how CropDrive\'s AI technology and AGS\'s consultancy expertise are revolutionizing farming practices.',
-    excerptMs: 'Melihat ke hadapan kepada masa depan pertanian, meneroka bagaimana teknologi AI CropDrive dan kepakaran perundingan AGS merevolusikan amalan pertanian.',
-    content: 'The future of agriculture is being shaped by the convergence of advanced technology and expert knowledge, and CropDrive and AGS are at the forefront of this transformation. As AI technology becomes more sophisticated, CropDrive continues to evolve, offering increasingly accurate predictions and insights. AGS\'s consultancy services adapt to incorporate new technologies and best practices, ensuring that farmers always have access to the latest innovations. Together, we envision a future where every farmer has access to AI-powered tools and expert guidance, creating a more sustainable, productive, and profitable agricultural sector. This future includes predictive farming that prevents problems before they occur, precision agriculture that optimizes every aspect of farming, and sustainable practices that protect the environment while feeding the world. CropDrive and AGS are committed to making this vision a reality, empowering farmers with the tools and knowledge they need to succeed in an ever-changing agricultural landscape.',
-    contentMs: 'Masa depan pertanian dibentuk oleh konvergensi teknologi canggih dan pengetahuan pakar, dan CropDrive dan AGS berada di barisan hadapan transformasi ini. Apabila teknologi AI menjadi lebih canggih, CropDrive terus berkembang, menawarkan ramalan dan pandangan yang semakin tepat. Perkhidmatan perundingan AGS menyesuaikan untuk menggabungkan teknologi dan amalan terbaik baru, memastikan petani sentiasa mempunyai akses kepada inovasi terkini. Bersama-sama, kami membayangkan masa depan di mana setiap petani mempunyai akses kepada alat berkuasa AI dan bimbingan pakar, mencipta sektor pertanian yang lebih lestari, produktif, dan menguntungkan. Masa depan ini termasuk pertanian ramalan yang mencegah masalah sebelum ia berlaku, pertanian tepat yang mengoptimumkan setiap aspek pertanian, dan amalan lestari yang melindungi alam sekitar sambil memberi makan kepada dunia. CropDrive dan AGS komited untuk menjadikan visi ini kenyataan, memberdayakan petani dengan alat dan pengetahuan yang mereka perlukan untuk berjaya dalam landskap pertanian yang sentiasa berubah.',
-    author: 'CropDrive & AGS Leadership',
-    authorMs: 'Kepimpinan CropDrive & AGS',
-    date: '2024-12-28',
-    readTime: '12 min read',
-    readTimeMs: '12 minit bacaan',
-    category: 'Innovation',
-    categoryMs: 'Inovasi',
-    tags: ['CropDrive', 'AGS', 'Future', 'Agriculture', 'Innovation'],
-    tagsMs: ['CropDrive', 'AGS', 'Masa Depan', 'Pertanian', 'Inovasi'],
-    image: '/images/blog/future-agriculture.jpg'
-  }
 ];
 
 const categories = [
   { id: 'all', label: 'All Posts', labelMs: 'Semua Pos', icon: faBookOpen },
+  { id: 'palm-oil', label: 'Palm Oil', labelMs: 'Kelapa Sawit', icon: faSeedling },
   { id: 'technology', label: 'Technology', labelMs: 'Teknologi', icon: faBolt },
   { id: 'agriculture', label: 'Agriculture', labelMs: 'Pertanian', icon: faLeaf },
   { id: 'sustainability', label: 'Sustainability', labelMs: 'Kelestarian', icon: faChartLine },
-  { id: 'farming', label: 'Farming', labelMs: 'Pertanian', icon: faChartColumn },
   { id: 'innovation', label: 'Innovation', labelMs: 'Inovasi', icon: faEye },
   { id: 'cropdrive', label: 'CropDrive', labelMs: 'CropDrive', icon: faRocket },
   { id: 'ags', label: 'AGS', labelMs: 'AGS', icon: faHandshake }
@@ -622,8 +701,17 @@ export default function BlogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 relative z-10">
         {/* Loading State */}
         {loading && (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 py-12">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="glass-card rounded-2xl overflow-hidden">
+                <div className="animate-pulse bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 h-48" style={{ animation: 'skeleton-shimmer 1.5s ease-in-out infinite', backgroundSize: '200% 100%' }} />
+                <div className="p-6 space-y-3">
+                  <div className="animate-pulse bg-gray-200 h-5 w-3/4 rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-full rounded-lg" />
+                  <div className="animate-pulse bg-gray-200 h-4 w-2/3 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
         
@@ -741,7 +829,7 @@ export default function BlogPage() {
                     className={`${colSpan} group cursor-pointer`}
                     onClick={() => handlePostClick(post)}
                   >
-                    <div className="relative overflow-hidden rounded-3xl bg-white shadow-xl hover:shadow-2xl transition-all duration-500 h-full transform hover:scale-[1.02]">
+                    <div className="relative overflow-hidden rounded-3xl bg-white/75 backdrop-blur-sm border border-green-100 shadow-xl hover:shadow-2xl hover:border-green-300 transition-all duration-500 h-full transform hover:scale-[1.02]">
                       {/* Image - visible with lighter overlay so AI/post image shows */}
                       <div className={`relative ${imageHeight} overflow-hidden`}>
                         <Image
@@ -795,7 +883,7 @@ export default function BlogPage() {
                           <span className="font-medium">{author}</span>
                           <div className="flex items-center gap-3">
                             <span>{formatDate(post.date)}</span>
-                            <span>•</span>
+                            <span>â€¢</span>
                             <span>{readTime}</span>
                           </div>
                         </div>
@@ -850,7 +938,7 @@ export default function BlogPage() {
                     className="group cursor-pointer"
                     onClick={() => handlePostClick(post)}
                   >
-                    <div className={`relative overflow-hidden rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-500 ${
+                    <div className={`relative overflow-hidden rounded-2xl bg-white/75 backdrop-blur-sm shadow-lg hover:shadow-2xl transition-all duration-500 border border-green-100 hover:border-green-300 ${
                       isCropDrive ? 'border-l-4 border-l-green-500' : 
                       isAGS ? 'border-l-4 border-l-blue-500' : 
                       'border-l-4 border-l-purple-500'
@@ -925,7 +1013,7 @@ export default function BlogPage() {
                             <span className="font-semibold">{author}</span>
                             <div className="flex items-center gap-3">
                               <span>{formatDate(post.date)}</span>
-                              <span>•</span>
+                              <span>â€¢</span>
                               <span>{readTime}</span>
                             </div>
                           </div>
@@ -938,7 +1026,7 @@ export default function BlogPage() {
             </div>
           ) : (
           <div className="premium-panel-strong rounded-[28px] p-16 sm:p-20 text-center">
-              <div className="text-6xl mb-4" aria-hidden="true">🔍</div>
+              <div className="text-6xl mb-4" aria-hidden="true">ðŸ”</div>
               <h3 className="text-2xl md:text-3xl font-black text-gray-900 font-heading mb-4">
                 {currentLanguage === 'id' ? 'Tidak Ada Artikel yang Ditemukan' : language === 'ms' ? 'Tiada Artikel Dijumpai' : 'No Articles Found'}
             </h3>
@@ -962,8 +1050,8 @@ export default function BlogPage() {
         >
           <div className="premium-cta-band relative rounded-[32px] p-8 lg:p-12 text-center text-white overflow-hidden border border-white/10">
             <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '30px 30px' }} aria-hidden="true" />
-            <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">🌱</div>
-            <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">🌾</div>
+            <div className="absolute top-4 left-4 text-4xl opacity-20" aria-hidden="true">ðŸŒ±</div>
+            <div className="absolute top-4 right-4 text-4xl opacity-20" aria-hidden="true">ðŸŒ¾</div>
             <div className="max-w-2xl mx-auto relative z-10">
               <h2 className="text-3xl xs:text-4xl sm:text-5xl font-black font-heading tracking-tight mb-4 bg-gradient-to-r from-yellow-300 to-yellow-100 bg-clip-text text-transparent">
                 {currentLanguage === 'id' ? 'Jangan Sampai Ketinggalan!' : language === 'ms' ? 'Jangan Ketinggalan!' : 'Stay Updated!'}
@@ -985,7 +1073,7 @@ export default function BlogPage() {
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
                   placeholder={currentLanguage === 'id' ? 'Alamat email Anda' : language === 'ms' ? 'Alamat emel anda' : 'Your email address'}
-                  className="flex-1 px-5 py-3.5 rounded-xl text-gray-900 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
+                  className="flex-1 px-5 py-3.5 rounded-xl bg-white text-gray-900 placeholder-gray-500 focus:ring-4 focus:ring-yellow-300 focus:outline-none shadow-xl font-medium"
                   disabled={newsletterStatus === 'loading'}
                   required
                 />
@@ -1005,7 +1093,7 @@ export default function BlogPage() {
                   {newsletterStatus === 'loading'
                     ? (currentLanguage === 'id' ? 'Memproses...' : language === 'ms' ? 'Memproses...' : 'Processing...')
                     : newsletterStatus === 'success'
-                    ? '✓'
+                    ? 'âœ“'
                     : currentLanguage === 'id' ? 'Berlangganan' : language === 'ms' ? 'Langgan' : 'Subscribe'}
                 </button>
               </form>
@@ -1091,9 +1179,9 @@ export default function BlogPage() {
                       {language === 'ms' ? selectedPost.authorMs : selectedPost.author}
                     </span>
                   </div>
-                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-400">â€¢</span>
                   <span className="text-gray-600">{formatDate(selectedPost.date)}</span>
-                  <span className="text-gray-400">•</span>
+                  <span className="text-gray-400">â€¢</span>
                   <span className="text-gray-600">{language === 'ms' ? selectedPost.readTimeMs : selectedPost.readTime}</span>
                 </div>
 

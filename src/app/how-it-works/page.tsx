@@ -2,11 +2,11 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTranslation, getCurrentLanguage, type Language } from '@/i18n';
 import { toIndonesianText } from '@/i18n/id';
-import { safeGetLocalStorage, isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
+import { isVideoSupported, isIntersectionObserverSupported } from '@/utils/browser-compat';
+import { ImageWithSkeleton } from '@/components/ui/ImageWithSkeleton';
 
 export default function HowItWorksPage() {
   const [mounted, setMounted] = useState(false);
@@ -371,7 +371,7 @@ export default function HowItWorksPage() {
             >
               <Link href="/assistant">
                 <button className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 uppercase tracking-wide">
-                  {language === 'ms' ? '🚀 Cuba Sekarang' : '🚀 Try Now'}
+                  {copy('🚀 Try Now', '🚀 Cuba Sekarang')}
                 </button>
               </Link>
             </motion.div>
@@ -380,7 +380,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Steps Section */}
-      <section className="py-24 bg-gray-50">
+      <section className="py-24 bg-gradient-to-b from-white via-green-50/30 to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {steps.map((step, index) => (
             <motion.div
@@ -396,13 +396,14 @@ export default function HowItWorksPage() {
               <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
                 {/* Image */}
                 <div className="w-full md:w-1/2">
-                  <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-                    <Image
+                  <div className="relative rounded-2xl overflow-hidden shadow-xl border border-green-100">
+                    <ImageWithSkeleton
                       src={step.image}
                       alt={step.title}
                       width={800}
                       height={600}
                       className="w-full h-96 object-cover"
+                      containerClassName="w-full h-96"
                     />
                   </div>
                 </div>
@@ -421,7 +422,7 @@ export default function HowItWorksPage() {
                   {index === steps.length - 1 && (
                     <Link href="/register">
                       <button className="px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold rounded-full hover:from-green-700 hover:to-green-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                        {language === 'ms' ? 'Mulakan Sekarang' : 'Get Started Now'}
+                        {copy('Get Started Now', 'Mulakan Sekarang')}
                       </button>
                     </Link>
                   )}
@@ -444,23 +445,20 @@ export default function HowItWorksPage() {
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl md:text-5xl font-black text-white mb-6 font-heading">
-              {language === 'ms' ? 'Sedia untuk Transformasi?' : 'Ready to Transform?'}
+              {copy('Ready to Transform?', 'Sedia untuk Transformasi?')}
             </h2>
             <p className="text-xl text-white/90 mb-8">
-              {language === 'ms'
-                ? 'Sertai ribuan petani yang sudah menggunakan AI untuk hasil yang lebih baik'
-                : 'Join thousands of farmers already using AI for better yields'
-              }
+              {copy('Join thousands of farmers already using AI for better yields', 'Sertai ribuan petani yang sudah menggunakan AI untuk hasil yang lebih baik')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/register">
                 <button className="px-10 py-5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-green-900 font-black rounded-full hover:from-yellow-300 hover:to-yellow-400 transition-all duration-300 shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 uppercase tracking-wide">
-                  {language === 'ms' ? 'Daftar Sekarang' : 'Register Now'}
+                  {copy('Register Now', 'Daftar Sekarang')}
                 </button>
               </Link>
               <Link href="/pricing">
                 <button className="px-10 py-5 border-2 border-white text-white font-bold rounded-full hover:bg-white/10 transition-all duration-300 uppercase tracking-wide">
-                  {language === 'ms' ? 'Lihat Harga' : 'View Pricing'}
+                  {copy('View Pricing', 'Lihat Harga')}
                 </button>
               </Link>
             </div>
