@@ -254,7 +254,7 @@ export default function PricingPage() {
             className="max-w-3xl mx-auto bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-8 text-white text-center shadow-xl"
           >
             <h3 className="text-3xl font-bold mb-3">
-              {language === 'id' ? '📋 2 Analisis Laporan Percuma Per Bulan' : language === 'ms' ? '📋 2 Analisis Laporan Percuma Sebulan' : '📋 2 Free Report Analyses Per Month'}
+              {language === 'id' ? '📋 2 Analisis Laporan Percuma Per Pengguna' : language === 'ms' ? '📋 2 Analisis Laporan Percuma Per Pengguna' : '📋 2 Free Report Analyses Per User'}
             </h3>
             <p className="text-lg text-white/90">
               {language === 'id'

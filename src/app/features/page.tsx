@@ -356,15 +356,11 @@ export default function FeaturesPage() {
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span>PDF {copy('reports (any laboratory)', 'laporan (mana-mana makmal)')}</span>
-                </li>
-                <li className="flex items-center">
-                  <span className="text-green-600 mr-2">•</span>
                   <span>Excel (.xlsx, .xls)</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>
-                  <span className="font-semibold text-green-700">SPLAB {copy('reports', 'laporan')}</span>
+                  <span className="font-semibold text-green-700">SP Lab {copy('reports', 'laporan')}</span>
                 </li>
                 <li className="flex items-center">
                   <span className="text-green-600 mr-2">•</span>

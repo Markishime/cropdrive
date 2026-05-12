@@ -273,6 +273,17 @@
   }
 }
 
+/* Pointer cursor on all interactive elements */
+button,
+a,
+[role="button"],
+input[type="submit"],
+input[type="button"],
+select,
+label[for] {
+  cursor: pointer;
+}
+
 /* Better touch targets for mobile */
 @media (pointer: coarse) {
   button,
